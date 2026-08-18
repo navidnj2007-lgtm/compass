@@ -2873,7 +2873,7 @@ var MODES = {
     "a list, or a pep talk. Two or three sentences is the right length."}
 };
 
-var mode="advise", history=[], busy=false, ctl=null;
+var mode="advise", history=[], busy=false, ctl=null, showCfg=false;
 
 /* ── UI ────────────────────────────────────────────── */
 function render(){
@@ -2884,7 +2884,10 @@ function render(){
     b.addEventListener("click",function(){ mode=b.dataset.mode; history=[]; render(); });
   });
   $("#askHint").textContent = MODES[mode].hint;
-  $("#askSetup").style.display = ready() ? "none" : "block";
+  $("#askSetup").style.display = (ready() && !showCfg) ? "none" : "block";
+  var cfgBtn=$("#askCfg"); if(cfgBtn){ cfgBtn.style.display = ready() ? "" : "none"; cfgBtn.textContent = showCfg ? "Hide settings" : "Settings"; }
+  var h=$("#askSetupH"); if(h) h.textContent = ready() ? "Connection" : "Connect it first";
+  var fg=$("#cfgForget"); if(fg) fg.style.display = ready() ? "" : "none";
   $("#askComposer").style.display = ready() ? "" : "none";
   $("#cfgUrl").value = cfg.url || "";
   $("#cfgSecret").value = cfg.secret || "";
@@ -2971,12 +2974,14 @@ function boot(){
   sec.innerHTML = ''
   + '<div class="card">'
   +   '<div class="spread" style="margin-bottom:10px"><h2>Ask</h2>'
-  +   '<button class="ghost sm" id="askClear">New chat</button></div>'
+  +   '<div class="row" style="gap:6px;flex:none">'
+  +   '<button class="ghost sm" id="askCfg" style="display:none">Settings</button>'
+  +   '<button class="ghost sm" id="askClear">New chat</button></div></div>'
   +   '<div class="pills" id="askModes" style="margin-bottom:8px"></div>'
   +   '<div class="hint" id="askHint" style="margin:0"></div>'
   + '</div>'
   + '<div class="card" id="askSetup" style="display:none">'
-  +   '<h2>Connect it first</h2>'
+  +   '<h2 id="askSetupH">Connect it first</h2>'
   +   '<div class="hint">Paste your Worker address and the passphrase you set as <b>APP_SECRET</b> in Cloudflare. '
   +   'Both stay on this device only — they are never written into the app file or the backup.</div>'
   +   '<label class="lbl">Worker URL</label>'
@@ -2985,6 +2990,7 @@ function boot(){
   +   '<input class="fld sm" id="cfgSecret" type="password" placeholder="the APP_SECRET you chose" autocomplete="off">'
   +   '<div class="row" style="margin-top:12px"><button class="primary sm" id="cfgSave">Save</button>'
   +   '<button class="ghost sm" id="cfgTest">Test connection</button>'
+  +   '<button class="ghost sm" id="cfgForget" style="display:none">Forget</button>'
   +   '<span id="cfgMsg" style="font-size:12px;color:var(--muted)"></span></div>'
   + '</div>'
   + '<div class="card askcard"><div id="askLog" class="asklog"></div></div>'
@@ -2998,10 +3004,15 @@ function boot(){
 
   render();
   document.getElementById("askClear").addEventListener("click",function(){ history=[]; paint(); });
+  document.getElementById("askCfg").addEventListener("click",function(){ showCfg=!showCfg; render(); });
+  document.getElementById("cfgForget").addEventListener("click",function(){
+    cfg={url:"",secret:""}; saveCfg(); showCfg=false; render();
+    var m=document.getElementById("cfgMsg"); if(m){ m.textContent="Cleared."; m.style.color="var(--muted)"; }
+  });
   document.getElementById("cfgSave").addEventListener("click",function(){
     cfg.url=document.getElementById("cfgUrl").value.trim();
     cfg.secret=document.getElementById("cfgSecret").value;
-    saveCfg(); render();
+    saveCfg(); showCfg=false; render();
     document.getElementById("cfgMsg") && (document.getElementById("cfgMsg").textContent="Saved.");
   });
   document.getElementById("cfgTest").addEventListener("click",async function(){
