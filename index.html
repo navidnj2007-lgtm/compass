@@ -377,6 +377,36 @@ input.bare::placeholder{color:var(--muted)}
 .tbl td{padding:9px 10px 9px 0;border-bottom:1px solid var(--grid);color:var(--ink-2);vertical-align:top}
 .tbl tr:last-child td{border-bottom:0}
 .tbl td b{color:var(--ink);font-weight:600}
+
+/* ═══ ASK ═══════════════════════════════════════════════════════════════ */
+.askcard{padding:0;overflow:hidden}
+.asklog{max-height:min(58vh,560px);overflow-y:auto;padding:18px 18px 6px;display:flex;flex-direction:column;gap:12px}
+.askempty{color:var(--muted);font-size:13.5px;line-height:1.6;padding:14px 2px 20px}
+.msg{display:flex}
+.msg.me{justify-content:flex-end}
+.msg .bub{max-width:82%;padding:11px 14px;border-radius:15px;font-size:14px;line-height:1.6}
+.msg.me .bub{background:var(--ink);color:var(--plane);border-bottom-right-radius:5px;white-space:pre-wrap}
+.msg.ai .bub{background:var(--surface-2);color:var(--ink);border-bottom-left-radius:5px}
+.msg.ai .bub p{margin:0 0 9px}
+.msg.ai .bub p:last-child{margin-bottom:0}
+.msg.ai .bub h4{font-size:13.5px;margin:12px 0 6px;color:var(--ink)}
+.msg.ai .bub h4:first-child{margin-top:0}
+.msg.ai .bub ul{margin:0 0 9px;padding-left:19px}
+.msg.ai .bub li{margin-bottom:4px}
+.msg.ai .bub li::marker{color:var(--muted)}
+.msg.ai .bub code{background:var(--surface-3);padding:1px 5px;border-radius:4px;font-size:12.5px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.msg.ai .bub pre{background:var(--surface-3);padding:11px 13px;border-radius:9px;overflow-x:auto;
+  font-size:12.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin:0 0 9px;line-height:1.5}
+.dots{display:inline-flex;gap:4px;padding:3px 0}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:dot 1.2s infinite}
+.dots i:nth-child(2){animation-delay:.18s}
+.dots i:nth-child(3){animation-delay:.36s}
+@keyframes dot{0%,60%,100%{opacity:.28;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+.composer{display:flex;gap:9px;align-items:flex-end}
+.composer textarea{flex:1;min-height:46px;max-height:150px;resize:none}
+.composer .primary{flex:none;height:40px}
+
 /* ═══════════════ TELEGRAM MINI APP SHELL ═══════════════ */
 :root{
   --tgnav: 60px;
@@ -489,7 +519,6 @@ body.tg .cell{width:32px;height:32px}
 body.tg .strength{min-width:64px}
 body.tg .strength .sbar{width:32px}
 
-/* ── installed to the home screen ── */
 body.standalone{padding-top:max(var(--tgtop), env(safe-area-inset-top, 0px))}
 body.standalone .wrap{padding-bottom:calc(var(--tgnav) + max(var(--tgsafe), env(safe-area-inset-bottom, 0px)) + 26px)}
 .tgnav{padding-bottom:max(var(--tgsafe), env(safe-area-inset-bottom, 0px))}
@@ -838,6 +867,9 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
   <div class="g2" id="ritualCards"></div>
 </section>
 
+<!-- ═══════════════ ASK ═══════════════ -->
+<section id="s-ask"></section>
+
 <!-- ═══════════════ RESET ═══════════════ -->
 <section id="s-reset"></section>
 
@@ -1065,7 +1097,7 @@ function execScore(){
 }
 
 /* ══════════ TABS ══════════ */
-var TABS=[["today","Today"],["week","Week"],["school","School"],["revise","Revise"],["tasks","Tasks"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["why","Why it works"]];
+var TABS=[["today","Today"],["ask","Ask"],["week","Week"],["school","School"],["revise","Revise"],["tasks","Tasks"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["why","Why it works"]];
 function buildTabs(){
   $("#tabs").innerHTML = TABS.map(function(t){
     return '<button class="tab" role="tab" data-t="'+t[0]+'" aria-selected="false">'+t[1]+'<span class="badge" data-bg="'+t[0]+'" style="display:none"></span></button>';
@@ -1992,6 +2024,8 @@ function stuckFlow(){
         var slot=T().big3.filter(function(x){return !x.t.trim();})[0];
         if(slot){ slot.t=$("#stAct").value; slot.mins=15; touch(); }
         tSet(5*60,true); startTimer(); closeModal(); renderToday(); show("today");});
+      var talk=b.querySelector("#stTalk");
+      if(talk) on(talk,"click",function(){ closeModal(); window.CompassAsk("stuck", $("#stAct").value ? "I can't start this: "+$("#stAct").value : "I'm stuck and can't start."); });
       on($("#stBack"),"click",function(){pick=null;draw();});
       on(b.querySelector("[data-close]"),"click",closeModal);
     }
@@ -2328,6 +2362,8 @@ window.CompassBridge={
   modalOpen:function(){ return $("#modal").classList.contains("on")||$("#focusOv").classList.contains("on"); },
   closeTop:function(){ closeModal(); $("#focusOv").classList.remove("on"); },
   wizards:{ plan:planWizard, shutdown:shutdownWizard, review:reviewWizard, stuck:stuckFlow },
+  readiness:function(){ return readiness(); },
+  execScore:function(){ return execScore(); },
   dueCount:function(){ return S.rev.filter(revDue).length; },
   inboxCount:function(){ return S.tasks.filter(function(t){return t.bucket==="inbox"&&!t.done;}).length; },
   file:function(){ return buildFile(); }
@@ -2368,6 +2404,7 @@ var I = {
   why:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4"/><circle cx="12" cy="16.6" r=".7" fill="currentColor"/></svg>',
   save:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M8 10.5l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
   sync:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-13.7 5.6L4 15"/><path d="M4 12A8 8 0 0 1 17.7 6.4L20 9"/><path d="M4 20v-5h5M20 4v5h-5"/></svg>',
+  ask:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 12.4c0 4-3.8 7.2-8.5 7.2a10 10 0 0 1-2.6-.33L4.5 20.8l1.2-3.5A6.9 6.9 0 0 1 3.5 12.4c0-4 3.8-7.2 8.5-7.2s8.5 3.2 8.5 7.2z"/></svg>',
   stuck:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-3.6 10.8c.5.4.8 1 .8 1.6V17h5.6v-1.6c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z"/><path d="M10 20.5h4"/></svg>'
 };
 
@@ -2493,8 +2530,9 @@ function doSave(){
 }
 
 /* ── bottom nav ────────────────────────────────────── */
-var PRIMARY=[["today","Today",I.today],["week","Week",I.week],["school","School",I.school],["revise","Revise",I.revise]];
+var PRIMARY=[["today","Today",I.today],["ask","Ask",I.ask],["school","School",I.school],["revise","Revise",I.revise]];
 var MORE=[
+  ["week","Week",I.week,"Habits, execution score, the six areas"],
   ["tasks","Tasks",I.tasks,"Capture everything, sort it later"],
   ["goals","Goals",I.goals,"Two or three, on a 90-day horizon"],
   ["rituals","Rituals",I.rituals,"The four scripts and the wizards"],
@@ -2665,6 +2703,336 @@ function boot(){
   }
   var tb=$("#themeBtn"); if(tb) tb.addEventListener("click",function(){ setTimeout(applyChrome,30); });
   syncBack();
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
+})();
+
+</script>
+<script>
+/* ═══════════════ COMPASS AI ═══════════════
+   Talks to your Cloudflare Worker, which holds the Qwen key. Nothing secret
+   lives in this file — the passphrase is typed once on your device and kept in
+   this browser's storage only, deliberately outside the backup file.        */
+(function(){
+"use strict";
+var B = window.CompassBridge;
+if(!B) return;
+
+var CFG_KEY = "compass_ai_cfg";
+var cfg = (function(){
+  try{ var v=localStorage.getItem(CFG_KEY); return v?JSON.parse(v):{url:"",secret:""}; }
+  catch(e){ return {url:"",secret:""}; }
+})();
+function saveCfg(){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){} }
+function ready(){ return !!(cfg.url && cfg.secret); }
+
+var $ = function(s){ return document.querySelector(s); };
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+/* ── tiny markdown ─────────────────────────────────── */
+function md(src){
+  var lines = esc(String(src||"")).split("\n"), out=[], inList=false, inCode=false, buf=[];
+  function closeList(){ if(inList){ out.push("</ul>"); inList=false; } }
+  for(var i=0;i<lines.length;i++){
+    var l=lines[i];
+    if(/^\s*```/.test(l)){
+      if(inCode){ out.push("<pre>"+buf.join("\n")+"</pre>"); buf=[]; inCode=false; }
+      else { closeList(); inCode=true; }
+      continue;
+    }
+    if(inCode){ buf.push(l); continue; }
+    if(/^\s*$/.test(l)){ closeList(); continue; }
+    var inline = l
+      .replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>")
+      .replace(/(^|[\s(])\*([^*\n]+)\*/g,"$1<em>$2</em>")
+      .replace(/`([^`]+)`/g,"<code>$1</code>");
+    var m;
+    if((m=inline.match(/^\s*#{1,6}\s+(.*)$/))){ closeList(); out.push("<h4>"+m[1]+"</h4>"); continue; }
+    if((m=inline.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)$/))){
+      if(!inList){ out.push("<ul>"); inList=true; }
+      out.push("<li>"+m[1]+"</li>"); continue;
+    }
+    closeList(); out.push("<p>"+inline+"</p>");
+  }
+  if(inCode && buf.length) out.push("<pre>"+buf.join("\n")+"</pre>");
+  closeList();
+  return out.join("");
+}
+
+/* ── context from live Compass state ───────────────── */
+function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function addD(d,n){ var x=new Date(d.getTime()); x.setDate(x.getDate()+n); return x; }
+function wkStart(d){ var x=new Date(d.getTime()); x.setHours(0,0,0,0); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; }
+function dBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+var DAYN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+function snapshot(mode){
+  var S=B.get(), now=new Date(), today=iso(now), d=S.days[today]||{}, L=[];
+  L.push("DATE: "+today+" ("+DAYN[now.getDay()]+")");
+  var toExam=dBetween(today,"2027-04-23");
+  L.push("Days to first IB exam (est. 23 Apr 2027): "+toExam);
+
+  var r=B.readiness ? B.readiness() : null;
+  if(r) L.push("Readiness: "+r.total+"/100");
+  L.push("Sleep last night: "+(d.sleep?d.sleep+"h":"not logged")
+    +" | Energy: "+(d.energy||"-")+"/5"
+    +" | Mood: "+(d.mood?d.mood.w:"not logged"));
+
+  var big=(d.big3||[]).filter(function(x){return x.t&&x.t.trim();});
+  L.push("Big 3 today: "+(big.length
+    ? big.map(function(x){return "“"+x.t+"” ("+(x.mins||60)+"m"+(x.d?", done":", not done")+(x.plan?", plan: "+x.plan:", NO PLAN SET")+")";}).join(" | ")
+    : "nothing set"));
+  var load=big.reduce(function(a,x){return a+(x.d?0:(x.mins||60));},0);
+  L.push("Remaining load: "+Math.round(load/6)/10+"h of a "+Math.round(S.cap/6)/10+"h day");
+  L.push("Anchors ticked: "+((d.anchors||[]).length)+"/"+S.anchors.length+(S.minMode?" (minimum day on)":""));
+
+  var ws=wkStart(now);
+  L.push("Habits this week: "+S.habits.map(function(h){
+    var n=0; for(var i=0;i<7;i++){ var k=iso(addD(ws,i)); if(S.days[k]&&S.days[k].habits[h.id]==="done") n++; }
+    return h.n+" "+n+"/"+h.target;
+  }).join("; "));
+  if(B.execScore) L.push("Weekly execution score: "+B.execScore()+"% (85% is the target)");
+
+  L.push("Life areas (1-10): "+S.domains.map(function(x){return x.n+" "+x.s;}).join(", "));
+
+  var soon=S.ms.filter(function(m){ return !m.done && dBetween(today,m.date)>=-30 && dBetween(today,m.date)<=35; })
+    .sort(function(a,b){return a.date<b.date?-1:1;}).slice(0,10);
+  L.push("Deadlines within ~5 weeks: "+(soon.length
+    ? soon.map(function(m){ var n=dBetween(today,m.date);
+        return m.title+" ["+m.type+(m.subject?", "+m.subject:"")+"] "+(n<0?Math.abs(n)+"d OVERDUE":n+"d")+(m.est?" (est.)":""); }).join(" | ")
+    : "none"));
+
+  var due=S.rev.filter(function(x){ return x.reps>0 && (!x.next || x.next<=today); });
+  var fresh=S.rev.filter(function(x){ return !x.reps; });
+  if(mode==="quiz"){
+    var pool=due.length?due:fresh;
+    L.push("REVISION TOPICS TO QUIZ ON ("+(due.length?"due for review":"not yet started")+"):");
+    pool.slice(0,12).forEach(function(x){
+      var su=S.subjects.filter(function(s){return s.id===x.s;})[0];
+      L.push("  - ["+(su?su.name:"?")+"] "+x.t+" (box "+x.box+")");
+    });
+  } else {
+    L.push("Revision: "+due.length+" topics due, "+fresh.length+" never started");
+  }
+
+  L.push("Goals: "+(S.goals.length? S.goals.map(function(g){
+    var lead=(S.lead[g.id]&&S.lead[g.id][iso(ws)])||0;
+    return g.title+" (lead "+lead+"/"+g.leadT+" this week, lag "+g.lagC+"/"+g.lagT+" "+g.unit+")";
+  }).join(" | ") : "none set"));
+
+  var inbox=S.tasks.filter(function(t){return t.bucket==="inbox"&&!t.done;}).length;
+  var todayT=S.tasks.filter(function(t){return t.bucket==="today"&&!t.done;});
+  L.push("Tasks: "+inbox+" uncleared in inbox; today: "
+    +(todayT.length?todayT.slice(0,8).map(function(t){return t.text;}).join(", "):"none"));
+  if(S.frav) L.push("Absence: "+S.frav+"%");
+  return L.join("\n");
+}
+
+/* ── prompts ───────────────────────────────────────── */
+var BASE =
+"You are the assistant inside Compass, a personal system belonging to Navid — an IB Diploma student in Denmark, "+
+"final year, May 2027 session, taking Maths AA HL, Physics SL, Chemistry HL and Danish B HL at a Danish gymnasium.\n\n"+
+"How to write:\n"+
+"- Short. Usually under 150 words. He is on a phone.\n"+
+"- Plain, calm, specific. No motivational language, no exclamation marks, no emoji, no praise padding.\n"+
+"- Concrete over general: “do the 8 equilibrium questions on p.212”, never “work on Chemistry”.\n"+
+"- If you don't know something about his situation, ask one short question rather than assuming.\n\n"+
+"Hard rules:\n"+
+"- NEVER invent a deadline, date, grade boundary or syllabus requirement. Only use what the CONTEXT gives you. "+
+"If it isn't there, say you don't have it and suggest he check with his DP coordinator.\n"+
+"- Dates marked (est.) are triangulated estimates, not confirmed by the IB. Say so if you lean on one.\n"+
+"- Don't restate his whole context back at him. He can see it.\n"+
+"- If he sounds genuinely low rather than just busy — hopeless, not sleeping, nothing feels worth doing — "+
+"drop the productivity framing entirely, say plainly that it sounds heavy, and mention that his studievejleder, "+
+"BørneTelefonen on 116 111, or headspace Danmark are there for exactly that. Don't lecture, don't diagnose, "+
+"and don't bury it in advice about deadlines.";
+
+var MODES = {
+  advise: { label:"Advise", hint:"Looks at today and tells you what to cut or start",
+    sys: BASE+"\n\nMODE: ADVISE.\nYou can see his live Compass data below. Your job is judgment, not encouragement. "+
+    "Look at readiness, sleep, load versus capacity, what's overdue and what's untouched, and say what he should "+
+    "actually do — including what to drop. If he has overcommitted the day, say which item to move and why. "+
+    "If readiness is low, defend rest rather than pushing. Lead with the single most useful observation."},
+  quiz: { label:"Quiz me", hint:"Tests you on topics that are due",
+    sys: BASE+"\n\nMODE: QUIZ.\nQuiz him on the revision topics listed in the context, at IB HL/SL standard for the "+
+    "relevant subject. Ask ONE question at a time and stop — wait for his answer before the next. Use real IB command "+
+    "terms (state, calculate, determine, deduce, explain, sketch). After he answers: say briefly what was right, what "+
+    "was missing, and what an examiner would want, then give the next question. Don't give the answer before he tries. "+
+    "Every few questions, tell him which topic number to rate in the Revise tab."},
+  explain: { label:"Explain", hint:"A tutor for your four subjects",
+    sys: BASE+"\n\nMODE: EXPLAIN.\nTeach the thing he asks about, at IB level for his subjects. Start from what the "+
+    "syllabus actually requires. Use a worked example with real numbers where it helps. Name the mistake examiners "+
+    "see most often on that topic. Keep the maths readable in plain text. End by checking understanding with one "+
+    "short question rather than a summary."},
+  stuck: { label:"I'm stuck", hint:"Works out what you're avoiding",
+    sys: BASE+"\n\nMODE: STUCK.\nHe is not starting something. Treat this as mood repair, not time management — "+
+    "procrastination is usually avoidance of how a task feels, not laziness. Ask what specifically he's avoiding "+
+    "about it (ambiguity, fear it'll be bad, size, boredom, exhaustion) if it isn't obvious. Then give ONE physical "+
+    "first step small enough to be faintly ridiculous, and tell him to do only five minutes. Do not produce a plan, "+
+    "a list, or a pep talk. Two or three sentences is the right length."}
+};
+
+var mode="advise", history=[], busy=false, ctl=null;
+
+/* ── UI ────────────────────────────────────────────── */
+function render(){
+  $("#askModes").innerHTML = Object.keys(MODES).map(function(k){
+    return '<button data-mode="'+k+'" aria-pressed="'+(mode===k)+'">'+MODES[k].label+'</button>';
+  }).join("");
+  Array.prototype.forEach.call($("#askModes").querySelectorAll("[data-mode]"),function(b){
+    b.addEventListener("click",function(){ mode=b.dataset.mode; history=[]; render(); });
+  });
+  $("#askHint").textContent = MODES[mode].hint;
+  $("#askSetup").style.display = ready() ? "none" : "block";
+  $("#askComposer").style.display = ready() ? "" : "none";
+  $("#cfgUrl").value = cfg.url || "";
+  $("#cfgSecret").value = cfg.secret || "";
+  paint();
+}
+function paint(){
+  var box=$("#askLog");
+  if(!history.length){
+    box.innerHTML='<div class="askempty">'+({
+      advise:"Ask it to look at today. Try: “what should I actually do today?” or “I have three hours, what matters most?”",
+      quiz:"It pulls whatever is due in Revise. Say “start” when you’re ready.",
+      explain:"Ask anything from your four subjects. Try: “why does entropy increase” or “integration by parts, from scratch”.",
+      stuck:"Say what you can’t start. One line is enough."
+    }[mode])+'</div>';
+    return;
+  }
+  box.innerHTML = history.map(function(m,i){
+    if(m.role==="user") return '<div class="msg me"><div class="bub">'+esc(m.content)+'</div></div>';
+    return '<div class="msg ai"><div class="bub">'+(m.content?md(m.content):'<span class="dots"><i></i><i></i><i></i></span>')+'</div></div>';
+  }).join("");
+  box.scrollTop = box.scrollHeight;
+}
+
+function stop(){ if(ctl){ try{ ctl.abort(); }catch(e){} ctl=null; } busy=false; setSend(); }
+function setSend(){ $("#askSend").textContent = busy ? "Stop" : "Send"; }
+
+async function send(text){
+  if(busy){ stop(); return; }
+  text=String(text||"").trim(); if(!text) return;
+  history.push({role:"user",content:text});
+  history.push({role:"assistant",content:""});
+  paint(); busy=true; setSend();
+
+  var msgs=[{role:"system",content:MODES[mode].sys+"\n\n=== LIVE COMPASS CONTEXT ===\n"+snapshot(mode)}]
+    .concat(history.slice(0,-1).slice(-12));
+
+  ctl = new AbortController();
+  var slot = history[history.length-1];
+  try{
+    var res = await fetch(cfg.url,{
+      method:"POST",
+      headers:{"Content-Type":"application/json","X-Compass-Secret":cfg.secret},
+      body: JSON.stringify({messages:msgs, stream:true}),
+      signal: ctl.signal
+    });
+    if(!res.ok){
+      var t=""; try{ t=(await res.json()).error||""; }catch(e){ t=await res.text().catch(function(){return "";}); }
+      slot.content = res.status===401
+        ? "Passphrase rejected. Check it matches APP_SECRET in Cloudflare — open Settings below."
+        : "That didn't go through ("+res.status+"). "+String(t).slice(0,220);
+      busy=false; setSend(); paint(); return;
+    }
+    var reader=res.body.getReader(), dec=new TextDecoder(), buf="";
+    while(true){
+      var chunk = await reader.read();
+      if(chunk.done) break;
+      buf += dec.decode(chunk.value,{stream:true});
+      var parts = buf.split("\n");
+      buf = parts.pop();
+      for(var i=0;i<parts.length;i++){
+        var line = parts[i].trim();
+        if(!line || line.indexOf("data:")!==0) continue;
+        var data = line.slice(5).trim();
+        if(data==="[DONE]") continue;
+        try{
+          var j = JSON.parse(data);
+          var delta = j.choices && j.choices[0] && j.choices[0].delta;
+          if(delta && delta.content){ slot.content += delta.content; paint(); }
+        }catch(e){}
+      }
+    }
+    if(!slot.content) slot.content = "No reply came back. Try again, or check the worker logs in Cloudflare.";
+  }catch(err){
+    if(err && err.name==="AbortError"){ if(!slot.content) slot.content="(stopped)"; }
+    else slot.content = "Couldn't reach the worker. Check the URL in Settings and that you're online.\n\n"+String(err&&err.message||err);
+  }
+  busy=false; ctl=null; setSend(); paint();
+}
+
+/* ── wire up ───────────────────────────────────────── */
+function boot(){
+  var sec = document.getElementById("s-ask");
+  if(!sec) return;
+  sec.innerHTML = ''
+  + '<div class="card">'
+  +   '<div class="spread" style="margin-bottom:10px"><h2>Ask</h2>'
+  +   '<button class="ghost sm" id="askClear">New chat</button></div>'
+  +   '<div class="pills" id="askModes" style="margin-bottom:8px"></div>'
+  +   '<div class="hint" id="askHint" style="margin:0"></div>'
+  + '</div>'
+  + '<div class="card" id="askSetup" style="display:none">'
+  +   '<h2>Connect it first</h2>'
+  +   '<div class="hint">Paste your Worker address and the passphrase you set as <b>APP_SECRET</b> in Cloudflare. '
+  +   'Both stay on this device only — they are never written into the app file or the backup.</div>'
+  +   '<label class="lbl">Worker URL</label>'
+  +   '<input class="fld sm" id="cfgUrl" placeholder="https://compass-ai.yourname.workers.dev" autocomplete="off">'
+  +   '<label class="lbl" style="margin-top:11px">Passphrase</label>'
+  +   '<input class="fld sm" id="cfgSecret" type="password" placeholder="the APP_SECRET you chose" autocomplete="off">'
+  +   '<div class="row" style="margin-top:12px"><button class="primary sm" id="cfgSave">Save</button>'
+  +   '<button class="ghost sm" id="cfgTest">Test connection</button>'
+  +   '<span id="cfgMsg" style="font-size:12px;color:var(--muted)"></span></div>'
+  + '</div>'
+  + '<div class="card askcard"><div id="askLog" class="asklog"></div></div>'
+  + '<div class="card" id="askComposer">'
+  +   '<div class="composer">'
+  +     '<textarea class="fld" id="askInput" rows="2" placeholder="Ask something…"></textarea>'
+  +     '<button class="primary" id="askSend">Send</button>'
+  +   '</div>'
+  +   '<div class="src" style="margin-top:9px">It can see today’s readiness, your Big 3, this week’s habits, deadlines and revision queue. It can’t change any of them — you still do that yourself.</div>'
+  + '</div>';
+
+  render();
+  document.getElementById("askClear").addEventListener("click",function(){ history=[]; paint(); });
+  document.getElementById("cfgSave").addEventListener("click",function(){
+    cfg.url=document.getElementById("cfgUrl").value.trim();
+    cfg.secret=document.getElementById("cfgSecret").value;
+    saveCfg(); render();
+    document.getElementById("cfgMsg") && (document.getElementById("cfgMsg").textContent="Saved.");
+  });
+  document.getElementById("cfgTest").addEventListener("click",async function(){
+    var m=document.getElementById("cfgMsg");
+    cfg.url=document.getElementById("cfgUrl").value.trim();
+    cfg.secret=document.getElementById("cfgSecret").value;
+    saveCfg();
+    m.textContent="Testing…"; m.style.color="var(--muted)";
+    try{
+      var r=await fetch(cfg.url,{method:"POST",
+        headers:{"Content-Type":"application/json","X-Compass-Secret":cfg.secret},
+        body:JSON.stringify({messages:[{role:"user",content:"Reply with the single word: ready"}],stream:false})});
+      if(r.ok){ m.textContent="Working."; m.style.color="var(--ok-text)"; render(); }
+      else { var e=""; try{ e=(await r.json()).error||""; }catch(x){}
+        m.textContent="Failed ("+r.status+"): "+String(e).slice(0,90); m.style.color="var(--crit)"; }
+    }catch(err){ m.textContent="Couldn't reach it — check the URL."; m.style.color="var(--crit)"; }
+  });
+  var input=document.getElementById("askInput");
+  document.getElementById("askSend").addEventListener("click",function(){
+    if(busy){ stop(); return; }
+    var v=input.value; input.value=""; send(v);
+  });
+  input.addEventListener("keydown",function(e){
+    if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); var v=input.value; input.value=""; send(v); }
+  });
+
+  window.CompassAsk = function(m, seed){
+    if(m && MODES[m]) mode=m;
+    history=[]; render(); B.show("ask");
+    if(seed) setTimeout(function(){ send(seed); }, 120);
+  };
 }
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
 })();
