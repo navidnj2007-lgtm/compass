@@ -1000,7 +1000,8 @@ function S_DEFAULT(){
     tasks:[],
     frav:2,
     days:{}, weeks:{},
-    lead:{}
+    lead:{},
+    timer:{on:false, rem:3000, at:0}
   };
 }
 var S = S_DEFAULT();
@@ -1233,6 +1234,24 @@ function renderGate(){
 
 /* ══════════ TIMER ══════════ */
 var tRem=50*60, tOn=false, tInt=null;
+function tPersist(){
+  S.timer = { on: tOn, rem: tRem, at: Date.now() };
+  touch();
+}
+function tRestore(){
+  var t = S.timer;
+  if(!t || typeof t.rem !== "number"){ tRem = 50*60; tOn = false; tDraw(); return; }
+  tRem = t.rem;
+  tOn = false;
+  if(t.on && t.at){
+    var gone = Math.floor((Date.now() - t.at)/1000);
+    tRem = Math.max(0, t.rem - gone);
+    if(tRem > 0){ tOn = true; }
+    else { tRem = 0; S.timer = {on:false, rem:0, at:Date.now()}; }
+  }
+  tDraw();
+  if(tOn && typeof startTimer === "function") startTimer();
+}
 function tDraw(){
   var m=Math.floor(tRem/60), s=tRem%60;
   $("#tDisp").textContent=m+":"+String(s).padStart(2,"0");
@@ -1242,7 +1261,7 @@ function tDraw(){
 function tTick(){
   if(!tOn) return; tRem--;
   if(tRem<=0){ tRem=0; tOn=false; clearInterval(tInt);
-    var t=T(); t.focus=(t.focus||0)+50; touch();
+    var t=T(); t.focus=(t.focus||0)+50; S.timer={on:false, rem:50*60, at:Date.now()}; touch();
     var sub=S.subjects.filter(function(x){return x.name===($("#blockQ").value.split(" ")[0]||"");})[0];
     openModal('<h2>Block done — 50 minutes</h2>'
       +'<div class="md">Now take ten minutes <b>off screens</b>. Walk, stretch, look out of a window. Scrolling isn’t a break; your attention doesn’t recover on it.</div>'
@@ -2023,7 +2042,7 @@ function stuckFlow(){
       on($("#stGo"),"click",function(){
         var slot=T().big3.filter(function(x){return !x.t.trim();})[0];
         if(slot){ slot.t=$("#stAct").value; slot.mins=15; touch(); }
-        tSet(5*60,true); startTimer(); closeModal(); renderToday(); show("today");});
+        tSet(5*60,true); startTimer(); tPersist(); closeModal(); renderToday(); show("today");});
       var talk=b.querySelector("#stTalk");
       if(talk) on(talk,"click",function(){ closeModal(); window.CompassAsk("stuck", $("#stAct").value ? "I can't start this: "+$("#stAct").value : "I'm stuck and can't start."); });
       on($("#stBack"),"click",function(){pick=null;draw();});
@@ -2284,21 +2303,21 @@ on($("#dumpToTasks"),"click",function(){
   T().dump=""; $("#dump").value=""; touch(); renderTasks(); show("tasks");
 });
 on($("#tStart"),"click",function(){
-  if(tOn){ tOn=false; if(tInt) clearInterval(tInt); tDraw(); return; }
+  if(tOn){ tOn=false; if(tInt) clearInterval(tInt); tDraw(); tPersist(); return; }
   var g=T().gate;
   if(!g.phone){
     openModal('<h2>The phone isn\'t in another room yet</h2>'
       +'<div class="md">This is the one gate worth keeping. A phone on the desk costs you measurable working memory even switched off — and you won\'t feel it happening, which is exactly why the checkbox exists rather than your judgement.</div>'
       +'<div class="row"><button class="primary" id="gYes">It\'s in another room now</button><button class="ghost" id="gNo">Start anyway</button></div>',
       function(root){
-        on(root.querySelector("#gYes"),"click",function(){T().gate.phone=true;touch();closeModal();renderGate();tOn=true;startTimer();});
-        on(root.querySelector("#gNo"),"click",function(){closeModal();tOn=true;startTimer();});
+        on(root.querySelector("#gYes"),"click",function(){T().gate.phone=true;touch();closeModal();renderGate();tOn=true;startTimer();tPersist();});
+        on(root.querySelector("#gNo"),"click",function(){closeModal();tOn=true;startTimer();tPersist();});
       });
     return;
   }
-  tOn=true; startTimer();
+  tOn=true; startTimer(); tPersist();
 });
-on($("#tStop"),"click",function(){ tOn=false; if(tInt) clearInterval(tInt); tRem=50*60; tDraw(); });
+on($("#tStop"),"click",function(){ tOn=false; if(tInt) clearInterval(tInt); tRem=50*60; tDraw(); tPersist(); });
 on($("#addTask"),"click",function(){ addTask($("#newTask").value); $("#newTask").value=""; renderTasks(); });
 on($("#newTask"),"keydown",function(e){ if(e.key==="Enter"){ addTask($("#newTask").value); $("#newTask").value=""; renderTasks(); } });
 on($("#addGoal"),"click",function(){
@@ -2354,6 +2373,8 @@ window.CompassBridge={
   set:function(o){ if(!o||typeof o!=="object") return false;
     Object.keys(o).forEach(function(k){ S[k]=o[k]; }); return true; },
   render:function(){ renderAll(); },
+  applyTheme:function(){ applyTheme(); },
+  restoreTimer:function(){ tRestore(); },
   show:function(k){ show(k); },
   tab:function(){ return S.tab; },
   onChange:function(f){ touchHook=f; },
@@ -2679,7 +2700,11 @@ function boot(){
     say("Loading\u2026","",0);
     loadState(function(state, where, why){
       if(state && !B.isDirty()){
-        B.set(state); B.render(); setTab(B.tab()||"today");
+        B.set(state);
+        if(B.applyTheme) B.applyTheme();
+        B.render(); setTab(B.tab()||"today");
+        if(B.restoreTimer) B.restoreTimer();
+        applyChrome();
         say(where==="telegram" ? "Loaded from Telegram" : "Loaded", "ok");
       } else if(!state){
         if(IN_TG && TG.colorScheme==="dark"){
