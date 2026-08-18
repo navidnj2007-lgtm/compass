@@ -1,0 +1,2629 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compass</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+/* ═══ PALETTE ═══════════════════════════════════════════════════════════ */
+:root{
+  color-scheme:light;
+  --plane:#f9f9f7; --surface:#fcfcfb; --surface-2:#f2f1ed; --surface-3:#eceae4;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+  --d1:#2a78d6; --d2:#eb6834; --d3:#1baf7a; --d4:#eda100; --d5:#e87ba4; --d6:#008300;
+  --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
+  --ok-text:#006300;
+  --track:#cde2fb; --pos:#2a78d6; --neg:#e34948;
+  --s0:#f2f1ed; --s1:#cde2fb; --s2:#9ec5f4; --s3:#5598e7; --s4:#2a78d6; --s5:#1c5cab;
+  --shadow:0 1px 2px rgba(11,11,11,.04),0 10px 28px -18px rgba(11,11,11,.20);
+  --shadow-lg:0 24px 60px -20px rgba(11,11,11,.35);
+}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){
+  color-scheme:dark;
+  --plane:#0d0d0d; --surface:#1a1a19; --surface-2:#232322; --surface-3:#2c2c2a;
+  --ink:#fff; --ink-2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+  --d1:#3987e5; --d2:#d95926; --d3:#199e70; --d4:#c98500; --d5:#d55181; --d6:#008300;
+  --ok-text:#0ca30c; --track:#184f95; --pos:#3987e5; --neg:#e66767;
+  --s0:#232322; --s1:#184f95; --s2:#256abf; --s3:#3987e5; --s4:#6da7ec; --s5:#9ec5f4;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -18px rgba(0,0,0,.9);
+  --shadow-lg:0 24px 60px -20px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --plane:#0d0d0d; --surface:#1a1a19; --surface-2:#232322; --surface-3:#2c2c2a;
+  --ink:#fff; --ink-2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+  --d1:#3987e5; --d2:#d95926; --d3:#199e70; --d4:#c98500; --d5:#d55181; --d6:#008300;
+  --ok-text:#0ca30c; --track:#184f95; --pos:#3987e5; --neg:#e66767;
+  --s0:#232322; --s1:#184f95; --s2:#256abf; --s3:#3987e5; --s4:#6da7ec; --s5:#9ec5f4;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -18px rgba(0,0,0,.9);
+  --shadow-lg:0 24px 60px -20px rgba(0,0,0,.8);
+}
+
+/* ═══ BASE ══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--plane);color:var(--ink);
+  font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px 110px}
+h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.011em}
+p{margin:0 0 11px}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;text-align:left}
+input,textarea,select{font:inherit;color:inherit}
+a{color:var(--d1)}
+.mono{font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+::selection{background:var(--track);color:var(--ink)}
+
+/* ═══ HEADER + NAV ══════════════════════════════════════════════════════ */
+header{padding:32px 0 16px}
+.brandrow{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.brand{flex:1;min-width:230px}
+.brand h1{font-size:24px;display:flex;align-items:center;gap:10px}
+.brand h1 svg{width:21px;height:21px;color:var(--d1)}
+.brand .sub{color:var(--ink-2);font-size:13px;margin-top:4px}
+.hbtns{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.ghost{border:1px solid var(--border);background:var(--surface);border-radius:999px;
+  padding:7px 13px;font-size:12.5px;font-weight:500;color:var(--ink-2);
+  transition:background .12s,color .12s,border-color .12s;white-space:nowrap}
+.ghost:hover{background:var(--surface-2);color:var(--ink)}
+.ghost.sm{padding:4px 10px;font-size:11.5px}
+.ghost.on{background:var(--ink);color:var(--plane);border-color:var(--ink)}
+nav{position:sticky;top:0;z-index:25;background:var(--plane);border-bottom:1px solid var(--border);margin-bottom:22px}
+.tabs{display:flex;gap:1px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:12px 12px;font-size:13px;font-weight:500;color:var(--muted);white-space:nowrap;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s}
+.tab:hover{color:var(--ink-2)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tab .badge{display:inline-block;min-width:16px;padding:0 4px;margin-left:5px;border-radius:8px;
+  background:var(--crit);color:#fff;font-size:10px;font-weight:700;text-align:center;line-height:16px}
+
+/* ═══ LAYOUT ════════════════════════════════════════════════════════════ */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:20px;box-shadow:var(--shadow);margin-bottom:15px}
+.card.flat{box-shadow:none}
+.card>h2{font-size:16px;margin-bottom:3px}
+.card>.hint{color:var(--muted);font-size:12.5px;margin-bottom:15px;line-height:1.55}
+.card>.hint a{color:var(--muted);text-decoration:underline}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:15px;align-items:start}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;align-items:start}
+.g2>.card,.g3>.card{margin-bottom:0}
+@media(max-width:820px){.g2,.g3{grid-template-columns:1fr}}
+section{display:none}
+section.on{display:block}
+.eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px}
+.divider{height:1px;background:var(--grid);margin:18px 0}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.spread{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+/* ═══ FIELDS ════════════════════════════════════════════════════════════ */
+.fld{width:100%;background:var(--surface-2);border:1px solid transparent;border-radius:9px;
+  padding:9px 11px;font-size:14px;outline:none;transition:border-color .12s,background .12s}
+.fld:focus{border-color:var(--d1);background:var(--surface)}
+.fld::placeholder{color:var(--muted)}
+.fld.sm{padding:6px 9px;font-size:13px}
+textarea.fld{resize:vertical;min-height:74px;line-height:1.55}
+label.lbl{display:block;font-size:11.5px;font-weight:600;color:var(--ink-2);margin:0 0 6px}
+label.lbl .q{color:var(--muted);font-weight:400}
+select.fld{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%23898781' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;background-size:12px;padding-right:28px}
+input[type=range]{width:100%;accent-color:var(--d1)}
+
+/* ═══ CHECK LINES ═══════════════════════════════════════════════════════ */
+.line{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--grid)}
+.line:last-child{border-bottom:0}
+.line.col{flex-direction:column;align-items:stretch;gap:7px}
+.box{flex:none;width:21px;height:21px;border-radius:6px;border:1.5px solid var(--axis);
+  background:var(--surface);display:grid;place-items:center;transition:all .13s}
+.box:hover{border-color:var(--d1)}
+.box svg{width:12px;height:12px;opacity:0;transform:scale(.7);transition:all .13s}
+.box[aria-pressed="true"]{background:var(--d1);border-color:var(--d1)}
+.box[aria-pressed="true"] svg{opacity:1;transform:scale(1)}
+input.bare{flex:1;background:none;border:0;outline:none;font-size:14.5px;padding:2px 0;min-width:0;border-radius:5px}
+input.bare:focus{background:var(--surface-2);padding:2px 6px;margin:0 -6px}
+input.bare::placeholder{color:var(--muted)}
+.line.done input.bare{color:var(--muted);text-decoration:line-through}
+.del{flex:none;color:var(--muted);font-size:17px;line-height:1;padding:0 5px;opacity:0;transition:opacity .12s;background:none}
+.line:hover .del,.dom:hover .del{opacity:1}
+.del:hover{color:var(--crit)}
+
+/* ═══ TILES & HERO ══════════════════════════════════════════════════════ */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;
+  background:var(--grid);border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.tile{background:var(--surface);padding:14px 15px}
+.tile .lb{font-size:11px;color:var(--muted);margin-bottom:5px}
+.tile .vl{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.tile .dl{font-size:11px;color:var(--ink-2);margin-top:3px;line-height:1.35}
+.hero{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.gauge{position:relative;width:132px;height:132px;flex:none}
+.gauge svg{transform:rotate(-90deg)}
+.gauge .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.gauge .num b{font-size:33px;font-weight:600;letter-spacing:-.03em;line-height:1;display:block}
+.gauge .num span{font-size:9px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:700;margin-top:5px;display:block}
+.herotxt{flex:1;min-width:210px}
+.herotxt .band{font-size:17px;font-weight:600;margin-bottom:5px}
+.herotxt p{font-size:13.5px;color:var(--ink-2);line-height:1.6;margin:0}
+.breakdown{display:flex;flex-direction:column;gap:9px;margin-top:15px}
+.bd{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:11px;font-size:12.5px}
+.bd .k{color:var(--ink-2)}
+.bd .v{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.minibar{height:7px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.minibar i{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--d1)}
+
+/* ═══ ANCHORS ═══════════════════════════════════════════════════════════ */
+.anchors{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:9px}
+.anchor{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:11px;
+  border:1px solid var(--border);background:var(--surface-2);transition:all .13s}
+.anchor:hover{border-color:var(--axis)}
+.anchor[aria-pressed="true"]{background:var(--surface);border-color:var(--d1)}
+.anchor .txt{display:block;min-width:0}
+.anchor .nm{display:block;font-size:13.5px;font-weight:500;line-height:1.3}
+.anchor .tm{display:block;font-size:11px;color:var(--muted);margin-top:1px;line-height:1.3}
+.anchor[aria-pressed="true"] .nm{color:var(--d1)}
+
+/* ═══ CAPACITY BAR ══════════════════════════════════════════════════════ */
+.cap{height:26px;background:var(--surface-2);border-radius:7px;position:relative;overflow:hidden;margin:11px 0 8px}
+.cap i{display:block;height:100%;background:var(--d1);transition:width .35s cubic-bezier(.4,0,.2,1);border-radius:0 5px 5px 0}
+.cap.amber i{background:var(--warn)} .cap.red i{background:var(--crit)}
+.cap b{position:absolute;top:0;bottom:0;right:9px;display:flex;align-items:center;
+  font-size:11.5px;font-weight:600;color:var(--ink-2)}
+.capnote{font-size:12.5px;line-height:1.55}
+.capnote.amber{color:var(--ink-2)} .capnote.red{color:var(--crit)}
+
+/* ═══ BARS ══════════════════════════════════════════════════════════════ */
+.bars{display:flex;flex-direction:column;gap:11px}
+.barrow{display:grid;grid-template-columns:98px 1fr 34px;align-items:center;gap:11px}
+.barrow .cat{font-size:12.5px;color:var(--ink-2);font-weight:500}
+.bartrack{height:20px;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.barfill{height:100%;border-radius:0 4px 4px 0;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.barrow .num{font-size:12.5px;color:var(--ink-2);text-align:right;font-variant-numeric:tabular-nums}
+.dom{border:1px solid var(--border);border-radius:12px;padding:15px;background:var(--surface)}
+.domhead{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.domhead .t{font-size:14px;font-weight:600}
+.domhead .s{margin-left:auto;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+
+/* ═══ HABIT GRID ════════════════════════════════════════════════════════ */
+.hgwrap{overflow-x:auto;margin:0 -4px;padding:0 4px}
+.hg{border-collapse:separate;border-spacing:0;width:100%;min-width:560px}
+.hg th{font-size:10.5px;font-weight:700;color:var(--muted);padding:0 0 9px;text-align:center}
+.hg th.nmcol{text-align:left;min-width:172px}
+.hg td{padding:3px 0;text-align:center;vertical-align:middle}
+.hg td.nm{text-align:left;font-size:13px;padding-right:12px;color:var(--ink-2);line-height:1.35}
+.hg td.nm small{display:block;color:var(--muted);font-size:11px}
+.cell{width:29px;height:29px;border-radius:8px;background:var(--surface-2);border:1px solid transparent;
+  display:inline-grid;place-items:center;transition:all .12s;position:relative}
+.cell:hover{border-color:var(--axis)}
+.cell.done{background:var(--d1);border-color:var(--d1)}
+.cell.done svg{opacity:1;stroke:#fff}
+.cell.skip{background:var(--warn);border-color:var(--warn)}
+.cell.skip::after{content:"";position:absolute;width:11px;height:2px;background:#0b0b0b;border-radius:1px;opacity:.75}
+.cell svg{width:13px;height:13px;opacity:0}
+.cell.today{box-shadow:0 0 0 2px var(--surface),0 0 0 3.5px var(--axis)}
+.cell.fut{opacity:.3;pointer-events:none}
+.strength{display:flex;align-items:center;gap:7px;min-width:82px}
+.strength .sbar{width:44px;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden}
+.strength .sbar i{display:block;height:100%;background:var(--d3);border-radius:3px}
+.strength .sv{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ═══ HEATMAP ═══════════════════════════════════════════════════════════ */
+.heat{display:flex;gap:3px;overflow-x:auto;padding-bottom:4px}
+.hcol{display:flex;flex-direction:column;gap:3px}
+.hcell{width:13px;height:13px;border-radius:3px;background:var(--s0)}
+.legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:12px;flex-wrap:wrap}
+.legend .sw{width:12px;height:12px;border-radius:3px}
+
+/* ═══ METERS ════════════════════════════════════════════════════════════ */
+.meter{height:9px;background:var(--track);border-radius:5px;overflow:hidden;margin:9px 0 6px}
+.meter i{display:block;height:100%;border-radius:5px;background:var(--d1);transition:width .35s}
+.exec{position:relative;height:30px;background:var(--surface-2);border-radius:7px;overflow:hidden}
+.exec i{display:block;height:100%;background:var(--d3);transition:width .4s}
+.exec .line85{position:absolute;top:0;bottom:0;left:85%;width:2px;background:var(--ink);opacity:.45}
+.exec .lb85{position:absolute;top:50%;left:calc(85% + 6px);transform:translateY(-50%);
+  font-size:10px;color:var(--ink-2);font-weight:600;white-space:nowrap}
+.exec b{position:absolute;left:9px;top:0;bottom:0;display:flex;align-items:center;
+  font-size:12px;font-weight:600;color:var(--ink)}
+
+/* ═══ DEADLINES / MILESTONES ════════════════════════════════════════════ */
+.dl-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--grid)}
+.dl-row:last-child{border-bottom:0}
+.dl-row.is-done{opacity:.45}
+.dl-days{flex:none;width:58px;text-align:center;border-radius:8px;padding:6px 0;
+  font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.dl-days span{display:block;font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;opacity:.85;margin-top:1px}
+.dl-main{flex:1;min-width:0}
+.dl-main .t{font-size:14px;font-weight:500}
+.dl-main .m{font-size:11.5px;color:var(--muted);margin-top:2px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;
+  padding:2px 7px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.chip.est{background:transparent;border:1px dashed var(--axis);color:var(--muted);font-weight:500}
+.chip.tag{background:var(--surface-3)}
+.defer{color:var(--serious);font-weight:700;font-size:12px;letter-spacing:-.5px}
+.defer.hot{color:var(--crit)}
+
+/* ═══ BUCKETS / PILLS ═══════════════════════════════════════════════════ */
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px}
+.pills button{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:500;
+  border:1px solid var(--border);color:var(--ink-2);background:var(--surface);transition:all .12s}
+.pills button:hover{border-color:var(--axis)}
+.pills button[aria-pressed="true"]{background:var(--ink);color:var(--plane);border-color:var(--ink)}
+.mv{font-size:10.5px;color:var(--muted);border:1px solid var(--border);border-radius:6px;
+  padding:2px 6px;opacity:0;transition:opacity .12s;white-space:nowrap}
+.line:hover .mv{opacity:1}
+.mv:hover{color:var(--ink);border-color:var(--axis)}
+
+/* ═══ WIZARD / STEPPER ══════════════════════════════════════════════════ */
+.steps{display:flex;gap:4px;margin-bottom:18px;flex-wrap:wrap}
+.stepdot{flex:1;min-width:44px;height:4px;border-radius:2px;background:var(--surface-2);transition:background .2s}
+.stepdot.on{background:var(--d1)} .stepdot.past{background:var(--d3)}
+.stepbody{min-height:190px}
+.stepbody h3{font-size:17px;margin-bottom:6px}
+.stepbody .sd{font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:16px}
+.stepnav{display:flex;gap:8px;align-items:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--grid)}
+.primary{background:var(--ink);color:var(--plane);border-radius:999px;padding:9px 18px;
+  font-size:13px;font-weight:600;white-space:nowrap;transition:opacity .12s}
+.primary:hover{opacity:.85}
+.primary.sm{padding:6px 13px;font-size:12px}
+.primary[disabled]{opacity:.35;cursor:default}
+
+/* ═══ PROSE / STEPS ═════════════════════════════════════════════════════ */
+.prose{font-size:14.5px;line-height:1.68;color:var(--ink-2)}
+.prose strong{color:var(--ink);font-weight:600}
+.prose ul,.prose ol{margin:0 0 14px;padding-left:20px}
+.prose li{margin-bottom:7px}
+.prose li::marker{color:var(--muted)}
+.step{display:flex;gap:13px;padding:12px 0;border-bottom:1px solid var(--grid)}
+.step:last-child{border-bottom:0}
+.step .n{flex:none;width:23px;height:23px;border-radius:50%;background:var(--surface-2);color:var(--ink-2);
+  font-size:11px;font-weight:700;display:grid;place-items:center;margin-top:1px}
+.step .b{flex:1;min-width:0}
+.step .b b{display:block;font-size:14px;color:var(--ink);font-weight:600;margin-bottom:2px}
+.step .b span{font-size:13.5px;color:var(--ink-2);line-height:1.55;display:block}
+.callout{border-left:3px solid var(--d1);background:var(--surface-2);border-radius:0 10px 10px 0;
+  padding:14px 16px;margin:0 0 15px;font-size:13.5px;line-height:1.62;color:var(--ink-2)}
+.callout b,.callout strong{color:var(--ink)}
+.callout.warm{border-left-color:var(--d2)}
+.callout.ok{border-left-color:var(--d3)}
+.callout.hot{border-left-color:var(--crit)}
+.src{font-size:11.5px;color:var(--muted);line-height:1.55}
+.src a{color:var(--muted)}
+
+/* ═══ MOOD GRID ═════════════════════════════════════════════════════════ */
+.moodgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.quad{border-radius:11px;padding:12px;border:1px solid var(--border);min-height:96px;transition:all .13s}
+.quad .qh{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px}
+.quad .words{display:flex;flex-wrap:wrap;gap:4px}
+.quad .w{font-size:11.5px;padding:3px 8px;border-radius:999px;background:var(--surface-2);
+  color:var(--ink-2);transition:all .12s;border:1px solid transparent}
+.quad .w:hover{border-color:var(--axis)}
+.quad .w[aria-pressed="true"]{background:var(--ink);color:var(--plane);border-color:var(--ink)}
+
+/* ═══ TIMER ═════════════════════════════════════════════════════════════ */
+.timer{text-align:center;padding:8px 0 4px}
+.timer .tt{font-size:52px;font-weight:600;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.timer .ts{font-size:12.5px;color:var(--muted);margin-top:7px}
+.gate{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.gatechk{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:10px;
+  background:var(--surface-2);border:1px solid transparent;transition:all .13s}
+.gatechk[aria-pressed="true"]{border-color:var(--d3);background:var(--surface)}
+.gatechk .gt{font-size:13px;line-height:1.4}
+.gatechk .gt small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+
+/* ═══ FOCUS MODE OVERLAY ════════════════════════════════════════════════ */
+.focus{position:fixed;inset:0;z-index:60;background:var(--plane);display:none;
+  place-items:center;padding:24px;text-align:center}
+.focus.on{display:grid}
+.focus .fi{max-width:520px}
+.focus .fl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+.focus .fq{font-size:29px;font-weight:600;line-height:1.28;letter-spacing:-.02em;margin-bottom:14px}
+.focus .fp{font-size:14px;color:var(--ink-2);line-height:1.6;margin-bottom:26px}
+.focus .fb{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+
+/* ═══ MODAL ═════════════════════════════════════════════════════════════ */
+.modal{position:fixed;inset:0;z-index:70;background:rgba(11,11,11,.5);display:none;place-items:center;padding:20px}
+.modal.on{display:grid}
+.modal .mb{background:var(--surface);border-radius:16px;padding:24px;max-width:640px;width:100%;
+  max-height:88vh;overflow:auto;box-shadow:var(--shadow-lg)}
+.modal h2{font-size:17px;margin-bottom:6px}
+.modal .md{font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:14px}
+
+/* ═══ SAVE BAR ══════════════════════════════════════════════════════════ */
+.savebar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);
+  border-top:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;
+  gap:12px;justify-content:center;font-size:12.5px;color:var(--ink-2)}
+.savebar b{color:var(--ink)}
+.savebar .short{display:none}
+.savebar .dirty{display:inline-flex;align-items:center;gap:6px}
+.savebar .dot-d{width:7px;height:7px;border-radius:50%;background:var(--warn);flex:none}
+@media(max-width:660px){
+  .savebar{padding:9px 14px;gap:10px;font-size:12px;justify-content:space-between}
+  .savebar .long{display:none} .savebar .short{display:inline}
+}
+
+/* ═══ REVISION ══════════════════════════════════════════════════════════ */
+.revrow{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--grid)}
+.revrow:last-child{border-bottom:0}
+.boxlvl{flex:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
+  font-size:11.5px;font-weight:700;color:#fff}
+.revrow .rt{flex:1;min-width:0;font-size:13.5px;line-height:1.35}
+.revrow .rt small{display:block;color:var(--muted);font-size:11px}
+.confbtns{display:flex;gap:3px;flex:none}
+.confbtns button{width:27px;height:27px;border-radius:7px;background:var(--surface-2);
+  font-size:12px;font-weight:600;display:grid;place-items:center;transition:all .12s;color:var(--ink-2)}
+.confbtns button:hover{background:var(--d1);color:#fff}
+.mixbox{background:var(--surface-2);border-radius:11px;padding:15px;margin-top:13px}
+.mixbox ol{margin:0;padding-left:19px}
+.mixbox li{margin-bottom:6px;font-size:13.5px;color:var(--ink-2)}
+
+/* ═══ TABLE ═════════════════════════════════════════════════════════════ */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);padding:0 10px 9px 0;border-bottom:1px solid var(--grid)}
+.tbl td{padding:9px 10px 9px 0;border-bottom:1px solid var(--grid);color:var(--ink-2);vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td b{color:var(--ink);font-weight:600}
+/* ═══════════════ TELEGRAM MINI APP SHELL ═══════════════ */
+:root{
+  --tgnav: 60px;
+  --tgsafe: 0px;
+  --tgtop: 0px;
+}
+body.tg{
+  padding-top:var(--tgtop);
+  overscroll-behavior-y:none;
+  -webkit-user-select:none;user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+body.tg input,body.tg textarea{-webkit-user-select:text;user-select:text}
+body.tg .wrap{padding:0 14px calc(var(--tgnav) + var(--tgsafe) + 26px)}
+body.tg header{padding:14px 0 10px}
+body.tg .brand h1{font-size:20px}
+body.tg .brand .sub{font-size:12px}
+body.tg nav{display:none}
+body.tg .savebar{display:none}
+body.tg .card{padding:16px 15px;border-radius:15px;margin-bottom:12px}
+body.tg .g2,body.tg .g3{grid-template-columns:1fr;gap:12px}
+body.tg .hbtns .ghost{padding:8px 13px;font-size:12.5px}
+body.tg .modal{padding:0;align-items:flex-end}
+body.tg .modal .mb{border-radius:18px 18px 0 0;max-height:92vh;
+  padding:20px 16px calc(20px + var(--tgsafe));animation:tgUp .22s cubic-bezier(.32,.72,0,1)}
+@keyframes tgUp{from{transform:translateY(26px);opacity:.4}to{transform:none;opacity:1}}
+
+/* bigger touch targets */
+body.tg .box{width:26px;height:26px;border-radius:8px}
+body.tg .box svg{width:14px;height:14px}
+body.tg .cell{width:36px;height:36px;border-radius:9px}
+body.tg .confbtns button{width:34px;height:34px;font-size:13px}
+body.tg .pills button{padding:8px 14px;font-size:13px}
+body.tg .ghost.sm{padding:7px 12px;font-size:12.5px}
+body.tg .line{padding:11px 0}
+body.tg .anchor{padding:13px 13px}
+body.tg .quad .w{padding:6px 11px;font-size:12.5px}
+body.tg .del{opacity:1}
+body.tg .mv{opacity:1}
+body.tg .hg{min-width:520px}
+body.tg .hg th.nmcol{min-width:130px}
+body.tg .hg td.nm{font-size:12px}
+
+/* sync pill */
+.tgsync{position:fixed;left:50%;transform:translateX(-50%) translateY(6px);
+  bottom:calc(var(--tgnav) + var(--tgsafe) + 12px);z-index:44;
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  padding:6px 14px;font-size:11.5px;font-weight:600;color:var(--ink-2);
+  box-shadow:var(--shadow);opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;display:flex;align-items:center;gap:7px}
+.tgsync.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.tgsync i{width:7px;height:7px;border-radius:50%;background:var(--warn);flex:none}
+.tgsync.ok i{background:var(--good)}
+.tgsync.err i{background:var(--crit)}
+
+/* bottom nav */
+.tgnav{position:fixed;left:0;right:0;bottom:0;z-index:45;
+  background:var(--surface);border-top:1px solid var(--border);
+  display:none;padding-bottom:var(--tgsafe);
+  box-shadow:0 -6px 22px -18px rgba(0,0,0,.5)}
+body.tg .tgnav{display:flex}
+.tgnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:9px 2px 8px;color:var(--muted);transition:color .14s;position:relative;min-height:56px;justify-content:center}
+.tgnav button svg{width:21px;height:21px;stroke-width:1.9}
+.tgnav button span{font-size:10px;font-weight:600;letter-spacing:.01em}
+.tgnav button[aria-selected="true"]{color:var(--d1)}
+.tgnav .nb{position:absolute;top:5px;left:calc(50% + 7px);min-width:16px;height:16px;
+  padding:0 4px;border-radius:8px;background:var(--crit);color:#fff;
+  font-size:9.5px;font-weight:700;line-height:16px;text-align:center;display:none}
+
+/* more sheet */
+.tgmore{position:fixed;inset:0;z-index:55;background:rgba(11,11,11,.45);display:none;align-items:flex-end}
+.tgmore.on{display:flex}
+.tgmore .sheet{width:100%;background:var(--surface);border-radius:18px 18px 0 0;
+  padding:10px 12px calc(14px + var(--tgsafe));animation:tgUp .22s cubic-bezier(.32,.72,0,1)}
+.tgmore .grab{width:36px;height:4px;border-radius:2px;background:var(--axis);margin:4px auto 12px}
+.tgmore .mrow{display:flex;align-items:center;gap:13px;padding:14px 10px;border-radius:12px;
+  font-size:15px;font-weight:500;transition:background .12s;width:100%}
+.tgmore .mrow:active{background:var(--surface-2)}
+.tgmore .mrow svg{width:20px;height:20px;color:var(--muted);flex:none;stroke-width:1.9}
+.tgmore .mrow small{display:block;font-size:11.5px;color:var(--muted);font-weight:400;margin-top:1px}
+.tgmore .msec{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);padding:12px 10px 6px}
+
+body.tg .hero{gap:15px}
+body.tg .gauge{width:104px;height:104px}
+body.tg .gauge svg{width:104px;height:104px}
+body.tg .gauge .num b{font-size:27px}
+body.tg .gauge .num span{font-size:8px;margin-top:4px}
+body.tg .herotxt{min-width:140px}
+body.tg .herotxt .band{font-size:15px}
+body.tg .herotxt p{font-size:12.5px}
+body.tg .bd{grid-template-columns:74px 1fr auto;font-size:12px}
+body.tg #saveBtn{display:none}
+body.tg .tiles{grid-template-columns:1fr 1fr}
+body.tg .timer .tt{font-size:44px}
+body.tg .dl-row{gap:10px}
+body.tg .dl-days{width:52px}
+body.tg .focus .fq{font-size:23px}
+
+/* keep the habit name visible while the week scrolls under it */
+body.tg .hg{min-width:470px}
+body.tg .hg th.nmcol,body.tg .hg td.nm{position:sticky;left:0;z-index:2;
+  background:var(--surface);min-width:120px;max-width:120px;padding-right:9px}
+body.tg .hgwrap{margin:0;padding:0}
+body.tg .hg th.nmcol,body.tg .hg td.nm{border-right:1px solid var(--grid)}
+body.tg .hg td.nm{font-size:11.5px;line-height:1.3}
+body.tg .hg td.nm small{font-size:10px}
+body.tg .cell{width:32px;height:32px}
+body.tg .strength{min-width:64px}
+body.tg .strength .sbar{width:32px}
+
+</style>
+</head>
+<body>
+<script id="state-data" type="application/json">null</script>
+<div class="wrap">
+
+<header>
+  <div class="brandrow">
+    <div class="brand">
+      <h1><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>Compass</h1>
+      <div class="sub" id="subline">—</div>
+    </div>
+    <div class="hbtns">
+      <button class="ghost" id="stuckBtn">I'm stuck</button>
+      <button class="ghost" id="minBtn">Minimum day</button>
+      <button class="ghost" id="themeBtn">Dark</button>
+      <button class="ghost" id="saveBtn">Save</button>
+    </div>
+  </div>
+</header>
+
+<nav><div class="tabs" role="tablist" id="tabs"></div></nav>
+
+<!-- ═══════════════ TODAY ═══════════════ -->
+<section id="s-today">
+  <div class="card">
+    <div class="hero">
+      <div class="gauge" id="gauge"></div>
+      <div class="herotxt">
+        <div class="band" id="rBand">—</div>
+        <p id="rText">—</p>
+      </div>
+    </div>
+    <div class="breakdown" id="rBreak"></div>
+    <div class="src" style="margin-top:14px">A capacity estimate, not a grade. Its only job is to tell you whether today is a day to push or a day to protect. Modelled on the readiness scores used by Oura and WHOOP.</div>
+  </div>
+
+  <div class="card">
+    <div class="spread" style="margin-bottom:3px">
+      <h2>The Big 3</h2>
+      <button class="ghost sm" id="focusBtn">Focus mode</button>
+    </div>
+    <div class="hint">Three things. Each needs an <b>if-then plan</b> — not because it's tidy, but because planning <em>when and where</em> is the specific thing that stops an unfinished task from occupying your head all day. Writing it down alone doesn't do it.</div>
+    <div id="big3"></div>
+    <div class="divider"></div>
+    <div class="eyebrow">Today's load</div>
+    <div class="cap" id="capBar"><i></i><b></b></div>
+    <div class="capnote" id="capNote"></div>
+  </div>
+
+  <div class="card">
+    <h2>Anchors</h2>
+    <div class="hint" id="anchorHint">Five fixed points that hold the day's shape. Deliberately small — these are the ones you keep on your worst days.</div>
+    <div class="anchors" id="anchors"></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="eyebrow">Check-in · 20 seconds</div>
+      <div class="hint" style="margin-bottom:12px">Naming a feeling precisely measurably reduces its intensity. Pick the closest word.</div>
+      <div class="moodgrid" id="moodGrid"></div>
+      <label class="lbl">Sleep last night <span class="q">— hours</span></label>
+      <input type="range" min="3" max="11" step="0.5" id="sleepR">
+      <div class="spread" style="font-size:11.5px;color:var(--muted);margin:-2px 0 14px">
+        <span>3h</span><span id="sleepTxt" style="color:var(--ink-2);font-weight:600"></span><span>11h</span>
+      </div>
+      <label class="lbl">Energy right now</label>
+      <input type="range" min="1" max="5" id="energyR">
+      <div class="spread" style="font-size:11.5px;color:var(--muted);margin:-2px 0 0">
+        <span>Empty</span><span id="energyTxt" style="color:var(--ink-2);font-weight:600"></span><span>Full</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Deep block · phone in another room</div>
+      <div class="timer">
+        <div class="tt" id="tDisp">50:00</div>
+        <div class="ts" id="tSub">Not running</div>
+      </div>
+      <div class="gate" id="gate"></div>
+      <label class="lbl" style="margin-top:4px">The one question this block answers</label>
+      <input class="fld sm" id="blockQ" placeholder="Not &quot;revise Chemistry&quot; — &quot;do the 8 equilibrium questions&quot;">
+      <div class="row" style="margin-top:12px">
+        <button class="primary sm" id="tStart">Start 50 min</button>
+        <button class="ghost sm" id="tStop">Reset</button>
+        <span style="font-size:12px;color:var(--muted);margin-left:auto" id="tToday"></span>
+      </div>
+      <div class="src" style="margin-top:12px">A silenced phone on the desk still costs you working memory — the effect shows up whether it's on, off, or face down. Only distance removes it.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">Evening · 5 minutes</div>
+    <div class="spread" style="margin-bottom:12px">
+      <h2 style="font-size:15px">Shutdown</h2>
+      <button class="ghost sm" id="shutBtn">Run the ritual</button>
+    </div>
+    <label class="lbl">One thing that went right</label>
+    <textarea class="fld" id="win" placeholder="However small. Write something."></textarea>
+    <label class="lbl" style="margin-top:13px">Brain dump — everything still rattling around</label>
+    <textarea class="fld" id="dump" placeholder="One per line. Doesn't have to be organised."></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="ghost sm" id="dumpToTasks">Send each line to the inbox</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ WEEK ═══════════════ -->
+<section id="s-week">
+  <div class="card">
+    <div class="spread" style="margin-bottom:3px">
+      <h2>Execution score</h2>
+      <span class="chip" id="wkLabel">—</span>
+    </div>
+    <div class="hint">The share of what you planned this week that you actually did. Around <b>85%</b> is the level that reliably delivers a 12-week goal — chasing 100% every week is how people burn out and quit.</div>
+    <div class="exec" id="execBar"><i></i><b></b><span class="line85"></span><span class="lb85">85%</span></div>
+    <div class="tiles" style="margin-top:15px" id="weekTiles"></div>
+  </div>
+
+  <div class="card">
+    <h2>Habits</h2>
+    <div class="hint">Tap once for <b>done</b>, twice for a <b>deliberate skip</b> (amber — a planned rest day is not a failure), three times to clear. The strength bar is an average that dips when you miss and recovers when you return; it never resets to zero, because missing one day genuinely doesn't undo a habit.</div>
+    <div class="hgwrap"><table class="hg" id="habitGrid"></table></div>
+    <div class="legend">
+      <span class="sw" style="background:var(--d1)"></span><span>Done</span>
+      <span class="sw" style="background:var(--warn);margin-left:8px"></span><span>Deliberate skip</span>
+      <span class="sw" style="background:var(--surface-2);border:1px solid var(--axis);margin-left:8px"></span><span>Missed or not yet</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>The long view</h2>
+    <div class="hint">One square per day, one column per week. Darker means more done. This is the chart that matters — not any single day in it.</div>
+    <div class="heat" id="heat"></div>
+    <div class="legend">
+      <span>Less</span>
+      <span class="sw" style="background:var(--s0)"></span><span class="sw" style="background:var(--s1)"></span>
+      <span class="sw" style="background:var(--s2)"></span><span class="sw" style="background:var(--s3)"></span>
+      <span class="sw" style="background:var(--s4)"></span><span class="sw" style="background:var(--s5)"></span>
+      <span>More</span>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <h2>Sleep &amp; energy</h2>
+      <div class="hint">Last 21 days. You're looking for the relationship, not the numbers.</div>
+      <div id="sleepChart"></div>
+    </div>
+    <div class="card">
+      <h2>What moves your mood</h2>
+      <div class="hint">Average mood on days you did each habit, minus days you didn't. Needs a couple of weeks of data before it says anything real.</div>
+      <div id="corrChart"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Manage your habits</h2>
+    <div class="hint">A cap of seven is deliberate. Each one needs an <b>anchor</b> (an existing moment that reliably happens) and a <b>two-minute version</b> for bad days. A habit with no anchor is a wish.</div>
+    <div id="habitList"></div>
+    <div class="divider"></div>
+    <div class="eyebrow">Add a habit</div>
+    <div class="g3" style="gap:8px">
+      <input class="fld sm" id="nhName" placeholder="Habit">
+      <input class="fld sm" id="nhAnchor" placeholder="After I… (anchor moment)">
+      <input class="fld sm" id="nhTiny" placeholder="Two-minute version">
+    </div>
+    <div class="row" style="margin-top:9px">
+      <label class="lbl" style="margin:0">Target</label>
+      <select class="fld sm" id="nhTarget" style="width:auto">
+        <option value="7">7× a week</option><option value="5">5× a week</option>
+        <option value="4">4× a week</option><option value="3" selected>3× a week</option>
+        <option value="2">2× a week</option><option value="1">1× a week</option>
+      </select>
+      <button class="ghost sm" id="addHabit">Add</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Where things stand</h2>
+    <div class="hint">Rate each area on gut feeling. Direction, not accuracy. Once a week, Sunday. Your attention this week goes to the lowest bar — one area, not six.</div>
+    <div class="bars" id="domBars"></div>
+  </div>
+  <div class="g2" id="domCards"></div>
+</section>
+
+<!-- ═══════════════ SCHOOL ═══════════════ -->
+<section id="s-school">
+  <div class="card">
+    <h2>May 2027</h2>
+    <div class="hint">Your session. Every date below marked <span class="chip est">est.</span> is triangulated from schools that have published their May 2027 calendars — <b>confirm all of them with your DP coordinator</b>, because each school sets its own internal deadlines.</div>
+    <div class="tiles" id="ibTiles"></div>
+    <div class="callout warm" style="margin-top:16px">
+      <b>One thing worth knowing early:</b> the Extended Essay was fully redesigned for first assessment in <b>May 2027</b> — your year is the first cohort. New criteria (A–E, 30 marks instead of 34), a single ≤500-word reflective statement instead of three, and a new interdisciplinary pathway option. Guidance from anyone who sat the EE before your session is out of date.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="spread" style="margin-bottom:3px">
+      <h2>Deadlines &amp; milestones</h2>
+      <div class="pills" style="margin:0" id="msFilter"></div>
+    </div>
+    <div class="hint">The number beside a deferred item counts the days you've been moving it. It only clears when the thing is done.</div>
+    <div id="milestones"></div>
+    <div class="divider"></div>
+    <div class="g3" style="gap:8px">
+      <input class="fld sm" id="msTitle" placeholder="What's due">
+      <select class="fld sm" id="msSubject"></select>
+      <input class="fld sm" id="msDate" type="date">
+    </div>
+    <div class="row" style="margin-top:9px">
+      <select class="fld sm" id="msType" style="width:auto">
+        <option value="IA">IA</option><option value="EE">EE</option><option value="TOK">TOK</option>
+        <option value="CAS">CAS</option><option value="Test">Test</option>
+        <option value="Aflevering" selected>Aflevering</option><option value="Exam">Exam</option>
+      </select>
+      <button class="ghost sm" id="addMs">Add</button>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <h2>Subjects</h2>
+      <div class="hint">Bars show study time logged this week. You will notice you avoid one of them.</div>
+      <div id="subjects"></div>
+      <div class="row" style="margin-top:13px">
+        <input class="fld sm" id="nsName" placeholder="Add a subject" style="flex:1">
+        <select class="fld sm" id="nsLevel" style="width:auto"><option>HL</option><option>SL</option></select>
+        <button class="ghost sm" id="addSubject">Add</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Fravær</h2>
+      <div class="hint">Danish gymnasium absence escalates in steps, and most students only find out where the lines are after they've crossed one.</div>
+      <label class="lbl">Current fraværsprocent</label>
+      <input type="range" min="0" max="20" step="0.5" id="fravR">
+      <div class="spread" style="font-size:11.5px;color:var(--muted);margin:-2px 0 14px">
+        <span>0%</span><span id="fravTxt" style="font-weight:600"></span><span>20%</span>
+      </div>
+      <div id="fravState"></div>
+      <div class="callout hot" style="margin-top:14px;font-size:13px">
+        <b>The part nobody tells you:</b> a written assignment handed in late without arranging it first is usually registered as <b>absence</b>, not just a late grade. Your afleveringer and your fraværsprocent are the same number.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ REVISE ═══════════════ -->
+<section id="s-revise">
+  <div class="card">
+    <h2>Due today</h2>
+    <div class="hint">Spaced retrieval. Rate how well it came back and the topic reschedules itself — solid ones stretch out to a month, shaky ones return tomorrow. Testing yourself beats rereading by a wide margin, and the gap grows the longer you leave it. <b>Only topics you've already started appear here</b>, so this stays short.</div>
+    <div id="revDue"></div>
+    <div class="legend" style="margin-top:14px">
+      <span>Rate 1 (blank) to 5 (solid) after you've actually tried to recall it — not while looking at your notes.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="spread" style="margin-bottom:3px">
+      <h2>Interleaved set</h2>
+      <button class="ghost sm" id="mixBtn">Shuffle a new set</button>
+    </div>
+    <div class="hint">Doing twenty questions on one technique trains you to apply a method you were already told to use. Exams don't tell you. Mixing types forces the identification step — the effect on a 30-day delayed test is roughly double.</div>
+    <div id="mixOut"></div>
+  </div>
+
+  <div class="card">
+    <h2>All topics</h2>
+    <div class="hint">Box 1 comes back tomorrow, box 5 in a month. Move something down by rating it low.</div>
+    <div class="pills" id="revFilter"></div>
+    <div id="revAll"></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <h2>Past paper plan</h2>
+      <div class="hint">Counting back from late April 2027.</div>
+      <div id="paperPlan"></div>
+    </div>
+    <div class="card">
+      <h2>Command terms</h2>
+      <div class="hint">Marks lost to answering at the wrong depth are the cheapest marks in the exam to get back.</div>
+      <table class="tbl" id="cmdTable"></table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TASKS ═══════════════ -->
+<section id="s-tasks">
+  <div class="card">
+    <h2>Inbox</h2>
+    <div class="hint">Capture first, sort later. Everything goes here, then gets clarified — that second step is the one people skip, and it's the one that does the work.</div>
+    <div class="row" style="margin-bottom:14px">
+      <input class="fld" id="newTask" placeholder="Type it and press Enter" style="flex:1">
+      <button class="ghost" id="addTask">Capture</button>
+    </div>
+    <div id="inbox"></div>
+  </div>
+
+  <div class="card">
+    <div class="spread" style="margin-bottom:12px">
+      <h2>Sorted</h2>
+      <div class="pills" style="margin:0" id="buckets"></div>
+    </div>
+    <div id="taskList"></div>
+  </div>
+
+  <div class="card" id="staleCard" style="display:none">
+    <h2>Been sitting a while</h2>
+    <div class="hint">These have moved forward more than five times. Rewriting a task by hand is what filters out the ones that were never going to happen — so: recommit, reschedule, or let it go.</div>
+    <div id="staleList"></div>
+  </div>
+</section>
+
+<!-- ═══════════════ GOALS ═══════════════ -->
+<section id="s-goals">
+  <div class="card">
+    <h2>Next 90 days</h2>
+    <div class="hint">Three at most, on a 12-week horizon — long enough to matter, short enough that "there's plenty of time" is obviously false. Each goal carries a <b>lead measure</b> (what you do weekly, which you control) and a <b>lag measure</b> (the outcome, which you don't). Tracking only the outcome tells you you've failed after it's too late.</div>
+    <div class="row"><input class="fld" id="newGoal" placeholder="Add a goal" style="flex:1"><button class="ghost" id="addGoal">Add</button></div>
+  </div>
+  <div id="goalCards"></div>
+</section>
+
+<!-- ═══════════════ RITUALS ═══════════════ -->
+<section id="s-rituals">
+  <div class="card">
+    <div class="callout">
+      <b>Why scripts beat willpower.</b> Every decision you make in the morning spends something you need later. These exist so that at 07:00 you're following instructions rather than negotiating with yourself. Adjust them to your real life once — then stop adjusting them.
+    </div>
+    <div class="row">
+      <button class="ghost" id="planBtn">Run the daily plan</button>
+      <button class="ghost" id="shutBtn2">Run the shutdown</button>
+      <button class="ghost" id="revBtn">Run the Sunday review</button>
+    </div>
+  </div>
+  <div class="g2" id="ritualCards"></div>
+</section>
+
+<!-- ═══════════════ RESET ═══════════════ -->
+<section id="s-reset"></section>
+
+<!-- ═══════════════ WHY ═══════════════ -->
+<section id="s-why"></section>
+
+</div>
+
+<!-- ═══════════════ OVERLAYS ═══════════════ -->
+<div class="focus" id="focusOv">
+  <div class="fi">
+    <div class="fl" id="fLabel">Now</div>
+    <div class="fq" id="fQuest">—</div>
+    <div class="fp" id="fPlan">—</div>
+    <div class="fb">
+      <button class="primary" id="fDone">Done</button>
+      <button class="ghost" id="fNext">Next one</button>
+      <button class="ghost" id="fExit">Exit</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal"><div class="mb" id="modalBody"></div></div>
+
+<div class="savebar" hidden>
+  <span class="long">Nothing saves on its own — <b>download your file before you close this.</b></span>
+  <span class="short"><b>Save before closing.</b></span>
+  <span class="dirty" id="dirtyDot" style="display:none"><span class="dot-d"></span></span>
+  <button class="primary" id="saveBtn2">Save my data</button>
+</div>
+<script>
+(function(){
+"use strict";
+var PRISTINE = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+
+/* ══════════ SEED DATA ══════════ */
+var MATHS = ["Algebra and function basics","Functions","Sequences and series","Exponential and logarithmic functions","Proofs","Trigonometric functions and equations","Geometry and trigonometry","Complex numbers","Vectors, lines and planes","Statistics","Probability","Differential calculus 1","Differential calculus 2","Integral calculus 1","Probability distributions","Integral calculus 2"];
+var PHYS = ["A.1 Kinematics","A.2 Forces and momentum","A.3 Work, energy and power","B.1 Thermal energy transfers","B.2 The greenhouse effect","B.3 Gas laws","B.5 Current and circuits","C.1 Simple harmonic motion","C.2 The wave model","C.3 Wave phenomena","C.4 Standing waves and resonance","C.5 Doppler effect","D.1 Gravitational fields","D.2 Electric and magnetic fields","D.3 Motion in electromagnetic fields","E.1 Structure of the atom","E.2 Quantum physics","E.3 Radioactive decay","E.4 Fission","E.5 Fusion and stars"];
+var CHEM = ["S1.1 Particulate nature of matter","S1.2 The nuclear atom","S1.3 Electron configurations","S1.4 Counting particles by mass: the mole","S1.5 Ideal gases","S2.1 The ionic model","S2.2 The covalent model","S2.3 The metallic model","S2.4 From models to materials","S3.1 The periodic table","S3.2 Functional groups","R1.1 Measuring enthalpy change","R1.2 Energy cycles in reactions","R1.3 Energy from fuels","R1.4 Entropy and spontaneity","R2.1 How much? Amount of chemical change","R2.2 How fast? Rate of chemical change","R2.3 How far? Extent of chemical change","R3.1 Proton transfer reactions","R3.2 Electron transfer reactions","R3.3 Electron sharing reactions","R3.4 Electron-pair sharing reactions"];
+var DANSK = ["Identiteter","Oplevelser","Menneskelig opfindsomhed","Social organisering","Deling af planeten","Paper 1 — skriftlig produktion","Paper 2 — lytte og læsning","Individuel mundtlig prøve"];
+
+var CMD = [["Define","Give the precise meaning of a word, phrase, concept or physical quantity."],["Calculate","Obtain a numerical answer, showing the relevant stages of working."],["Determine","Obtain the only possible answer."],["Deduce","Reach a conclusion from the information given."],["Derive","Manipulate a mathematical relationship to give a new equation or relationship."],["Sketch","Represent by a diagram or graph, showing the general shape and labelling relevant features."],["Outline","Give a brief account or summary."],["Compare","Give an account of similarities between two or more items, referring to all of them throughout."],["Discuss","Offer a considered, balanced review including a range of arguments and factors."],["Analyse","Break down in order to bring out the essential elements or structure."],["Justify","Give valid reasons or evidence to support an answer or conclusion."],["Evaluate","Make an appraisal by weighing up the strengths and limitations."]];
+
+var MOODQ = [
+  {k:"hu", h:"High energy · unpleasant", c:"--crit", w:["Anxious","Stressed","Overwhelmed","Frustrated","Angry","Restless"]},
+  {k:"hp", h:"High energy · pleasant", c:"--d4", w:["Motivated","Focused","Excited","Energised","Hopeful","Proud"]},
+  {k:"lu", h:"Low energy · unpleasant", c:"--d1", w:["Flat","Drained","Bored","Lonely","Numb","Discouraged"]},
+  {k:"lp", h:"Low energy · pleasant", c:"--d3", w:["Calm","Content","Rested","Settled","Relaxed","Grateful"]}
+];
+var MOODVAL = {hp:4.5, lp:3.5, hu:2.5, lu:1.5};
+
+function ms(t,s,d,ty,est){ return {id:"m"+(t+d).replace(/\W/g,"").slice(0,14), title:t, subject:s, date:d, type:ty, est:!!est, done:false, deferrals:0, firstSeen:d}; }
+var SEED_MS = [
+  ms("EE — final essay submitted","Extended Essay","2026-10-26","EE",true),
+  ms("EE — third reflection (viva voce)","Extended Essay","2026-11-17","EE",true),
+  ms("Physics IA — final","Physics SL","2026-11-25","IA",true),
+  ms("TOK — prescribed title chosen","TOK","2026-10-30","TOK",true),
+  ms("TOK essay — full draft","TOK","2027-01-15","TOK",true),
+  ms("TOK essay — final","TOK","2027-02-28","TOK",true),
+  ms("Danish B — individual oral","Danish B HL","2027-02-01","IA",true),
+  ms("Chemistry IA — final","Chemistry HL","2027-03-07","IA",true),
+  ms("Maths AA IA — final","Maths AA HL","2027-03-15","IA",true),
+  ms("IB exams begin","All","2027-04-23","Exam",true),
+  ms("Physics SL — Paper 1","Physics SL","2027-04-28","Exam",true),
+  ms("Physics SL — Paper 2","Physics SL","2027-04-29","Exam",true),
+  ms("Chemistry HL — Paper 1","Chemistry HL","2027-05-05","Exam",true),
+  ms("Chemistry HL — Paper 2","Chemistry HL","2027-05-06","Exam",true),
+  ms("Maths AA HL — Paper 1","Maths AA HL","2027-05-13","Exam",true),
+  ms("Maths AA HL — Paper 2","Maths AA HL","2027-05-14","Exam",true),
+  ms("Maths AA HL — Paper 3","Maths AA HL","2027-05-18","Exam",true),
+  ms("Results released","All","2027-07-05","Exam",true)
+];
+
+var EXAM_START = "2027-04-23";
+
+function S_DEFAULT(){
+  var subs = [
+    {id:"su1", name:"Maths AA HL", level:"HL", c:"--d1", mins:0},
+    {id:"su2", name:"Physics SL",  level:"SL", c:"--d2", mins:0},
+    {id:"su3", name:"Chemistry HL",level:"HL", c:"--d3", mins:0},
+    {id:"su4", name:"Danish B HL", level:"HL", c:"--d4", mins:0}
+  ];
+  var rev = [];
+  function seed(list, sid){ list.forEach(function(t,i){ rev.push({id:"r"+sid+i, s:sid, t:t, box:1, next:null, reps:0}); }); }
+  seed(MATHS,"su1"); seed(PHYS,"su2"); seed(CHEM,"su3"); seed(DANSK,"su4");
+  return {
+    v:2, theme:"light", minMode:false, tab:"today", bucket:"today", revFilter:"all", msFilter:"all",
+    cap:240,
+    domains:[
+      {k:"body",  n:"Body",   c:"--d1", s:5, focus:"", next:"", hint:"Sleep, food, movement, energy"},
+      {k:"mind",  n:"Mind",   c:"--d2", s:5, focus:"", next:"", hint:"Focus, mood, calm, screen time"},
+      {k:"school",n:"School", c:"--d3", s:5, focus:"", next:"", hint:"Lessons, deadlines, revision"},
+      {k:"people",n:"People", c:"--d4", s:5, focus:"", next:"", hint:"Family, friends, being reachable"},
+      {k:"craft", n:"Craft",  c:"--d5", s:5, focus:"", next:"", hint:"Skills and interests outside school"},
+      {k:"order", n:"Order",  c:"--d6", s:5, focus:"", next:"", hint:"Money, room, admin, files, inbox"}
+    ],
+    anchors:[
+      {id:"a1", n:"Up on time",        t:"fixed wake time", core:true},
+      {id:"a2", n:"Daylight + water",  t:"first 10 min",    core:false},
+      {id:"a3", n:"Phone in another room", t:"one block",   core:true},
+      {id:"a4", n:"One deep block",    t:"50 min",          core:true},
+      {id:"a5", n:"Shutdown said out loud", t:"before bed", core:false}
+    ],
+    habits:[
+      {id:"h1", n:"Fixed wake time, no snooze", anchor:"my alarm goes off", tiny:"Sit up and put both feet on the floor", target:7},
+      {id:"h2", n:"Daylight within 30 min of waking", anchor:"I get out of bed", tiny:"Open the curtains", target:7},
+      {id:"h3", n:"Moved 20+ minutes", anchor:"I finish my last lesson", tiny:"Put my shoes on", target:4},
+      {id:"h4", n:"One deep block, phone in another room", anchor:"I get home and eat", tiny:"Put the phone in the hall and open one file", target:5},
+      {id:"h5", n:"Shutdown ritual done", anchor:"I close my laptop for the night", tiny:"Say “shutdown complete” out loud", target:6},
+      {id:"h6", n:"Screens dimmed an hour before bed", anchor:"I brush my teeth", tiny:"Turn the big light off", target:5},
+      {id:"h7", n:"Something that isn't school", anchor:"I finish my last deep block", tiny:"Open the thing for two minutes", target:3}
+    ],
+    goals:[
+      {id:"g1", title:"Hold one sleep window for 12 weeks", why:"Everything else is downstream of this. When sleep is stable, the same workload stops feeling impossible.",
+       w:"Sleep on a fixed schedule", o:"Waking without an alarm fight, thinking clearly in first period, not needing the whole weekend to recover.",
+       ob:"I tell myself I'll do one more thing and it's suddenly 01:00.",
+       plan:"If it's 22:30 and I'm still on my laptop, then I close it and put the phone in the hall.",
+       leadN:"Nights in the sleep window", leadT:5, lagN:"Weeks held", lagC:0, lagT:12},
+      {id:"g2", title:"Maths AA IA — finished draft, not a perfect one", why:"A finished rough draft can be improved. An unstarted perfect one can't.",
+       w:"Complete the IA exploration", o:"Handing it in early, having time to act on feedback instead of writing through the night before.",
+       ob:"I don't feel ready to start writing, so I keep 'researching'.",
+       plan:"If I catch myself reading one more source, then I open the doc and write 150 bad words.",
+       leadN:"Writing sessions", leadT:3, lagN:"Percent drafted", lagC:0, lagT:100}
+    ],
+    subjects:subs,
+    ms:SEED_MS.slice(),
+    rev:rev,
+    tasks:[],
+    frav:2,
+    days:{}, weeks:{},
+    lead:{}
+  };
+}
+var S = S_DEFAULT();
+try{
+  var loaded = JSON.parse(document.getElementById("state-data").textContent);
+  if(loaded && loaded.v) S = loaded;
+}catch(e){}
+
+/* ══════════ UTIL ══════════ */
+var uid=0; function nid(){ return "x"+(++uid)+Date.now().toString(36).slice(-4); }
+var $=function(s){return document.querySelector(s);};
+function each(sel,root,fn){ Array.prototype.forEach.call((root||document).querySelectorAll(sel),fn); }
+function on(el,ev,fn){ if(el) el.addEventListener(ev,fn); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+
+function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function pISO(s){ var p=String(s).split("-"); return new Date(+p[0],(+p[1])-1,+p[2]); }
+function addD(d,n){ var x=new Date(d.getTime()); x.setDate(x.getDate()+n); return x; }
+function wkStart(d){ var x=new Date(d.getTime()); x.setHours(0,0,0,0); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; }
+function dBetween(a,b){ return Math.round((pISO(b)-pISO(a))/86400000); }
+var NOW=new Date(), TODAY=iso(NOW);
+var DAYN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+var MON=["January","February","March","April","May","June","July","August","September","October","November","December"];
+function fmtD(s){ var d=pISO(s); return d.getDate()+" "+MON[d.getMonth()].slice(0,3)+" "+d.getFullYear(); }
+
+var dirty=false, touchHook=null;
+function touch(){ dirty=true; var e=$("#dirtyDot"); if(e) e.style.display="inline-flex"; if(touchHook) touchHook(); }
+
+function day(k){
+  if(!S.days[k]) S.days[k]={big3:[],anchors:[],habits:{},energy:3,sleep:0,mood:null,win:"",dump:"",focus:0,q:"",gate:{},planned:false,shut:[]};
+  var o=S.days[k];
+  if(!o.big3) o.big3=[];
+  while(o.big3.length<3) o.big3.push({t:"",d:false,plan:"",mins:60});
+  if(!o.anchors) o.anchors=[]; if(!o.habits) o.habits={}; if(!o.gate) o.gate={}; if(!o.shut) o.shut=[];
+  return o;
+}
+function T(){ return day(TODAY); }
+
+/* ══════════ READINESS ══════════ */
+function readiness(){
+  var t=T(), y=S.days[iso(addD(NOW,-1))];
+  var sl = t.sleep>0 ? clamp((t.sleep-4)/4.5,0,1)*40 : 22;
+  var fw = 24;
+  if(y){
+    var named=y.big3.filter(function(b){return b.t&&b.t.trim();}).length;
+    var bd = named ? y.big3.filter(function(b){return b.d&&b.t.trim();}).length/named : 0.6;
+    var hd = S.habits.length ? Object.keys(y.habits||{}).filter(function(k){return y.habits[k]==="done";}).length/Math.min(S.habits.length,5) : 0.6;
+    fw = clamp((bd*0.55+Math.min(hd,1)*0.45),0,1)*30;
+  }
+  var en = ((t.energy||3)-1)/4*30;
+  var tot = Math.round(sl+fw+en);
+  return {total:clamp(tot,0,100), sleep:sl, follow:fw, energy:en, hasSleep:t.sleep>0, hasY:!!y};
+}
+function band(v){
+  if(v<45) return {n:"Protect today", c:"--crit",
+    p:"Low capacity — that's information, not a verdict. Switch to Minimum day, do one anchor and one Big 3 item, and let the rest go. Days like this are in the design."};
+  if(v<70) return {n:"Steady", c:"--d4",
+    p:"Normal working capacity. Do the Big 3 in order, take the deep block, don't add anything extra to the list."};
+  return {n:"Good day to push", c:"--d3",
+    p:"You have room today. This is the day to start the thing you've been circling — the hard one, not the easy one."};
+}
+
+/* ══════════ HABIT STRENGTH (weekly, never resets) ══════════ */
+function habitWeek(h,ws){
+  var n=0,sk=0;
+  for(var i=0;i<7;i++){ var k=iso(addD(ws,i)); var v=S.days[k]&&S.days[k].habits[h.id];
+    if(v==="done") n++; else if(v==="skip") sk++; }
+  return {done:n, skip:sk};
+}
+function strength(h){
+  var s=0, ws=wkStart(addD(NOW,-7*11));
+  for(var w=0;w<12;w++){
+    var st=addD(ws,w*7);
+    if(st>NOW) break;
+    var r=habitWeek(h,st);
+    var eff=Math.max(1,(h.target||3)-r.skip);
+    var hit=clamp(r.done/eff,0,1)*100;
+    var isCur = iso(st)===iso(wkStart(NOW));
+    if(isCur){ var frac=(((NOW-st)/86400000)+1)/7; hit=clamp(r.done/Math.max(1,eff*frac),0,1)*100; }
+    s = s + (hit - s)*0.28;
+  }
+  return Math.round(s);
+}
+function execScore(){
+  var ws=wkStart(NOW), got=0, want=0;
+  S.habits.forEach(function(h){ var r=habitWeek(h,ws); var eff=Math.max(1,(h.target||3)-r.skip); got+=Math.min(r.done,eff); want+=eff; });
+  var bd=0,bn=0;
+  for(var i=0;i<7;i++){ var k=iso(addD(ws,i)); if(k>TODAY) break; var d=S.days[k]; if(!d) continue;
+    d.big3.forEach(function(b){ if(b.t&&b.t.trim()){ bn++; if(b.d) bd++; } }); }
+  got+=bd; want+=bn;
+  return want ? Math.round(got/want*100) : 0;
+}
+
+/* ══════════ TABS ══════════ */
+var TABS=[["today","Today"],["week","Week"],["school","School"],["revise","Revise"],["tasks","Tasks"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["why","Why it works"]];
+function buildTabs(){
+  $("#tabs").innerHTML = TABS.map(function(t){
+    return '<button class="tab" role="tab" data-t="'+t[0]+'" aria-selected="false">'+t[1]+'<span class="badge" data-bg="'+t[0]+'" style="display:none"></span></button>';
+  }).join("");
+  each(".tab",null,function(b){ on(b,"click",function(){ show(b.dataset.t); }); });
+}
+function show(k){
+  S.tab=k;
+  each(".tab",null,function(b){ b.setAttribute("aria-selected",String(b.dataset.t===k)); });
+  each("section",null,function(s){ s.classList.toggle("on", s.id==="s-"+k); });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function badges(){
+  var due = S.rev.filter(revDue).length;
+  var inbox = S.tasks.filter(function(t){return t.bucket==="inbox"&&!t.done;}).length;
+  setBadge("revise",due); setBadge("tasks",inbox);
+}
+function setBadge(t,n){ var e=document.querySelector('[data-bg="'+t+'"]'); if(!e) return;
+  e.style.display = n>0?"inline-block":"none"; e.textContent=n>99?"99+":n; }
+
+/* ══════════ TODAY ══════════ */
+var ENERGY=["","Running on empty","Low","Okay","Good","Full tank"];
+function renderToday(){
+  var t=T(), r=readiness(), b=band(r.total);
+  var C=2*Math.PI*54;
+  $("#gauge").innerHTML =
+    '<svg viewBox="0 0 132 132" style="width:100%;height:100%">'
+    + '<circle cx="66" cy="66" r="54" fill="none" stroke="var(--surface-2)" stroke-width="11"/>'
+    + '<circle cx="66" cy="66" r="54" fill="none" stroke="var('+b.c+')" stroke-width="11" stroke-linecap="round"'
+    + ' stroke-dasharray="'+C+'" stroke-dashoffset="'+(C*(1-r.total/100))+'" style="transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1)"/></svg>'
+    + '<div class="num"><b>'+r.total+'</b><span>Readiness</span></div>';
+  $("#rBand").textContent=b.n; $("#rBand").style.color="var("+b.c+")";
+  $("#rText").textContent=b.p;
+  $("#rBreak").innerHTML=[
+    bdRow("Sleep", r.sleep, 40, r.hasSleep? t.sleep+"h" : "not logged"),
+    bdRow("Yesterday", r.follow, 30, r.hasY? Math.round(r.follow/30*100)+"%" : "no data"),
+    bdRow("Energy now", r.energy, 30, ENERGY[t.energy||3])
+  ].join("");
+
+  var named=t.big3.filter(function(x){return x.t.trim();}).length;
+  var done=t.big3.filter(function(x){return x.d&&x.t.trim();}).length;
+  $("#subline").textContent = DAYN[NOW.getDay()]+", "+NOW.getDate()+" "+MON[NOW.getMonth()]
+    + " · " + (named? done+" of "+named+" done" : "nothing set yet")
+    + (S.minMode? " · minimum day" : "");
+
+  $("#big3").innerHTML = t.big3.map(function(x,i){
+    return '<div class="line col'+(x.d?" done":"")+'">'
+      + '<div style="display:flex;align-items:center;gap:11px">'
+      + '<button class="box" data-b3="'+i+'" aria-pressed="'+!!x.d+'" aria-label="Done">'+CHECK+'</button>'
+      + '<input class="bare" data-b3t="'+i+'" value="'+esc(x.t)+'" placeholder="Thing '+(i+1)+'">'
+      + '<select class="fld sm" data-b3m="'+i+'" style="width:auto;flex:none">'
+      + [15,30,45,60,90,120,180].map(function(m){return '<option value="'+m+'"'+(x.mins===m?" selected":"")+'>'+(m<60?m+"m":(m/60)+"h")+'</option>';}).join("")
+      + '</select></div>'
+      + (x.t.trim()? '<input class="fld sm" data-b3p="'+i+'" style="margin-left:32px;width:calc(100% - 32px)" value="'+esc(x.plan)+'" placeholder="If it’s ___ and I’m ___, then I’ll start this">' : "")
+      + '</div>';
+  }).join("");
+  each("[data-b3]",$("#big3"),function(e){on(e,"click",function(){var i=+e.dataset.b3;T().big3[i].d=!T().big3[i].d;touch();renderToday();});});
+  each("[data-b3t]",$("#big3"),function(e){on(e,"input",function(){T().big3[+e.dataset.b3t].t=e.value;touch();cap();});
+    on(e,"blur",function(){renderToday();});});
+  each("[data-b3p]",$("#big3"),function(e){on(e,"input",function(){T().big3[+e.dataset.b3p].plan=e.value;touch();});});
+  each("[data-b3m]",$("#big3"),function(e){on(e,"change",function(){T().big3[+e.dataset.b3m].mins=+e.value;touch();cap();});});
+  cap();
+
+  var acts = S.minMode ? S.anchors.filter(function(a){return a.core;}) : S.anchors;
+  $("#anchors").innerHTML = acts.map(function(a){
+    var o=t.anchors.indexOf(a.id)>-1;
+    return '<button class="anchor" data-a="'+a.id+'" aria-pressed="'+o+'">'
+      + '<span class="box" '+(o?'aria-pressed="true"':"")+'>'+CHECK+'</span>'
+      + '<span class="txt"><span class="nm">'+esc(a.n)+'</span><span class="tm">'+esc(a.t)+'</span></span></button>';
+  }).join("");
+  each("[data-a]",$("#anchors"),function(e){on(e,"click",function(){
+    var d=T(),i=d.anchors.indexOf(e.dataset.a); if(i>-1)d.anchors.splice(i,1); else d.anchors.push(e.dataset.a);
+    touch(); renderToday();});});
+  $("#anchorHint").textContent = S.minMode
+    ? "Minimum day: three anchors only. Doing these still counts as a day you showed up — that is the whole point of having a floor."
+    : "Five fixed points that hold the day’s shape. Deliberately small — these are the ones you keep on your worst days.";
+  $("#minBtn").textContent = S.minMode ? "Full day" : "Minimum day";
+
+  $("#moodGrid").innerHTML = MOODQ.map(function(q){
+    return '<div class="quad" style="border-color:var('+q.c+');background:color-mix(in srgb, var('+q.c+') 5%, var(--surface))">'
+      + '<div class="qh">'+q.h+'</div><div class="words">'
+      + q.w.map(function(w){ var sel=t.mood&&t.mood.w===w;
+        return '<button class="w" data-mq="'+q.k+'" data-mw="'+esc(w)+'" aria-pressed="'+sel+'">'+w+'</button>'; }).join("")
+      + '</div></div>';
+  }).join("");
+  each("[data-mw]",$("#moodGrid"),function(e){on(e,"click",function(){
+    var cur=T().mood; T().mood=(cur&&cur.w===e.dataset.mw)?null:{q:e.dataset.mq,w:e.dataset.mw};
+    touch(); renderToday();});});
+
+  $("#sleepR").value=t.sleep||7.5;
+  $("#sleepTxt").textContent=(t.sleep? t.sleep+" hours" : "not logged")+(t.sleep&&t.sleep<7?" · below the 8–10 range for your age":"");
+  $("#energyR").value=t.energy||3; $("#energyTxt").textContent=ENERGY[t.energy||3];
+  if($("#win")!==document.activeElement) $("#win").value=t.win||"";
+  if($("#dump")!==document.activeElement) $("#dump").value=t.dump||"";
+  if($("#blockQ")!==document.activeElement) $("#blockQ").value=t.q||"";
+  $("#tToday").textContent=(t.focus||0)+" min focused today";
+  renderGate();
+  badges();
+}
+function bdRow(k,v,max,note){
+  return '<div class="bd"><span class="k">'+k+'</span>'
+    + '<span class="minibar"><i style="width:'+(v/max*100)+'%"></i></span>'
+    + '<span class="v">'+note+'</span></div>';
+}
+function cap(){
+  var t=T(), used=t.big3.reduce(function(a,x){return a+(x.t.trim()&&!x.d?(x.mins||60):0);},0);
+  var pct=Math.min(100,used/S.cap*100), over=used>S.cap, near=used>S.cap*0.9;
+  var el=$("#capBar"); el.className="cap"+(over?" red":near?" amber":"");
+  el.querySelector("i").style.width=pct+"%";
+  el.querySelector("b").textContent=Math.round(used/60*10)/10+"h of "+Math.round(S.cap/60*10)/10+"h";
+  var n=$("#capNote");
+  n.className="capnote"+(over?" red":near?" amber":"");
+  n.textContent = used===0 ? "Nothing scheduled yet. Add your Big 3 above and give each one an honest time estimate."
+    : over ? "That’s more than fits. Move one to tomorrow now, while it’s a calm decision — not at 22:00 when it’s a failure."
+    : near ? "Right at the edge. Anything unexpected today will push something out."
+    : "Fits, with room for the day to go sideways. Which it will.";
+}
+function renderGate(){
+  var t=T(), G=[
+    ["phone","Phone is in another room","Not face down. Not in a pocket. Another room — that’s the only version the evidence supports."],
+    ["tabs","Tabs closed, notifications off","One document, one question."],
+    ["q","I’ve written the one question below","“Revise Chemistry” isn’t a task. “Do the 8 equilibrium questions” is."]
+  ];
+  $("#gate").innerHTML=G.map(function(g){
+    var o=!!t.gate[g[0]];
+    return '<button class="gatechk" data-g="'+g[0]+'" aria-pressed="'+o+'">'
+      + '<span class="box" '+(o?'aria-pressed="true"':"")+'>'+CHECK+'</span>'
+      + '<span class="gt">'+g[1]+'<small>'+g[2]+'</small></span></button>';
+  }).join("");
+  each("[data-g]",$("#gate"),function(e){on(e,"click",function(){
+    var d=T(); d.gate[e.dataset.g]=!d.gate[e.dataset.g]; touch(); renderGate();});});
+}
+
+/* ══════════ TIMER ══════════ */
+var tRem=50*60, tOn=false, tInt=null;
+function tDraw(){
+  var m=Math.floor(tRem/60), s=tRem%60;
+  $("#tDisp").textContent=m+":"+String(s).padStart(2,"0");
+  $("#tSub").textContent = tOn ? "Running — when you drift, come back without commentary" : (tRem===50*60?"Not running":"Paused");
+  $("#tStart").textContent = tOn ? "Pause" : (tRem===50*60?"Start 50 min":"Resume");
+}
+function tTick(){
+  if(!tOn) return; tRem--;
+  if(tRem<=0){ tRem=0; tOn=false; clearInterval(tInt);
+    var t=T(); t.focus=(t.focus||0)+50; touch();
+    var sub=S.subjects.filter(function(x){return x.name===($("#blockQ").value.split(" ")[0]||"");})[0];
+    openModal('<h2>Block done — 50 minutes</h2>'
+      +'<div class="md">Now take ten minutes <b>off screens</b>. Walk, stretch, look out of a window. Scrolling isn’t a break; your attention doesn’t recover on it.</div>'
+      +'<div class="eyebrow">Log it to a subject</div>'
+      +'<div class="pills">'+S.subjects.map(function(x){return '<button data-logsub="'+x.id+'">'+esc(x.name)+'</button>';}).join("")+'</div>'
+      +'<div class="row" style="margin-top:14px"><button class="ghost" data-close>Skip</button></div>',
+      function(root){
+        each("[data-logsub]",root,function(e){on(e,"click",function(){
+          var su=S.subjects.filter(function(x){return x.id===e.dataset.logsub;})[0];
+          if(su){ su.mins=(su.mins||0)+50; touch(); }
+          closeModal(); renderSchool();});});
+      });
+    renderToday();
+  }
+  tDraw();
+}
+
+/* ══════════ PART B FOLLOWS ══════════ */
+
+/* ══════════ CHART HELPERS ══════════ */
+function barPath(x,y,w,h,r){
+  r=Math.max(0,Math.min(r,h,w/2));
+  if(h<=0) return "";
+  return "M"+x+","+(y+h)+"V"+(y+r)+"a"+r+","+r+" 0 0 1 "+r+",-"+r+"h"+(w-2*r)+"a"+r+","+r+" 0 0 1 "+r+","+r+"V"+(y+h)+"Z";
+}
+function miniBars(vals, max, color, unit, band){
+  var W=520,H=78,pad=20,n=vals.length,slot=(W-pad)/n,bw=Math.min(18,slot-4);
+  var g="";
+  if(band){
+    var y1=H-pad-(band[1]/max)*(H-pad-6), y2=H-pad-(band[0]/max)*(H-pad-6);
+    g+='<rect x="0" y="'+y1+'" width="'+(W)+'" height="'+(y2-y1)+'" fill="var(--surface-2)"/>';
+  }
+  g+='<line x1="0" y1="'+(H-pad)+'" x2="'+W+'" y2="'+(H-pad)+'" stroke="var(--axis)" stroke-width="1"/>';
+  vals.forEach(function(v,i){
+    var x=i*slot+(slot-bw)/2, h=v>0?Math.max(2,(v/max)*(H-pad-6)):0;
+    if(h>0) g+='<path d="'+barPath(x,H-pad-h,bw,h,3)+'" fill="'+color+'"><title>'+v+unit+'</title></path>';
+  });
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" preserveAspectRatio="none" style="display:block">'+g+'</svg>';
+}
+function xLabels(days){
+  return '<div style="display:flex;font-size:10px;color:var(--muted);margin-top:2px">'
+    + days.map(function(d,i){ return '<span style="flex:1;text-align:center">'+(i%3===0?d:"")+'</span>'; }).join("")
+    + '</div>';
+}
+
+/* ══════════ WEEK ══════════ */
+function renderWeek(){
+  var e=execScore();
+  var eb=$("#execBar");
+  eb.querySelector("i").style.width=e+"%";
+  eb.querySelector("b").textContent=e+"%";
+  eb.querySelector("i").style.background = e>=85?"var(--d3)":e>=60?"var(--d1)":"var(--d4)";
+  $("#wkLabel").textContent="Week of "+wkStart(NOW).getDate()+" "+MON[wkStart(NOW).getMonth()].slice(0,3);
+
+  var ws=wkStart(NOW), fm=0, done3=0, name3=0, mins=0;
+  for(var i=0;i<7;i++){ var k=iso(addD(ws,i)); if(k>TODAY) break; var d=S.days[k]; if(!d) continue;
+    fm+=d.focus||0; d.big3.forEach(function(b){ if(b.t&&b.t.trim()){name3++; if(b.d) done3++;} }); }
+  S.subjects.forEach(function(s){ mins+=s.mins||0; });
+  var avgS=0,cS=0; for(i=0;i<7;i++){ var kk=iso(addD(ws,i)); var dd=S.days[kk]; if(dd&&dd.sleep>0){avgS+=dd.sleep;cS++;} }
+  $("#weekTiles").innerHTML=[
+    tile("Deep focus", Math.round(fm/60*10)/10+"h", fm?"logged in blocks":"nothing logged"),
+    tile("Big 3", done3+"/"+name3, "completed this week"),
+    tile("Avg sleep", cS?(Math.round(avgS/cS*10)/10)+"h":"—", cS?(avgS/cS>=8?"in range":"below 8h"):"not logged"),
+    tile("Study time", Math.round(mins/60*10)/10+"h", "across subjects")
+  ].join("");
+
+  var labels=["M","T","W","T","F","S","S"];
+  var head='<tr><th class="nmcol">Habit</th>';
+  for(i=0;i<7;i++){ var dd2=addD(ws,i); head+='<th>'+labels[i]+'<div style="font-weight:400;opacity:.6;margin-top:2px">'+dd2.getDate()+'</div></th>'; }
+  head+='<th style="text-align:left;padding-left:12px">Week</th><th style="text-align:left">Strength</th></tr>';
+  var rows=S.habits.map(function(h){
+    var r='<tr><td class="nm">'+esc(h.n)+'<small>'+(h.anchor?"After "+esc(h.anchor):"no anchor set")+'</small></td>';
+    var w=habitWeek(h,ws);
+    for(var i=0;i<7;i++){
+      var d=addD(ws,i), k=iso(d), fut=k>TODAY, v=(S.days[k]&&S.days[k].habits[h.id])||"";
+      r+='<td><button class="cell '+v+(k===TODAY?" today":"")+(fut?" fut":"")+'" data-hk="'+k+'" data-hi="'+h.id+'" aria-label="'+esc(h.n)+'">'+CHECK+'</button></td>';
+    }
+    var st=strength(h);
+    r+='<td style="padding-left:12px;font-size:12px;color:'+(w.done>=h.target?"var(--ok-text)":"var(--muted)")+';font-variant-numeric:tabular-nums;white-space:nowrap">'+w.done+'/'+h.target+(w.skip?' <span style="color:var(--warn)">+'+w.skip+'</span>':'')+'</td>';
+    r+='<td><span class="strength"><span class="sbar"><i style="width:'+st+'%"></i></span><span class="sv">'+st+'</span></span></td>';
+    return r+'</tr>';
+  }).join("");
+  $("#habitGrid").innerHTML=head+rows;
+  each("[data-hk]",$("#habitGrid"),function(b){on(b,"click",function(){
+    var rec=day(b.dataset.hk), cur=rec.habits[b.dataset.hi];
+    rec.habits[b.dataset.hi] = cur==="done"?"skip" : cur==="skip"?undefined : "done";
+    if(!rec.habits[b.dataset.hi]) delete rec.habits[b.dataset.hi];
+    touch(); renderWeek(); renderToday();});});
+
+  heatmap(); sleepChart(); corrChart(); habitList(); domains();
+}
+function tile(l,v,d){ return '<div class="tile"><div class="lb">'+l+'</div><div class="vl">'+v+'</div><div class="dl">'+(d||"")+'</div></div>'; }
+
+function heatmap(){
+  var WK=14, ws=wkStart(NOW), start=addD(ws,-7*(WK-1)), h="";
+  for(var w=0;w<WK;w++){
+    h+='<div class="hcol">';
+    for(var i=0;i<7;i++){
+      var d=addD(start,w*7+i), k=iso(d), lvl=0;
+      if(k<=TODAY&&S.days[k]&&S.habits.length){
+        var dn=0,sk=0; S.habits.forEach(function(x){ var v=S.days[k].habits[x.id]; if(v==="done")dn++; else if(v==="skip")sk++; });
+        var den=Math.max(1,S.habits.length-sk), f=dn/den;
+        lvl = f===0?0 : f<=.2?1 : f<=.4?2 : f<=.6?3 : f<=.85?4 : 5;
+      }
+      h+='<div class="hcell" style="background:var(--s'+lvl+')" title="'+k+'"></div>';
+    }
+    h+='</div>';
+  }
+  $("#heat").innerHTML=h;
+}
+function sleepChart(){
+  var n=21, sv=[], ev=[], lb=[];
+  for(var i=n-1;i>=0;i--){ var d=addD(NOW,-i), k=iso(d), r=S.days[k];
+    sv.push(r&&r.sleep?r.sleep:0); ev.push(r&&r.energy?r.energy:0); lb.push(d.getDate()); }
+  var any=sv.some(function(x){return x>0;});
+  $("#sleepChart").innerHTML = !any
+    ? '<div style="color:var(--muted);font-size:13px;padding:16px 0">Log a couple of nights and this fills in. The shaded band is the 8–10 hours recommended for 14–17 year olds.</div>'
+    : '<div class="eyebrow" style="margin-bottom:5px">Sleep — hours</div>'+miniBars(sv,11,"var(--d1)","h",[8,10])+xLabels(lb)
+      +'<div class="eyebrow" style="margin:16px 0 5px">Energy next day — 1 to 5</div>'+miniBars(ev,5,"var(--d4)","/5")+xLabels(lb);
+}
+function corrChart(){
+  var out=[];
+  S.habits.forEach(function(h){
+    var a=[],b=[];
+    for(var i=0;i<60;i++){ var k=iso(addD(NOW,-i)), r=S.days[k];
+      if(!r||!r.mood) continue;
+      var m=MOODVAL[r.mood.q]||3;
+      if(r.habits[h.id]==="done") a.push(m); else b.push(m); }
+    if(a.length>=3&&b.length>=3){
+      var av=a.reduce(function(x,y){return x+y;},0)/a.length, bv=b.reduce(function(x,y){return x+y;},0)/b.length;
+      out.push({n:h.n, d:av-bv, na:a.length});
+    }
+  });
+  if(!out.length){ $("#corrChart").innerHTML='<div style="color:var(--muted);font-size:13px;padding:16px 0">Needs about two weeks of mood check-ins alongside habit logs. Once it has them, this shows which habits actually move your mood — and the answer is usually not the one you expect.</div>'; return; }
+  out.sort(function(x,y){return y.d-x.d;});
+  var mx=Math.max.apply(null,out.map(function(o){return Math.abs(o.d);}))||1;
+  $("#corrChart").innerHTML='<div style="display:flex;flex-direction:column;gap:9px">'
+    + out.map(function(o){
+      var pct=Math.abs(o.d)/mx*46, pos=o.d>=0;
+      return '<div style="display:grid;grid-template-columns:1fr 150px 44px;align-items:center;gap:10px;font-size:12.5px">'
+        + '<span style="color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(o.n)+'</span>'
+        + '<span style="position:relative;height:16px;background:var(--surface-2);border-radius:4px">'
+        + '<i style="position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--axis)"></i>'
+        + '<i style="position:absolute;top:2px;bottom:2px;border-radius:3px;'
+        + (pos?'left:50%;background:var(--pos);':'right:50%;background:var(--neg);')+'width:'+pct+'%"></i></span>'
+        + '<span style="color:var(--muted);font-variant-numeric:tabular-nums;text-align:right">'+(pos?"+":"")+(Math.round(o.d*10)/10)+'</span></div>';
+    }).join("")+'</div>'
+    +'<div class="src" style="margin-top:12px">Difference in average mood on days you did it versus days you didn’t. Correlation, not proof — but a strong one is worth taking seriously.</div>';
+}
+function habitList(){
+  $("#habitList").innerHTML = S.habits.length ? S.habits.map(function(h,i){
+    return '<div class="dom" style="margin-bottom:9px">'
+      + '<div class="domhead"><span class="dot" style="background:var(--d1)"></span>'
+      + '<input class="bare" data-hn="'+h.id+'" value="'+esc(h.n)+'" style="flex:1;font-weight:600;font-size:14px">'
+      + '<span class="s">'+h.target+'×/wk</span>'
+      + '<button class="del" data-hd="'+h.id+'" style="opacity:1">&times;</button></div>'
+      + '<div class="g2" style="gap:8px">'
+      + '<div><label class="lbl">After I… <span class="q">(anchor)</span></label>'
+      + '<input class="fld sm" data-ha="'+h.id+'" value="'+esc(h.anchor||"")+'" placeholder="an existing moment that always happens"></div>'
+      + '<div><label class="lbl">Two-minute version <span class="q">(bad days)</span></label>'
+      + '<input class="fld sm" data-ht="'+h.id+'" value="'+esc(h.tiny||"")+'" placeholder="small enough that refusing feels silly"></div>'
+      + '</div></div>';
+  }).join("") : '<div style="color:var(--muted);font-size:13px;padding:8px 0">No habits. Three is a good number to rebuild from.</div>';
+  function H(id){ return S.habits.filter(function(x){return x.id===id;})[0]; }
+  each("[data-hn]",$("#habitList"),function(e){on(e,"input",function(){H(e.dataset.hn).n=e.value;touch();});});
+  each("[data-ha]",$("#habitList"),function(e){on(e,"input",function(){H(e.dataset.ha).anchor=e.value;touch();});});
+  each("[data-ht]",$("#habitList"),function(e){on(e,"input",function(){H(e.dataset.ht).tiny=e.value;touch();});});
+  each("[data-hd]",$("#habitList"),function(e){on(e,"click",function(){
+    S.habits=S.habits.filter(function(x){return x.id!==e.dataset.hd;});touch();renderWeek();renderToday();});});
+}
+function domains(){
+  $("#domBars").innerHTML=S.domains.map(function(d){
+    return '<div class="barrow"><div class="cat">'+esc(d.n)+'</div>'
+      + '<div class="bartrack"><div class="barfill" style="width:'+(d.s*10)+'%;background:var('+d.c+')"></div></div>'
+      + '<div class="num">'+d.s+'</div></div>';
+  }).join("");
+  $("#domCards").innerHTML=S.domains.map(function(d,i){
+    return '<div class="card dom"><div class="domhead"><span class="dot" style="background:var('+d.c+')"></span>'
+      + '<span class="t">'+esc(d.n)+'</span><span class="s">'+d.s+' / 10</span></div>'
+      + '<div style="font-size:11.5px;color:var(--muted);margin:-5px 0 10px">'+esc(d.hint)+'</div>'
+      + '<input type="range" min="1" max="10" value="'+d.s+'" data-dr="'+i+'" style="accent-color:var('+d.c+');margin-bottom:12px">'
+      + '<label class="lbl">What matters here right now</label>'
+      + '<input class="fld sm" data-df="'+i+'" value="'+esc(d.focus)+'" placeholder="One sentence">'
+      + '<label class="lbl" style="margin-top:10px">Next physical action</label>'
+      + '<input class="fld sm" data-dn="'+i+'" value="'+esc(d.next)+'" placeholder="Something you could start in five minutes">'
+      + '</div>';
+  }).join("");
+  each("[data-dr]",$("#domCards"),function(e){on(e,"input",function(){S.domains[+e.dataset.dr].s=+e.value;touch();domains();});});
+  each("[data-df]",$("#domCards"),function(e){on(e,"input",function(){S.domains[+e.dataset.df].focus=e.value;touch();});});
+  each("[data-dn]",$("#domCards"),function(e){on(e,"input",function(){S.domains[+e.dataset.dn].next=e.value;touch();});});
+}
+
+/* ══════════ SCHOOL ══════════ */
+function renderSchool(){
+  var toExam=dBetween(TODAY,EXAM_START);
+  var next=S.ms.filter(function(m){return !m.done&&m.date>=TODAY;}).sort(function(a,b){return a.date<b.date?-1:1;})[0];
+  var wksLeft=Math.max(0,Math.floor(toExam/7));
+  var overdue=S.ms.filter(function(m){return !m.done&&m.date<TODAY;}).length;
+  $("#ibTiles").innerHTML=[
+    tile("Exams begin", toExam>0?toExam:"—", toExam>0?"days · est. 23 Apr 2027":"—"),
+    tile("Weeks left", wksLeft, "to first paper"),
+    tile("Next up", next?dBetween(TODAY,next.date):"—", next?next.title.slice(0,30):"nothing scheduled"),
+    tile("Overdue", overdue, overdue?"needs a decision":"nothing behind")
+  ].join("");
+
+  var types=["all","IA","EE","TOK","Aflevering","Test","Exam","CAS"];
+  $("#msFilter").innerHTML=types.map(function(t){
+    return '<button data-mf="'+t+'" aria-pressed="'+(S.msFilter===t)+'">'+(t==="all"?"All":t)+'</button>';}).join("");
+  each("[data-mf]",$("#msFilter"),function(e){on(e,"click",function(){S.msFilter=e.dataset.mf;renderSchool();});});
+
+  var list=S.ms.filter(function(m){return S.msFilter==="all"||m.type===S.msFilter;})
+    .sort(function(a,b){ if(a.done!==b.done) return a.done?1:-1; return a.date<b.date?-1:1;});
+  $("#milestones").innerHTML = list.length ? list.map(function(m){
+    var n=dBetween(TODAY,m.date), bg="var(--surface-2)", fg="var(--ink-2)", lab="days";
+    if(!m.done){
+      if(n<0){bg="var(--crit)";fg="#fff";lab="overdue";}
+      else if(n===0){bg="var(--crit)";fg="#fff";lab="today";}
+      else if(n<=3){bg="var(--crit)";fg="#fff";}
+      else if(n<=10){bg="var(--serious)";fg="#0b0b0b";}
+      else if(n<=21){bg="var(--warn)";fg="#0b0b0b";}
+    }
+    var big=n<0?Math.abs(n):n===0?"!":n;
+    var def=m.deferrals||0;
+    return '<div class="dl-row'+(m.done?" is-done":"")+'">'
+      + '<div class="dl-days" style="background:'+bg+';color:'+fg+'">'+big+'<span>'+lab+'</span></div>'
+      + '<div class="dl-main"><div class="t">'+esc(m.title)+'</div><div class="m">'
+      + '<span class="chip tag">'+esc(m.type)+'</span>'
+      + (m.subject?'<span>'+esc(m.subject)+'</span>':"")
+      + '<span>'+fmtD(m.date)+'</span>'
+      + (m.est?'<span class="chip est">est. — confirm with coordinator</span>':"")
+      + (def>2?'<span class="defer'+(def>6?" hot":"")+'">'+"!".repeat(Math.min(def,8))+' moved '+def+'×</span>':"")
+      + '</div></div>'
+      + '<div class="row" style="gap:5px;flex:none">'
+      + (m.done?'':'<button class="ghost sm" data-msd="'+m.id+'">+1 day</button>')
+      + '<button class="ghost sm" data-msk="'+m.id+'">'+(m.done?"Undo":"Done")+'</button>'
+      + '<button class="del" data-msx="'+m.id+'" style="opacity:1">&times;</button></div></div>';
+  }).join("") : '<div style="color:var(--muted);font-size:13px;padding:10px 0">Nothing here. Add every deadline you know about, even vague ones — a rough date beats no date.</div>';
+  function M(id){ return S.ms.filter(function(x){return x.id===id;})[0]; }
+  each("[data-msd]",$("#milestones"),function(e){on(e,"click",function(){
+    var m=M(e.dataset.msd); m.date=iso(addD(pISO(m.date),1)); m.deferrals=(m.deferrals||0)+1; touch(); renderSchool();});});
+  each("[data-msk]",$("#milestones"),function(e){on(e,"click",function(){
+    var m=M(e.dataset.msk); m.done=!m.done; if(m.done) m.deferrals=0; touch(); renderSchool();});});
+  each("[data-msx]",$("#milestones"),function(e){on(e,"click",function(){
+    S.ms=S.ms.filter(function(x){return x.id!==e.dataset.msx;}); touch(); renderSchool();});});
+
+  $("#msSubject").innerHTML='<option value="">Subject…</option>'+S.subjects.map(function(s){return '<option>'+esc(s.name)+'</option>';}).join("")+'<option>TOK</option><option>Extended Essay</option><option>CAS</option>';
+
+  var mx=Math.max.apply(null,S.subjects.map(function(s){return s.mins||0;}).concat([60]));
+  $("#subjects").innerHTML=S.subjects.map(function(s){
+    return '<div style="display:grid;grid-template-columns:1fr 1.1fr auto;align-items:center;gap:9px;margin-bottom:9px">'
+      + '<div style="min-width:0"><input class="bare" data-sn="'+s.id+'" value="'+esc(s.name)+'" style="font-size:13px;width:100%">'
+      + '<div style="font-size:10.5px;color:var(--muted)">'+s.level+'</div></div>'
+      + '<div class="bartrack" style="height:15px"><div class="barfill" style="width:'+((s.mins||0)/mx*100)+'%;background:var('+s.c+')"></div></div>'
+      + '<div class="row" style="gap:4px;flex:none">'
+      + '<button class="ghost sm" data-sm="'+s.id+'">−</button>'
+      + '<span class="mono" style="min-width:46px;text-align:center;font-size:12px">'+(Math.round((s.mins||0)/6)/10)+'h</span>'
+      + '<button class="ghost sm" data-sp="'+s.id+'">+</button>'
+      + '<button class="del" data-sx="'+s.id+'" style="opacity:1">&times;</button></div></div>';
+  }).join("")+'<button class="ghost sm" id="resetMins" style="margin-top:4px">Reset the week</button>';
+  function SU(id){ return S.subjects.filter(function(x){return x.id===id;})[0]; }
+  each("[data-sn]",$("#subjects"),function(e){on(e,"input",function(){SU(e.dataset.sn).name=e.value;touch();});});
+  each("[data-sp]",$("#subjects"),function(e){on(e,"click",function(){var s=SU(e.dataset.sp);s.mins=(s.mins||0)+30;touch();renderSchool();});});
+  each("[data-sm]",$("#subjects"),function(e){on(e,"click",function(){var s=SU(e.dataset.sm);s.mins=Math.max(0,(s.mins||0)-30);touch();renderSchool();});});
+  each("[data-sx]",$("#subjects"),function(e){on(e,"click",function(){S.subjects=S.subjects.filter(function(x){return x.id!==e.dataset.sx;});touch();renderSchool();});});
+  on($("#resetMins"),"click",function(){S.subjects.forEach(function(s){s.mins=0;});touch();renderSchool();});
+
+  $("#fravR").value=S.frav;
+  $("#fravTxt").textContent=S.frav+"%";
+  var f=S.frav, st;
+  if(f<3) st={c:"--d3",h:"Comfortable",p:"Nothing to manage here. Worth glancing at once a month so it doesn’t creep."};
+  else if(f<5) st={c:"--warn",h:"Watch it",p:"You’re approaching the level where most schools start a conversation with your klasselærer or studievejleder. Easier to fix now than to argue about later."};
+  else if(f<8) st={c:"--serious",h:"Conversation territory",p:"At this level a first written warning is a realistic possibility, usually with a condition to stay under about 5% from then on. Talk to your studievejleder before the school talks to you — going in first genuinely changes how it goes."};
+  else st={c:"--crit",h:"Act on this now",p:"This is the range where a second warning, SU consequences and — at the far end — expulsion enter the picture. This is not a self-management problem any more; book your studievejleder this week."};
+  $("#fravState").innerHTML='<div class="callout" style="border-left-color:var('+st.c+');margin:0">'
+    +'<b>'+st.h+'</b><br>'+st.p+'</div>'
+    +'<div class="src" style="margin-top:10px">Thresholds follow the pattern published by Danish gymnasier under the ministry’s studie- og ordensregler. Your school’s exact numbers are in its own rules — check them.</div>';
+  badges();
+}
+
+/* ══════════ REVISE ══════════ */
+var BOXDAYS=[0,1,3,7,16,35];
+var BOXC=["","--s5","--s4","--s3","--d3","--d6"];
+function revDue(r){ return r.reps>0 && (!r.next || r.next<=TODAY); }
+function revNew(r){ return !r.reps; }
+function subOf(id){ return S.subjects.filter(function(x){return x.id===id;})[0]||{name:"—",c:"--d1"}; }
+function renderRevise(){
+  var due=S.rev.filter(revDue);
+  due.sort(function(a,b){ return (a.box-b.box)||(a.next<b.next?-1:1); });
+  var showing=due.slice(0,12);
+  var html = showing.length ? showing.map(revRow).join("")
+    + (due.length>12?'<div class="src" style="margin-top:12px">'+(due.length-12)+' more due. Twelve in a sitting is plenty — the rest keep until tomorrow.</div>':"")
+    : '<div style="color:var(--muted);font-size:13px;padding:10px 0">Nothing due today. Either you are ahead, or you have not started any topics yet — pick a few below.</div>';
+
+  var fresh=S.rev.filter(revNew);
+  if(fresh.length){
+    var pool=pickNew(fresh,4);
+    html += '<div class="divider"></div><div class="eyebrow">Bring new topics into the rotation</div>'
+      + '<div class="src" style="margin:-4px 0 12px">'+fresh.length+' topics have never been reviewed. Do not add them all — three or four at a time, once you have actually covered them in class.</div>'
+      + pool.map(revRow).join("")
+      + '<div class="row" style="margin-top:12px"><button class="ghost sm" id="newShuffle">Show me different ones</button></div>';
+  }
+  $("#revDue").innerHTML=html;
+  bindRev($("#revDue"));
+  on($("#newShuffle"),"click",function(){ newSeed++; renderRevise(); });
+
+  $("#revFilter").innerHTML=['<button data-rf="all" aria-pressed="'+(S.revFilter==="all")+'">All ('+S.rev.length+')</button>']
+    .concat(S.subjects.map(function(s){
+      var n=S.rev.filter(function(r){return r.s===s.id;}).length;
+      return '<button data-rf="'+s.id+'" aria-pressed="'+(S.revFilter===s.id)+'">'+esc(s.name)+' ('+n+')</button>';})).join("");
+  each("[data-rf]",$("#revFilter"),function(e){on(e,"click",function(){S.revFilter=e.dataset.rf;allCap=24;renderRevise();});});
+  var all=S.rev.filter(function(r){return S.revFilter==="all"||r.s===S.revFilter;});
+  $("#revAll").innerHTML=all.slice(0,allCap).map(revRow).join("")
+    + (all.length>allCap?'<div class="row" style="margin-top:12px"><button class="ghost sm" id="moreAll">Show the other '+(all.length-allCap)+'</button></div>':"");
+  bindRev($("#revAll"));
+  on($("#moreAll"),"click",function(){ allCap=9999; renderRevise(); });
+
+  if(!$("#mixOut").innerHTML.trim()) mixSet();
+  paperPlan();
+  $("#cmdTable").innerHTML='<tr><th style="width:96px">Term</th><th>What the examiner wants</th></tr>'
+    + CMD.map(function(c){return '<tr><td><b>'+c[0]+'</b></td><td>'+c[1]+'</td></tr>';}).join("");
+  badges();
+}
+var allCap=24, newSeed=0;
+function pickNew(list,n){
+  var out=[], seen={};
+  for(var i=0;i<list.length*3&&out.length<n;i++){
+    var idx=(i*7+newSeed*13)%list.length, r=list[idx];
+    if(r&&!seen[r.id]){ seen[r.id]=1; out.push(r); }
+  }
+  return out;
+}
+function revRow(r){
+  var s=subOf(r.s), nxt=!r.reps?"not started":(r.next&&r.next>TODAY?"in "+dBetween(TODAY,r.next)+"d":"due now");
+  return '<div class="revrow">'
+    + '<span class="boxlvl" style="background:var('+BOXC[r.box]+')">'+r.box+'</span>'
+    + '<span class="rt">'+esc(r.t)+'<small>'+esc(s.name)+' · '+nxt+(r.reps?" · "+r.reps+" reviews":"")+'</small></span>'
+    + '<span class="confbtns">'+[1,2,3,4,5].map(function(q){return '<button data-rq="'+q+'" data-rid="'+r.id+'" title="'+["","blank","shaky","ok","good","solid"][q]+'">'+q+'</button>';}).join("")+'</span>'
+    + '</div>';
+}
+function bindRev(root){
+  each("[data-rq]",root,function(e){on(e,"click",function(){
+    var r=S.rev.filter(function(x){return x.id===e.dataset.rid;})[0]; if(!r) return;
+    var q=+e.dataset.rq;
+    r.box = q<=2 ? 1 : Math.min(5, r.box + (q>=4?1:0) + (q===5?1:0));
+    r.reps=(r.reps||0)+1;
+    r.next=iso(addD(NOW, BOXDAYS[r.box]||1));
+    touch(); renderRevise();});});
+}
+function mixSet(){
+  var weak=S.rev.filter(function(r){return r.box<=2;});
+  var pool=weak.length>=4?weak:S.rev.slice();
+  // spread across subjects first — mixing within one topic is not interleaving
+  var bySub={}; pool.forEach(function(r){ (bySub[r.s]=bySub[r.s]||[]).push(r); });
+  var subs=Object.keys(bySub);
+  var pick=[], round=0;
+  while(pick.length<4 && round<6){
+    subs.forEach(function(sid,si){
+      if(pick.length>=4) return;
+      var arr=bySub[sid];
+      var r=arr[(mixSeed*7+si*13+round*29)%arr.length];
+      if(r && pick.indexOf(r)<0) pick.push(r);
+    });
+    round++;
+  }
+  $("#mixOut").innerHTML = pick.length
+    ? '<div class="mixbox"><div class="eyebrow">Do these in this order — two questions each, no notes open</div><ol>'
+      + pick.map(function(r){return '<li><b>'+esc(subOf(r.s).name)+'</b> — '+esc(r.t)+'</li>';}).join("")
+      + '</ol><div class="src" style="margin-top:8px">Weakest topics first, and deliberately across different subjects. The mixing is the point: you have to work out <em>which</em> method applies before you can use it — which is exactly what the exam asks and blocked practice never trains.</div></div>'
+    : '<div style="color:var(--muted);font-size:13px">No topics yet.</div>';
+}
+var mixSeed=1;
+function paperPlan(){
+  var ex=pISO(EXAM_START);
+  var ph=[
+    {d:addD(ex,-240), h:"Now → January", p:"Topic-isolated question sets. 10–15 questions on one thing, notes allowed, no clock. You are closing content gaps, not simulating anything."},
+    {d:addD(ex,-120), h:"January → February", p:"Whole past papers with 20% extra time. Focus on reading the question correctly and choosing a method — not speed."},
+    {d:addD(ex,-60),  h:"Late February → March", p:"Full papers under strict exam timing. Minimum five complete papers per subject. Mark them yourself 24–48 hours later, not immediately."},
+    {d:addD(ex,-14),  h:"Final two weeks", p:"Weakest areas only, light touch. No new material. Protect sleep — this is the fortnight where cramming costs more than it returns."}
+  ];
+  var now=new Date();
+  $("#paperPlan").innerHTML=ph.map(function(p,i){
+    var nxt=ph[i+1], active = now>=p.d && (!nxt||now<nxt.d);
+    return '<div class="step"><div class="n" style="'+(active?"background:var(--d1);color:#fff":"")+'">'+(i+1)+'</div>'
+      + '<div class="b"><b>'+p.h+(active?' <span class="chip" style="background:var(--d1);color:#fff">now</span>':"")+'</b><span>'+p.p+'</span></div></div>';
+  }).join("")
+  + '<div class="src" style="margin-top:12px">When you mark a paper, sort every lost mark into one of three piles: <b>didn’t know it</b> (back to notes), <b>knew it, applied it wrong</b> (more reps of that technique), <b>misread the command term</b> (drill the terms, not the content). Those three need completely different responses, and treating them the same is why past papers sometimes don’t improve anything.</div>';
+}
+
+/* ══════════ TASKS ══════════ */
+var BUCKETS=[["today","Today"],["week","This week"],["waiting","Waiting on"],["someday","Someday"]];
+function renderTasks(){
+  var inbox=S.tasks.filter(function(t){return t.bucket==="inbox";});
+  $("#inbox").innerHTML = inbox.length ? inbox.map(function(t){
+    return '<div class="line"><span class="dot" style="background:var(--d4)"></span>'
+      + '<input class="bare" data-it="'+t.id+'" value="'+esc(t.text)+'">'
+      + '<button class="ghost sm" data-ic="'+t.id+'">Clarify</button>'
+      + '<button class="del" data-ix="'+t.id+'">&times;</button></div>';
+  }).join("") : '<div style="color:var(--muted);font-size:13px;padding:8px 0">Inbox is empty. That is the goal state, not a failure to use the app.</div>';
+  function TK(id){ return S.tasks.filter(function(x){return x.id===id;})[0]; }
+  each("[data-it]",$("#inbox"),function(e){on(e,"input",function(){TK(e.dataset.it).text=e.value;touch();});});
+  each("[data-ic]",$("#inbox"),function(e){on(e,"click",function(){clarify(TK(e.dataset.ic));});});
+  each("[data-ix]",$("#inbox"),function(e){on(e,"click",function(){
+    S.tasks=S.tasks.filter(function(x){return x.id!==e.dataset.ix;});touch();renderTasks();});});
+
+  $("#buckets").innerHTML=BUCKETS.map(function(b){
+    var n=S.tasks.filter(function(t){return t.bucket===b[0]&&!t.done;}).length;
+    return '<button data-bk="'+b[0]+'" aria-pressed="'+(S.bucket===b[0])+'">'+b[1]+(n?" · "+n:"")+'</button>';}).join("");
+  each("[data-bk]",$("#buckets"),function(e){on(e,"click",function(){S.bucket=e.dataset.bk;renderTasks();});});
+
+  var list=S.tasks.filter(function(t){return t.bucket===S.bucket;});
+  $("#taskList").innerHTML = list.length ? list.map(function(t){
+    var age=t.created?dBetween(t.created,TODAY):0;
+    return '<div class="line col'+(t.done?" done":"")+'">'
+      + '<div style="display:flex;align-items:center;gap:11px">'
+      + '<button class="box" data-tk="'+t.id+'" aria-pressed="'+!!t.done+'">'+CHECK+'</button>'
+      + '<input class="bare" data-tt="'+t.id+'" value="'+esc(t.text)+'">'
+      + (t.mins?'<span class="chip">'+t.mins+'m</span>':"")
+      + (t.para?'<span class="chip tag">'+esc(t.para)+'</span>':"")
+      + ((t.moves||0)>2?'<span class="defer'+((t.moves||0)>5?" hot":"")+'">moved '+t.moves+'×</span>':"")
+      + BUCKETS.filter(function(b){return b[0]!==S.bucket;}).map(function(b){
+          return '<button class="mv" data-tm="'+t.id+'" data-to="'+b[0]+'">'+b[1]+'</button>';}).join("")
+      + '<button class="del" data-tx="'+t.id+'">&times;</button></div>'
+      + (t.plan?'<div style="margin-left:32px;font-size:12px;color:var(--muted)">'+esc(t.plan)+'</div>':"")
+      + '</div>';
+  }).join("") : '<div style="color:var(--muted);font-size:13px;padding:12px 0">Empty. That is allowed to feel good.</div>';
+  each("[data-tk]",$("#taskList"),function(e){on(e,"click",function(){var t=TK(e.dataset.tk);t.done=!t.done;touch();renderTasks();});});
+  each("[data-tt]",$("#taskList"),function(e){on(e,"input",function(){TK(e.dataset.tt).text=e.value;touch();});});
+  each("[data-tm]",$("#taskList"),function(e){on(e,"click",function(){
+    var t=TK(e.dataset.tm);t.bucket=e.dataset.to;t.moves=(t.moves||0)+1;touch();renderTasks();});});
+  each("[data-tx]",$("#taskList"),function(e){on(e,"click",function(){
+    S.tasks=S.tasks.filter(function(x){return x.id!==e.dataset.tx;});touch();renderTasks();});});
+
+  var stale=S.tasks.filter(function(t){return !t.done&&(t.moves||0)>5;});
+  $("#staleCard").style.display=stale.length?"block":"none";
+  $("#staleList").innerHTML=stale.map(function(t){
+    return '<div class="line"><span class="rt" style="flex:1">'+esc(t.text)+'<small style="display:block;color:var(--muted);font-size:11px">moved '+t.moves+' times</small></span>'
+      + '<button class="ghost sm" data-sr="'+t.id+'">Recommit</button>'
+      + '<button class="ghost sm" data-ss="'+t.id+'">Someday</button>'
+      + '<button class="ghost sm" data-sd="'+t.id+'">Let it go</button></div>';
+  }).join("");
+  each("[data-sr]",$("#staleList"),function(e){on(e,"click",function(){var t=TK(e.dataset.sr);t.moves=0;t.bucket="today";touch();renderTasks();});});
+  each("[data-ss]",$("#staleList"),function(e){on(e,"click",function(){var t=TK(e.dataset.ss);t.moves=0;t.bucket="someday";touch();renderTasks();});});
+  each("[data-sd]",$("#staleList"),function(e){on(e,"click",function(){
+    S.tasks=S.tasks.filter(function(x){return x.id!==e.dataset.sd;});touch();renderTasks();});});
+  badges();
+}
+function addTask(text,bucket){
+  var v=String(text||"").trim(); if(!v) return null;
+  var t={id:nid(),text:v,bucket:bucket||"inbox",done:false,created:TODAY,moves:0,plan:"",mins:0,para:""};
+  S.tasks.push(t); touch(); return t;
+}
+function clarify(t){
+  if(!t) return;
+  var st={step:0};
+  openModal("",function(){});
+  function draw(){
+    var b=$("#modalBody");
+    if(st.step===0){
+      b.innerHTML='<h2>Is this actually actionable?</h2>'
+        +'<div class="md">“'+esc(t.text)+'”</div>'
+        +'<div class="pills"><button data-c="yes">Yes — there’s something to do</button>'
+        +'<button data-c="ref">No — it’s just information</button>'
+        +'<button data-c="some">Maybe one day</button>'
+        +'<button data-c="bin">No — bin it</button></div>';
+      each("[data-c]",b,function(e){on(e,"click",function(){
+        var c=e.dataset.c;
+        if(c==="bin"){ S.tasks=S.tasks.filter(function(x){return x.id!==t.id;}); touch(); closeModal(); renderTasks(); return; }
+        if(c==="some"||c==="ref"){ t.bucket="someday"; t.para=c==="ref"?"Resource":""; touch(); closeModal(); renderTasks(); return; }
+        st.step=1; draw();});});
+    } else if(st.step===1){
+      b.innerHTML='<h2>What is the very next physical action?</h2>'
+        +'<div class="md">Not the project — the next thing your hands actually do. “Email Mr X” rather than “sort out the IA”.</div>'
+        +'<input class="fld" id="cxAct" value="'+esc(t.text)+'">'
+        +'<label class="lbl" style="margin-top:14px">Roughly how long?</label>'
+        +'<div class="pills" id="cxMin">'+[2,15,30,60,120].map(function(m){return '<button data-m="'+m+'">'+(m===2?"under 2 min":m+" min")+'</button>';}).join("")+'</div>';
+      each("[data-m]",b,function(e){on(e,"click",function(){
+        t.text=$("#cxAct").value; t.mins=+e.dataset.m;
+        if(t.mins===2){
+          b.innerHTML='<h2>Then do it now.</h2><div class="md">Under two minutes means tracking it costs more than doing it. Go — this modal will wait.</div>'
+            +'<div class="row"><button class="primary" data-done2>Done, it’s finished</button><button class="ghost" data-later2>Actually, later</button></div>';
+          on(b.querySelector("[data-done2]"),"click",function(){t.done=true;t.bucket="today";touch();closeModal();renderTasks();});
+          on(b.querySelector("[data-later2]"),"click",function(){st.step=2;draw();});
+        } else { st.step=2; draw(); }
+        touch();});});
+    } else {
+      b.innerHTML='<h2>When and where?</h2>'
+        +'<div class="md">This is the step that does the work. Writing a task down doesn’t stop it circling in your head — committing to <em>when and where</em> you’ll do it does. Vague reflection has no effect; a specific plan has a measurable one.</div>'
+        +'<input class="fld" id="cxPlan" placeholder="If it’s Tuesday after dinner and I’m at my desk, then I’ll…" value="'+esc(t.plan||"")+'">'
+        +'<label class="lbl" style="margin-top:14px">Where does it live?</label>'
+        +'<div class="pills" id="cxB">'+BUCKETS.map(function(x){return '<button data-b="'+x[0]+'">'+x[1]+'</button>';}).join("")+'</div>'
+        +'<label class="lbl" style="margin-top:6px">Type <span class="q">— optional</span></label>'
+        +'<div class="pills" id="cxP">'+["Project","Area","Resource"].map(function(p){return '<button data-p="'+p+'">'+p+'</button>';}).join("")+'</div>';
+      each("[data-p]",b,function(e){on(e,"click",function(){
+        t.para=e.dataset.p; each("[data-p]",b,function(x){x.setAttribute("aria-pressed",String(x===e));});touch();});});
+      each("[data-b]",b,function(e){on(e,"click",function(){
+        t.plan=$("#cxPlan").value; t.bucket=e.dataset.b; touch(); closeModal(); renderTasks();});});
+    }
+  }
+  draw();
+}
+
+/* ══════════ GOALS ══════════ */
+function renderGoals(){
+  $("#goalCards").innerHTML = S.goals.length ? S.goals.map(function(g,i){
+    var pct=g.lagT>0?Math.min(100,Math.round(g.lagC/g.lagT*100)):0;
+    var ws=iso(wkStart(NOW)), lead=(S.lead[g.id]&&S.lead[g.id][ws])||0;
+    return '<div class="card">'
+      + '<div class="spread" style="align-items:flex-start">'
+      + '<input class="bare" data-gt="'+i+'" value="'+esc(g.title)+'" style="font-size:16px;font-weight:600;flex:1">'
+      + '<div class="row" style="gap:5px;flex:none"><button class="ghost sm" data-gw="'+i+'">WOOP it</button>'
+      + '<button class="del" data-gx="'+i+'" style="opacity:1">&times;</button></div></div>'
+      + '<div style="font-size:12.5px;color:var(--ink-2);margin:8px 0 16px;font-style:italic">'+(g.why?"“"+esc(g.why)+"”":"")+'</div>'
+      + '<div class="g2" style="gap:16px">'
+      + '<div><div class="eyebrow">Lead — what you control</div>'
+      + '<div class="spread"><span style="font-size:13.5px">'+esc(g.leadN)+'</span>'
+      + '<span class="mono" style="font-size:13px;color:'+(lead>=g.leadT?"var(--ok-text)":"var(--ink-2)")+'">'+lead+' / '+g.leadT+' this week</span></div>'
+      + '<div class="meter"><i style="width:'+Math.min(100,lead/Math.max(1,g.leadT)*100)+'%;background:var(--d3)"></i></div>'
+      + '<div class="row" style="gap:5px"><button class="ghost sm" data-lm="'+i+'">−</button><button class="ghost sm" data-lp="'+i+'">+1 done</button></div></div>'
+      + '<div><div class="eyebrow">Lag — the outcome</div>'
+      + '<div class="spread"><span style="font-size:13.5px">'+esc(g.lagN)+'</span>'
+      + '<span class="mono" style="font-size:13px;color:var(--ink-2)">'+g.lagC+' / '+g.lagT+'</span></div>'
+      + '<div class="meter"><i style="width:'+pct+'%"></i></div>'
+      + '<div class="row" style="gap:5px"><button class="ghost sm" data-am="'+i+'">−</button><button class="ghost sm" data-ap="'+i+'">+1</button></div></div>'
+      + '</div>'
+      + (g.ob?'<div class="callout warm" style="margin:16px 0 0;font-size:13px"><b>The obstacle you named:</b> '+esc(g.ob)+'<br><b style="color:var(--ink)">Your plan:</b> '+esc(g.plan)+'</div>':"")
+      + '</div>';
+  }).join("") : '<div class="card" style="color:var(--muted);font-size:13px">No goals yet. Two is plenty.</div>';
+  each("[data-gt]",$("#goalCards"),function(e){on(e,"input",function(){S.goals[+e.dataset.gt].title=e.value;touch();});});
+  each("[data-gx]",$("#goalCards"),function(e){on(e,"click",function(){S.goals.splice(+e.dataset.gx,1);touch();renderGoals();});});
+  each("[data-gw]",$("#goalCards"),function(e){on(e,"click",function(){woop(S.goals[+e.dataset.gw]);});});
+  each("[data-ap]",$("#goalCards"),function(e){on(e,"click",function(){var g=S.goals[+e.dataset.ap];g.lagC=Math.min(g.lagT,g.lagC+1);touch();renderGoals();});});
+  each("[data-am]",$("#goalCards"),function(e){on(e,"click",function(){var g=S.goals[+e.dataset.am];g.lagC=Math.max(0,g.lagC-1);touch();renderGoals();});});
+  each("[data-lp]",$("#goalCards"),function(e){on(e,"click",function(){bumpLead(+e.dataset.lp,1);});});
+  each("[data-lm]",$("#goalCards"),function(e){on(e,"click",function(){bumpLead(+e.dataset.lm,-1);});});
+}
+function bumpLead(i,d){
+  var g=S.goals[i], ws=iso(wkStart(NOW));
+  if(!S.lead[g.id]) S.lead[g.id]={};
+  S.lead[g.id][ws]=Math.max(0,(S.lead[g.id][ws]||0)+d);
+  touch(); renderGoals();
+}
+function woop(g){
+  var i=0;
+  var steps=[
+    {h:"Wish", d:"One meaningful but achievable thing, in three to six words. Not a fantasy — something you could plausibly get in the next twelve weeks.", f:"w", ph:"Sleep on a fixed schedule"},
+    {h:"Outcome", d:"Close your eyes for a minute and picture the best realistic result. What does it actually feel like? Sensory detail, not a to-do list. Then write it down.", f:"o", ph:"Waking up clear-headed, not fighting the alarm…"},
+    {h:"Obstacle", d:"Not the world — you. What is it <em>in you</em> that gets in the way? This is the step people skip, and it's the one that makes the whole thing work. Imagining the good outcome on its own measurably lowers your energy; contrasting it against the real obstacle is what mobilises you.", f:"ob", ph:"I tell myself I'll do one more thing and it's suddenly 01:00"},
+    {h:"Plan", d:"One if-then sentence connecting that obstacle to a specific response. Keep the response short — five words or fewer if you can.", f:"plan", ph:"If it's 22:30 and I'm still on my laptop, then I close it"}
+  ];
+  openModal("",function(){}); draw();
+  function draw(){
+    var s=steps[i], b=$("#modalBody");
+    b.innerHTML='<div class="steps">'+steps.map(function(_,j){
+        return '<span class="stepdot '+(j<i?"past":j===i?"on":"")+'"></span>';}).join("")+'</div>'
+      +'<div class="stepbody"><h3>'+s.h+'</h3><div class="sd">'+s.d+'</div>'
+      +'<textarea class="fld" id="wf" placeholder="'+esc(s.ph)+'">'+esc(g[s.f]||"")+'</textarea></div>'
+      +'<div class="stepnav">'+(i>0?'<button class="ghost" id="wb">Back</button>':"")
+      +'<button class="primary" id="wn">'+(i===steps.length-1?"Save":"Next")+'</button>'
+      +'<button class="ghost" data-close style="margin-left:auto">Close</button></div>';
+    on($("#wn"),"click",function(){ g[s.f]=$("#wf").value; touch();
+      if(i===steps.length-1){ if(!g.why) g.why=g.o; closeModal(); renderGoals(); } else { i++; draw(); } });
+    on($("#wb"),"click",function(){ g[s.f]=$("#wf").value; i--; draw(); });
+    on(b.querySelector("[data-close]"),"click",closeModal);
+  }
+}
+
+/* ══════════ MODAL ══════════ */
+function openModal(html,bind){
+  $("#modalBody").innerHTML=html; $("#modal").classList.add("on");
+  each("[data-close]",$("#modalBody"),function(e){on(e,"click",closeModal);});
+  if(bind) bind($("#modalBody"));
+}
+function closeModal(){ $("#modal").classList.remove("on"); }
+
+/* ══════════ WIZARDS ══════════ */
+function runWizard(steps,onDone){
+  var i=0;
+  openModal("",function(){}); draw();
+  function draw(){
+    var s=steps[i], b=$("#modalBody");
+    b.innerHTML='<div class="steps">'+steps.map(function(_,j){
+        return '<span class="stepdot '+(j<i?"past":j===i?"on":"")+'"></span>';}).join("")+'</div>'
+      +'<div class="stepbody"><h3>'+s.h+'</h3><div class="sd">'+s.d+'</div><div id="wzBody">'+(s.body?s.body():"")+'</div></div>'
+      +'<div class="stepnav">'+(i>0?'<button class="ghost" id="wzb">Back</button>':"")
+      +'<button class="primary" id="wzn">'+(i===steps.length-1?(s.cta||"Finish"):(s.cta||"Next"))+'</button>'
+      +'<button class="ghost" data-close style="margin-left:auto">Close</button></div>';
+    if(s.bind) s.bind($("#wzBody"));
+    on($("#wzn"),"click",function(){ if(s.save)s.save();
+      if(i===steps.length-1){ closeModal(); if(onDone)onDone(); } else { i++; draw(); } });
+    on($("#wzb"),"click",function(){ if(s.save)s.save(); i--; draw(); });
+    on(b.querySelector("[data-close]"),"click",closeModal);
+  }
+}
+function planWizard(){
+  var t=T(), y=S.days[iso(addD(NOW,-1))];
+  runWizard([
+    {h:"Yesterday", d:"Before you plan today, close yesterday. Anything unfinished either moves or goes.",
+     body:function(){
+       if(!y) return '<div style="color:var(--muted);font-size:13px">No record of yesterday. Fine — start here.</div>';
+       var un=y.big3.filter(function(b){return b.t.trim()&&!b.d;});
+       if(!un.length) return '<div class="callout ok" style="margin:0">Everything you named yesterday got done. Note that, then move on.</div>';
+       return un.map(function(b,j){
+         return '<div class="line"><span style="flex:1;font-size:14px">'+esc(b.t)+'</span>'
+           + '<button class="ghost sm" data-cy="'+j+'" data-ct="'+esc(b.t)+'">Bring forward</button>'
+           + '<button class="ghost sm" data-dy="'+j+'">Let go</button></div>';}).join("");
+     },
+     bind:function(root){
+       each("[data-cy]",root,function(e){on(e,"click",function(){
+         var d=T(), slot=d.big3.filter(function(x){return !x.t.trim();})[0];
+         if(slot){ slot.t=e.dataset.ct; touch(); }
+         e.textContent="Added"; e.disabled=true;});});
+       each("[data-dy]",root,function(e){on(e,"click",function(){ e.textContent="Gone"; e.disabled=true; });});
+     }},
+    {h:"What's actually coming", d:"Anything inside ten days that hasn't started should be on today's list, not in your peripheral vision.",
+     body:function(){
+       var soon=S.ms.filter(function(m){return !m.done&&dBetween(TODAY,m.date)>=0&&dBetween(TODAY,m.date)<=10;})
+         .sort(function(a,b){return a.date<b.date?-1:1;});
+       if(!soon.length) return '<div class="callout ok" style="margin:0">Nothing inside ten days. Rare and worth enjoying.</div>';
+       return soon.map(function(m){
+         return '<div class="line"><span style="flex:1;font-size:13.5px">'+esc(m.title)+' <span class="chip">'+dBetween(TODAY,m.date)+'d</span></span>'
+           + '<button class="ghost sm" data-mk="'+esc(m.title)+'">Make it a Big 3</button></div>';}).join("");
+     },
+     bind:function(root){
+       each("[data-mk]",root,function(e){on(e,"click",function(){
+         var d=T(), slot=d.big3.filter(function(x){return !x.t.trim();})[0];
+         if(slot){ slot.t=e.dataset.mk; touch(); }
+         e.textContent="Added"; e.disabled=true;});});
+     }},
+    {h:"Three things", d:"Not five. Choosing what doesn't matter today is most of the work — and an uncapped list is, by definition, an unprioritised one.",
+     body:function(){
+       return T().big3.map(function(x,j){
+         return '<div style="margin-bottom:9px"><input class="fld sm" data-p3="'+j+'" value="'+esc(x.t)+'" placeholder="Thing '+(j+1)+'"></div>';}).join("");
+     },
+     bind:function(root){ each("[data-p3]",root,function(e){on(e,"input",function(){T().big3[+e.dataset.p3].t=e.value;touch();});}); }},
+    {h:"Does it fit?", d:"Estimate honestly. Almost everyone plans about twice what a day holds, and finds out at 22:00 instead of now.",
+     body:function(){
+       var d=T();
+       return d.big3.filter(function(x){return x.t.trim();}).map(function(x,j){
+         var idx=d.big3.indexOf(x);
+         return '<div class="line"><span style="flex:1;font-size:13.5px">'+esc(x.t)+'</span>'
+           + '<select class="fld sm" data-pm="'+idx+'" style="width:auto">'
+           + [15,30,45,60,90,120,180].map(function(m){return '<option value="'+m+'"'+(x.mins===m?" selected":"")+'>'+(m<60?m+"m":(m/60)+"h")+'</option>';}).join("")
+           + '</select></div>';}).join("")+'<div id="pcap" style="margin-top:14px"></div>';
+     },
+     bind:function(root){
+       function upd(){
+         var used=T().big3.reduce(function(a,x){return a+(x.t.trim()?(x.mins||60):0);},0);
+         var over=used>S.cap;
+         root.querySelector("#pcap").innerHTML='<div class="cap'+(over?" red":"")+'"><i style="width:'+Math.min(100,used/S.cap*100)+'%"></i><b>'
+           +(Math.round(used/60*10)/10)+'h of '+(Math.round(S.cap/60*10)/10)+'h</b></div>'
+           +'<div class="capnote'+(over?" red":"")+'">'+(over?"Over. Move one to tomorrow now — while it is a calm decision rather than a failure.":"Fits, with room for the day to go sideways.")+'</div>';
+       }
+       each("[data-pm]",root,function(e){on(e,"change",function(){T().big3[+e.dataset.pm].mins=+e.value;touch();upd();});});
+       upd();
+     }},
+    {h:"When and where", d:"The last step, and the one that actually changes the outcome. An unfinished task keeps interrupting you until you decide <em>when and where</em> it happens — at which point it stops, even before you've done it.",
+     cta:"Start the day",
+     body:function(){
+       return T().big3.filter(function(x){return x.t.trim();}).map(function(x){
+         var idx=T().big3.indexOf(x);
+         return '<div style="margin-bottom:11px"><label class="lbl">'+esc(x.t)+'</label>'
+           + '<input class="fld sm" data-pp="'+idx+'" value="'+esc(x.plan||"")+'" placeholder="If it’s ___ and I’m at ___, then I’ll start this"></div>';}).join("");
+     },
+     bind:function(root){ each("[data-pp]",root,function(e){on(e,"input",function(){T().big3[+e.dataset.pp].plan=e.value;touch();});}); }}
+  ], function(){ T().planned=true; touch(); renderToday(); show("today"); });
+}
+function shutdownWizard(){
+  runWizard([
+    {h:"What actually happened", d:"Honestly. An accurate bad day is more useful than a flattering one.",
+     body:function(){ var t=T();
+       return t.big3.filter(function(x){return x.t.trim();}).map(function(x,j){
+         var i=t.big3.indexOf(x);
+         return '<div class="line"><button class="box" data-sb="'+i+'" aria-pressed="'+!!x.d+'">'+CHECK+'</button>'
+           + '<span style="flex:1;font-size:14px">'+esc(x.t)+'</span></div>';}).join("")
+         || '<div style="color:var(--muted);font-size:13px">Nothing was set today.</div>'; },
+     bind:function(root){ each("[data-sb]",root,function(e){on(e,"click",function(){
+       var i=+e.dataset.sb; T().big3[i].d=!T().big3[i].d; e.setAttribute("aria-pressed",String(T().big3[i].d)); touch();});}); }},
+    {h:"One thing that went right", d:"You will resist this most on the days you need it most. Write it anyway.",
+     body:function(){ return '<textarea class="fld" id="swWin" placeholder="However small.">'+esc(T().win||"")+'</textarea>'; },
+     save:function(){ T().win=$("#swWin").value; touch(); }},
+    {h:"Empty your head", d:"Everything unfinished goes on the page so it stops circling at midnight. One per line — it doesn't have to be organised.",
+     body:function(){ return '<textarea class="fld" id="swDump" style="min-height:120px">'+esc(T().dump||"")+'</textarea>'; },
+     save:function(){ T().dump=$("#swDump").value; touch(); }},
+    {h:"The next fourteen days", d:"A quick look ahead, so nothing arrives as a surprise.",
+     body:function(){
+       var soon=S.ms.filter(function(m){return !m.done&&dBetween(TODAY,m.date)>=0&&dBetween(TODAY,m.date)<=14;})
+         .sort(function(a,b){return a.date<b.date?-1:1;});
+       return soon.length? soon.map(function(m){
+         return '<div class="line"><span class="chip">'+dBetween(TODAY,m.date)+'d</span><span style="flex:1;font-size:13.5px">'+esc(m.title)+'</span></div>';}).join("")
+         : '<div class="callout ok" style="margin:0">Clear for two weeks.</div>'; }},
+    {h:"Tomorrow's three", d:"Decide tomorrow tonight, so the morning has no decisions in it.",
+     body:function(){
+       var tk=iso(addD(NOW,1)), d=day(tk);
+       return d.big3.map(function(x,j){
+         return '<div style="margin-bottom:9px"><input class="fld sm" data-t3="'+j+'" value="'+esc(x.t)+'" placeholder="Thing '+(j+1)+'"></div>';}).join("");
+     },
+     bind:function(root){ var tk=iso(addD(NOW,1));
+       each("[data-t3]",root,function(e){on(e,"input",function(){day(tk).big3[+e.dataset.t3].t=e.value;touch();});}); }},
+    {h:"Say it out loud", d:"“Shutdown complete.” Out loud, actually. It only works because the four steps above genuinely happened — that's what makes it a signal your brain believes rather than a phrase. A day without an ending bleeds into the night and you never really rest.",
+     cta:"Shutdown complete",
+     body:function(){ return '<div class="callout ok" style="margin:0">Everything is captured. Nothing is lost. There is nothing useful you can do about any of it before tomorrow.</div>'; }}
+  ], function(){ var t=T(); t.shut.push(new Date().toISOString()); touch(); renderToday(); });
+}
+function reviewWizard(){
+  runWizard([
+    {h:"Get clear", d:"Inbox to zero first. Reviewing against a stale list is worse than not reviewing.",
+     body:function(){
+       var n=S.tasks.filter(function(t){return t.bucket==="inbox";}).length;
+       return n? '<div class="callout warm" style="margin:0"><b>'+n+' item'+(n>1?"s":"")+' still uncleared.</b> Go to Tasks and clarify each one — decide what it is and when it happens. Then come back.</div>'
+         : '<div class="callout ok" style="margin:0">Inbox is empty. Good.</div>'; }},
+    {h:"Get current", d:"What the week actually looked like. Ask “what got in the way?”, not “why am I like this?” — only the first question has answers.",
+     body:function(){
+       var e=execScore();
+       return '<div class="exec" style="margin-bottom:14px"><i style="width:'+e+'%;background:'+(e>=85?"var(--d3)":"var(--d1)")+'"></i><b>'+e+'%</b>'
+         +'<span class="line85"></span><span class="lb85">85%</span></div>'
+         +'<textarea class="fld" id="rvBlock" placeholder="What got in the way this week? Be specific — “Wednesday and Thursday I had no plan by 16:00” beats “I was lazy”.">'+esc(weekRec().block||"")+'</textarea>'; },
+     save:function(){ weekRec().block=$("#rvBlock").value; touch(); }},
+    {h:"Re-rate the six areas", d:"Gut feeling, thirty seconds. You're looking for the direction of travel, not precision.",
+     body:function(){ return S.domains.map(function(d,i){
+       return '<div class="barrow" style="margin-bottom:10px"><div class="cat">'+esc(d.n)+'</div>'
+         + '<input type="range" min="1" max="10" value="'+d.s+'" data-rd="'+i+'" style="accent-color:var('+d.c+')">'
+         + '<div class="num" data-rv="'+i+'">'+d.s+'</div></div>';}).join(""); },
+     bind:function(root){ each("[data-rd]",root,function(e){on(e,"input",function(){
+       var i=+e.dataset.rd; S.domains[i].s=+e.value; root.querySelector('[data-rv="'+i+'"]').textContent=e.value; touch();});}); }},
+    {h:"Pick one area", d:"Trying to fix everything is how you fix nothing. One area gets your attention this week — the lowest bar. The rest coast, on purpose.",
+     body:function(){
+       var low=S.domains.slice().sort(function(a,b){return a.s-b.s;})[0];
+       return '<div class="callout" style="margin:0 0 14px"><b>Lowest right now: '+esc(low.n)+'</b> at '+low.s+'/10. You don\'t have to accept that suggestion, but you do have to pick one.</div>'
+         + '<div class="pills" id="rvPick">'+S.domains.map(function(d){
+             return '<button data-rp="'+d.k+'" aria-pressed="'+(weekRec().focus===d.k)+'">'+esc(d.n)+'</button>';}).join("")+'</div>'
+         + '<label class="lbl" style="margin-top:14px">One thing you\'ll do about it this week</label>'
+         + '<input class="fld" id="rvAct" value="'+esc(weekRec().act||"")+'" placeholder="Small and specific">'; },
+     bind:function(root){ each("[data-rp]",root,function(e){on(e,"click",function(){
+       weekRec().focus=e.dataset.rp; each("[data-rp]",root,function(x){x.setAttribute("aria-pressed",String(x===e));}); touch();});}); },
+     save:function(){ var a=$("#rvAct"); if(a){ weekRec().act=a.value; touch(); } }},
+    {h:"Fresh start", d:"Mondays and term starts genuinely work — gym visits jump about a third on a Monday and nearly half at the start of a term. It's not willpower, it's the clean-slate feeling. You may as well use it deliberately.",
+     cta:"Close the week",
+     body:function(){ return '<div class="callout ok" style="margin:0">Week reviewed. Download your file before you close the tab — that\'s the only thing standing between you and starting over.</div>'; }}
+  ], function(){ touch(); renderWeek(); show("week"); });
+}
+function weekRec(){
+  var k=iso(wkStart(NOW));
+  if(!S.weeks[k]) S.weeks[k]={block:"",focus:"",act:""};
+  return S.weeks[k];
+}
+function stuckFlow(){
+  var pick=null, ans={
+    start:{h:"You don't know where to start.", p:"That's an ambiguity problem wearing a motivation costume. The fix isn't more willpower, it's making the first move smaller until it's obvious. Not “write the IA” — “open the document and type a heading”.", s:"Open the file and write one heading"},
+    bad:{h:"You're worried it'll be bad.", p:"Almost always the real one. Procrastination is far better explained as short-term mood repair than as laziness — you're not avoiding the work, you're avoiding how the work makes you feel. Which means the goal for the next five minutes is to produce something deliberately bad. A rough draft can be fixed. A blank page can't.", s:"Write 150 deliberately bad words"},
+    big:{h:"It's too big.", p:"Then it isn't a task, it's a project, and no amount of staring will make it start. Name the smallest physical thing that would count as having begun.", s:"List the parts on paper — nothing else"},
+    bored:{h:"It's boring.", p:"Boredom counts. Procrastination isn't only about escaping something unpleasant — a task losing out to something more appealing does it too. So bundle it: something you actually want, available only while you do this.", s:"Pick one album, start it, work until it ends"},
+    tired:{h:"You've got nothing left.", p:"Then believe that. If readiness is low, the right move is the two-minute version, not the full thing — and that still counts as a day you showed up. This is exactly what Minimum day is for.", s:"Do the two-minute version and stop"}
+  };
+  openModal("",function(){}); draw();
+  function draw(){
+    var b=$("#modalBody");
+    if(!pick){
+      b.innerHTML='<h2>What\'s actually in the way?</h2>'
+        +'<div class="md">Not “why haven\'t you started” — that question only produces excuses. What <em>feeling</em> is the task giving you that you\'re moving away from?</div>'
+        +'<div class="pills">'
+        +'<button data-s="start">I don\'t know where to start</button>'
+        +'<button data-s="bad">I\'ll do it badly</button>'
+        +'<button data-s="big">It\'s too big</button>'
+        +'<button data-s="bored">It\'s boring</button>'
+        +'<button data-s="tired">I\'ve got nothing left</button></div>'
+        +'<div class="row" style="margin-top:16px"><button class="ghost" data-close>Close</button></div>';
+      each("[data-s]",b,function(e){on(e,"click",function(){pick=e.dataset.s;draw();});});
+      on(b.querySelector("[data-close]"),"click",closeModal);
+    } else {
+      var a=ans[pick];
+      b.innerHTML='<h2>'+a.h+'</h2><div class="md">'+a.p+'</div>'
+        +'<label class="lbl">The smallest physical first step</label>'
+        +'<input class="fld" id="stAct" value="'+esc(a.s)+'">'
+        +'<div class="callout ok" style="margin:16px 0 0"><b>Five minutes.</b> Not the whole thing. Motivation shows up after you start, essentially never before — action is the intervention, not the reward for feeling ready.</div>'
+        +'<div class="row" style="margin-top:16px"><button class="primary" id="stGo">Do it for five minutes</button>'
+        +'<button class="ghost" id="stBack">Back</button>'
+        +'<button class="ghost" data-close style="margin-left:auto">Close</button></div>';
+      on($("#stGo"),"click",function(){
+        var slot=T().big3.filter(function(x){return !x.t.trim();})[0];
+        if(slot){ slot.t=$("#stAct").value; slot.mins=15; touch(); }
+        tSet(5*60,true); startTimer(); closeModal(); renderToday(); show("today");});
+      on($("#stBack"),"click",function(){pick=null;draw();});
+      on(b.querySelector("[data-close]"),"click",closeModal);
+    }
+  }
+}
+
+/* ══════════ TIMER CONTROL ══════════ */
+var tRem2=null;
+function tSet(r,o){ tRem=r; tOn=o; }
+function startTimer(){
+  if(tInt) clearInterval(tInt);
+  tInt=setInterval(tTick,1000); tDraw();
+}
+
+/* ══════════ FOCUS MODE ══════════ */
+var fIdx=0;
+function focusMode(){
+  var t=T(), items=t.big3.filter(function(x){return x.t.trim()&&!x.d;});
+  if(!items.length){ openModal('<h2>Nothing left in the Big 3</h2><div class="md">Either you\'re done, or nothing is named yet. Both are fine — but focus mode has nothing to show you.</div><div class="row"><button class="ghost" data-close>Close</button></div>'); return; }
+  fIdx=Math.min(fIdx,items.length-1);
+  var it=items[fIdx];
+  $("#fLabel").textContent="Now — "+(fIdx+1)+" of "+items.length;
+  $("#fQuest").textContent=it.t;
+  $("#fPlan").textContent=it.plan||"No plan set for this one. When and where does it happen?";
+  $("#focusOv").classList.add("on");
+}
+
+/* ══════════ STATIC SECTIONS ══════════ */
+function renderRituals(){
+  var R=[
+    ["Morning · about 30 min",[
+      ["Feet on the floor, phone stays down","The first twenty minutes set the tone. Whatever is in your phone will still be there after breakfast — and a phone in the room costs you working memory even switched off."],
+      ["Daylight, water, move a little","Curtains open or step outside. Morning light is the strongest lever you have on a teenage body clock that naturally wants to run late — much stronger than anything you do in the evening."],
+      ["Open Compass, set the Big 3","Two minutes. Three things, a time estimate each, and where they happen. Rate energy honestly — a low day needs a shorter list, not more guilt."],
+      ["Start the first one before you feel ready","Five minutes is the whole commitment. Motivation arrives after you start."]]],
+    ["Study block · 60 min",[
+      ["Phone in another room","Not face down, not in a pocket. Another room. On, off, silent — makes no difference; only distance does."],
+      ["Write the one question you're answering","“Revise Chemistry” is not a task. “Do the eight equilibrium questions” is. On paper, beside you."],
+      ["50 minutes, timer running","When you drift — and you will — come back without commentary. Drifting is what attention does, not evidence about you."],
+      ["10 minutes off screens","Walk, stretch, stare out of a window. Scrolling is not a break; your attention doesn't recover on it."]]],
+    ["Evening shutdown · 5 min",[
+      ["Tick what actually happened","Honestly. An accurate bad day is more useful than a flattering one."],
+      ["Write one thing that went right","You'll resist this most on the days you need it most."],
+      ["Brain dump, then tomorrow's three","Everything unfinished onto the page, then decide tomorrow tonight."],
+      ["Say “shutdown complete” out loud","It works because the steps above actually happened. A day with no ending bleeds into the night."]]],
+    ["Sunday reset · 20 min",[
+      ["Inbox to zero","Clarify every captured item. A stale list is worse than no list, because you still trust it."],
+      ["Look at the week without judging it","Execution score, the grid, what got in the way. Around 85% is the target — not 100%."],
+      ["Re-rate the six areas, check 14 days ahead","Anything inside a week that hasn't started becomes a Big 3 this week."],
+      ["Pick one area to push, let the rest coast","One. The lowest bar."],
+      ["Download your file","Ten seconds, and the whole history survives."]]]
+  ];
+  $("#ritualCards").innerHTML=R.map(function(r){
+    return '<div class="card"><div class="eyebrow">'+r[0]+'</div>'
+      + r[1].map(function(s,i){return '<div class="step"><div class="n">'+(i+1)+'</div><div class="b"><b>'+s[0]+'</b><span>'+s[1]+'</span></div></div>';}).join("")
+      + '</div>';
+  }).join("");
+}
+function renderReset(){
+  $("#s-reset").innerHTML=''
+  +'<div class="card"><h2>When it breaks</h2>'
+  +'<div class="hint">It will. This page is written for the day you\'ve already stopped — read it then, not now.</div>'
+  +'<div class="prose">'
+  +'<p>Every system you have tried collapsed at the same point. Not when you missed a day — when missing became <strong>evidence about you</strong>. The streak broke, the tracker turned into a monument to failing, and you closed it.</p>'
+  +'<p>That reaction is so predictable it has a name in the research, and it is the single most common reason people abandon habit trackers: one miss, a counter resets to zero, and the response isn\'t "I missed a day", it\'s "I\'ve ruined it, so it doesn\'t matter now". One tester ran ten habit apps for a month and found eight of them broke him the same way.</p>'
+  +'</div>'
+  +'<div class="callout warm"><b>So this one is built differently, deliberately.</b> No streak counter anywhere. The strength bar is an average that dips and recovers — it can never hit zero from one bad week. Habits are counted per week, not per day, because flexible targets hold up better over time than rigid daily ones. And a deliberate skip is a separate colour, because a planned rest day is not a failure and shouldn\'t be recorded as one.</div>'
+  +'<div class="prose"><p><strong>The rule: never miss twice.</strong> One missed day is weather — in the actual study that tracked people forming habits, a single miss barely moved automaticity at all. Two in a row is the start of a different pattern. The second day is the only one worth defending, and you defend it with a smaller target, not more discipline.</p></div></div>'
+
+  +'<div class="g2">'
+  +'<div class="card"><div class="eyebrow">Off for a day or two</div><div class="prose">'
+  +'<p>Don\'t restart. Don\'t re-plan. Do <strong>one anchor</strong> today — the easiest one — and tick it. That\'s the whole assignment. The grid doesn\'t care that yesterday is blank.</p></div></div>'
+  +'<div class="card"><div class="eyebrow">Off for a week or more</div><div class="prose">'
+  +'<p>Open Week. <strong>Delete every habit except three.</strong> Not pause — delete. Run those three for seven days before you\'re allowed to add anything back. Ambition is what broke it; more of it won\'t fix it.</p></div></div>'
+  +'</div>'
+
+  +'<div class="card"><div class="eyebrow">Before you restart — the step people skip</div>'
+  +'<div class="prose"><p>There is a real finding here that sounds too soft to be true. Students who <strong>forgave themselves</strong> for procrastinating before one midterm procrastinated <em>less</em> before the next one, compared to students who didn\'t. Not more. Less.</p>'
+  +'<p>The reason is mechanical, not sentimental: shame about the last failure makes the task itself a reminder of that failure, so you avoid the task to avoid the feeling, which produces another failure. Self-forgiveness cuts the loop. Being hard on yourself here is not the responsible option — it\'s the one that measurably doesn\'t work.</p></div>'
+  +'<div class="callout ok"><b>Say this, then carry on:</b> the gap was a normal response to a heavy stretch. It doesn\'t predict anything about how the next one goes. There is nothing to make up and no debt to clear — the system starts from today, not from the day you stopped.</div>'
+  +'<div class="row"><button class="primary" id="resetGo">Restart with three habits</button></div></div>'
+
+  +'<div class="card"><div class="eyebrow">The ten-minute reset — when everything is too much</div>'
+  +'<div class="step"><div class="n">1</div><div class="b"><b>Two minutes: get it all out</b><span>Open the brain dump on Today and write every loose thing in your head. Don\'t organise it, don\'t judge it, don\'t stop early. The weight comes from holding it, not from the things.</span></div></div>'
+  +'<div class="step"><div class="n">2</div><div class="b"><b>Three minutes: three piles</b><span>Do now (under ten minutes), schedule (needs a real slot), let go (was never going to happen, and that\'s fine). Most lists are half pile three.</span></div></div>'
+  +'<div class="step"><div class="n">3</div><div class="b"><b>Two minutes: pick exactly one</b><span>Not the most important — the most unblocking. The one that would make the rest feel lighter.</span></div></div>'
+  +'<div class="step"><div class="n">4</div><div class="b"><b>Three minutes: do the first piece</b><span>Open the file. Write the first sentence. Send the message. You\'re not finishing it, you\'re breaking the seal.</span></div></div></div>'
+
+  +'<div class="card"><h2>The honest part</h2><div class="prose">'
+  +'<p>You said you want control over everything, down to the smallest details. I\'d push back on the target, not the wanting.</p>'
+  +'<p>Total control over every detail isn\'t available to anyone, and chasing it fails in a specific way: you build something elaborate, reality refuses to cooperate for three days, and the gap between the plan and the day becomes proof you\'re failing. Then you quit, and now you feel lost <em>and</em> like someone who can\'t stick to things.</p>'
+  +'<p>What is available is better: <strong>control over the frame, not the contents.</strong> You decide when you wake, what the first hour looks like, what the three things are, and how the day ends. Inside that frame the day still goes sideways — people cancel, you get ill, the essay takes four hours instead of two. That isn\'t the system failing. That\'s Tuesday.</p>'
+  +'<p>And feeling lost at seventeen, in the middle of the IB, is not a malfunction. In developmental terms it has a name — actively questioning what you want rather than having settled it, which is the expected stage at your age and the one that leads somewhere. What makes it feel unmanageable isn\'t the uncertainty. It\'s the uncertainty <em>plus</em> sleep debt, plus a workload with no visible shape, plus attention broken into fragments all day. This page can\'t answer who you are. It can take the other three off the pile, which is enough to make the first one bearable.</p>'
+  +'</div></div>'
+
+  +'<div class="card"><h2>When it\'s more than disorganisation</h2>'
+  +'<div class="prose"><p>Ordinary stress moves. It\'s worse before a deadline and better after one, worse on four hours\' sleep and better on eight. Worth telling someone when it <strong>stops moving</strong>:</p>'
+  +'<ul><li>It\'s there most days regardless of what\'s happening that week</li>'
+  +'<li>Sleep or appetite changed and stayed changed</li>'
+  +'<li>You stopped doing things you used to enjoy — not from lack of time, from lack of want</li>'
+  +'<li>Concentration is gone most of most days, not just before deadlines</li>'
+  +'<li>Any thought of hurting yourself — this one skips every other step. Tell someone today.</li></ul>'
+  +'<p>None of that means anything is wrong with you. It means the load has gone past what one person manages alone, which is information, not a verdict.</p></div>'
+  +'<div class="divider"></div>'
+  +'<table class="tbl">'
+  +'<tr><th style="width:34%">Where</th><th>What it is</th></tr>'
+  +'<tr><td><b>Studievejleder</b><br><span style="font-size:11.5px;color:var(--muted)">at your school</span></td><td>Bound by confidentiality and explicitly there for personal things affecting school, not only subject choices. The right first stop for anything too personal for a teacher and too vague for a doctor.</td></tr>'
+  +'<tr><td><b>BørneTelefonen</b><br><span style="font-size:11.5px;color:var(--muted)">116 111</span></td><td>Free and anonymous, open every day, all day. Phone, SMS or chat, and it doesn\'t appear on a phone bill. Run by Børns Vilkår.</td></tr>'
+  +'<tr><td><b>headspace Danmark</b><br><span style="font-size:11.5px;color:var(--muted)">ages 12–25</span></td><td>Free, anonymous conversations with trained counsellors. No referral, no diagnosis, no waiting list. Drop-in centres around the country plus online chat.</td></tr>'
+  +'<tr><td><b>Egen læge</b></td><td>The door to everything else — referrals for assessment or a psychologist. Worth going to sooner than feels justified; you don\'t need to have "enough" wrong to book an appointment.</td></tr>'
+  +'</table>'
+  +'<div class="src" style="margin-top:14px">Details checked against each organisation\'s own site. Some kommuner run their own free youth psychology schemes on top of these — worth searching your own kommune\'s name.</div></div>';
+  on($("#resetGo"),"click",function(){
+    openModal('<h2>Cut back to three</h2><div class="md">This keeps the first three habits and deletes the rest, and clears today so you start from now rather than from a backlog. Your history stays — the strength bars will recover on their own.</div>'
+      +'<div class="row"><button class="primary" id="rsYes">Do it</button><button class="ghost" data-close>Cancel</button></div>',
+      function(root){ on(root.querySelector("#rsYes"),"click",function(){
+        S.habits=S.habits.slice(0,3); S.minMode=true;
+        var t=T(); t.big3=[{t:"",d:false,plan:"",mins:60},{t:"",d:false,plan:"",mins:60},{t:"",d:false,plan:"",mins:60}];
+        touch(); closeModal(); renderAll(); show("week");});});
+  });
+}
+function renderWhy(){
+  var W=[
+    ["Every task asks when and where","The if-then line under each Big 3 item, and the last step of the daily plan.","Writing a task down doesn't stop it interrupting you — deciding when and where does. In the studies, people who made a specific plan for an unfinished task had no more intrusive thoughts about it than people with nothing pending at all, and solved noticeably more anagrams on an unrelated task. Vague reflection did nothing.","Masicampo &amp; Baumeister 2011; Gollwitzer &amp; Sheeran 2006 meta-analysis, d = 0.65"],
+    ["No streaks anywhere","The strength bar is a rolling average that dips and recovers; it can't hit zero from one bad week.","Hard streak resets are the most commonly reported reason people abandon habit trackers — the reset reads as 'all progress erased', which licenses giving up entirely. Meanwhile the actual habit-formation data shows one missed day barely dents automaticity.","Lally et al. 2010 (median 66 days to automaticity, range 18–254); habit-tracker retention reviews"],
+    ["Weekly targets, not daily","Habits are counted x-times-per-week; deliberate skips reduce the denominator.","A 2,500-person randomised trial compared incentivising exercise at a fixed time versus any time. Flexible beat rigid both during the incentive period and — the part that matters — after incentives stopped.","Milkman et al. 2021, Management Science"],
+    ["A deliberate skip is its own colour","Amber, not red, and it doesn't count against you.","Binary done/not-done trackers punish a planned rest day exactly like a failure, which teaches people to stop logging honestly rather than to rest less.","Habit-tracker design reviews; Way of Life's three-state model"],
+    ["Self-forgiveness before restarting","The restart flow on 'When it breaks' asks you to let the gap go before rebuilding.","Students who forgave themselves for procrastinating before one exam procrastinated less before the next. Shame makes the task a reminder of failure, so you avoid the task to avoid the feeling.","Wohl, Pychyl &amp; Bennett 2010"],
+    ["'I'm stuck' asks what you're feeling","Not 'why haven't you started' — which only produces excuses.","Procrastination is much better explained as short-term mood repair than as poor time management. You're avoiding how the task makes you feel, so more reminders and deadlines target the wrong thing.","Sirois &amp; Pychyl 2013"],
+    ["Five minutes, not the whole thing","The stuck flow starts a five-minute timer and adds the smallest step to your Big 3.","Behavioural activation — doing the thing before you feel ready — performs about as well as full cognitive therapy for depression, with a large effect against controls. Action comes first; motivation follows.","Cuijpers et al. 2007 meta-analysis, d = 0.87"],
+    ["Phone in another room, as a checkbox","The deep-block gate won't accept 'silenced' or 'face down'.","Across ~800 participants, cognitive capacity was highest with the phone in another room, lower in a bag, lowest on the desk — and it made no difference whether it was on or off. People also reported not thinking about it, so you can't feel this cost happening.","Ward et al. 2017, 'Brain Drain'"],
+    ["Capacity check before you commit","The load bar on Today and step four of the daily plan.","Almost everyone plans roughly twice what a day holds. Finding out at 09:00 is a scheduling decision; finding out at 22:00 is a failure — and the second one is what makes people quit planning altogether.","Sunsama's workload model; long-term user reports"],
+    ["Three things, capped","The Big 3, and the daily plan won't offer a fourth slot.","Every durable daily method caps the list — six for Ivy Lee, one to three for MITs, nine sized items for 1-3-5. An uncapped list is by definition unprioritised.","Ivy Lee method (1918); MIT / 1-3-5 rule"],
+    ["Lead and lag on every goal","Each goal tracks a weekly action you control and an outcome you don't.","Tracking only the outcome tells you you're off course after it's too late to correct. Around 85% weekly completion of the controllable actions is the level that reliably delivers a twelve-week goal.","Moran, The 12 Week Year"],
+    ["Ninety-day goals","The goals page runs on a twelve-week horizon.","On an annual horizon there is always 'plenty of time', so effort back-loads to the deadline. Twelve weeks is long enough to finish something and short enough that the deadline is real.","12 Week Year; individual OKR practice"],
+    ["WOOP, not visualisation","The goal wizard makes you name the inner obstacle after imagining the outcome.","Imagining a good outcome on its own measurably lowers energy — blood pressure drops, and people achieve fewer of that week's goals. Contrasting it against the real obstacle is what turns the image into effort.","Oettingen; Kappes &amp; Oettingen 2011; MCII meta-analysis g = 0.34"],
+    ["Every habit needs an anchor and a two-minute version","Both fields are on the habit card.","Behaviour needs motivation, ability and a prompt at the same moment. Motivation is the one you can't control, so you shrink the behaviour and attach it to something that already happens reliably.","Fogg, B=MAP / Tiny Habits; Clear, habit stacking &amp; the 2-minute rule"],
+    ["Spaced retrieval, not rereading","The Revise queue reschedules by how well you recalled it, 1 to 35 days.","Practice testing and distributed practice were the only two of ten common study techniques rated high utility. Rereading and highlighting — the two most popular — were rated low. After a week, testing beat restudying by roughly 14 points.","Dunlosky et al. 2013; Roediger &amp; Karpicke 2006"],
+    ["Mixed problem sets","The interleaved set pulls your weakest topics across subjects and shuffles them.","Seventh-graders doing interleaved maths scored 74% versus 42% on a 30-day delayed test. The gap grows with delay, because mixing forces you to identify which method applies — which is the part the exam actually tests.","Rohrer, Dedrick &amp; Stershic 2015"],
+    ["Sleep judged on hours and consistency, not bedtime","The readiness score weights sleep most heavily; the habits are fixed wake time and morning daylight.","Teenage body clocks genuinely run late — it's a shift in melatonin timing, not a discipline problem. So a fixed early bedtime is the wrong target; consistent duration, a fixed wake time including weekends, and morning light are the levers that work.","AASM (8–10 hours for 13–18); adolescent chronotherapy trials"],
+    ["Absence tracked against real thresholds","The fravær card maps your percentage onto the actual escalation steps.","A late aflevering handed in without arranging it first is usually recorded as absence rather than just a late grade — so written work and absence are the same number, which most students find out afterwards.","Danish gymnasium studie- og ordensregler"],
+    ["The readiness score is a capacity estimate","It tells you to push or protect. It is never framed as a grade.","A single legible number beats six raw metrics for daily decisions, but only if you can see what drove it — so the breakdown is always shown underneath.","Oura Readiness / WHOOP Recovery"],
+    ["Stale tasks force a decision","Anything moved more than five times asks: recommit, reschedule, or let go.","In the analogue method this works because rewriting by hand is effortful — if a task isn't worth rewriting, it wasn't worth keeping. Software normally removes that friction, which is why digital lists rot.","Carroll, Bullet Journal migration"]
+  ];
+  $("#s-why").innerHTML='<div class="card"><h2>Why it works this way</h2>'
+    +'<div class="hint">Every design decision in here traces to something specific. This page exists so you can argue with it — and so the parts that sound like motivational fluff can be checked.</div>'
+    +'<div class="callout">Two honest caveats. Effect sizes in behavioural science are averages across groups, not predictions about you; and the IB dates in School are triangulated from schools that published their May 2027 calendars, not from the IB directly. Confirm those with your coordinator.</div></div>'
+    + W.map(function(w){
+      return '<div class="card flat"><div class="spread" style="align-items:flex-start;gap:16px;flex-wrap:wrap">'
+        +'<div style="flex:1;min-width:240px"><h3 style="font-size:15px;margin-bottom:4px">'+w[0]+'</h3>'
+        +'<div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">'+w[1]+'</div>'
+        +'<div style="font-size:13.5px;line-height:1.6;color:var(--ink-2)">'+w[2]+'</div>'
+        +'<div class="src" style="margin-top:9px">'+w[3]+'</div></div></div></div>';
+    }).join("");
+}
+
+/* ══════════ SAVE / LOAD ══════════ */
+function buildFile(){
+  var json=JSON.stringify(S).replace(/</g,"\\u003c");
+  var openTag='<script id="state-data" type="application/json">';
+  var i=PRISTINE.indexOf(openTag);
+  if(i<0) return null;
+  var j=PRISTINE.indexOf("<\/script>",i);
+  return PRISTINE.slice(0,i+openTag.length)+json+PRISTINE.slice(j);
+}
+function saveModal(){
+  openModal(''
+    +'<h2>Save your data</h2>'
+    +'<div class="md">This page has no server and no browser storage, so <b>the file is the save</b>. Downloading gives you a complete working copy of Compass with everything you\'ve entered already inside it — open that file tomorrow and carry on. Each save replaces the last one.</div>'
+    +'<div class="row" style="margin-bottom:18px"><button class="primary" id="dlFile">Download compass.html</button>'
+    +'<button class="ghost" id="cpCode">Copy as text instead</button></div>'
+    +'<div id="saveMsg" style="font-size:12.5px;color:var(--muted);margin-bottom:18px"></div>'
+    +'<div class="divider"></div>'
+    +'<h2>Restore from text</h2>'
+    +'<div class="md">Only needed if you copied text rather than downloading the file.</div>'
+    +'<textarea class="fld" id="loadT" style="min-height:80px;font-family:ui-monospace,monospace;font-size:11px" placeholder="Paste here…"></textarea>'
+    +'<div class="row" style="margin-top:11px"><button class="primary" id="loadGo">Restore</button>'
+    +'<button class="ghost" data-close>Close</button></div>'
+    +'<div id="loadMsg" style="font-size:12.5px;margin-top:11px"></div>',
+  function(root){
+    on(root.querySelector("#dlFile"),"click",function(){
+      var html=buildFile();
+      if(!html){ root.querySelector("#saveMsg").textContent="Couldn't rebuild the file — use Copy as text."; return; }
+      try{
+        var blob=new Blob([html],{type:"text/html"}), a=document.createElement("a");
+        a.href=URL.createObjectURL(blob); a.download="compass.html";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function(){URL.revokeObjectURL(a.href);},4000);
+        dirty=false; $("#dirtyDot").style.display="none";
+        root.querySelector("#saveMsg").innerHTML="Saved. Keep that file somewhere you'll find it — that copy <b>is</b> your Compass now.";
+      }catch(err){ root.querySelector("#saveMsg").textContent="Download blocked here. Use Copy as text, or open the downloaded file directly instead of a preview."; }
+    });
+    on(root.querySelector("#cpCode"),"click",function(){
+      var ta=document.createElement("textarea");
+      ta.value=JSON.stringify(S); ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.select();
+      var ok=false; try{ ok=document.execCommand("copy"); }catch(e2){}
+      if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(function(){},function(){});
+      document.body.removeChild(ta);
+      root.querySelector("#saveMsg").textContent=ok?"Copied. Paste it somewhere you'll find it again.":"Couldn't copy automatically — try the download instead.";
+    });
+    on(root.querySelector("#loadGo"),"click",function(){
+      var m=root.querySelector("#loadMsg"), raw=root.querySelector("#loadT").value.trim();
+      if(!raw){ m.style.color="var(--muted)"; m.textContent="Paste something first."; return; }
+      try{
+        var o=JSON.parse(raw);
+        if(!o||!o.domains) throw new Error("shape");
+        Object.keys(o).forEach(function(k){ S[k]=o[k]; });
+        renderAll(); m.style.color="var(--ok-text)"; m.textContent="Restored.";
+        setTimeout(closeModal,800);
+      }catch(e3){ m.style.color="var(--crit)"; m.textContent="Couldn't read that. Make sure you copied all of it."; }
+    });
+  });
+}
+
+/* ══════════ WIRING ══════════ */
+function renderAll(){
+  renderToday(); renderWeek(); renderSchool(); renderRevise();
+  renderTasks(); renderGoals(); renderRituals(); renderReset(); renderWhy();
+}
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme",S.theme||"light");
+  $("#themeBtn").textContent=(S.theme==="dark")?"Light":"Dark";
+}
+on($("#themeBtn"),"click",function(){ S.theme=(S.theme==="dark")?"light":"dark"; applyTheme(); touch(); });
+on($("#minBtn"),"click",function(){ S.minMode=!S.minMode; touch(); renderToday(); });
+on($("#stuckBtn"),"click",stuckFlow);
+on($("#saveBtn"),"click",saveModal);
+on($("#saveBtn2"),"click",saveModal);
+on($("#focusBtn"),"click",focusMode);
+on($("#fExit"),"click",function(){ $("#focusOv").classList.remove("on"); });
+on($("#fNext"),"click",function(){ fIdx++; focusMode(); });
+on($("#fDone"),"click",function(){
+  var t=T(), items=t.big3.filter(function(x){return x.t.trim()&&!x.d;});
+  if(items[fIdx]) items[fIdx].d=true;
+  touch(); fIdx=0; renderToday();
+  var left=T().big3.filter(function(x){return x.t.trim()&&!x.d;}).length;
+  if(left) focusMode(); else { $("#focusOv").classList.remove("on"); }
+});
+on($("#planBtn"),"click",planWizard);
+on($("#shutBtn"),"click",shutdownWizard);
+on($("#shutBtn2"),"click",shutdownWizard);
+on($("#revBtn"),"click",reviewWizard);
+on($("#mixBtn"),"click",function(){ mixSeed++; mixSet(); });
+on($("#modal"),"click",function(e){ if(e.target===$("#modal")) closeModal(); });
+
+on($("#sleepR"),"input",function(){ T().sleep=+$("#sleepR").value; touch(); renderToday(); });
+on($("#energyR"),"input",function(){ T().energy=+$("#energyR").value; touch(); renderToday(); });
+on($("#win"),"input",function(){ T().win=$("#win").value; touch(); });
+on($("#dump"),"input",function(){ T().dump=$("#dump").value; touch(); });
+on($("#blockQ"),"input",function(){ T().q=$("#blockQ").value; touch(); });
+on($("#dumpToTasks"),"click",function(){
+  var lines=String(T().dump||"").split("\n").map(function(s){return s.trim();}).filter(Boolean);
+  if(!lines.length) return;
+  lines.forEach(function(l){ addTask(l,"inbox"); });
+  T().dump=""; $("#dump").value=""; touch(); renderTasks(); show("tasks");
+});
+on($("#tStart"),"click",function(){
+  if(tOn){ tOn=false; if(tInt) clearInterval(tInt); tDraw(); return; }
+  var g=T().gate;
+  if(!g.phone){
+    openModal('<h2>The phone isn\'t in another room yet</h2>'
+      +'<div class="md">This is the one gate worth keeping. A phone on the desk costs you measurable working memory even switched off — and you won\'t feel it happening, which is exactly why the checkbox exists rather than your judgement.</div>'
+      +'<div class="row"><button class="primary" id="gYes">It\'s in another room now</button><button class="ghost" id="gNo">Start anyway</button></div>',
+      function(root){
+        on(root.querySelector("#gYes"),"click",function(){T().gate.phone=true;touch();closeModal();renderGate();tOn=true;startTimer();});
+        on(root.querySelector("#gNo"),"click",function(){closeModal();tOn=true;startTimer();});
+      });
+    return;
+  }
+  tOn=true; startTimer();
+});
+on($("#tStop"),"click",function(){ tOn=false; if(tInt) clearInterval(tInt); tRem=50*60; tDraw(); });
+on($("#addTask"),"click",function(){ addTask($("#newTask").value); $("#newTask").value=""; renderTasks(); });
+on($("#newTask"),"keydown",function(e){ if(e.key==="Enter"){ addTask($("#newTask").value); $("#newTask").value=""; renderTasks(); } });
+on($("#addGoal"),"click",function(){
+  var v=$("#newGoal").value.trim(); if(!v) return;
+  var g={id:nid(),title:v,why:"",w:"",o:"",ob:"",plan:"",leadN:"Sessions this week",leadT:3,lagN:"Progress",lagC:0,lagT:100};
+  S.goals.push(g); $("#newGoal").value=""; touch(); renderGoals(); woop(g);
+});
+on($("#addHabit"),"click",function(){
+  var n=$("#nhName").value.trim(); if(!n) return;
+  S.habits.push({id:nid(),n:n,anchor:$("#nhAnchor").value.trim(),tiny:$("#nhTiny").value.trim(),target:+$("#nhTarget").value});
+  $("#nhName").value="";$("#nhAnchor").value="";$("#nhTiny").value="";
+  touch(); renderWeek();
+});
+on($("#addSubject"),"click",function(){
+  var n=$("#nsName").value.trim(); if(!n) return;
+  var cs=["--d1","--d2","--d3","--d4","--d5","--d6"];
+  S.subjects.push({id:nid(),name:n,level:$("#nsLevel").value,c:cs[S.subjects.length%6],mins:0});
+  $("#nsName").value=""; touch(); renderSchool(); renderRevise();
+});
+on($("#addMs"),"click",function(){
+  var t=$("#msTitle").value.trim(), d=$("#msDate").value;
+  if(!t||!d) return;
+  S.ms.push({id:nid(),title:t,subject:$("#msSubject").value,date:d,type:$("#msType").value,est:false,done:false,deferrals:0});
+  $("#msTitle").value="";$("#msDate").value=""; touch(); renderSchool();
+});
+on($("#fravR"),"input",function(){ S.frav=+$("#fravR").value; touch(); renderSchool(); });
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape"){ closeModal(); $("#focusOv").classList.remove("on"); }
+});
+window.addEventListener("beforeunload",function(e){ if(dirty){ e.preventDefault(); e.returnValue=""; } });
+
+buildTabs(); applyTheme(); renderAll(); show(S.tab||"today"); tDraw();
+
+/* Fresh-start nudge on Mondays and month starts */
+(function(){
+  var d=NOW, isMon=d.getDay()===1, isM1=d.getDate()<=2;
+  if((isMon||isM1) && !T().planned && !S.weeks[iso(wkStart(NOW))]){
+    setTimeout(function(){
+      openModal('<h2>'+(isM1?"First of the month":"It\'s Monday")+'</h2>'
+        +'<div class="md">Worth using deliberately: gym visits jump about a third on Mondays and nearly half at the start of a term, purely because a clean slate makes a new commitment feel plausible. It isn\'t willpower — it\'s a free boost sitting in the calendar, and you may as well spend it.</div>'
+        +'<div class="row"><button class="primary" id="fsPlan">Plan the day</button>'
+        +'<button class="ghost" id="fsRev">Do the weekly review</button>'
+        +'<button class="ghost" data-close style="margin-left:auto">Not now</button></div>',
+        function(root){
+          on(root.querySelector("#fsPlan"),"click",function(){closeModal();planWizard();});
+          on(root.querySelector("#fsRev"),"click",function(){closeModal();reviewWizard();});
+        });
+    },900);
+  }
+/* ══════════ BRIDGE (for the Telegram shell) ══════════ */
+window.CompassBridge={
+  get:function(){ return S; },
+  set:function(o){ if(!o||typeof o!=="object") return false;
+    Object.keys(o).forEach(function(k){ S[k]=o[k]; }); return true; },
+  render:function(){ renderAll(); },
+  show:function(k){ show(k); },
+  tab:function(){ return S.tab; },
+  onChange:function(f){ touchHook=f; },
+  clean:function(){ dirty=false; var e=$("#dirtyDot"); if(e) e.style.display="none"; },
+  isDirty:function(){ return dirty; },
+  modalOpen:function(){ return $("#modal").classList.contains("on")||$("#focusOv").classList.contains("on"); },
+  closeTop:function(){ closeModal(); $("#focusOv").classList.remove("on"); },
+  wizards:{ plan:planWizard, shutdown:shutdownWizard, review:reviewWizard, stuck:stuckFlow },
+  dueCount:function(){ return S.rev.filter(revDue).length; },
+  inboxCount:function(){ return S.tasks.filter(function(t){return t.bucket==="inbox"&&!t.done;}).length; },
+  file:function(){ return buildFile(); }
+};
+
+})();
+})();
+
+</script>
+<script>
+/* ═══════════════ TELEGRAM MINI APP SHELL ═══════════════ */
+(function(){
+"use strict";
+var B = window.CompassBridge;
+if(!B){ return; }
+var TG = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+var IN_TG = !!(TG && TG.initData !== undefined && TG.platform && TG.platform !== "unknown");
+var CS = (TG && TG.CloudStorage) ? TG.CloudStorage : null;
+var CAN_CLOUD = !!(CS && TG.isVersionAtLeast && TG.isVersionAtLeast("6.9"));
+
+var $ = function(s){ return document.querySelector(s); };
+function el(tag,cls,html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
+
+/* ── icons ─────────────────────────────────────────── */
+var I = {
+  today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  week:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  school:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-4 9 4-9 4-9-4z"/><path d="M7 10.5V16c0 1.1 2.2 2 5 2s5-.9 5-2v-5.5"/></svg>',
+  revise:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H19v3H6.5A2.5 2.5 0 0 1 4 20.5z"/></svg>',
+  more:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>',
+  tasks:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg>',
+  goals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',
+  rituals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+  reset:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>',
+  why:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4"/><circle cx="12" cy="16.6" r=".7" fill="currentColor"/></svg>',
+  save:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M8 10.5l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
+  sync:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-13.7 5.6L4 15"/><path d="M4 12A8 8 0 0 1 17.7 6.4L20 9"/><path d="M4 20v-5h5M20 4v5h-5"/></svg>',
+  stuck:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-3.6 10.8c.5.4.8 1 .8 1.6V17h5.6v-1.6c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z"/><path d="M10 20.5h4"/></svg>'
+};
+
+/* ── haptics ───────────────────────────────────────── */
+var H = {
+  tap:function(){ try{ TG.HapticFeedback.impactOccurred("light"); }catch(e){} },
+  sel:function(){ try{ TG.HapticFeedback.selectionChanged(); }catch(e){} },
+  ok:function(){ try{ TG.HapticFeedback.notificationOccurred("success"); }catch(e){} },
+  err:function(){ try{ TG.HapticFeedback.notificationOccurred("error"); }catch(e){} }
+};
+if(!IN_TG){ H = {tap:function(){},sel:function(){},ok:function(){},err:function(){}}; }
+
+/* ── sync pill ─────────────────────────────────────── */
+var pill = el("div","tgsync",'<i></i><span>Saving…</span>');
+document.body.appendChild(pill);
+var pillT=null;
+function say(msg,kind,hold){
+  pill.className="tgsync on"+(kind?" "+kind:"");
+  pill.querySelector("span").textContent=msg;
+  if(pillT) clearTimeout(pillT);
+  if(hold!==0) pillT=setTimeout(function(){ pill.className="tgsync"+(kind?" "+kind:""); }, hold||1600);
+}
+
+/* ── cloud storage, chunked ────────────────────────── */
+var CH = 3500, MAXCH = 200;
+function cloudSave(cb){
+  if(!CAN_CLOUD) return cb && cb(false,"no cloud");
+  var json;
+  try{ json = JSON.stringify(prune(B.get())); }catch(e){ return cb && cb(false,"serialise"); }
+  var parts=[]; for(var i=0;i<json.length;i+=CH) parts.push(json.slice(i,i+CH));
+  if(parts.length>MAXCH) return cb && cb(false,"too big");
+  var pending=parts.length, bad=null;
+  if(!pending) return cb && cb(false,"empty");
+  parts.forEach(function(p,i){
+    CS.setItem("cp"+i, p, function(err){
+      if(err) bad=err;
+      if(--pending===0){
+        if(bad) return cb && cb(false,String(bad));
+        CS.setItem("cpmeta", JSON.stringify({n:parts.length,t:Date.now(),v:2}), function(e2){
+          if(e2) return cb && cb(false,String(e2));
+          var junk=[]; for(var k=parts.length;k<parts.length+12;k++) junk.push("cp"+k);
+          try{ CS.removeItems(junk,function(){}); }catch(e3){}
+          cb && cb(true);
+        });
+      }
+    });
+  });
+}
+function cloudLoad(cb){
+  if(!CAN_CLOUD) return cb(null,"no cloud");
+  CS.getItem("cpmeta", function(err,val){
+    if(err) return cb(null,String(err));
+    if(!val) return cb(null,"empty");
+    var meta; try{ meta=JSON.parse(val); }catch(e){ return cb(null,"bad meta"); }
+    var keys=[]; for(var i=0;i<meta.n;i++) keys.push("cp"+i);
+    CS.getItems(keys, function(e2,obj){
+      if(e2) return cb(null,String(e2));
+      var s="";
+      for(var j=0;j<meta.n;j++){ var v=obj["cp"+j]; if(v==null||v==="") return cb(null,"missing chunk "+j); s+=v; }
+      try{ cb(JSON.parse(s)); }catch(e3){ cb(null,"bad json"); }
+    });
+  });
+}
+function prune(S){
+  // keep the last ~14 months of daily records; drop free text from anything older than 4 months
+  var out={}; for(var k in S) out[k]=S[k];
+  var days={}, now=new Date();
+  var cut=new Date(now.getTime()-425*86400000), soft=new Date(now.getTime()-120*86400000);
+  Object.keys(S.days||{}).forEach(function(k){
+    var d=new Date(k); if(isNaN(d)||d<cut) return;
+    var r=S.days[k];
+    if(d<soft){ r=JSON.parse(JSON.stringify(r)); r.dump=""; r.win=r.win?r.win.slice(0,80):""; r.q=""; }
+    days[k]=r;
+  });
+  out.days=days;
+  return out;
+}
+
+var saveT=null, saving=false, again=false;
+function scheduleSave(){
+  if(!CAN_CLOUD) return;
+  if(saveT) clearTimeout(saveT);
+  saveT=setTimeout(doSave, 1800);
+}
+function doSave(){
+  if(!CAN_CLOUD) return;
+  if(saving){ again=true; return; }
+  saving=true; say("Saving…","",0);
+  cloudSave(function(ok,why){
+    saving=false;
+    if(ok){ B.clean(); say("Saved to Telegram","ok"); }
+    else { say(why==="too big"?"Too much history to sync":"Not saved — try again","err",3200); H.err(); }
+    if(again){ again=false; scheduleSave(); }
+  });
+}
+
+/* ── bottom nav ────────────────────────────────────── */
+var PRIMARY=[["today","Today",I.today],["week","Week",I.week],["school","School",I.school],["revise","Revise",I.revise]];
+var MORE=[
+  ["tasks","Tasks",I.tasks,"Capture everything, sort it later"],
+  ["goals","Goals",I.goals,"Two or three, on a 90-day horizon"],
+  ["rituals","Rituals",I.rituals,"The four scripts and the wizards"],
+  ["reset","When it breaks",I.reset,"Read this on the day you've stopped"],
+  ["why","Why it works",I.why,"Every decision, with its source"]
+];
+var nav=el("div","tgnav");
+nav.innerHTML = PRIMARY.map(function(t){
+    return '<button data-nt="'+t[0]+'" aria-selected="false">'+t[2]+'<span>'+t[1]+'</span><i class="nb" data-nb="'+t[0]+'"></i></button>';
+  }).join("")
+  + '<button data-nmore="1" aria-selected="false">'+I.more+'<span>More</span><i class="nb" data-nb="more"></i></button>';
+document.body.appendChild(nav);
+
+var sheet=el("div","tgmore");
+sheet.innerHTML='<div class="sheet"><div class="grab"></div>'
+  + MORE.map(function(m){ return '<button class="mrow" data-ns="'+m[0]+'">'+m[2]+'<span>'+m[1]+'<small>'+m[3]+'</small></span></button>'; }).join("")
+  + '<div class="msec">This file</div>'
+  + '<button class="mrow" data-act="sync">'+I.sync+'<span>Sync now<small id="tgLast">—</small></span></button>'
+  + '<button class="mrow" data-act="file">'+I.save+'<span>Download a backup file<small>A copy you keep outside Telegram</small></span></button>'
+  + '<button class="mrow" data-act="stuck">'+I.stuck+'<span>I\'m stuck<small>Smallest next step, five minutes</small></span></button>'
+  + '</div>';
+document.body.appendChild(sheet);
+
+function setTab(k){
+  B.show(k);
+  Array.prototype.forEach.call(nav.querySelectorAll("[data-nt]"),function(b){
+    b.setAttribute("aria-selected", String(b.dataset.nt===k)); });
+  var isMore = MORE.some(function(m){return m[0]===k;});
+  nav.querySelector("[data-nmore]").setAttribute("aria-selected", String(isMore));
+  refreshBadges();
+}
+nav.addEventListener("click",function(e){
+  var b=e.target.closest("[data-nt]");
+  if(b){ H.sel(); setTab(b.dataset.nt); closeSheet(); return; }
+  if(e.target.closest("[data-nmore]")){ H.sel(); openSheet(); }
+});
+function openSheet(){
+  var d=new Date();
+  sheet.querySelector("#tgLast").textContent = CAN_CLOUD
+    ? (B.isDirty()? "Unsaved changes" : "Everything saved")
+    : "Cloud sync unavailable on this version";
+  sheet.classList.add("on"); syncBack();
+}
+function closeSheet(){ sheet.classList.remove("on"); syncBack(); }
+sheet.addEventListener("click",function(e){
+  if(e.target===sheet){ closeSheet(); return; }
+  var r=e.target.closest("[data-ns]");
+  if(r){ H.sel(); setTab(r.dataset.ns); closeSheet(); return; }
+  var a=e.target.closest("[data-act]");
+  if(!a) return;
+  H.tap();
+  if(a.dataset.act==="sync"){ closeSheet(); doSave(); }
+  if(a.dataset.act==="stuck"){ closeSheet(); B.wizards.stuck(); }
+  if(a.dataset.act==="file"){
+    closeSheet();
+    var html=B.file();
+    if(!html){ say("Couldn't build the file","err"); return; }
+    try{
+      var blob=new Blob([html],{type:"text/html"}), u=URL.createObjectURL(blob);
+      if(IN_TG && TG.openLink){ TG.downloadFile ? TG.downloadFile({url:u,file_name:"compass.html"},function(){}) : window.open(u,"_blank"); }
+      else { var el2=document.createElement("a"); el2.href=u; el2.download="compass.html";
+        document.body.appendChild(el2); el2.click(); document.body.removeChild(el2); }
+      setTimeout(function(){URL.revokeObjectURL(u);},8000);
+      say("Backup created","ok");
+    }catch(err){ say("Download blocked here","err",2600); }
+  }
+});
+function refreshBadges(){
+  var m={revise:B.dueCount(), tasks:B.inboxCount()};
+  var moreN=0; MORE.forEach(function(x){ if(m[x[0]]) moreN+=m[x[0]]; });
+  Array.prototype.forEach.call(nav.querySelectorAll("[data-nb]"),function(i){
+    var k=i.dataset.nb, n = k==="more" ? moreN : (m[k]||0);
+    i.style.display = n>0 ? "block" : "none";
+    i.textContent = n>99?"99+":n;
+  });
+}
+
+/* ── Telegram BackButton drives every overlay ──────── */
+function syncBack(){
+  if(!IN_TG || !TG.BackButton) return;
+  var open = B.modalOpen() || sheet.classList.contains("on") || B.tab()!=="today";
+  try{ open ? TG.BackButton.show() : TG.BackButton.hide(); }catch(e){}
+}
+if(IN_TG && TG.BackButton){
+  TG.BackButton.onClick(function(){
+    H.sel();
+    if(sheet.classList.contains("on")) return closeSheet();
+    if(B.modalOpen()){ B.closeTop(); return syncBack(); }
+    setTab("today"); syncBack();
+  });
+}
+var mo=new MutationObserver(function(){ syncBack(); });
+mo.observe($("#modal"),{attributes:true,attributeFilter:["class"]});
+mo.observe($("#focusOv"),{attributes:true,attributeFilter:["class"]});
+
+/* ── haptics on the things you tap most ────────────── */
+document.addEventListener("click",function(e){
+  if(!IN_TG) return;
+  var t=e.target;
+  if(t.closest(".cell")||t.closest(".box")||t.closest(".anchor")||t.closest(".confbtns button")
+     ||t.closest(".gatechk")||t.closest(".quad .w")) H.tap();
+  else if(t.closest(".pills button")||t.closest(".ghost")||t.closest(".mrow")||t.closest(".primary")) H.sel();
+},true);
+
+/* ── theme + viewport ──────────────────────────────── */
+function applyChrome(){
+  if(!IN_TG) return;
+  var dark = document.documentElement.getAttribute("data-theme")==="dark";
+  var plane = dark ? "#0d0d0d" : "#f9f9f7";
+  var bar   = dark ? "#1a1a19" : "#fcfcfb";
+  try{ TG.setBackgroundColor(plane); }catch(e){}
+  try{ TG.setHeaderColor(plane); }catch(e){}
+  try{ TG.setBottomBarColor(bar); }catch(e){}
+}
+function applyInsets(){
+  var top=0, bot=0;
+  try{
+    var s=TG.safeAreaInset||{}, c=TG.contentSafeAreaInset||{};
+    top=(s.top||0)+(c.top||0); bot=(s.bottom||0);
+  }catch(e){}
+  document.documentElement.style.setProperty("--tgtop", top+"px");
+  document.documentElement.style.setProperty("--tgsafe", bot+"px");
+}
+
+/* ── boot ──────────────────────────────────────────── */
+function boot(){
+  document.body.classList.add("tg");
+  if(IN_TG){
+    try{ TG.ready(); }catch(e){}
+    try{ TG.expand(); }catch(e){}
+    try{ TG.disableVerticalSwipes(); }catch(e){}
+    try{ TG.enableClosingConfirmation(); }catch(e){}
+    applyInsets(); applyChrome();
+    try{ TG.onEvent("themeChanged", applyChrome); }catch(e){}
+    try{ TG.onEvent("safeAreaChanged", applyInsets); }catch(e){}
+    try{ TG.onEvent("contentSafeAreaChanged", applyInsets); }catch(e){}
+    try{ TG.onEvent("viewportChanged", applyInsets); }catch(e){}
+  }
+  setTab(B.tab()||"today");
+
+  if(CAN_CLOUD){
+    say("Loading your data…","",0);
+    cloudLoad(function(state,why){
+      if(state && !B.isDirty()){
+        B.set(state); B.render(); setTab(B.tab()||"today");
+        say("Loaded","ok");
+      } else if(!state && why==="empty"){
+        // first ever open: follow the Telegram colour scheme
+        if(IN_TG && TG.colorScheme==="dark"){
+          B.set({theme:"dark"}); document.documentElement.setAttribute("data-theme","dark");
+          var tb=$("#themeBtn"); if(tb) tb.textContent="Light";
+          applyChrome();
+        }
+        B.render(); setTab("today");
+        say("Ready — this saves itself from now on","ok",2600);
+      } else {
+        say("Couldn't load: "+(why||"unknown"),"err",3600);
+      }
+      refreshBadges();
+    });
+    B.onChange(function(){ scheduleSave(); refreshBadges(); syncBack(); });
+    window.addEventListener("pagehide",function(){ if(B.isDirty()) doSave(); });
+    document.addEventListener("visibilitychange",function(){
+      if(document.visibilityState==="hidden" && B.isDirty()) doSave(); });
+  } else {
+    B.onChange(function(){ refreshBadges(); syncBack(); });
+    if(IN_TG){
+      say("Old Telegram — update to sync","err",5000);
+    }
+  }
+  // keep the in-app theme toggle wired to Telegram's chrome
+  var tb=$("#themeBtn"); if(tb) tb.addEventListener("click",function(){ setTimeout(applyChrome,30); });
+  syncBack();
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
+})();
+
+</script>
+</body>
+</html>
