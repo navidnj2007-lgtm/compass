@@ -526,6 +526,21 @@ body.standalone .wrap{padding-bottom:calc(var(--tgnav) + max(var(--tgsafe), env(
 body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-inset-bottom, 0px)))}
 .tgsync{bottom:calc(var(--tgnav) + max(var(--tgsafe), env(safe-area-inset-bottom, 0px)) + 12px)}
 
+
+/* ── AI action cards ─────────────────────────────── */
+.acts{margin:8px 0 2px;border:1px solid var(--border);border-radius:14px;background:var(--surface);overflow:hidden}
+.acts .ah{display:flex;align-items:center;gap:7px;padding:9px 12px;background:var(--s1);border-bottom:1px solid var(--border);
+  font-size:11.5px;font-weight:650;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.acts ul{list-style:none;margin:0;padding:6px 12px 8px}
+.acts li{display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:13.5px;line-height:1.42;color:var(--ink)}
+.acts li .ai-v{flex:none;width:16px;text-align:center;font-weight:700;color:var(--pos)}
+.acts li.del .ai-v{color:var(--neg)}
+.acts li.fail{color:var(--muted)}
+.acts li.fail .ai-v{color:var(--neg)}
+.acts .af{display:flex;gap:8px;padding:9px 12px 11px;border-top:1px solid var(--border)}
+.acts .af button{flex:1}
+.acts.done{opacity:.9}
+.acts .note{padding:0 12px 10px;font-size:12.5px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -2378,6 +2393,7 @@ window.CompassBridge={
   show:function(k){ show(k); },
   tab:function(){ return S.tab; },
   onChange:function(f){ touchHook=f; },
+  touch:function(){ touch(); },
   clean:function(){ dirty=false; var e=$("#dirtyDot"); if(e) e.style.display="none"; },
   isDirty:function(){ return dirty; },
   modalOpen:function(){ return $("#modal").classList.contains("on")||$("#focusOv").classList.contains("on"); },
@@ -2577,6 +2593,7 @@ sheet.innerHTML='<div class="sheet"><div class="grab"></div>'
   + '</div>';
 document.body.appendChild(sheet);
 
+window.CompassSetTab=function(k){ setTab(k); };
 function setTab(k){
   B.show(k);
   Array.prototype.forEach.call(nav.querySelectorAll("[data-nt]"),function(b){
@@ -2862,7 +2879,245 @@ function snapshot(mode){
   L.push("Tasks: "+inbox+" uncleared in inbox; today: "
     +(todayT.length?todayT.slice(0,8).map(function(t){return t.text;}).join(", "):"none"));
   if(S.frav) L.push("Absence: "+S.frav+"%");
+
+  if(ACT_MODES[mode]){
+    var open=S.tasks.filter(function(t){ return !t.done; });
+    L.push("ALL OPEN TASKS \u2014 copy a fragment of one of these into \"match\":");
+    if(!open.length) L.push("  (none)");
+    open.slice(0,30).forEach(function(t){
+      L.push("  - ["+(BK[t.bucket]||t.bucket)+"] "+t.text+(t.mins?" ("+t.mins+"m)":""));
+    });
+    if(open.length>30) L.push("  \u2026and "+(open.length-30)+" more");
+    var b3=d.big3||[];
+    L.push("BIG 3 SLOTS TODAY: "+[0,1,2].map(function(i){
+      var x=b3[i]||{}; return (i+1)+"="+(x.t&&x.t.trim()?"\u201C"+x.t+"\u201D"+(x.d?" (done)":""):"empty");
+    }).join(", "));
+    L.push("Subject names you may use in revise.add: "+S.subjects.map(function(x){return x.name;}).join(", "));
+    L.push("Valid buckets: inbox, today, week, waiting, someday");
+  }
   return L.join("\n");
+}
+
+
+/* ── ACTIONS: the AI proposes, Navid approves, then it edits ─────────── */
+var BK={inbox:"Inbox",today:"Today",week:"This week",waiting:"Waiting on",someday:"Someday"};
+var ACT_MODES={advise:1,organise:1};
+
+var ACTIONS_SPEC =
+"\n\n=== CHANGING HIS COMPASS ===\n"+
+"You can propose changes to his data. He sees them as a list and taps Apply before anything happens.\n"+
+"When — and only when — he asks you to add, change, tick off, move or remove something, put a fenced block at the "+
+"very END of your reply:\n\n"+
+"```compass\n"+
+'[{"do":"task.add","text":"Finish the Chem IA method section","bucket":"today","mins":60}]\n'+
+"```\n\n"+
+"Rules:\n"+
+"- One short line of prose first, saying what you're proposing. Then the block. Nothing after it.\n"+
+"- Never mention, explain or demonstrate the block. He never sees it; he sees a tidy list.\n"+
+"- Only propose what he actually asked for. Never tidy, reschedule, delete or invent items on your own initiative.\n"+
+"- To touch something that already exists, use \"match\": a distinctive fragment of its current text, copied exactly "+
+"from the CONTEXT above. If the item isn't in the CONTEXT, don't guess — ask him which one he means.\n"+
+"- Dates are YYYY-MM-DD. Today's date is in the CONTEXT. Never invent a deadline he didn't give you.\n"+
+"- If he only wanted advice or an answer, emit no block at all. Most replies have no block.\n\n"+
+"Actions:\n"+
+'  {"do":"task.add","text":"...","bucket":"inbox|today|week|waiting|someday","mins":0,"plan":"If X then Y"}\n'+
+'  {"do":"task.edit","match":"...","text":"...","bucket":"...","mins":0,"plan":"..."}\n'+
+'  {"do":"task.done","match":"..."}\n'+
+'  {"do":"task.delete","match":"..."}\n'+
+'  {"do":"big3.set","slot":1,"text":"...","mins":60,"plan":"..."}   slot is 1, 2 or 3 — today only\n'+
+'  {"do":"big3.clear","slot":2}\n'+
+'  {"do":"deadline.add","title":"...","date":"2026-11-25","subject":"Chemistry HL","type":"IA|EE|TOK|Exam|Other"}\n'+
+'  {"do":"deadline.done","match":"..."}\n'+
+'  {"do":"revise.add","subject":"Chemistry HL","topic":"Le Chatelier and Kc"}\n';
+
+function actId(){ return "ai"+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+function clip(s,n){ return String(s==null?"":s).replace(/\s+/g," ").trim().slice(0,n||200); }
+function qt(s){ return "“"+esc(clip(s,90))+"”"; }
+function okBucket(b){ return BK[b] ? b : null; }
+function okMins(m){ return typeof m==="number" && isFinite(m) ? Math.max(0,Math.min(600,Math.round(m))) : null; }
+function okDate(d){ return /^\d{4}-\d{2}-\d{2}$/.test(String(d||"")) ? String(d) : null; }
+function slotOf(a){ var n=parseInt(a.slot,10); if(!isFinite(n)) n=1; return Math.max(0,Math.min(2,n-1)); }
+
+/* Pull the action block out of the reply text. */
+function splitActions(txt){
+  txt=String(txt||"");
+  var m=/```[ \t]*compass[ \t]*\r?\n?([\s\S]*?)```/i.exec(txt), whole=null, raw=null;
+  if(m){ whole=m[0]; raw=m[1]; }
+  else {
+    var m2=/(\[\s*\{[\s\S]*?"do"\s*:[\s\S]*?\}\s*\])/.exec(txt);
+    if(m2){ whole=m2[0]; raw=m2[1]; }
+  }
+  if(raw===null) return {body:txt, acts:null};
+  var body=txt.replace(whole,"").replace(/```\s*$/,"").trim();
+  var acts=null;
+  try{
+    var j=JSON.parse(String(raw).trim());
+    if(Array.isArray(j)) acts=j; else if(j&&typeof j.do==="string") acts=[j];
+  }catch(e){ acts=null; }
+  if(acts) acts=acts.filter(function(a){ return a && typeof a.do==="string"; }).slice(0,20);
+  return {body:body, acts:(acts&&acts.length)?acts:null};
+}
+/* While streaming, hide a block that hasn't finished arriving yet. */
+function streamBody(txt){
+  var i=String(txt||"").search(/```[ \t]*compass/i);
+  if(i<0) i=String(txt||"").search(/\n\[\s*\{\s*"do"/);
+  return i<0 ? txt : String(txt).slice(0,i).trim();
+}
+
+function resolveName(a){
+  try{
+    var r=pickTask(B.get(),a);
+    if(r && r.t) return r.t.text;
+  }catch(e){}
+  return a.match;
+}
+function resolveSubj(name){
+  try{
+    var n=clip(name,40).toLowerCase();
+    var su=B.get().subjects.filter(function(x){ return String(x.name||"").toLowerCase().indexOf(n)>=0; });
+    if(n && su.length===1) return su[0].name;
+  }catch(e){}
+  return name;
+}
+function describe(a){
+  var c;
+  switch(a.do){
+    case "task.add":
+      c=[]; if(okMins(a.mins)) c.push(okMins(a.mins)+" min"); if(a.plan) c.push("with a plan");
+      return {t:"Add task "+qt(a.text)+" to "+(BK[okBucket(a.bucket)]||"Inbox")+(c.length?" · "+c.join(", "):"")};
+    case "task.edit":
+      c=[]; if(a.text) c.push("rename to "+qt(a.text));
+      if(okBucket(a.bucket)) c.push("move to "+BK[a.bucket]);
+      if(okMins(a.mins)!==null) c.push(okMins(a.mins)+" min");
+      if(a.plan) c.push("set the plan");
+      return {t:"Change "+qt(resolveName(a))+" — "+(c.join(", ")||"nothing")};
+    case "task.done":    return {t:"Tick off "+qt(resolveName(a))};
+    case "task.delete":  return {t:"Delete "+qt(resolveName(a)), del:true};
+    case "big3.set":     return {t:"Big 3 · slot "+(slotOf(a)+1)+" → "+qt(a.text)+(okMins(a.mins)?" ("+okMins(a.mins)+" min)":"")};
+    case "big3.clear":   return {t:"Clear Big 3 slot "+(slotOf(a)+1), del:true};
+    case "deadline.add": return {t:"Add deadline "+qt(a.title)+" on "+esc(okDate(a.date)||"?")+(a.subject?" · "+esc(clip(a.subject,30)):"")};
+    case "deadline.done":return {t:"Mark deadline "+qt(a.match)+" done"};
+    case "revise.add":   return {t:"Add revision topic "+qt(a.topic)+" to "+esc(clip(resolveSubj(a.subject),30))};
+    default:             return {t:"Unrecognised action “"+esc(clip(a.do,40))+"”", bad:true};
+  }
+}
+
+function pickTask(S,a){
+  var q=clip(a.match||a.id||"",120).toLowerCase();
+  if(!q) return {err:"no item named"};
+  var open=S.tasks.filter(function(t){ return !t.done; });
+  var hits=open.filter(function(t){ return String(t.text||"").toLowerCase().indexOf(q)>=0; });
+  if(!hits.length) hits=S.tasks.filter(function(t){ return String(t.text||"").toLowerCase().indexOf(q)>=0; });
+  if(!hits.length) return {err:"no task matches that"};
+  if(hits.length>1){
+    var exact=hits.filter(function(t){ return String(t.text||"").toLowerCase()===q; });
+    if(exact.length!==1) return {err:hits.length+" tasks match — too vague"};
+    return {t:exact[0]};
+  }
+  return {t:hits[0]};
+}
+
+function dayRec(S,k){
+  if(!S.days[k]) S.days[k]={big3:[],anchors:[],habits:{},energy:3,sleep:0,mood:null,win:"",dump:"",focus:0,q:"",gate:{},planned:false,shut:[]};
+  var o=S.days[k];
+  if(!o.big3) o.big3=[];
+  while(o.big3.length<3) o.big3.push({t:"",d:false,plan:"",mins:60});
+  return o;
+}
+
+function runAct(S,a,today){
+  var r,t,b,m,v;
+  switch(a.do){
+    case "task.add":
+      v=clip(a.text,200); if(!v) return "the task had no text";
+      S.tasks.push({id:actId(), text:v, bucket:okBucket(a.bucket)||"inbox", done:false,
+        created:today, moves:0, plan:clip(a.plan,200), mins:okMins(a.mins)||0, para:""});
+      return null;
+    case "task.edit":
+      r=pickTask(S,a); if(r.err) return r.err; t=r.t;
+      if(a.text) t.text=clip(a.text,200);
+      b=okBucket(a.bucket); if(b && b!==t.bucket){ t.bucket=b; t.moves=(t.moves||0)+1; }
+      m=okMins(a.mins); if(m!==null) t.mins=m;
+      if(a.plan) t.plan=clip(a.plan,200);
+      return null;
+    case "task.done":
+      r=pickTask(S,a); if(r.err) return r.err; r.t.done=true; return null;
+    case "task.delete":
+      r=pickTask(S,a); if(r.err) return r.err;
+      S.tasks=S.tasks.filter(function(x){ return x.id!==r.t.id; }); return null;
+    case "big3.set":
+      v=clip(a.text,140); if(!v) return "no text for the slot";
+      t=dayRec(S,today).big3[slotOf(a)];
+      t.t=v; t.d=false; if(okMins(a.mins)) t.mins=okMins(a.mins); if(a.plan) t.plan=clip(a.plan,200);
+      return null;
+    case "big3.clear":
+      t=dayRec(S,today).big3[slotOf(a)]; t.t=""; t.d=false; t.plan=""; t.mins=60; return null;
+    case "deadline.add":
+      v=clip(a.title,160); var dt=okDate(a.date);
+      if(!v) return "the deadline had no title";
+      if(!dt) return "the date wasn't a real YYYY-MM-DD date";
+      S.ms.push({id:actId(), title:v, subject:clip(a.subject,40), date:dt,
+        type:clip(a.type,12)||"Other", est:false, done:false, deferrals:0, firstSeen:today});
+      return null;
+    case "deadline.done":
+      var qq=clip(a.match,120).toLowerCase(); if(!qq) return "no deadline named";
+      var ms=S.ms.filter(function(x){ return !x.done && String(x.title||"").toLowerCase().indexOf(qq)>=0; });
+      if(!ms.length) return "no deadline matches that";
+      if(ms.length>1) return ms.length+" deadlines match — too vague";
+      ms[0].done=true; return null;
+    case "revise.add":
+      var tp=clip(a.topic,160); if(!tp) return "no topic given";
+      var sn=clip(a.subject,40).toLowerCase();
+      var su=S.subjects.filter(function(x){ return String(x.name||"").toLowerCase().indexOf(sn)>=0; });
+      if(!sn||!su.length) return "no subject called “"+esc(clip(a.subject,30))+"”";
+      S.rev.push({id:actId(), s:su[0].id, t:tp, box:1, next:null, reps:0}); return null;
+    default:
+      return "not an action Compass knows";
+  }
+}
+
+function applyActs(msg){
+  var S=B.get();
+  var before=JSON.parse(JSON.stringify({tasks:S.tasks, ms:S.ms, rev:S.rev, days:S.days}));
+  var today=iso(new Date()), out=[];
+  msg.acts.forEach(function(a){
+    var why=null;
+    try{ why=runAct(S,a,today); }catch(e){ why="it failed ("+(e&&e.message||e)+")"; }
+    out.push(why);
+  });
+  msg.result=out;
+  msg.undo=before;
+  B.set(S); if(B.touch) B.touch(); B.render();
+  paint();
+}
+function undoActs(msg){
+  if(!msg.undo) return;
+  B.set(JSON.parse(JSON.stringify(msg.undo)));
+  if(B.touch) B.touch(); B.render();
+  msg.result=null; msg.undo=null; msg.undone=true;
+  paint();
+}
+
+function actsHTML(m,i){
+  var applied=!!m.result, rows=m.acts.map(function(a,k){
+    var d=describe(a), fail=applied && m.result[k];
+    var cls=(d.del||d.bad?"del ":"")+(fail?"fail":"");
+    var tick=!applied ? "·" : (fail ? "×" : "✓");
+    return '<li class="'+cls+'"><span class="ai-v">'+tick+'</span><span>'+d.t
+      +(fail?' <i style="opacity:.8">— '+esc(fail)+'</i>':'')+'</span></li>';
+  }).join("");
+  var head, foot;
+  if(!applied){
+    head="Proposed changes · "+m.acts.length;
+    foot='<div class="af"><button class="primary sm" data-actapply="'+i+'">Apply</button>'
+       + '<button class="ghost sm" data-actskip="'+i+'">Discard</button></div>';
+  } else {
+    var bad=m.result.filter(Boolean).length, good=m.acts.length-bad;
+    head="Applied · "+good+" of "+m.acts.length;
+    foot='<div class="af"><button class="ghost sm" data-actundo="'+i+'">Undo</button></div>'
+       + (bad?'<div class="note">The ones marked × didn’t go through. Tell it which item you meant.</div>':'');
+  }
+  return '<div class="acts'+(applied?" done":"")+'"><div class="ah">'+head+'</div><ul>'+rows+'</ul>'+foot+'</div>';
 }
 
 /* ── prompts ───────────────────────────────────────── */
@@ -2906,8 +3161,12 @@ var MODES = {
     "procrastination is usually avoidance of how a task feels, not laziness. Ask what specifically he's avoiding "+
     "about it (ambiguity, fear it'll be bad, size, boredom, exhaustion) if it isn't obvious. Then give ONE physical "+
     "first step small enough to be faintly ridiculous, and tell him to do only five minutes. Do not produce a plan, "+
-    "a list, or a pep talk. Two or three sentences is the right length."}
+    "a list, or a pep talk. Two or three sentences is the right length."},
+  organise: { label:"Organise", hint:"Say what to add or change — it edits the app for you",
+    sys: BASE+"\n\nMODE: ORGANISE.\nHe is telling you what to put into Compass, or what to change in it. Turn what he says into concrete changes and propose them. Keep the prose to one line — the list of changes is the answer, not a description of it. If something is genuinely ambiguous (which task he means, what day, how long it takes) ask one short question and propose nothing that turn. Choose a sensible bucket yourself rather than asking: something for today goes to Today, a vague someday-thought goes to Someday, anything unclear goes to Inbox. Estimate minutes only if he gave you enough to estimate from."}
 };
+
+Object.keys(ACT_MODES).forEach(function(k){ if(MODES[k]) MODES[k].sys += ACTIONS_SPEC; });
 
 var mode="advise", history=[], busy=false, ctl=null, showCfg=false;
 
@@ -2941,13 +3200,19 @@ function paint(){
       advise:"Ask it to look at today. Try: “what should I actually do today?” or “I have three hours, what matters most?”",
       quiz:"It pulls whatever is due in Revise. Say “start” when you’re ready.",
       explain:"Ask anything from your four subjects. Try: “why does entropy increase” or “integration by parts, from scratch”.",
-      stuck:"Say what you can’t start. One line is enough."
+      stuck:"Say what you can’t start. One line is enough.",
+      organise:"Tell it what to add or change. Try: “add a task to redo the titration writeup, 45 min, today” or “move the Danish oral prep to this week and tick off the maths problem set”."
     }[mode])+'</div>';
     return;
   }
   box.innerHTML = history.map(function(m,i){
     if(m.role==="user") return '<div class="msg me"><div class="bub">'+esc(m.content)+'</div></div>';
-    return '<div class="msg ai"><div class="bub">'+(m.content?md(m.content):'<span class="dots"><i></i><i></i><i></i></span>')+'</div></div>';
+    var body = m.acts ? m.body : streamBody(m.content);
+    var bub = '<div class="msg ai"><div class="bub">'
+      + (body ? md(body) : (m.acts ? "" : '<span class="dots"><i></i><i></i><i></i></span>'))
+      + '</div></div>';
+    if(m.undone) bub += '<div class="msg ai"><div class="bub"><i>Reverted \u2014 nothing was changed.</i></div></div>';
+    return bub + (m.acts ? actsHTML(m,i) : "");
   }).join("");
   box.scrollTop = box.scrollHeight;
 }
@@ -2963,7 +3228,14 @@ async function send(text){
   paint(); busy=true; setSend();
 
   var msgs=[{role:"system",content:MODES[mode].sys+"\n\n=== LIVE COMPASS CONTEXT ===\n"+snapshot(mode)}]
-    .concat(history.slice(0,-1).slice(-12));
+    .concat(history.slice(0,-1).slice(-12).map(function(m){
+      if(m.role!=="assistant") return {role:m.role, content:m.content};
+      var c = m.body || m.content;
+      if(m.acts && m.result) c += "\n[Those changes were applied.]";
+      else if(m.acts) c += "\n[Those changes are still waiting for him to approve.]";
+      else if(m.undone) c += "\n[He discarded those changes.]";
+      return {role:"assistant", content:c};
+    }));
 
   ctl = new AbortController();
   var slot = history[history.length-1];
@@ -3004,6 +3276,10 @@ async function send(text){
       }
     }
     if(!slot.content) slot.content = "No reply came back. Try again, or check the worker logs in Cloudflare.";
+    if(ACT_MODES[mode]){
+      var sp = splitActions(slot.content);
+      if(sp.acts){ slot.acts = sp.acts; slot.body = sp.body || "Here\u2019s what I\u2019d change:"; }
+    }
   }catch(err){
     if(err && err.name==="AbortError"){ if(!slot.content) slot.content="(stopped)"; }
     else slot.content = "Couldn't reach the worker. Check the URL in Settings and that you're online.\n\n"+String(err&&err.message||err);
@@ -3053,6 +3329,17 @@ function boot(){
 
   render();
   document.getElementById("askClear").addEventListener("click",function(){ history=[]; paint(); });
+  document.getElementById("askLog").addEventListener("click",function(e){
+    var b=e.target.closest && e.target.closest("[data-actapply],[data-actskip],[data-actundo]");
+    if(!b) return;
+    var i=+(b.dataset.actapply||b.dataset.actskip||b.dataset.actundo), m=history[i];
+    if(!m||!m.acts&&!m.undo) { if(!m) return; }
+    if(b.dataset.actapply!=null){ applyActs(m); }
+    else if(b.dataset.actskip!=null){ m.acts=null; m.undone=true; paint(); }
+    else { undoActs(m); }
+    try{ if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.HapticFeedback)
+      window.Telegram.WebApp.HapticFeedback.impactOccurred("light"); }catch(err){}
+  });
   document.getElementById("askCfg").addEventListener("click",function(){ showCfg=!showCfg; render(); });
   document.getElementById("cfgForget").addEventListener("click",function(){
     cfg={url:"",secret:""}; saveCfg(); showCfg=false; render();
@@ -3126,7 +3413,8 @@ function boot(){
 
   window.CompassAsk = function(m, seed){
     if(m && MODES[m]) mode=m;
-    history=[]; render(); B.show("ask");
+    history=[]; render();
+    if(window.CompassSetTab) window.CompassSetTab("ask"); else B.show("ask");
     if(seed) setTimeout(function(){ send(seed); }, 120);
   };
 }
