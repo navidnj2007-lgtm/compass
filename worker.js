@@ -80,12 +80,36 @@ export default {
       return fail(500, "Worker is missing QWEN_API_KEY.", allowed);
     }
 
+    const base = (env.QWEN_BASE || DEFAULTS.base).replace(/\/+$/, "");
+
     // 3. Validate the body so a bug on the client can't run up a bill.
     let body;
     try {
       body = await request.json();
     } catch {
       return fail(400, "Body must be JSON.", allowed);
+    }
+
+    // 3a. Ask the provider which models it actually offers, so the app can
+    //     offer a picker instead of guessing at names.
+    if (body.action === "models") {
+      let list;
+      try {
+        list = await fetch(`${base}/models`, {
+          headers: { Authorization: `Bearer ${env.QWEN_API_KEY}` },
+        });
+      } catch (e) {
+        return fail(502, `Could not reach the provider: ${e.message}`, allowed);
+      }
+      const text = await list.text();
+      return new Response(text, {
+        status: list.status,
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": "no-store",
+          ...cors(allowed || origin),
+        },
+      });
     }
     const messages = Array.isArray(body.messages) ? body.messages : null;
     if (!messages || !messages.length) {
@@ -112,8 +136,12 @@ export default {
     }
 
     const stream = body.stream !== false;
+    const chosen =
+      typeof body.model === "string" && body.model.length && body.model.length <= 64
+        ? body.model
+        : null;
     const payload = {
-      model: env.QWEN_MODEL || DEFAULTS.model,
+      model: chosen || env.QWEN_MODEL || DEFAULTS.model,
       messages,
       stream,
       temperature: typeof body.temperature === "number"
@@ -125,8 +153,6 @@ export default {
       ),
     };
     if (stream) payload.stream_options = { include_usage: true };
-
-    const base = (env.QWEN_BASE || DEFAULTS.base).replace(/\/+$/, "");
 
     let upstream;
     try {

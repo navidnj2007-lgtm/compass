@@ -2720,8 +2720,8 @@ if(!B) return;
 
 var CFG_KEY = "compass_ai_cfg";
 var cfg = (function(){
-  try{ var v=localStorage.getItem(CFG_KEY); return v?JSON.parse(v):{url:"",secret:""}; }
-  catch(e){ return {url:"",secret:""}; }
+  try{ var v=localStorage.getItem(CFG_KEY); return v?JSON.parse(v):{url:"",secret:"",model:""}; }
+  catch(e){ return {url:"",secret:"",model:""}; }
 })();
 function saveCfg(){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){} }
 function ready(){ return !!(cfg.url && cfg.secret); }
@@ -2758,6 +2758,17 @@ function md(src){
   if(inCode && buf.length) out.push("<pre>"+buf.join("\n")+"</pre>");
   closeList();
   return out.join("");
+}
+
+function niceErr(txt){
+  var s=String(txt==null?"":txt);
+  var m=s.match(/\{[\s\S]*\}/);
+  if(m){ try{ var j=JSON.parse(m[0]);
+    var e=j.error!==undefined?j.error:j;
+    if(typeof e==="string") return e;
+    if(e && e.message) return e.message;
+  }catch(x){} }
+  return s;
 }
 
 /* ── context from live Compass state ───────────────── */
@@ -2891,6 +2902,11 @@ function render(){
   $("#askComposer").style.display = ready() ? "" : "none";
   $("#cfgUrl").value = cfg.url || "";
   $("#cfgSecret").value = cfg.secret || "";
+  var sel=$("#cfgModel");
+  if(sel && cfg.model && !Array.prototype.some.call(sel.options,function(o){return o.value===cfg.model;})){
+    var o=document.createElement("option"); o.value=cfg.model; o.textContent=cfg.model; sel.appendChild(o);
+  }
+  if(sel) sel.value = cfg.model || "";
   paint();
 }
 function paint(){
@@ -2930,14 +2946,17 @@ async function send(text){
     var res = await fetch(cfg.url,{
       method:"POST",
       headers:{"Content-Type":"application/json","X-Compass-Secret":cfg.secret},
-      body: JSON.stringify({messages:msgs, stream:true}),
+      body: JSON.stringify({messages:msgs, stream:true, model: cfg.model||undefined}),
       signal: ctl.signal
     });
     if(!res.ok){
       var t=""; try{ t=(await res.json()).error||""; }catch(e){ t=await res.text().catch(function(){return "";}); }
+      var msg=niceErr(t);
       slot.content = res.status===401
-        ? "Passphrase rejected. Check it matches APP_SECRET in Cloudflare — open Settings below."
-        : "That didn't go through ("+res.status+"). "+String(t).slice(0,220);
+        ? "Passphrase rejected — open Settings and check it matches APP_SECRET in Cloudflare."
+        : /model not found/i.test(msg)
+          ? "That model name isn't one your provider offers. Open Settings, tap **Load list**, and pick one."
+          : "That didn't go through ("+res.status+"). "+msg.slice(0,240);
       busy=false; setSend(); paint(); return;
     }
     var reader=res.body.getReader(), dec=new TextDecoder(), buf="";
@@ -2988,6 +3007,11 @@ function boot(){
   +   '<input class="fld sm" id="cfgUrl" placeholder="https://compass-ai.yourname.workers.dev" autocomplete="off">'
   +   '<label class="lbl" style="margin-top:11px">Passphrase</label>'
   +   '<input class="fld sm" id="cfgSecret" type="password" placeholder="the APP_SECRET you chose" autocomplete="off">'
+  +   '<label class="lbl" style="margin-top:11px">Model</label>'
+  +   '<div class="row" style="gap:8px;flex-wrap:nowrap">'
+  +     '<select class="fld sm" id="cfgModel" style="flex:1"><option value="">Whatever the worker defaults to</option></select>'
+  +     '<button class="ghost sm" id="cfgLoad" style="flex:none">Load list</button>'
+  +   '</div>'
   +   '<div class="row" style="margin-top:12px"><button class="primary sm" id="cfgSave">Save</button>'
   +   '<button class="ghost sm" id="cfgTest">Test connection</button>'
   +   '<button class="ghost sm" id="cfgForget" style="display:none">Forget</button>'
@@ -3015,6 +3039,38 @@ function boot(){
     saveCfg(); showCfg=false; render();
     document.getElementById("cfgMsg") && (document.getElementById("cfgMsg").textContent="Saved.");
   });
+  document.getElementById("cfgModel").addEventListener("change",function(e){
+    cfg.model=e.target.value; saveCfg();
+    var m=document.getElementById("cfgMsg");
+    m.textContent = cfg.model ? "Using "+cfg.model : "Using the worker default";
+    m.style.color="var(--muted)";
+  });
+  document.getElementById("cfgLoad").addEventListener("click",async function(){
+    var m=document.getElementById("cfgMsg");
+    cfg.url=document.getElementById("cfgUrl").value.trim();
+    cfg.secret=document.getElementById("cfgSecret").value; saveCfg();
+    if(!cfg.url||!cfg.secret){ m.textContent="Fill in the URL and passphrase first."; m.style.color="var(--crit)"; return; }
+    m.textContent="Asking your provider…"; m.style.color="var(--muted)";
+    try{
+      var r=await fetch(cfg.url,{method:"POST",
+        headers:{"Content-Type":"application/json","X-Compass-Secret":cfg.secret},
+        body:JSON.stringify({action:"models"})});
+      var raw=await r.text();
+      if(!r.ok){ m.textContent="Couldn't list models ("+r.status+"): "+niceErr(raw).slice(0,120); m.style.color="var(--crit)"; return; }
+      var j={}; try{ j=JSON.parse(raw); }catch(e){}
+      var arr=j.data||j.models||j||[];
+      var names=(Array.isArray(arr)?arr:[]).map(function(x){ return typeof x==="string"?x:(x.id||x.name||""); })
+        .filter(Boolean).sort();
+      if(!names.length){ m.textContent="Provider returned no model list — type a name from their docs instead."; m.style.color="var(--crit)"; return; }
+      var sel=document.getElementById("cfgModel");
+      sel.innerHTML='<option value="">Whatever the worker defaults to</option>'
+        + names.map(function(n){ return '<option value="'+esc(n)+'">'+esc(n)+'</option>'; }).join("");
+      var pick = cfg.model && names.indexOf(cfg.model)>-1 ? cfg.model
+        : (names.filter(function(n){return /qwen/i.test(n)&&!/vl|audio|image|embed|asr|omni/i.test(n);})[0] || names[0]);
+      sel.value=pick; cfg.model=pick; saveCfg();
+      m.textContent=names.length+" models found — selected "+pick; m.style.color="var(--ok-text)";
+    }catch(err){ m.textContent="Couldn't reach the worker."; m.style.color="var(--crit)"; }
+  });
   document.getElementById("cfgTest").addEventListener("click",async function(){
     var m=document.getElementById("cfgMsg");
     cfg.url=document.getElementById("cfgUrl").value.trim();
@@ -3024,10 +3080,14 @@ function boot(){
     try{
       var r=await fetch(cfg.url,{method:"POST",
         headers:{"Content-Type":"application/json","X-Compass-Secret":cfg.secret},
-        body:JSON.stringify({messages:[{role:"user",content:"Reply with the single word: ready"}],stream:false})});
+        body:JSON.stringify({messages:[{role:"user",content:"Reply with the single word: ready"}],stream:false,model:cfg.model||undefined})});
       if(r.ok){ m.textContent="Working."; m.style.color="var(--ok-text)"; render(); }
       else { var e=""; try{ e=(await r.json()).error||""; }catch(x){}
-        m.textContent="Failed ("+r.status+"): "+String(e).slice(0,90); m.style.color="var(--crit)"; }
+        var em=niceErr(e);
+        m.textContent = /model not found/i.test(em)
+          ? "Model name wrong — tap Load list and pick one."
+          : "Failed ("+r.status+"): "+em.slice(0,110);
+        m.style.color="var(--crit)"; }
     }catch(err){ m.textContent="Couldn't reach it — check the URL."; m.style.color="var(--crit)"; }
   });
   var input=document.getElementById("askInput");
