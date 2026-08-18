@@ -527,6 +527,38 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 .tgsync{bottom:calc(var(--tgnav) + max(var(--tgsafe), env(safe-area-inset-bottom, 0px)) + 12px)}
 
 
+/* ── Attachments ─────────────────────────────────── */
+.atts{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+.att{display:flex;align-items:center;gap:8px;max-width:100%;padding:6px 6px 6px 6px;
+  border:1px solid var(--border);border-radius:11px;background:var(--s1)}
+.att img{width:30px;height:30px;object-fit:cover;border-radius:7px;flex:none}
+.att .fi{width:30px;height:30px;border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;
+  background:var(--s2);font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase}
+.att .an{min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.att .an b{font-size:12.5px;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.att .an i{font-size:11px;font-style:normal;color:var(--muted)}
+.att.bad{border-color:var(--neg)}
+.att.bad .an i{color:var(--neg)}
+.att .ax{flex:none;width:22px;height:22px;border-radius:50%;border:0;background:transparent;
+  color:var(--muted);font-size:15px;line-height:1;cursor:pointer;padding:0}
+.att .ax:hover{background:var(--s2);color:var(--ink)}
+.composer{position:relative}
+.plus{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--border);
+  background:var(--surface);color:var(--ink);font-size:20px;line-height:1;padding:0;cursor:pointer}
+.plus[aria-expanded="true"]{background:var(--s2)}
+.plusmenu{position:absolute;bottom:50px;left:0;z-index:40;min-width:215px;border:1px solid var(--border);
+  border-radius:14px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden;display:none}
+.plusmenu.on{display:block}
+.plusmenu button{display:block;width:100%;text-align:left;padding:10px 14px;border:0;
+  background:transparent;color:var(--ink);font-size:14px;cursor:pointer;font-family:inherit}
+.plusmenu button:hover{background:var(--s1)}
+.plusmenu button small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
+.mineatts{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;margin-bottom:5px}
+.mineatts img{width:74px;height:74px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
+.mineatts .fc{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:9px;
+  background:var(--s1);border:1px solid var(--border);font-size:12px;color:var(--muted)}
+.dropz{outline:2px dashed var(--pos);outline-offset:4px;border-radius:16px}
+
 /* ── AI action cards ─────────────────────────────── */
 .acts{margin:8px 0 2px;border:1px solid var(--border);border-radius:14px;background:var(--surface);overflow:hidden}
 .acts .ah{display:flex;align-items:center;gap:7px;padding:9px 12px;background:var(--s1);border-bottom:1px solid var(--border);
@@ -3120,6 +3152,226 @@ function actsHTML(m,i){
   return '<div class="acts'+(applied?" done":"")+'"><div class="ah">'+head+'</div><ul>'+rows+'</ul>'+foot+'</div>';
 }
 
+
+/* ── ATTACHMENTS: files and photos he sends to the model ────────────── */
+var MAX_FILES=6, MAX_IMAGES=4, MAX_FILE_BYTES=25*1024*1024;
+var MAX_DOC_CHARS=14000, MAX_ALL_DOC_CHARS=38000;
+var CDN={
+  pdf:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+  pdfw:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",
+  zip:"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+};
+var atts=[], libs={};
+
+function loadLib(url){
+  if(libs[url]) return libs[url];
+  libs[url]=new Promise(function(res,rej){
+    var s=document.createElement("script");
+    s.src=url; s.async=true;
+    s.onload=function(){ res(); };
+    s.onerror=function(){ libs[url]=null; rej(new Error("couldn’t load the reader for that file type — are you online?")); };
+    document.head.appendChild(s);
+  });
+  return libs[url];
+}
+
+function extOf(n){ var m=/\.([a-z0-9]{1,5})$/i.exec(String(n||"")); return m?m[1].toLowerCase():"file"; }
+function kindOf(f){
+  if(/^image\//i.test(f.type||"")) return "image";
+  if(/\.(png|jpe?g|webp|gif|heic|heif)$/i.test(f.name||"")) return "image";
+  return "doc";
+}
+function fmtN(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,","); }
+function unent(s){
+  return String(s).replace(/&#(\d+);/g,function(_,d){ return String.fromCharCode(+d); })
+    .replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">")
+    .replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&nbsp;/g," ");
+}
+
+/* PDF — the text layer only. Scans have no text layer; we say so. */
+async function readPdf(file){
+  await loadLib(CDN.pdf);
+  var lib=window.pdfjsLib;
+  if(!lib) throw new Error("the PDF reader didn’t load");
+  try{ lib.GlobalWorkerOptions.workerSrc=CDN.pdfw; }catch(e){}
+  var doc=await lib.getDocument({data:await file.arrayBuffer()}).promise;
+  var out=[], len=0, n=Math.min(doc.numPages,80);
+  for(var i=1;i<=n;i++){
+    var pg=await doc.getPage(i), tc=await pg.getTextContent();
+    var line=tc.items.map(function(x){ return x.str; }).join(" ").replace(/[ \t]+/g," ").trim();
+    if(line){ out.push("[page "+i+"] "+line); len+=line.length; }
+    if(len>MAX_DOC_CHARS) break;
+  }
+  var txt=out.join("\n\n");
+  if(txt.replace(/\[page \d+\]/g,"").trim().length<40){
+    throw new Error("that PDF is a scan with no selectable text — send it as a photo instead");
+  }
+  return {text:txt, pages:doc.numPages};
+}
+
+/* DOCX — a zip; the text lives in word/document.xml */
+async function readDocx(file){
+  await loadLib(CDN.zip);
+  if(!window.JSZip) throw new Error("the Word reader didn’t load");
+  var zip=await window.JSZip.loadAsync(await file.arrayBuffer());
+  var f=zip.file("word/document.xml");
+  if(!f) throw new Error("that .docx looks damaged");
+  var xml=await f.async("string");
+  xml=xml.replace(/<w:tab\b[^>]*\/?>/g," ").replace(/<w:br\b[^>]*\/?>/g,"\n");
+  var paras=xml.split(/<\/w:p>/).map(function(p){
+    var t=""; p.replace(/<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g,function(_,x){ t+=x; return ""; });
+    return t;
+  });
+  var txt=unent(paras.join("\n")).replace(/[ \t]+/g," ").replace(/\n{3,}/g,"\n\n").trim();
+  if(!txt) throw new Error("there was no text in that document");
+  return {text:txt};
+}
+
+async function readPlain(file){
+  var t=await file.text();
+  t=t.replace(/\r\n?/g,"\n");
+  if(/\.(html?|xml)$/i.test(file.name)){
+    t=unent(t.replace(/<(script|style)[\s\S]*?<\/\1>/gi," ").replace(/<[^>]+>/g," ")).replace(/[ \t]+/g," ");
+  }
+  t=t.replace(/\n{3,}/g,"\n\n").trim();
+  if(!t) throw new Error("that file was empty");
+  return {text:t};
+}
+
+async function readDoc(file){
+  var e=extOf(file.name), m=file.type||"";
+  if(e==="pdf" || /pdf/i.test(m)) return readPdf(file);
+  if(e==="docx" || /wordprocessingml/i.test(m)) return readDocx(file);
+  if(e==="doc") throw new Error("old .doc files can’t be read — save it as .docx or PDF first");
+  if(e==="pages"||e==="key"||e==="numbers") throw new Error("Apple ".concat(e," files can’t be read — export it as PDF first"));
+  if(/^(txt|md|markdown|csv|tsv|json|log|srt|vtt|rtf|html?|xml|tex|py|js|ts|css)$/.test(e)) return readPlain(file);
+  if(/^text\//i.test(m) || /json|csv|xml/i.test(m)) return readPlain(file);
+  throw new Error("I can’t read ."+e+" files — PDF, Word, text or a photo work");
+}
+
+/* Photos — downscaled so a 12 MP phone picture doesn't blow the request up. */
+function readImage(file){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file), im=new Image();
+    im.onload=function(){
+      try{
+        var w=im.naturalWidth, h=im.naturalHeight;
+        if(!w||!h) throw new Error("that image was empty");
+        function draw(max){
+          var sc=Math.min(1,max/Math.max(w,h));
+          var c=document.createElement("canvas");
+          c.width=Math.max(1,Math.round(w*sc)); c.height=Math.max(1,Math.round(h*sc));
+          c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+          return c;
+        }
+        var c=draw(1400), q=0.82, data=c.toDataURL("image/jpeg",q);
+        while(data.length>1800000 && q>0.4){ q-=0.12; data=c.toDataURL("image/jpeg",q); }
+        var thumb=draw(120).toDataURL("image/jpeg",0.7);
+        URL.revokeObjectURL(url);
+        res({dataUrl:data, thumb:thumb, w:c.width, h:c.height});
+      }catch(e){ URL.revokeObjectURL(url); rej(e); }
+    };
+    im.onerror=function(){ URL.revokeObjectURL(url); rej(new Error("that image wouldn’t open (HEIC photos need converting to JPEG)")); };
+    im.src=url;
+  });
+}
+
+function attNote(msg){
+  var box=$("#askAttNote"); if(!box) return;
+  box.textContent=msg||""; box.style.display=msg?"":"none";
+  if(msg) setTimeout(function(){ if(box.textContent===msg){ box.textContent=""; box.style.display="none"; } },6000);
+}
+
+async function addFiles(list){
+  var files=Array.prototype.slice.call(list||[]);
+  if(!files.length) return;
+  for(var i=0;i<files.length;i++){
+    var f=files[i];
+    if(atts.length>=MAX_FILES){ attNote("You can attach "+MAX_FILES+" things at a time."); break; }
+    if(!f.size){ attNote("“"+f.name+"” is empty."); continue; }
+    if(f.size>MAX_FILE_BYTES){ attNote("“"+f.name+"” is over 25 MB."); continue; }
+    var kind=kindOf(f);
+    if(kind==="image" && atts.filter(function(x){ return x.kind==="image"; }).length>=MAX_IMAGES){
+      attNote("Four images is the limit per message."); continue;
+    }
+    var a={id:actId(), name:f.name||("file."+extOf(f.name)), size:f.size, mime:f.type||"", kind:kind, status:"reading"};
+    atts.push(a); paintAtts();
+    try{
+      if(kind==="image"){
+        var r=await readImage(f);
+        a.dataUrl=r.dataUrl; a.thumb=r.thumb; a.w=r.w; a.h=r.h; a.status="ready";
+      }else{
+        var d=await readDoc(f);
+        var txt=d.text;
+        if(txt.length>MAX_DOC_CHARS){ txt=txt.slice(0,MAX_DOC_CHARS); a.truncated=true; }
+        a.text=txt; a.pages=d.pages; a.chars=txt.length; a.status="ready";
+      }
+    }catch(e){
+      a.status="error"; a.err=(e&&e.message)||"couldn’t read it";
+    }
+    paintAtts();
+  }
+  var used=atts.filter(function(a){ return a.kind==="doc"&&a.text; })
+    .reduce(function(n,a){ return n+a.text.length; },0);
+  if(used>MAX_ALL_DOC_CHARS) attNote("That’s a lot of text — the oldest attachments may get cut short.");
+}
+
+function attSub(a){
+  if(a.status==="reading") return "reading…";
+  if(a.status==="error") return a.err;
+  if(a.kind==="image") return a.w+"×"+a.h;
+  return (a.pages?a.pages+" pages · ":"")+fmtN(a.chars)+" characters"+(a.truncated?" (trimmed)":"");
+}
+function paintAtts(){
+  var box=$("#askAtts"); if(!box) return;
+  if(!atts.length){ box.innerHTML=""; box.style.display="none"; return; }
+  box.style.display="";
+  box.innerHTML=atts.map(function(a){
+    var ic = (a.kind==="image"&&a.thumb) ? '<img src="'+a.thumb+'" alt="">'
+           : '<span class="fi">'+esc(extOf(a.name))+'</span>';
+    return '<div class="att'+(a.status==="error"?" bad":"")+'">'+ic
+      +'<div class="an"><b>'+esc(a.name)+'</b><i>'+esc(attSub(a))+'</i></div>'
+      +'<button class="ax" data-attx="'+a.id+'" aria-label="Remove '+esc(a.name)+'">×</button></div>';
+  }).join("");
+}
+function mineAttsHTML(list){
+  if(!list||!list.length) return "";
+  return '<div class="mineatts">'+list.map(function(a){
+    return a.thumb ? '<img src="'+a.thumb+'" alt="'+esc(a.name)+'">'
+                   : '<span class="fc">'+esc(extOf(a.name))+' · '+esc(a.name)+'</span>';
+  }).join("")+'</div>';
+}
+
+/* Build what actually goes to the model for this turn. */
+function buildTurn(text){
+  var ready=atts.filter(function(a){ return a.status==="ready"; });
+  var docs=ready.filter(function(a){ return a.kind==="doc"&&a.text; });
+  var imgs=ready.filter(function(a){ return a.kind==="image"&&a.dataUrl; }).slice(0,MAX_IMAGES);
+  var head="", budget=MAX_ALL_DOC_CHARS;
+  docs.forEach(function(a){
+    var t=a.text, cut=a.truncated;
+    if(t.length>budget){ t=t.slice(0,Math.max(0,budget)); cut=true; }
+    budget-=t.length;
+    if(!t) return;
+    head += "=== ATTACHED FILE: "+a.name+(a.pages?" ("+a.pages+" pages)":"")+" ===\n"
+         + t + (cut?"\n[...cut off here — this is only the start of the file]":"")
+         + "\n=== END OF "+a.name+" ===\n\n";
+  });
+  if(imgs.length){
+    head += "["+imgs.length+" image"+(imgs.length>1?"s":"")+" attached: "
+         + imgs.map(function(a){ return a.name; }).join(", ")+"]\n\n";
+  }
+  var q = text || (ready.length ? "(no question typed — look at what I attached and tell me what matters)" : "");
+  var full = head ? head+q : q;
+  var api = imgs.length
+    ? [{type:"text",text:full}].concat(imgs.map(function(a){ return {type:"image_url", image_url:{url:a.dataUrl}}; }))
+    : full;
+  return {
+    api: (head||imgs.length) ? api : null,
+    chips: ready.map(function(a){ return {name:a.name, thumb:a.thumb||null}; })
+  };
+}
+
 /* ── prompts ───────────────────────────────────────── */
 var BASE =
 "You are the assistant inside Compass, a personal system belonging to Navid — an IB Diploma student in Denmark, "+
@@ -3134,6 +3386,12 @@ var BASE =
 "If it isn't there, say you don't have it and suggest he check with his DP coordinator.\n"+
 "- Dates marked (est.) are triangulated estimates, not confirmed by the IB. Say so if you lean on one.\n"+
 "- Don't restate his whole context back at him. He can see it.\n"+
+"\nAttachments:\n"+
+"- Text he attaches arrives inside === ATTACHED FILE === markers in his message. That is the real content of "+
+"that file. Work from it. Never ask him to paste it again, and never invent anything that isn't in it.\n"+
+"- If a file is marked as cut off, use what you have and say which part you could see.\n"+
+"- Photos are usually his handwriting, a worksheet, a whiteboard or a textbook page. Read what's there. If it is "+
+"too blurry or cut off to be sure of a number, a symbol or a word, say which bit you can't read rather than guessing.\n"+
 "- If he sounds genuinely low rather than just busy — hopeless, not sleeping, nothing feels worth doing — "+
 "drop the productivity framing entirely, say plainly that it sounds heavy, and mention that his studievejleder, "+
 "BørneTelefonen on 116 111, or headspace Danmark are there for exactly that. Don't lecture, don't diagnose, "+
@@ -3198,15 +3456,16 @@ function paint(){
   if(!history.length){
     box.innerHTML='<div class="askempty">'+({
       advise:"Ask it to look at today. Try: “what should I actually do today?” or “I have three hours, what matters most?”",
-      quiz:"It pulls whatever is due in Revise. Say “start” when you’re ready.",
-      explain:"Ask anything from your four subjects. Try: “why does entropy increase” or “integration by parts, from scratch”.",
+      quiz:"It pulls whatever is due in Revise. Say “start” when you’re ready — or attach a past paper and it will quiz you from that.",
+      explain:"Ask anything from your four subjects. Try: “why does entropy increase”, or attach a worksheet with + and ask it to work through question 4.",
       stuck:"Say what you can’t start. One line is enough.",
       organise:"Tell it what to add or change. Try: “add a task to redo the titration writeup, 45 min, today” or “move the Danish oral prep to this week and tick off the maths problem set”."
     }[mode])+'</div>';
     return;
   }
   box.innerHTML = history.map(function(m,i){
-    if(m.role==="user") return '<div class="msg me"><div class="bub">'+esc(m.content)+'</div></div>';
+    if(m.role==="user") return '<div class="msg me">'+mineAttsHTML(m.chips)
+      + (m.content ? '<div class="bub">'+esc(m.content)+'</div>' : '') + '</div>';
     var body = m.acts ? m.body : streamBody(m.content);
     var bub = '<div class="msg ai"><div class="bub">'
       + (body ? md(body) : (m.acts ? "" : '<span class="dots"><i></i><i></i><i></i></span>'))
@@ -3222,13 +3481,30 @@ function setSend(){ $("#askSend").textContent = busy ? "Stop" : "Send"; }
 
 async function send(text){
   if(busy){ stop(); return; }
-  text=String(text||"").trim(); if(!text) return;
-  history.push({role:"user",content:text});
+  text=String(text||"").trim();
+  var pending=atts.filter(function(a){ return a.status==="reading"; }).length;
+  if(pending){ attNote("Still reading "+pending+" file"+(pending>1?"s":"")+" — one second."); return; }
+  var turn=buildTurn(text);
+  if(!text && !turn.chips.length) return;
+  history.push({role:"user", content:text, api:turn.api, chips:turn.chips});
+  var box=$("#askInput"); if(box) box.value="";
+  atts=[]; paintAtts(); attNote("");
   history.push({role:"assistant",content:""});
   paint(); busy=true; setSend();
 
   var msgs=[{role:"system",content:MODES[mode].sys+"\n\n=== LIVE COMPASS CONTEXT ===\n"+snapshot(mode)}]
-    .concat(history.slice(0,-1).slice(-12).map(function(m){
+    .concat((function(){
+      var sl=history.slice(0,-1).slice(-12), rich=-1;
+      for(var k=sl.length-1;k>=0;k--){ if(sl[k].role==="user" && sl[k].api){ rich=k; break; } }
+      return sl.map(function(m,k){
+        if(m.role==="user"){
+          if(k===rich) return {role:"user", content:m.api};
+          return {role:"user", content:(m.content||"")
+            + (m.chips&&m.chips.length ? "\n[earlier attachments: "+m.chips.map(function(c){return c.name;}).join(", ")+"]" : "")};
+        }
+        return m;
+      });
+    })().map(function(m){
       if(m.role!=="assistant") return {role:m.role, content:m.content};
       var c = m.body || m.content;
       if(m.acts && m.result) c += "\n[Those changes were applied.]";
@@ -3320,15 +3596,59 @@ function boot(){
   + '</div>'
   + '<div class="card askcard"><div id="askLog" class="asklog"></div></div>'
   + '<div class="card" id="askComposer">'
+  +   '<div class="atts" id="askAtts" style="display:none"></div>'
+  +   '<div class="hint" id="askAttNote" style="display:none;margin:0 0 8px"></div>'
   +   '<div class="composer">'
-  +     '<textarea class="fld" id="askInput" rows="2" placeholder="Ask something…"></textarea>'
+  +     '<button class="plus" id="askPlus" aria-label="Attach a file" aria-expanded="false">+</button>'
+  +     '<div class="plusmenu" id="askPlusMenu">'
+  +       '<button data-pick="camera">Take a photo<small>Point it at a question or your notes</small></button>'
+  +       '<button data-pick="image">Photo library<small>A screenshot or a picture you already have</small></button>'
+  +       '<button data-pick="file">Choose a file<small>PDF, Word, text, CSV</small></button>'
+  +     '</div>'
+  +     '<textarea class="fld" id="askInput" rows="2" placeholder="Ask something, or attach a file…"></textarea>'
   +     '<button class="primary" id="askSend">Send</button>'
   +   '</div>'
-  +   '<div class="src" style="margin-top:9px">It can see today’s readiness, your Big 3, this week’s habits, deadlines and revision queue. It can’t change any of them — you still do that yourself.</div>'
+  +   '<input type="file" id="askFile" multiple hidden accept="">'
+  +   '<div class="src" style="margin-top:9px">It can see today’s readiness, your Big 3, this week’s habits, deadlines and revision queue. In <b>Organise</b> it can also propose changes — you approve them before anything moves. Attach a PDF, a Word file or a photo and it reads it.</div>'
   + '</div>';
 
   render();
   document.getElementById("askClear").addEventListener("click",function(){ history=[]; paint(); });
+  var fileIn=document.getElementById("askFile"), plus=document.getElementById("askPlus"),
+      menu=document.getElementById("askPlusMenu");
+  function closeMenu(){ menu.classList.remove("on"); plus.setAttribute("aria-expanded","false"); }
+  plus.addEventListener("click",function(e){
+    e.stopPropagation();
+    var on=!menu.classList.contains("on");
+    menu.classList.toggle("on",on); plus.setAttribute("aria-expanded",String(on));
+  });
+  document.addEventListener("click",function(e){ if(!menu.contains(e.target)&&e.target!==plus) closeMenu(); });
+  menu.addEventListener("click",function(e){
+    var b=e.target.closest && e.target.closest("[data-pick]"); if(!b) return;
+    var p=b.dataset.pick;
+    fileIn.removeAttribute("capture");
+    if(p==="camera"){ fileIn.accept="image/*"; fileIn.setAttribute("capture","environment"); }
+    else if(p==="image"){ fileIn.accept="image/*"; }
+    else { fileIn.accept=".pdf,.docx,.txt,.md,.csv,.tsv,.json,.rtf,.html,.xml,.log,.srt,.vtt,text/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"; }
+    closeMenu(); fileIn.click();
+  });
+  fileIn.addEventListener("change",function(){ addFiles(fileIn.files); fileIn.value=""; });
+  document.getElementById("askAtts").addEventListener("click",function(e){
+    var b=e.target.closest && e.target.closest("[data-attx]"); if(!b) return;
+    atts=atts.filter(function(a){ return a.id!==b.dataset.attx; }); paintAtts();
+  });
+  var zone=document.getElementById("s-ask"), dragN=0;
+  zone.addEventListener("dragover",function(e){ e.preventDefault(); });
+  zone.addEventListener("dragenter",function(e){ e.preventDefault(); if(++dragN===1) zone.classList.add("dropz"); });
+  zone.addEventListener("dragleave",function(){ if(--dragN<=0){ dragN=0; zone.classList.remove("dropz"); } });
+  zone.addEventListener("drop",function(e){
+    e.preventDefault(); dragN=0; zone.classList.remove("dropz");
+    if(ready() && e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files);
+  });
+  document.getElementById("askInput").addEventListener("paste",function(e){
+    var items=(e.clipboardData&&e.clipboardData.files)||null;
+    if(items && items.length){ e.preventDefault(); addFiles(items); }
+  });
   document.getElementById("askLog").addEventListener("click",function(e){
     var b=e.target.closest && e.target.closest("[data-actapply],[data-actskip],[data-actundo]");
     if(!b) return;
@@ -3405,10 +3725,10 @@ function boot(){
   var input=document.getElementById("askInput");
   document.getElementById("askSend").addEventListener("click",function(){
     if(busy){ stop(); return; }
-    var v=input.value; input.value=""; send(v);
+    send(input.value);
   });
   input.addEventListener("keydown",function(e){
-    if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); var v=input.value; input.value=""; send(v); }
+    if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); send(input.value); }
   });
 
   window.CompassAsk = function(m, seed){
