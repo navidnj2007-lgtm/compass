@@ -2,8 +2,17 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Compass</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Compass">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f9f9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 /* ═══ PALETTE ═══════════════════════════════════════════════════════════ */
@@ -479,6 +488,14 @@ body.tg .hg td.nm small{font-size:10px}
 body.tg .cell{width:32px;height:32px}
 body.tg .strength{min-width:64px}
 body.tg .strength .sbar{width:32px}
+
+/* ── installed to the home screen ── */
+body.standalone{padding-top:max(var(--tgtop), env(safe-area-inset-top, 0px))}
+body.standalone .wrap{padding-bottom:calc(var(--tgnav) + max(var(--tgsafe), env(safe-area-inset-bottom, 0px)) + 26px)}
+.tgnav{padding-bottom:max(var(--tgsafe), env(safe-area-inset-bottom, 0px))}
+.tgmore .sheet{padding-bottom:calc(14px + max(var(--tgsafe), env(safe-area-inset-bottom, 0px)))}
+body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-inset-bottom, 0px)))}
+.tgsync{bottom:calc(var(--tgnav) + max(var(--tgsafe), env(safe-area-inset-bottom, 0px)) + 12px)}
 
 </style>
 </head>
@@ -2330,6 +2347,9 @@ var TG = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : 
 var IN_TG = !!(TG && TG.initData !== undefined && TG.platform && TG.platform !== "unknown");
 var CS = (TG && TG.CloudStorage) ? TG.CloudStorage : null;
 var CAN_CLOUD = !!(CS && TG.isVersionAtLeast && TG.isVersionAtLeast("6.9"));
+var LS_KEY = "compass_state_v2";
+var CAN_LS = (function(){ try{ localStorage.setItem("__ct","1"); localStorage.removeItem("__ct"); return true; }catch(e){ return false; } })();
+var STANDALONE = !!(window.navigator.standalone || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches));
 
 var $ = function(s){ return document.querySelector(s); };
 function el(tag,cls,html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
@@ -2426,19 +2446,47 @@ function prune(S){
   return out;
 }
 
+function lsSave(){
+  if(!CAN_LS) return false;
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(prune(B.get()))); return true; }
+  catch(e){ return false; }
+}
+function lsLoad(){
+  if(!CAN_LS) return null;
+  try{ var v=localStorage.getItem(LS_KEY); if(!v) return null;
+       var o=JSON.parse(v); return (o && o.domains) ? o : null; }
+  catch(e){ return null; }
+}
+function loadState(cb){
+  if(CAN_CLOUD){
+    cloudLoad(function(s,why){
+      if(s) return cb(s,"telegram");
+      var l=lsLoad(); return cb(l, l?"device":null, why);
+    });
+  } else {
+    var l=lsLoad(); cb(l, l?"device":null, l?null:"empty");
+  }
+}
+
 var saveT=null, saving=false, again=false;
 function scheduleSave(){
-  if(!CAN_CLOUD) return;
+  if(!CAN_CLOUD && !CAN_LS) return;
   if(saveT) clearTimeout(saveT);
   saveT=setTimeout(doSave, 1800);
 }
 function doSave(){
-  if(!CAN_CLOUD) return;
+  var okLocal = lsSave();
+  if(!CAN_CLOUD){
+    if(okLocal){ B.clean(); say("Saved on this device","ok"); }
+    else { say("Can't save here — use More \u2192 Download a backup","err",4200); }
+    return;
+  }
   if(saving){ again=true; return; }
-  saving=true; say("Saving…","",0);
+  saving=true; say("Saving\u2026","",0);
   cloudSave(function(ok,why){
     saving=false;
     if(ok){ B.clean(); say("Saved to Telegram","ok"); }
+    else if(okLocal){ B.clean(); say("Saved on this device","ok"); }
     else { say(why==="too big"?"Too much history to sync":"Not saved — try again","err",3200); H.err(); }
     if(again){ again=false; scheduleSave(); }
   });
@@ -2574,6 +2622,7 @@ function applyInsets(){
 /* ── boot ──────────────────────────────────────────── */
 function boot(){
   document.body.classList.add("tg");
+  if(STANDALONE) document.body.classList.add("standalone");
   if(IN_TG){
     try{ TG.ready(); }catch(e){}
     try{ TG.expand(); }catch(e){}
@@ -2587,23 +2636,22 @@ function boot(){
   }
   setTab(B.tab()||"today");
 
-  if(CAN_CLOUD){
-    say("Loading your data…","",0);
-    cloudLoad(function(state,why){
+  var canSave = CAN_CLOUD || CAN_LS;
+  if(canSave){
+    say("Loading\u2026","",0);
+    loadState(function(state, where, why){
       if(state && !B.isDirty()){
         B.set(state); B.render(); setTab(B.tab()||"today");
-        say("Loaded","ok");
-      } else if(!state && why==="empty"){
-        // first ever open: follow the Telegram colour scheme
+        say(where==="telegram" ? "Loaded from Telegram" : "Loaded", "ok");
+      } else if(!state){
         if(IN_TG && TG.colorScheme==="dark"){
           B.set({theme:"dark"}); document.documentElement.setAttribute("data-theme","dark");
-          var tb=$("#themeBtn"); if(tb) tb.textContent="Light";
+          var tb0=$("#themeBtn"); if(tb0) tb0.textContent="Light";
           applyChrome();
         }
         B.render(); setTab("today");
-        say("Ready — this saves itself from now on","ok",2600);
-      } else {
-        say("Couldn't load: "+(why||"unknown"),"err",3600);
+        say(CAN_CLOUD ? "Ready \u2014 this saves itself from now on"
+                      : "Ready \u2014 saves on this device automatically", "ok", 2800);
       }
       refreshBadges();
     });
@@ -2613,11 +2661,8 @@ function boot(){
       if(document.visibilityState==="hidden" && B.isDirty()) doSave(); });
   } else {
     B.onChange(function(){ refreshBadges(); syncBack(); });
-    if(IN_TG){
-      say("Old Telegram — update to sync","err",5000);
-    }
+    say("This browser blocks saving \u2014 use More \u2192 Download a backup","err",6000);
   }
-  // keep the in-app theme toggle wired to Telegram's chrome
   var tb=$("#themeBtn"); if(tb) tb.addEventListener("click",function(){ setTimeout(applyChrome,30); });
   syncBack();
 }
