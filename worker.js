@@ -2,35 +2,38 @@
  * Compass AI proxy — Cloudflare Worker
  *
  * Holds the Qwen API key server-side so it never reaches the browser or the
- * public repo. Forwards chat completions to Alibaba Cloud Model Studio's
- * OpenAI-compatible endpoint and streams the reply straight back.
+ * public repo. Forwards chat completions to the provider's OpenAI-compatible
+ * endpoint and streams the reply straight back.
  *
- * Cloudflare settings to add (Workers → your worker → Settings → Variables):
+ * Cloudflare settings (Workers → compass-ai → Settings → Variables and secrets):
  *
  *   Secrets (encrypted, never readable again once saved):
- *     QWEN_API_KEY    your Model Studio API key   e.g. sk-xxxxxxxx
- *     APP_SECRET      a passphrase you invent     e.g. a long random phrase
+ *     QWEN_API_KEY    the provider API key
+ *     APP_SECRET      the passphrase you also type into Compass on your phone
  *
  *   Plain variables:
  *     ALLOWED_ORIGIN  https://navidnj2007-lgtm.github.io
- *     QWEN_BASE       https://dashscope-intl.aliyuncs.com/compatible-mode/v1
- *     QWEN_MODEL      qwen-plus
+ *     QWEN_BASE       https://qwen.aikit.club/v1
+ *     QWEN_MODEL      qwen3.8-max
  *
- * APP_SECRET is the one you also type into Compass on your phone. It is never
- * committed anywhere, which is what stops a stranger who finds this URL from
- * spending your credit.
+ * Message content may be a plain string, or an array of OpenAI-style parts
+ * ({type:"text"} / {type:"image_url"}) so Compass can send photos and the text
+ * pulled out of PDFs and Word documents.
  */
 
 const LIMITS = {
   maxMessages: 40,
-  maxCharsPerMessage: 12000,
-  maxTotalChars: 60000,
+  maxCharsPerMessage: 45000,   // one long document plus the question
+  maxTotalChars: 120000,       // whole conversation
   maxTokensOut: 1500,
+  maxImages: 4,
+  maxImageChars: 2400000,      // ~1.8 MB of base64 per image
+  maxTotalImageChars: 6000000, // ~4.5 MB across the request
 };
 
 const DEFAULTS = {
-  base: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-  model: "qwen-plus",
+  base: "https://qwen.aikit.club/v1",
+  model: "qwen3.8-max",
 };
 
 function cors(origin) {
@@ -48,6 +51,43 @@ function fail(status, message, origin) {
     status,
     headers: { "Content-Type": "application/json", ...cors(origin) },
   });
+}
+
+/**
+ * Validate one message's content. Returns {chars, imageChars, images} or
+ * {error}. Anything not recognised is rejected rather than passed through.
+ */
+function measure(content) {
+  if (typeof content === "string") {
+    return { chars: content.length, imageChars: 0, images: 0 };
+  }
+  if (!Array.isArray(content) || !content.length) {
+    return { error: "content must be a string or a non-empty array of parts" };
+  }
+  if (content.length > 12) return { error: "too many parts in one message" };
+
+  let chars = 0, imageChars = 0, images = 0;
+  for (const part of content) {
+    if (!part || typeof part.type !== "string") {
+      return { error: "each content part needs a type" };
+    }
+    if (part.type === "text") {
+      if (typeof part.text !== "string") return { error: "a text part had no text" };
+      chars += part.text.length;
+    } else if (part.type === "image_url") {
+      const url = part.image_url && part.image_url.url;
+      if (typeof url !== "string") return { error: "an image part had no url" };
+      if (!/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(url)) {
+        return { error: "images must be inline data URLs (png, jpeg, webp or gif)" };
+      }
+      if (url.length > LIMITS.maxImageChars) return { error: "one image is too large" };
+      imageChars += url.length;
+      images += 1;
+    } else {
+      return { error: `unsupported content part: ${part.type}` };
+    }
+  }
+  return { chars, imageChars, images };
 }
 
 export default {
@@ -68,7 +108,7 @@ export default {
     }
 
     // 2. Passphrase. This is the real gate — it lives only in Cloudflare and on
-    //    your phone, never in the public repo.
+    //    the phone, never in the public repo.
     if (!env.APP_SECRET) {
       return fail(500, "Worker is missing APP_SECRET.", allowed);
     }
@@ -90,8 +130,8 @@ export default {
       return fail(400, "Body must be JSON.", allowed);
     }
 
-    // 3a. Ask the provider which models it actually offers, so the app can
-    //     offer a picker instead of guessing at names.
+    // 3a. Let the app ask which models the provider actually offers, so it can
+    //     show a picker instead of guessing at names.
     if (body.action === "models") {
       let list;
       try {
@@ -111,6 +151,7 @@ export default {
         },
       });
     }
+
     const messages = Array.isArray(body.messages) ? body.messages : null;
     if (!messages || !messages.length) {
       return fail(400, "messages[] is required.", allowed);
@@ -118,21 +159,32 @@ export default {
     if (messages.length > LIMITS.maxMessages) {
       return fail(413, `Too many messages (max ${LIMITS.maxMessages}).`, allowed);
     }
-    let total = 0;
+
+    let total = 0, totalImageChars = 0, totalImages = 0;
     for (const m of messages) {
-      if (!m || typeof m.content !== "string" || typeof m.role !== "string") {
-        return fail(400, "Each message needs a string role and content.", allowed);
+      if (!m || typeof m.role !== "string") {
+        return fail(400, "Each message needs a role.", allowed);
       }
       if (!["system", "user", "assistant"].includes(m.role)) {
         return fail(400, `Unexpected role: ${m.role}`, allowed);
       }
-      if (m.content.length > LIMITS.maxCharsPerMessage) {
-        return fail(413, "One message is too long.", allowed);
+      const got = measure(m.content);
+      if (got.error) return fail(400, got.error, allowed);
+      if (got.chars > LIMITS.maxCharsPerMessage) {
+        return fail(413, "One message is too long — shorten it or attach less.", allowed);
       }
-      total += m.content.length;
+      total += got.chars;
+      totalImageChars += got.imageChars;
+      totalImages += got.images;
     }
     if (total > LIMITS.maxTotalChars) {
       return fail(413, "Conversation too long — start a new chat.", allowed);
+    }
+    if (totalImages > LIMITS.maxImages) {
+      return fail(413, `Too many images (max ${LIMITS.maxImages}).`, allowed);
+    }
+    if (totalImageChars > LIMITS.maxTotalImageChars) {
+      return fail(413, "Those images are too large altogether.", allowed);
     }
 
     const stream = body.stream !== false;
