@@ -528,6 +528,30 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 
 
 .bub.lookup{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted)}
+/* ── Maths ───────────────────────────────────────── */
+.math{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.95em}
+.math[data-done]{font-family:inherit;font-size:inherit}
+.math[data-display]{display:block;margin:10px 0;text-align:center;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+.bub .katex{font-size:1.03em}
+.bub .katex-display{margin:10px 0}
+.bub .katex-display>.katex{white-space:normal}
+.msg .bub{overflow-wrap:break-word}
+/* ── Sync screen ─────────────────────────────────── */
+.syncst{display:flex;align-items:flex-start;gap:10px;padding:13px;border:1px solid var(--border);
+  border-radius:13px;background:var(--s1);margin-bottom:14px}
+.syncst .dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:4px;background:var(--muted)}
+.syncst.on .dot{background:var(--pos)} .syncst.bad .dot{background:var(--neg)}
+.syncst.wait .dot{background:var(--warn)}
+.syncst .st-x b{display:block;font-size:14.5px;line-height:1.35}
+.syncst .st-x span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+.syncrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.syncrow button{flex:1;min-width:120px}
+.devlist{margin-top:12px;font-size:12.5px;color:var(--muted);line-height:1.6}
+.buildline{margin-top:16px;padding-top:13px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted)}
+.nosync{display:flex;align-items:center;gap:9px;padding:10px 12px;margin-bottom:12px;
+  border:1px solid var(--warn);border-radius:12px;background:var(--s1);font-size:13px;line-height:1.4}
+.nosync button{flex:none}
 /* ── Device sync ─────────────────────────────────── */
 .syncbar{position:fixed;left:12px;right:12px;z-index:120;
   top:calc(12px + env(safe-area-inset-top,0px));
@@ -931,6 +955,7 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 
 <!-- ═══════════════ WHY ═══════════════ -->
 <section id="s-why"></section>
+<section id="s-sync"></section>
 
 </div>
 
@@ -1154,7 +1179,7 @@ function execScore(){
 }
 
 /* ══════════ TABS ══════════ */
-var TABS=[["today","Today"],["ask","Ask"],["week","Week"],["school","School"],["revise","Revise"],["tasks","Tasks"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["why","Why it works"]];
+var TABS=[["today","Today"],["ask","Ask"],["week","Week"],["school","School"],["revise","Revise"],["tasks","Tasks"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["why","Why it works"],["sync","Sync"]];
 function buildTabs(){
   $("#tabs").innerHTML = TABS.map(function(t){
     return '<button class="tab" role="tab" data-t="'+t[0]+'" aria-selected="false">'+t[1]+'<span class="badge" data-bg="'+t[0]+'" style="display:none"></span></button>';
@@ -2610,7 +2635,7 @@ function deviceName(){
     : /iPhone/i.test(ua) ? "iPhone"
     : /Android/i.test(ua) ? "Android phone"
     : /Macintosh/i.test(ua) ? "Mac"
-    : /Windows/i.test(ua) ? "PC" : "a device";
+    : /Windows/i.test(ua) ? "PC" : "Computer";
   if(IN_TG) n = "Telegram on "+n;
   try{ localStorage.setItem(DEV_KEY,n); }catch(e){}
   return n;
@@ -2685,6 +2710,7 @@ function pushSync(force){
       syncBusy=false;
       if(r.status===200 && r.body && r.body.ok){
         setRev(r.body.rev); setSyncDirty(false); syncLast=Date.now(); syncOn=true; clearConflict();
+        setSyncState("ok","");
         if(syncPend){ syncPend=false; setTimeout(function(){ pushSync(); }, 400); }
         return true;
       }
@@ -2698,34 +2724,194 @@ function pushSync(force){
           lsSave(); applyChrome(); refreshBadges();
           say("Updated from "+(r.body.device||"another device"),"ok",2600);
         } else {
+          setSyncState("conflict","");
           showConflict(r.body);
         }
         return false;
       }
-      if(r.status===401) say("Sync passphrase rejected","err",3200);
-      else if(r.status===503) syncOn=false;
+      if(r.status===401){ setSyncState("auth",""); say("Sync passphrase rejected","err",3600); }
+      else if(r.status===503){ syncOn=false; setSyncState("nokv",""); }
+      else setSyncState("err","The worker answered "+r.status+".");
       return false;
     })
-    .catch(function(){ syncBusy=false; return false; });
+    .catch(function(){ syncBusy=false; setSyncState("net",""); return false; });
 }
 
 function pullSync(quiet){
   if(!syncAvailable()) return Promise.resolve(false);
   return syncCall({action:"sync.get"}).then(function(r){
+    if(r.status===401){ setSyncState("auth",""); return false; }
+    if(r.status===503){ setSyncState("nokv",""); return false; }
     if(r.status!==200 || !r.body) return false;
     syncOn=true;
     var rem=r.body;
     if(!rem.rev || !rem.state) return false;         // nothing stored yet
     if(rem.rev === syncRev) return false;            // already in step
-    if(rem.rev < syncRev) return false;              // ours is ahead; push will handle it
-    if(syncDirty || B.isDirty()){ showConflict(rem); return false; }
+    if(rem.rev < syncRev){ setRev(rem.rev); setSyncDirty(true); pushSync(); return false; }
+    if(syncDirty || B.isDirty()){ setSyncState("conflict",""); showConflict(rem); return false; }
     setRev(rem.rev); setSyncDirty(false); B.set(rem.state);
     if(B.applyTheme) B.applyTheme();
     B.render(); if(B.restoreTimer) B.restoreTimer();
     lsSave(); B.clean(); applyChrome(); refreshBadges();
     if(!quiet) say("Updated from "+(rem.device||"your other device"),"ok",2600);
     return true;
-  }).catch(function(){ return false; });
+  }).catch(function(){ setSyncState("net",""); return false; });
+}
+
+
+/* ── SYNC SCREEN ─────────────────────────────────────────────────────
+   Sync used to be invisible: it quietly reused the AI connection, and if
+   that was missing or wrong on a device, nothing happened and nothing
+   said so. This screen is the cure — status, a real test, and a way in. */
+var BUILD = "2026-08-21";
+var syncState = {kind:"unknown", msg:"", at:0};
+
+function setSyncState(kind,msg){
+  syncState={kind:kind, msg:msg||"", at:Date.now()};
+  renderSync(); paintNoSync();
+}
+
+function syncStatusText(){
+  var c=syncCfg();
+  if(!c) return {kind:"off", head:"Not syncing on this device",
+    sub:"Add the worker address and your passphrase below. Do the same on every device and they all share one copy."};
+  switch(syncState.kind){
+    case "ok":    return {kind:"on", head:"Syncing", sub:"Last change shared "+(syncLast?ago(new Date(syncLast).toISOString()):"just now")+" · this device is “"+deviceName()+"”"};
+    case "auth":  return {kind:"bad", head:"Passphrase rejected",
+      sub:"This device’s passphrase doesn’t match APP_SECRET in Cloudflare. Retype it below and press Test."};
+    case "nokv":  return {kind:"bad", head:"Sync storage isn’t connected",
+      sub:"The worker has no KV binding called SYNC."};
+    case "net":   return {kind:"wait", head:"Can’t reach the worker",
+      sub:"You may be offline. Your work is saved on this device and will go up when you’re back."};
+    case "conflict": return {kind:"wait", head:"Waiting for you to choose",
+      sub:"Two devices changed things separately."};
+    case "err":   return {kind:"bad", head:"Sync problem", sub:syncState.msg||"Something went wrong."};
+    default:      return {kind:"wait", head:"Checking…", sub:"This device is “"+deviceName()+"”."};
+  }
+}
+
+/* Repaint only the status block, so a status change never wipes what he
+   is halfway through typing. */
+function paintSyncStatus(){
+  var box=document.querySelector("#s-sync .syncst");
+  if(!box) return;
+  var st=syncStatusText();
+  box.className="syncst "+(st.kind==="on"?"on":st.kind==="bad"?"bad":st.kind==="wait"?"wait":"");
+  box.innerHTML='<span class="dot"></span><span class="st-x"><b>'+esc(st.head)+'</b><span>'+esc(st.sub)+'</span></span>';
+}
+
+function renderSync(force){
+  var sec=document.getElementById("s-sync");
+  if(!sec) return;
+  if(!force && document.getElementById("syTest")){
+    paintSyncStatus(); showSyncInfo(); return;
+  }
+  var c=syncCfg()||{}, st=syncStatusText();
+  sec.innerHTML = ''
+  + '<div class="card">'
+  +   '<div class="spread" style="margin-bottom:12px"><h2>Sync</h2></div>'
+  +   '<div class="syncst '+(st.kind==="on"?"on":st.kind==="bad"?"bad":st.kind==="wait"?"wait":"")+'">'
+  +     '<span class="dot"></span><span class="st-x"><b>'+esc(st.head)+'</b><span>'+esc(st.sub)+'</span></span></div>'
+  +   '<div class="hint" style="margin:0 0 12px">Every device that has the same address and passphrase shares one copy of your Compass. '
+  +     'A change on your phone shows up on your iPad the next time you open it.</div>'
+  +   '<label class="lbl">Worker address</label>'
+  +   '<input class="fld sm" id="syUrl" placeholder="https://compass-ai.yourname.workers.dev" autocomplete="off" spellcheck="false" value="'+esc(c.url||"")+'">'
+  +   '<label class="lbl" style="margin-top:11px">Passphrase</label>'
+  +   '<input class="fld sm" id="sySecret" type="password" placeholder="the APP_SECRET you chose" autocomplete="off" value="'+esc(c.secret||"")+'">'
+  +   '<label class="lbl" style="margin-top:11px">This device is called</label>'
+  +   '<input class="fld sm" id="syDev" autocomplete="off" value="'+esc(deviceName())+'">'
+  +   '<div class="syncrow">'
+  +     '<button class="primary sm" id="syTest">Save and test</button>'
+  +     '<button class="ghost sm" id="syNow">Sync now</button>'
+  +   '</div>'
+  +   '<div class="syncrow">'
+  +     '<button class="ghost sm" id="syCopy">Copy address</button>'
+  +     '<button class="ghost sm" id="syShow">Show passphrase</button>'
+  +   '</div>'
+  +   '<div class="devlist" id="syInfo"></div>'
+  +   '<div class="buildline"><span>App version '+BUILD+'</span>'
+  +     '<button class="ghost sm" id="syUpdate">Check for update</button></div>'
+  + '</div>';
+
+  var by=function(id){ return document.getElementById(id); };
+  by("syTest").addEventListener("click", function(){
+    var url=by("syUrl").value.trim(), sec2=by("sySecret").value, dev=by("syDev").value.trim();
+    if(dev){ try{ localStorage.setItem(DEV_KEY, dev.slice(0,40)); }catch(e){} }
+    var cur={}; try{ cur=JSON.parse(localStorage.getItem("compass_ai_cfg")||"{}"); }catch(e){}
+    cur.url=url; cur.secret=sec2;
+    try{ localStorage.setItem("compass_ai_cfg", JSON.stringify(cur)); }catch(e){}
+    if(!url || !sec2){ setSyncState("off",""); return; }
+    setSyncState("unknown","");
+    testSync();
+  });
+  by("syNow").addEventListener("click", function(){
+    if(!syncAvailable()){ setSyncState("off",""); return; }
+    setSyncState("unknown","");
+    pushSync().then(function(){ return pullSync(true); }).then(function(){ renderSync(); });
+  });
+  by("syCopy").addEventListener("click", function(){
+    var v=by("syUrl").value.trim();
+    try{ navigator.clipboard.writeText(v); say("Address copied","ok"); }catch(e){ say("Select it and copy by hand","err",3000); }
+  });
+  by("syShow").addEventListener("click", function(){
+    var f=by("sySecret");
+    f.type = f.type==="password" ? "text" : "password";
+    by("syShow").textContent = f.type==="password" ? "Show passphrase" : "Hide passphrase";
+  });
+  by("syUpdate").addEventListener("click", function(){
+    var u=location.origin+location.pathname+"?u="+Date.now();
+    location.replace(u);
+  });
+  showSyncInfo();
+}
+
+function showSyncInfo(){
+  var box=document.getElementById("syInfo");
+  if(!box || !syncAvailable()) return;
+  syncCall({action:"sync.get"}).then(function(r){
+    if(!box.isConnected) return;
+    if(r.status===401){ setSyncState("auth",""); return; }
+    if(r.status!==200 || !r.body){ return; }
+    var b=r.body;
+    box.innerHTML = b.rev
+      ? "Shared copy: version "+b.rev+", last written by <b>"+esc(b.device||"a device")+"</b> "+esc(ago(b.updatedAt))
+        +". This device is on version "+syncRev+"."
+      : "Nothing has been shared yet. Make a change and it will go up.";
+  }).catch(function(){});
+}
+
+/* An explicit, honest connection test. */
+function testSync(){
+  var c=syncCfg();
+  if(!c){ setSyncState("off",""); return; }
+  syncCall({action:"capabilities"}).then(function(r){
+    if(r.status===401) return setSyncState("auth","");
+    if(r.status!==200) return setSyncState("err","The worker answered "+r.status+".");
+    if(!r.body || !r.body.sync) return setSyncState("nokv","");
+    return pullSync(true).then(function(){
+      return pushSync();
+    }).then(function(){
+      if(syncState.kind!=="conflict") setSyncState("ok","");
+    });
+  }).catch(function(){ setSyncState("net",""); });
+}
+
+/* A one-line nudge on Today when this device isn't syncing. */
+function paintNoSync(){
+  var host=document.getElementById("s-today");
+  if(!host) return;
+  var bar=document.getElementById("nosyncBar");
+  var bad = !syncAvailable() || syncState.kind==="auth" || syncState.kind==="nokv";
+  if(!bad){ if(bar) bar.remove(); return; }
+  if(bar) return;
+  bar=el("div","nosync");
+  bar.id="nosyncBar";
+  bar.innerHTML='<span style="flex:1">'
+    + (syncAvailable() ? "This device isn’t syncing — the passphrase was rejected."
+                       : "This device isn’t syncing with your others yet.")
+    + '</span><button class="ghost sm" id="nosyncGo">Set up</button>';
+  host.insertBefore(bar, host.firstChild);
+  bar.querySelector("#nosyncGo").addEventListener("click", function(){ setTab("sync"); });
 }
 
 function scheduleSave(){
@@ -2764,7 +2950,8 @@ var MORE=[
   ["goals","Goals",I.goals,"Two or three, on a 90-day horizon"],
   ["rituals","Rituals",I.rituals,"The four scripts and the wizards"],
   ["reset","When it breaks",I.reset,"Read this on the day you've stopped"],
-  ["why","Why it works",I.why,"Every decision, with its source"]
+  ["why","Why it works",I.why,"Every decision, with its source"],
+  ["sync","Sync",I.sync,"Share one copy across your phone, iPad and computer"]
 ];
 var nav=el("div","tgnav");
 nav.innerHTML = PRIMARY.map(function(t){
@@ -2786,6 +2973,7 @@ document.body.appendChild(sheet);
 window.CompassSetTab=function(k){ setTab(k); };
 function setTab(k){
   B.show(k);
+  if(k==="sync"){ renderSync(); }
   Array.prototype.forEach.call(nav.querySelectorAll("[data-nt]"),function(b){
     b.setAttribute("aria-selected", String(b.dataset.nt===k)); });
   var isMore = MORE.some(function(m){return m[0]===k;});
@@ -2947,6 +3135,8 @@ function boot(){
     say("This browser blocks saving \u2014 use More \u2192 Download a backup","err",6000);
   }
   var tb=$("#themeBtn"); if(tb) tb.addEventListener("click",function(){ setTimeout(applyChrome,30); });
+  renderSync(); paintNoSync();
+  if(syncAvailable()) testSync();
   syncBack();
 }
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
@@ -2975,8 +3165,106 @@ var $ = function(s){ return document.querySelector(s); };
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 
+/* ── provider noise ────────────────────────────────────
+   The upstream proxy sometimes wraps replies in a <details> block holding
+   Response/Request IDs. That is plumbing, not an answer — strip it. */
+function scrub(t){
+  t = String(t==null?"":t);
+  t = t.replace(/<details\b[^>]*>[\s\S]*?<\/details>/gi, "");
+  t = t.replace(/<\/?(?:details|summary)\b[^>]*>/gi, "");
+  t = t.replace(/^[ \t]*(?:Response|Request)[ \t]+ID:[ \t]*[0-9a-fA-F-]{8,}[ \t]*$/gm, "");
+  return t.replace(/\n{3,}/g, "\n\n").replace(/^\s+|\s+$/g, "");
+}
+
+/* ── maths ─────────────────────────────────────────────
+   KaTeX renders it properly. It is fetched on first use, so the app still
+   opens instantly and still works offline — the formula just shows as its
+   source until the library arrives. */
+var KATEX = {
+  css:"https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css",
+  js:"https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"
+};
+var katexP = null;
+/* KaTeX draws some symbols by composing glyphs from its own fonts — \neq is
+   an "=" with a stroke from KaTeX_Main. If the CSS arrives but the fonts do
+   not, that stroke silently vanishes and "≠" reads as "=". For a maths
+   student that is worse than no rendering at all, so we refuse to typeset
+   until the fonts are genuinely loaded and otherwise leave the source. */
+function fontsReady(){
+  if(!document.fonts || !document.fonts.load) return Promise.resolve(true);
+  var need = ['1em "KaTeX_Main"', '1em "KaTeX_Size1"', '1em "KaTeX_Math"'];
+  return Promise.race([
+    Promise.all(need.map(function(f){
+      return document.fonts.load(f).catch(function(){ return []; });
+    })).then(function(r){ return r.every(function(x){ return x && x.length; }); }),
+    new Promise(function(res){ setTimeout(function(){ res(false); }, 8000); })
+  ]);
+}
+function loadKatex(){
+  if(katexP) return katexP;
+  katexP = new Promise(function(res,rej){
+    var l=document.createElement("link");
+    l.rel="stylesheet"; l.href=KATEX.css; document.head.appendChild(l);
+    var sc=document.createElement("script");
+    sc.src=KATEX.js;
+    sc.onload=function(){ res(true); };
+    sc.onerror=function(){ rej(new Error("no katex")); };
+    document.head.appendChild(sc);
+  }).then(function(){
+    return fontsReady();
+  }).then(function(ok){
+    if(!ok) throw new Error("katex fonts missing");
+    return true;
+  }).catch(function(e){ katexP=null; throw e; });
+  return katexP;
+}
+var katexUsable = false;
+/* Render every formula that hasn't been rendered yet, inside `root`. */
+function typeset(root){
+  if(!root) return;
+  var nodes = root.querySelectorAll(".math[data-tex]:not([data-done])");
+  if(!nodes.length) return;
+  if(!katexUsable){
+    loadKatex().then(function(){ katexUsable=true; typeset(root); }).catch(function(){});
+    return;
+  }
+  Array.prototype.forEach.call(nodes, function(n){
+    var tex = n.getAttribute("data-tex") || "";
+    try{
+      window.katex.render(tex, n, {
+        throwOnError:false, displayMode:n.getAttribute("data-display")==="1",
+        output:"html", strict:"ignore", trust:false, maxSize:24, maxExpand:400
+      });
+    }catch(e){ /* leave the source showing */ }
+    n.setAttribute("data-done","1");
+  });
+}
+var MTOK="\u0001";
+/* Lift formulas out before markdown touches them, put them back after. */
+function liftMath(src, store){
+  function take(tex, display){
+    store.push({tex:tex, display:display});
+    return MTOK + (store.length-1) + MTOK;
+  }
+  return String(src)
+    .replace(/\$\$([\s\S]+?)\$\$/g, function(_,a){ return take(a, true); })
+    .replace(/\\\[([\s\S]+?)\\\]/g, function(_,a){ return take(a, true); })
+    .replace(/\\\(([\s\S]+?)\\\)/g, function(_,a){ return take(a, false); })
+    .replace(/\$([^\$\n]+?)\$/g,    function(_,a){ return take(a, false); });
+}
+function dropMath(html, store){
+  return html.replace(new RegExp(MTOK+"(\\d+)"+MTOK,"g"), function(_,i){
+    var m = store[+i];
+    if(!m) return "";
+    return '<span class="math" data-tex="'+esc(m.tex)+'"'
+      + (m.display?' data-display="1"':'') + '>' + esc(m.tex) + '</span>';
+  });
+}
+
 /* ── tiny markdown ─────────────────────────────────── */
 function md(src){
+  var mathStore=[];
+  src = liftMath(scrub(src), mathStore);
   var lines = esc(String(src||"")).split("\n"), out=[], inList=false, inCode=false, buf=[];
   function closeList(){ if(inList){ out.push("</ul>"); inList=false; } }
   for(var i=0;i<lines.length;i++){
@@ -3002,7 +3290,7 @@ function md(src){
   }
   if(inCode && buf.length) out.push("<pre>"+buf.join("\n")+"</pre>");
   closeList();
-  return out.join("");
+  return dropMath(out.join(""), mathStore);
 }
 
 function niceErr(txt){
@@ -3164,7 +3452,11 @@ function splitActions(txt){
 function streamBody(txt){
   var i=String(txt||"").search(/```[ \t]*compass/i);
   if(i<0) i=String(txt||"").search(/\n\[\s*\{\s*"do"/);
-  return i<0 ? txt : String(txt).slice(0,i).trim();
+  var t = i<0 ? String(txt||"") : String(txt).slice(0,i);
+  // an unfinished <details> shouldn't flash on screen mid-stream
+  var d = t.search(/<details\b/i);
+  if(d>=0 && !/<\/details>/i.test(t)) t = t.slice(0,d);
+  return t.replace(/\s+$/,"");
 }
 
 function resolveName(a){
@@ -3663,6 +3955,9 @@ var BASE =
 "- Short. Usually under 150 words. He is on a phone.\n"+
 "- Plain, calm, specific. No motivational language, no exclamation marks, no emoji, no praise padding.\n"+
 "- Concrete over general: “do the 8 equilibrium questions on p.212”, never “work on Chemistry”.\n"+
+"- Maths is rendered properly, so write it as LaTeX: $...$ inside a sentence, $$...$$ for a line of its own. "+
+"\\int, \\frac, ^{}, _{}, \\sqrt, \\to, \\Delta all work. Never write a formula as plain ASCII like x^2/3 "+
+"or 1/(n+1) when LaTeX would be clearer. Don't put LaTeX in headings or inside code blocks.\n"+
 "- If you don't know something about his situation, ask one short question rather than assuming.\n\n"+
 "Hard rules:\n"+
 "- NEVER invent a deadline, date, grade boundary or syllabus requirement. Only use what the CONTEXT gives you. "+
@@ -3695,7 +3990,7 @@ var MODES = {
   explain: { label:"Explain", hint:"A tutor for your four subjects",
     sys: BASE+"\n\nMODE: EXPLAIN.\nTeach the thing he asks about, at IB level for his subjects. Start from what the "+
     "syllabus actually requires. Use a worked example with real numbers where it helps. Name the mistake examiners "+
-    "see most often on that topic. Keep the maths readable in plain text. End by checking understanding with one "+
+    "see most often on that topic. Set out the working line by line with $$...$$ so each step is readable. End by checking understanding with one "+
     "short question rather than a summary."},
   stuck: { label:"I'm stuck", hint:"Works out what you're avoiding",
     sys: BASE+"\n\nMODE: STUCK.\nHe is not starting something. Treat this as mood repair, not time management — "+
@@ -3760,6 +4055,7 @@ function paint(){
     if(m.undone) bub += '<div class="msg ai"><div class="bub"><i>Reverted \u2014 nothing was changed.</i></div></div>';
     return bub + (m.acts ? actsHTML(m,i) : "");
   }).join("");
+  typeset(box);
   box.scrollTop = box.scrollHeight;
 }
 
@@ -3788,6 +4084,7 @@ async function send(text){
       slot.content="";
       var stopped = await streamTurn(baseMessages().concat(extra), slot);
       if(stopped) break;
+      slot.content = scrub(slot.content);
       if(!slot.content){
         slot.content="No reply came back. Try again, or check the worker logs in Cloudflare.";
         break;
