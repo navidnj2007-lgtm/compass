@@ -2977,6 +2977,27 @@ function syncCall(payload){
   });
 }
 function setRev(n){ syncRev=n; try{ localStorage.setItem(REV_KEY,String(n)); }catch(e){} }
+
+/* Two devices can drift apart in revision number while holding exactly the
+   same data — three devices polling each other guarantees it. Only a real
+   difference in content is worth interrupting him for. `timer` and `tab` are
+   per-device (a session running on his phone shouldn't argue with his laptop),
+   so they don't count as a difference. */
+function stateKey(o){
+  if(!o || typeof o!=="object") return "";
+  var c={}; Object.keys(o).sort().forEach(function(k){
+    if(k!=="timer" && k!=="tab") c[k]=o[k];
+  });
+  try{ return JSON.stringify(c); }catch(e){ return "?"+Math.random(); }
+}
+function sameState(a,b){
+  var ka=stateKey(a); return ka!=="" && ka===stateKey(b);
+}
+/* Adopt the remote revision without touching the data or asking. */
+function acceptRev(rem){
+  setRev(rem.rev); setSyncDirty(false); B.clean(); clearConflict();
+  syncOn=true; setSyncState("ok","");
+}
 function ago(iso){
   if(!iso) return "";
   var s=Math.max(0,Math.round((Date.now()-new Date(iso).getTime())/1000));
@@ -3029,6 +3050,8 @@ function pushSync(force){
         return true;
       }
       if(r.status===409 && r.body && r.body.conflict){
+        // Same data, different revision number — nothing to decide.
+        if(sameState(snap, r.body.state)){ acceptRev(r.body); return true; }
         // The shared copy moved on. Only adopt it outright if this device has
         // nothing of its own to lose.
         if(!syncDirty && !B.isDirty() && r.body.state){
@@ -3062,7 +3085,11 @@ function pullSync(quiet){
     if(!rem.rev || !rem.state) return false;         // nothing stored yet
     if(rem.rev === syncRev) return false;            // already in step
     if(rem.rev < syncRev){ setRev(rem.rev); setSyncDirty(true); pushSync(); return false; }
-    if(syncDirty || B.isDirty()){ setSyncState("conflict",""); showConflict(rem); return false; }
+    if(syncDirty || B.isDirty()){
+      var mine; try{ mine=prune(B.get()); }catch(e){ mine=null; }
+      if(sameState(mine, rem.state)){ acceptRev(rem); return false; }
+      setSyncState("conflict",""); showConflict(rem); return false;
+    }
     setRev(rem.rev); setSyncDirty(false); B.set(rem.state);
     if(B.applyTheme) B.applyTheme();
     B.render(); if(B.restoreTimer) B.restoreTimer();
@@ -3077,7 +3104,7 @@ function pullSync(quiet){
    Sync used to be invisible: it quietly reused the AI connection, and if
    that was missing or wrong on a device, nothing happened and nothing
    said so. This screen is the cure — status, a real test, and a way in. */
-var BUILD = "2026-08-22b";
+var BUILD = "2026-08-22c";
 var syncState = {kind:"unknown", msg:"", at:0};
 
 function setSyncState(kind,msg){
