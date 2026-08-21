@@ -528,6 +528,30 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 
 
 .bub.lookup{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted)}
+/* ── Focus sessions ──────────────────────────────── */
+.fstep{display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 0 10px}
+.fstep button{width:44px;height:44px;border-radius:50%;font-size:22px;line-height:1;padding:0;flex:none}
+.fnum{min-width:118px;text-align:center;border:1px solid var(--border);border-radius:14px;padding:10px 6px;background:var(--s1)}
+.fnum b{display:block;font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1}
+.fnum span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-top:3px}
+.fplan{text-align:center;font-size:13px;color:var(--muted);margin-bottom:12px}
+.fchk{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px;color:var(--ink)}
+.fchk input{width:17px;height:17px}
+.fLiveCard{text-align:center}
+.gauge.fbig{width:172px;height:172px;margin:6px auto 4px}
+.gauge.fbig .num b{font-size:38px;font-variant-numeric:tabular-nums}
+.fmeta .fwhat{font-size:15.5px;font-weight:600;line-height:1.35;margin-top:6px}
+.fmeta .fsub{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:5px}
+.frow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fcol{flex:1;text-align:center;min-width:0}
+.fcol b{display:block;font-size:19px;font-weight:600;line-height:1.2}
+.fcol span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:4px}
+.fdone{text-align:center;font-size:13px;color:var(--muted);margin-top:14px}
+.fdone b{color:var(--ink)}
+.fsr{display:flex;align-items:center;gap:9px;padding:6px 0;font-size:13.5px}
+.fsr .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.fsr .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsr b{font-weight:600;font-variant-numeric:tabular-nums}
 /* ── Maths ───────────────────────────────────────── */
 .math{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.95em}
 .math[data-done]{font-family:inherit;font-size:inherit}
@@ -955,6 +979,7 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 
 <!-- ═══════════════ WHY ═══════════════ -->
 <section id="s-why"></section>
+<section id="s-focus"></section>
 <section id="s-sync"></section>
 
 </div>
@@ -1082,7 +1107,8 @@ function S_DEFAULT(){
     frav:2,
     days:{}, weeks:{},
     lead:{},
-    timer:{on:false, rem:3000, at:0}
+    timer:{v:2, on:false, seg:null},
+    focus:{goal:60, plan:120, skip:false, log:[]}
   };
 }
 var S = S_DEFAULT();
@@ -1179,7 +1205,7 @@ function execScore(){
 }
 
 /* ══════════ TABS ══════════ */
-var TABS=[["today","Today"],["ask","Ask"],["week","Week"],["school","School"],["revise","Revise"],["tasks","Tasks"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["why","Why it works"],["sync","Sync"]];
+var TABS=[["today","Today"],["ask","Ask"],["week","Week"],["school","School"],["revise","Revise"],["tasks","Tasks"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["why","Why it works"],["focus","Focus"],["sync","Sync"]];
 function buildTabs(){
   $("#tabs").innerHTML = TABS.map(function(t){
     return '<button class="tab" role="tab" data-t="'+t[0]+'" aria-selected="false">'+t[1]+'<span class="badge" data-bg="'+t[0]+'" style="display:none"></span></button>';
@@ -1275,7 +1301,7 @@ function renderToday(){
   if($("#win")!==document.activeElement) $("#win").value=t.win||"";
   if($("#dump")!==document.activeElement) $("#dump").value=t.dump||"";
   if($("#blockQ")!==document.activeElement) $("#blockQ").value=t.q||"";
-  $("#tToday").textContent=(t.focus||0)+" min focused today";
+  $("#tToday").textContent=fHrs(t.focus||0)+" focused today";
   renderGate();
   badges();
 }
@@ -1314,50 +1340,174 @@ function renderGate(){
 }
 
 /* ══════════ TIMER ══════════ */
-var tRem=50*60, tOn=false, tInt=null;
-function tPersist(){
-  S.timer = { on: tOn, rem: tRem, at: Date.now() };
-  touch();
+/* ══════════ FOCUS ENGINE ══════════
+   A session is a fixed schedule of segments, plus the wall-clock time it
+   started. Everything else is derived. That means closing the app mid-block,
+   locking the phone, or coming back three hours later all work out: on the
+   way back we replay the schedule against the clock and log whatever finished
+   while you were gone. Nothing depends on the tab staying alive. */
+var F_BLOCK=50, F_BREAK=10, fInt=null, fChime=null;
+
+function fCfg(){
+  if(!S.focus) S.focus={goal:60, plan:120, skip:false, log:[]};
+  if(!S.focus.log) S.focus.log=[];
+  if(typeof S.focus.goal!=="number") S.focus.goal=60;
+  if(typeof S.focus.plan!=="number") S.focus.plan=120;
+  return S.focus;
 }
-function tRestore(){
-  var t = S.timer;
-  if(!t || typeof t.rem !== "number"){ tRem = 50*60; tOn = false; tDraw(); return; }
-  tRem = t.rem;
-  tOn = false;
-  if(t.on && t.at){
-    var gone = Math.floor((Date.now() - t.at)/1000);
-    tRem = Math.max(0, t.rem - gone);
-    if(tRem > 0){ tOn = true; }
-    else { tRem = 0; S.timer = {on:false, rem:0, at:Date.now()}; }
+
+/* Turn a total length into blocks of deep work separated by real breaks. */
+function fBuild(total, skip){
+  total=Math.max(5, Math.min(480, Math.round(total)));
+  if(skip) return [{k:"f", s:total*60}];
+  var blocks=Math.max(1, Math.round(total/(F_BLOCK+F_BREAK)));
+  var breaks=blocks-1;
+  var focusTotal=Math.max(blocks, total-breaks*F_BREAK);   // honour the length he asked for
+  var per=Math.floor(focusTotal/blocks), extra=focusTotal-per*blocks, seg=[];
+  for(var i=0;i<blocks;i++){
+    seg.push({k:"f", s:(per+(i<extra?1:0))*60});
+    if(i<blocks-1) seg.push({k:"b", s:F_BREAK*60});
   }
-  tDraw();
-  if(tOn && typeof startTimer === "function") startTimer();
+  return seg;
 }
-function tDraw(){
-  var m=Math.floor(tRem/60), s=tRem%60;
-  $("#tDisp").textContent=m+":"+String(s).padStart(2,"0");
-  $("#tSub").textContent = tOn ? "Running — when you drift, come back without commentary" : (tRem===50*60?"Not running":"Paused");
-  $("#tStart").textContent = tOn ? "Pause" : (tRem===50*60?"Start 50 min":"Resume");
+function fBlocks(seg){ return seg.filter(function(x){ return x.k==="f"; }).length; }
+function fSpan(seg){ return Math.round(seg.reduce(function(a,x){ return a+x.s; },0)/60); }
+
+function fLive(){ var t=S.timer; return !!(t && t.v===2 && t.seg && t.seg.length); }
+function fPos(){
+  var t=S.timer; if(!fLive()) return 0;
+  var end = t.on ? Date.now() : (t.pausedAt || Date.now());
+  return Math.max(0, Math.floor((end - t.startAt - (t.paused||0))/1000));
 }
-function tTick(){
-  if(!tOn) return; tRem--;
-  if(tRem<=0){ tRem=0; tOn=false; clearInterval(tInt);
-    var t=T(); t.focus=(t.focus||0)+50; S.timer={on:false, rem:50*60, at:Date.now()}; touch();
-    var sub=S.subjects.filter(function(x){return x.name===($("#blockQ").value.split(" ")[0]||"");})[0];
-    openModal('<h2>Block done — 50 minutes</h2>'
-      +'<div class="md">Now take ten minutes <b>off screens</b>. Walk, stretch, look out of a window. Scrolling isn’t a break; your attention doesn’t recover on it.</div>'
-      +'<div class="eyebrow">Log it to a subject</div>'
-      +'<div class="pills">'+S.subjects.map(function(x){return '<button data-logsub="'+x.id+'">'+esc(x.name)+'</button>';}).join("")+'</div>'
-      +'<div class="row" style="margin-top:14px"><button class="ghost" data-close>Skip</button></div>',
-      function(root){
-        each("[data-logsub]",root,function(e){on(e,"click",function(){
-          var su=S.subjects.filter(function(x){return x.id===e.dataset.logsub;})[0];
-          if(su){ su.mins=(su.mins||0)+50; touch(); }
-          closeModal(); renderSchool();});});
-      });
-    renderToday();
+function fWhere(pos){
+  var t=S.timer, acc=0;
+  for(var i=0;i<t.seg.length;i++){
+    if(pos < acc+t.seg[i].s) return {i:i, k:t.seg[i].k, left:acc+t.seg[i].s-pos, len:t.seg[i].s, before:i};
+    acc+=t.seg[i].s;
   }
-  tDraw();
+  return {i:t.seg.length, k:"end", left:0, len:0, before:t.seg.length};
+}
+function fBlockNo(idx){
+  var t=S.timer, n=0;
+  for(var i=0;i<=idx && i<t.seg.length;i++) if(t.seg[i].k==="f") n++;
+  return Math.max(1,n);
+}
+
+/* Write one finished block into the record. */
+function fRecord(mins, label, sub){
+  if(!(mins>0)) return;
+  var F=fCfg(), k=iso(new Date());
+  F.log.push({d:k, m:mins, t:String(label||"").slice(0,90), s:sub||null, at:Date.now()});
+  if(F.log.length>500) F.log=F.log.slice(-500);
+  var d=day(k); d.focus=(d.focus||0)+mins;
+  if(sub){ var su=S.subjects.filter(function(x){ return x.id===sub; })[0]; if(su) su.mins=(su.mins||0)+mins; }
+}
+/* Log every focus block that has finished since we last looked. */
+function fHarvest(){
+  if(!fLive()) return false;
+  var t=S.timer, w=fWhere(fPos()), doneFocus=0, changed=false;
+  for(var i=0;i<w.before;i++) if(t.seg[i].k==="f") doneFocus++;
+  while((t.logged||0) < doneFocus){
+    var n=0, mins=0;
+    for(var j=0;j<t.seg.length;j++){
+      if(t.seg[j].k==="f"){
+        if(n===(t.logged||0)){ mins=Math.round(t.seg[j].s/60); break; }
+        n++;
+      }
+    }
+    fRecord(mins, t.label, t.sub);
+    t.logged=(t.logged||0)+1;
+    changed=true;
+  }
+  return changed;
+}
+
+function fStart(totalMin, label, sub, skip){
+  var F=fCfg();
+  F.plan=totalMin; F.skip=!!skip;
+  S.timer={ v:2, on:true, startAt:Date.now(), paused:0, pausedAt:null,
+    seg:fBuild(totalMin, skip), logged:0, label:label||"", sub:sub||null, planMin:totalMin };
+  touch(); fLoop(); fPaint(true);
+}
+function fPause(){
+  var t=S.timer; if(!fLive()||!t.on) return;
+  fHarvest(); t.on=false; t.pausedAt=Date.now(); touch(); fLoop(); fPaint(true);
+}
+function fResume(){
+  var t=S.timer; if(!fLive()||t.on) return;
+  t.paused=(t.paused||0)+(Date.now()-(t.pausedAt||Date.now()));
+  t.pausedAt=null; t.on=true; touch(); fLoop(); fPaint(true);
+}
+function fStop(){
+  if(fLive()) fHarvest();
+  S.timer={v:2, on:false, seg:null}; touch(); fLoop(); fPaint(true); renderToday();
+}
+/* Jump to the end of the current segment (skip a break, or end a block early
+   without losing the minutes already done). */
+function fSkip(){
+  var t=S.timer; if(!fLive()) return;
+  var pos=fPos(), w=fWhere(pos);
+  if(w.k==="end") return fStop();
+  if(w.k==="f"){
+    var mins=Math.floor((w.len-w.left)/60);
+    if(mins>0) fRecord(mins, t.label, t.sub);
+    t.logged=(t.logged||0)+1;
+  }
+  t.startAt -= w.left*1000;              // pretend that segment just ended
+  touch(); fPaint(true); renderToday();
+}
+
+function fLoop(){
+  if(fInt){ clearInterval(fInt); fInt=null; }
+  if(fLive() && S.timer.on) fInt=setInterval(fTick, 1000);
+}
+function fTick(){
+  if(!fLive() || !S.timer.on){ fLoop(); return; }
+  var before=fWhere(fPos()).k;
+  var logged=fHarvest();
+  var w=fWhere(fPos());
+  if(w.k==="end"){
+    fCelebrate();
+    S.timer={v:2, on:false, seg:null};
+    touch(); fLoop(); fPaint(true); renderToday(); return;
+  }
+  if(logged || before!==w.k) { touch(); renderToday(); }
+  fPaint();
+}
+function fRestore(){
+  var t=S.timer;
+  if(t && t.v!==2){ S.timer={v:2, on:false, seg:null}; }       // pre-sessions shape
+  if(fLive()){
+    if(fHarvest()) touch();
+    var w=fWhere(fPos());
+    if(w.k==="end"){ S.timer={v:2, on:false, seg:null}; touch(); }
+  }
+  fLoop(); fPaint(true);
+}
+function fCelebrate(){
+  try{ if(window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback)
+    Telegram.WebApp.HapticFeedback.notificationOccurred("success"); }catch(e){}
+  try{ if(window.Notification && Notification.permission==="granted")
+    new Notification("Focus session done", {body:"Take the break properly — off screens."}); }catch(e){}
+}
+
+/* ── numbers for the screen ── */
+function fMins(k){ var d=S.days[k]; return d?(d.focus||0):0; }
+function fStreak(){
+  var F=fCfg(), n=0, d=new Date();
+  if(fMins(iso(d)) < F.goal) d=addD(d,-1);      // a day still in progress can't break it
+  for(var i=0;i<400;i++){
+    if(fMins(iso(d)) >= F.goal){ n++; d=addD(d,-1); } else break;
+  }
+  return n;
+}
+function fHrs(m){
+  m=Math.round(m||0);
+  var h=Math.floor(m/60), r=m%60;
+  if(!m) return "0 min";
+  if(!h) return r+" min";
+  if(!r) return h+" h";
+  return h+" h "+r+" min";
 }
 
 /* ══════════ PART B FOLLOWS ══════════ */
@@ -1386,6 +1536,169 @@ function xLabels(days){
   return '<div style="display:flex;font-size:10px;color:var(--muted);margin-top:2px">'
     + days.map(function(d,i){ return '<span style="flex:1;text-align:center">'+(i%3===0?d:"")+'</span>'; }).join("")
     + '</div>';
+}
+
+/* ══════════ FOCUS SCREEN ══════════ */
+function fPaint(full){
+  var sec=$("#s-focus"); if(!sec) return;
+  if(fLive()){
+    if(!full && fTickLive()) return;                   // cheap path, once a second
+    fPaintLive();
+  } else fPaintSetup();
+  fPaintStats();
+}
+/* Update just the clock and the ring. Returns false if the card isn't built
+   yet, or the segment changed and the whole thing needs redrawing. */
+function fTickLive(){
+  var card=$("#fLiveCard"); if(!card) return false;
+  var t=S.timer, w=fWhere(fPos());
+  if(w.k==="end") return false;
+  if(card.getAttribute("data-seg")!==String(w.i)) return false;
+  var mm=Math.floor(w.left/60), ss=w.left%60;
+  card.querySelector(".num b").textContent = mm+":"+String(ss).padStart(2,"0");
+  var ring=card.querySelector(".gauge circle:last-of-type"), C=2*Math.PI*54;
+  if(ring) ring.setAttribute("stroke-dashoffset", C*(w.left/w.len));
+  var pb=$("#fPause"); if(pb) pb.textContent = t.on?"Pause":"Resume";
+  return true;
+}
+
+function fSetupHTML(){
+  var F=fCfg(), seg=fBuild(F.plan, F.skip), n=fBlocks(seg), br=n-1;
+  return '<div class="card" id="fCard">'
+    + '<h2>Get ready to focus</h2>'
+    + '<div class="hint">Each block is deep work with the phone in another room. Between blocks you get a real '
+    +   'break — away from screens, or it doesn’t count as recovery.</div>'
+    + '<div class="fstep">'
+    +   '<button class="ghost" id="fMinus" aria-label="Less time">−</button>'
+    +   '<div class="fnum"><b>'+F.plan+'</b><span>mins</span></div>'
+    +   '<button class="ghost" id="fPlus" aria-label="More time">+</button>'
+    + '</div>'
+    + '<div class="fplan">'+(F.skip
+        ? 'One unbroken block of '+fHrs(F.plan)
+        : n+' block'+(n===1?'':'s')+' of about '+Math.round(seg[0].s/60)+' min'
+          +(br? ' · '+br+' break'+(br===1?'':'s') : ' · no break'))+'</div>'
+    + '<label class="fchk"><input type="checkbox" id="fSkip"'+(F.skip?' checked':'')+'> Skip breaks</label>'
+    + '<label class="lbl" style="margin-top:14px">What exactly are you doing?</label>'
+    + '<input class="fld sm" id="fLabel" placeholder="Not “revise Chemistry” — “the 8 equilibrium questions on p.212”" value="'+esc(T().q||"")+'">'
+    + '<label class="lbl" style="margin-top:11px">Count it towards</label>'
+    + '<div class="pills" id="fSubs">'
+    +   '<button data-fsub="" aria-pressed="'+(!fPickSub?'true':'false')+'">Nothing</button>'
+    +   S.subjects.map(function(x){
+          return '<button data-fsub="'+x.id+'" aria-pressed="'+(fPickSub===x.id?'true':'false')+'">'+esc(x.name)+'</button>'; }).join("")
+    + '</div>'
+    + '<button class="primary" id="fGo" style="width:100%;margin-top:16px">Start focus session</button>'
+    + '</div>';
+}
+var fPickSub=null;
+
+function fPaintSetup(){
+  var sec=$("#s-focus");
+  var lab=$("#fLabel");
+  if(lab && document.activeElement===lab) return;      // he's mid-sentence; leave it alone
+  sec.innerHTML = fSetupHTML() + '<div id="fStats"></div>';
+  var F=fCfg();
+  function bump(d){
+    F.plan=Math.max(5, Math.min(480, F.plan+d));
+    touch(); fPaintSetup(); fPaintStats();
+  }
+  on($("#fMinus"),"click",function(){ bump(F.plan<=60?-5:-15); });
+  on($("#fPlus"),"click",function(){ bump(F.plan<60?5:15); });
+  on($("#fSkip"),"change",function(e){ F.skip=e.target.checked; touch(); fPaintSetup(); fPaintStats(); });
+  on($("#fLabel"),"input",function(e){ T().q=e.target.value; touch(); });
+  each("[data-fsub]",$("#fSubs"),function(b){
+    on(b,"click",function(){ fPickSub=b.dataset.fsub||null; fPaintSetup(); fPaintStats(); });
+  });
+  on($("#fGo"),"click",function(){
+    var lab=$("#fLabel").value.trim();
+    if(!lab){ $("#fLabel").focus(); $("#fLabel").placeholder="Name the actual task first"; return; }
+    T().q=lab; fStart(F.plan, lab, fPickSub, F.skip);
+  });
+}
+
+function fPaintLive(){
+  var sec=$("#s-focus"), t=S.timer, pos=fPos(), w=fWhere(pos);
+  if(w.k==="end") return fPaintSetup();
+  var mm=Math.floor(w.left/60), ss=w.left%60;
+  var blocks=fBlocks(t.seg), no=fBlockNo(w.i);
+  var onBreak=w.k==="b";
+  var pct=1-(w.left/w.len);
+  var C=2*Math.PI*54;
+  var live = '<div class="card fLiveCard" id="fLiveCard" data-seg="'+w.i+'">'
+    + '<div class="gauge fbig">'
+    +   '<svg viewBox="0 0 132 132" style="width:100%;height:100%">'
+    +     '<circle cx="66" cy="66" r="54" fill="none" stroke="var(--surface-2)" stroke-width="11"/>'
+    +     '<circle cx="66" cy="66" r="54" fill="none" stroke="var('+(onBreak?"--d1":"--d3")+')" stroke-width="11" stroke-linecap="round"'
+    +       ' stroke-dasharray="'+C+'" stroke-dashoffset="'+(C*(1-pct))+'"/></svg>'
+    +   '<div class="num"><b>'+mm+':'+String(ss).padStart(2,"0")+'</b><span>'+(onBreak?"Break":"Focus")+'</span></div>'
+    + '</div>'
+    + '<div class="fmeta">'
+    +   '<div class="fwhat">'+esc(t.label||"Deep work")+'</div>'
+    +   '<div class="fsub">'+(onBreak
+          ? "Off screens. Walk, stretch, look out of a window — scrolling isn’t a break."
+          : "Block "+no+" of "+blocks+" · when you drift, come back without commentary")+'</div>'
+    + '</div>'
+    + '<div class="row" style="margin-top:16px;gap:8px">'
+    +   '<button class="primary sm" id="fPause">'+(t.on?"Pause":"Resume")+'</button>'
+    +   '<button class="ghost sm" id="fNextSeg">'+(onBreak?"Skip break":"End block")+'</button>'
+    +   '<button class="ghost sm" id="fEnd">Stop</button>'
+    + '</div></div>';
+  sec.innerHTML = live + '<div id="fStats"></div>';
+  on($("#fPause"),"click",function(){ S.timer.on?fPause():fResume(); });
+  on($("#fNextSeg"),"click",function(){ fSkip(); fPaint(true); });
+  on($("#fEnd"),"click",function(){ fStop(); });
+}
+
+function fPaintStats(){
+  var box=$("#fStats"); if(!box) return;
+  var F=fCfg(), today=fMins(iso(new Date())), yday=fMins(iso(addD(new Date(),-1)));
+  var goal=Math.max(5,F.goal), pct=Math.min(1, today/goal), C=2*Math.PI*54;
+  var ws=wkStart(NOW), days=[], labels=["M","T","W","T","F","S","S"], wk=0;
+  for(var i=0;i<7;i++){ var k=iso(addD(ws,i)); var v=fMins(k); days.push(v); wk+=v; }
+  var mx=Math.max(60, Math.max.apply(null,days.concat([goal])));
+
+  var bysub={}, wsk=iso(ws);
+  F.log.forEach(function(e){ if(e.d>=wsk && e.s){ bysub[e.s]=(bysub[e.s]||0)+e.m; } });
+  var subRows=Object.keys(bysub).sort(function(a,b){ return bysub[b]-bysub[a]; }).map(function(id){
+    var su=S.subjects.filter(function(x){ return x.id===id; })[0];
+    return '<div class="fsr"><span class="dot" style="background:var('+(su?su.c:"--d1")+')"></span>'
+      + '<span class="nm">'+esc(su?su.name:"Other")+'</span><b>'+fHrs(bysub[id])+'</b></div>';
+  }).join("");
+
+  box.innerHTML = '<div class="card">'
+    + '<div class="spread" style="margin-bottom:14px"><h2>Daily progress</h2>'
+    +   '<button class="ghost sm" id="fGoalEdit">Goal: '+fHrs(goal)+'</button></div>'
+    + '<div class="frow">'
+    +   '<div class="fcol"><b>'+fHrs(yday)+'</b><span>Yesterday</span></div>'
+    +   '<div class="gauge">'
+    +     '<svg viewBox="0 0 132 132" style="width:100%;height:100%">'
+    +       '<circle cx="66" cy="66" r="54" fill="none" stroke="var(--surface-2)" stroke-width="11"/>'
+    +       '<circle cx="66" cy="66" r="54" fill="none" stroke="var(--d3)" stroke-width="11" stroke-linecap="round"'
+    +         ' stroke-dasharray="'+C+'" stroke-dashoffset="'+(C*(1-pct))+'" style="transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1)"/></svg>'
+    +     '<div class="num"><b>'+Math.round(pct*100)+'%</b><span>Of goal</span></div></div>'
+    +   '<div class="fcol"><b>'+fStreak()+'</b><span>Day streak</span></div>'
+    + '</div>'
+    + '<div class="fdone">Focused today: <b>'+fHrs(today)+'</b>'+(today>=goal?' · goal met':'')+'</div>'
+    + '</div>'
+    + '<div class="card">'
+    +   '<div class="spread" style="margin-bottom:4px"><h2>This week</h2><span class="src">'+fHrs(wk)+' total</span></div>'
+    +   miniBars(days, mx, "var(--d3)", " min")
+    +   xLabels(labels)
+    +   (subRows ? '<div class="eyebrow" style="margin-top:16px">Where it went</div>'+subRows : '')
+    + '</div>';
+
+  on($("#fGoalEdit"),"click",function(){
+    openModal('<h2>Daily focus goal</h2>'
+      + '<div class="md">How many minutes of real deep work counts as a day done? Two blocks is a solid target on a school day.</div>'
+      + '<div class="pills" id="goalPick">'
+      + [30,50,60,90,120,180].map(function(v){
+          return '<button data-goal="'+v+'" aria-pressed="'+(F.goal===v)+'">'+fHrs(v)+'</button>'; }).join("")
+      + '</div><div class="row" style="margin-top:14px"><button class="ghost" data-close>Close</button></div>',
+      function(root){
+        each("[data-goal]",root,function(b){
+          on(b,"click",function(){ F.goal=+b.dataset.goal; touch(); closeModal(); fPaint(true); });
+        });
+      });
+  });
 }
 
 /* ══════════ WEEK ══════════ */
@@ -2123,7 +2436,7 @@ function stuckFlow(){
       on($("#stGo"),"click",function(){
         var slot=T().big3.filter(function(x){return !x.t.trim();})[0];
         if(slot){ slot.t=$("#stAct").value; slot.mins=15; touch(); }
-        tSet(5*60,true); startTimer(); tPersist(); closeModal(); renderToday(); show("today");});
+        fStart(5, "Five minutes only — then you may stop", null, true); closeModal(); renderToday(); show("focus");});
       var talk=b.querySelector("#stTalk");
       if(talk) on(talk,"click",function(){ closeModal(); window.CompassAsk("stuck", $("#stAct").value ? "I can't start this: "+$("#stAct").value : "I'm stuck and can't start."); });
       on($("#stBack"),"click",function(){pick=null;draw();});
@@ -2132,13 +2445,6 @@ function stuckFlow(){
   }
 }
 
-/* ══════════ TIMER CONTROL ══════════ */
-var tRem2=null;
-function tSet(r,o){ tRem=r; tOn=o; }
-function startTimer(){
-  if(tInt) clearInterval(tInt);
-  tInt=setInterval(tTick,1000); tDraw();
-}
 
 /* ══════════ FOCUS MODE ══════════ */
 var fIdx=0;
@@ -2344,7 +2650,7 @@ function saveModal(){
 /* ══════════ WIRING ══════════ */
 function renderAll(){
   renderToday(); renderWeek(); renderSchool(); renderRevise();
-  renderTasks(); renderGoals(); renderRituals(); renderReset(); renderWhy();
+  renderTasks(); renderGoals(); renderRituals(); renderReset(); renderWhy(); fPaint(true);
 }
 function applyTheme(){
   document.documentElement.setAttribute("data-theme",S.theme||"light");
@@ -2384,21 +2690,20 @@ on($("#dumpToTasks"),"click",function(){
   T().dump=""; $("#dump").value=""; touch(); renderTasks(); show("tasks");
 });
 on($("#tStart"),"click",function(){
-  if(tOn){ tOn=false; if(tInt) clearInterval(tInt); tDraw(); tPersist(); return; }
-  var g=T().gate;
-  if(!g.phone){
-    openModal('<h2>The phone isn\'t in another room yet</h2>'
-      +'<div class="md">This is the one gate worth keeping. A phone on the desk costs you measurable working memory even switched off — and you won\'t feel it happening, which is exactly why the checkbox exists rather than your judgement.</div>'
+  if(fLive()){ S.timer.on ? fPause() : fResume(); return; }
+  if(!T().gate.phone){
+    openModal('<h2>Phone in another room?</h2>'
+      +'<div class="md">Not face down. Not in your pocket. A phone in sight costs measurable working memory even switched off (Ward et al., 2017).</div>'
       +'<div class="row"><button class="primary" id="gYes">It\'s in another room now</button><button class="ghost" id="gNo">Start anyway</button></div>',
       function(root){
-        on(root.querySelector("#gYes"),"click",function(){T().gate.phone=true;touch();closeModal();renderGate();tOn=true;startTimer();tPersist();});
-        on(root.querySelector("#gNo"),"click",function(){closeModal();tOn=true;startTimer();tPersist();});
+        on(root.querySelector("#gYes"),"click",function(){ T().gate.phone=true; touch(); closeModal(); renderGate(); fStart(F_BLOCK, T().q||"Deep work", null, true); });
+        on(root.querySelector("#gNo"),"click",function(){ closeModal(); fStart(F_BLOCK, T().q||"Deep work", null, true); });
       });
     return;
   }
-  tOn=true; startTimer(); tPersist();
+  fStart(F_BLOCK, T().q||"Deep work", null, true);
 });
-on($("#tStop"),"click",function(){ tOn=false; if(tInt) clearInterval(tInt); tRem=50*60; tDraw(); tPersist(); });
+on($("#tStop"),"click",function(){ fStop(); });
 on($("#addTask"),"click",function(){ addTask($("#newTask").value); $("#newTask").value=""; renderTasks(); });
 on($("#newTask"),"keydown",function(e){ if(e.key==="Enter"){ addTask($("#newTask").value); $("#newTask").value=""; renderTasks(); } });
 on($("#addGoal"),"click",function(){
@@ -2430,7 +2735,7 @@ document.addEventListener("keydown",function(e){
 });
 window.addEventListener("beforeunload",function(e){ if(dirty){ e.preventDefault(); e.returnValue=""; } });
 
-buildTabs(); applyTheme(); renderAll(); show(S.tab||"today"); tDraw();
+buildTabs(); applyTheme(); renderAll(); show(S.tab||"today"); fRestore();
 
 /* Fresh-start nudge on Mondays and month starts */
 (function(){
@@ -2448,6 +2753,7 @@ buildTabs(); applyTheme(); renderAll(); show(S.tab||"today"); tDraw();
         });
     },900);
   }
+
 /* ══════════ BRIDGE (for the Telegram shell) ══════════ */
 window.CompassBridge={
   get:function(){ return S; },
@@ -2455,7 +2761,8 @@ window.CompassBridge={
     Object.keys(o).forEach(function(k){ S[k]=o[k]; }); return true; },
   render:function(){ renderAll(); },
   applyTheme:function(){ applyTheme(); },
-  restoreTimer:function(){ tRestore(); },
+  restoreTimer:function(){ fRestore(); },
+  paintFocus:function(){ if(typeof fPaint==="function") fPaint(true); },
   show:function(k){ show(k); },
   tab:function(){ return S.tab; },
   onChange:function(f){ touchHook=f; },
@@ -2763,7 +3070,7 @@ function pullSync(quiet){
    Sync used to be invisible: it quietly reused the AI connection, and if
    that was missing or wrong on a device, nothing happened and nothing
    said so. This screen is the cure — status, a real test, and a way in. */
-var BUILD = "2026-08-21";
+var BUILD = "2026-08-22";
 var syncState = {kind:"unknown", msg:"", at:0};
 
 function setSyncState(kind,msg){
@@ -2945,6 +3252,7 @@ function doSave(){
 /* ── bottom nav ────────────────────────────────────── */
 var PRIMARY=[["today","Today",I.today],["ask","Ask",I.ask],["school","School",I.school],["revise","Revise",I.revise]];
 var MORE=[
+  ["focus","Focus",I.focus||I.today,"Timed deep-work blocks and the hours behind you"],
   ["week","Week",I.week,"Habits, execution score, the six areas"],
   ["tasks","Tasks",I.tasks,"Capture everything, sort it later"],
   ["goals","Goals",I.goals,"Two or three, on a 90-day horizon"],
@@ -2974,6 +3282,7 @@ window.CompassSetTab=function(k){ setTab(k); };
 function setTab(k){
   B.show(k);
   if(k==="sync"){ renderSync(); }
+  if(k==="focus" && B.paintFocus) B.paintFocus();
   Array.prototype.forEach.call(nav.querySelectorAll("[data-nt]"),function(b){
     b.setAttribute("aria-selected", String(b.dataset.nt===k)); });
   var isMore = MORE.some(function(m){return m[0]===k;});
