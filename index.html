@@ -1726,7 +1726,10 @@ function gCfg(){
   /* The first version shipped a generic PPL placeholder. Replace it with the
      real programme — but only while it is still untouched and nothing has been
      logged against it, so an edited plan or real history is never overwritten. */
-  if(G.v!==5 && !G.log.length && gIsStockOld(G.prog)){ G.prog=gDefaultProgram(); }
+  if(G.v!==5 && !G.log.length && gIsStockOld(G.prog)){
+    G.prog=gDefaultProgram();
+    G.draft=null;                 // a half-filled draft from the old plan is meaningless now
+  }
   if(!G.v) G.v=5;
   if(!G.log) G.log=[];
   if(!G.unit) G.unit="kg";
@@ -1824,6 +1827,20 @@ function gStart(dayId){
   touch(); renderGym();
 }
 function gDiscard(){ gCfg().draft=null; touch(); renderGym(); }
+/* If the programme changed under a draft, anything already typed is kept and
+   anything stale is dropped, rather than showing exercises that no longer exist. */
+function gDraftStale(){
+  var G=gCfg(), d=G.draft;
+  if(!d) return false;
+  var day=gDay(d.dayId);
+  if(!day) return true;
+  var names={}; day.ex.forEach(function(e){ names[e.n]=1; });
+  var typed=(d.ex||[]).some(function(e){
+    return (e.sets||[]).some(function(s){ return s.r>0; });
+  });
+  var unknown=(d.ex||[]).filter(function(e){ return !names[e.n]; }).length;
+  return unknown>0 && !typed;
+}
 function gFinish(){
   var G=gCfg(), d=G.draft;
   if(!d) return;
@@ -2060,6 +2077,7 @@ function renderGym(){
     + [["today","Workout"],["hist","History"],["lifts","Lifts"],["prog","Program"]].map(function(t){
         return '<button data-gv="'+t[0]+'" aria-pressed="'+(GYM_VIEW===t[0])+'">'+t[1]+'</button>'; }).join("")
     + '</div>';
+  if(G.draft && gDraftStale()){ G.draft=null; touch(); }
   sec.innerHTML = '<div class="card"><div class="spread" style="margin-bottom:10px"><h2>Gym</h2>'
     + '<span class="src">'+gWeekSessions().length+' this week</span></div>'+tabs+'</div>'
     + (GYM_VIEW==="today" ? (G.draft ? gDraftHTML() : gPickHTML())
