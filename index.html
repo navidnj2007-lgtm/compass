@@ -537,6 +537,74 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 .fbl{display:flex;align-items:center;gap:9px;padding:4px 0;font-size:12.5px}
 .fbl .m{flex:none;font-weight:600;font-variant-numeric:tabular-nums;min-width:56px}
 .fbl .t{flex:1;min-width:0;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ── Calendar ────────────────────────────────────── */
+.calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.calhead h2{margin:0;flex:1;text-align:center}
+.calhead button{flex:none;width:34px;height:34px;padding:0;font-size:19px;line-height:1;border-radius:50%}
+.calw{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:5px}
+.calw span{text-align:center;font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--muted)}
+.calg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cc{position:relative;aspect-ratio:1;border:1px solid var(--border);border-radius:9px;background:var(--surface);
+  padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+  transition:transform .1s}
+.cc:active{transform:scale(.94)}
+.cc.empty{border:0;background:transparent;cursor:default}
+.cc .n{font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1}
+.cc.blank .n{color:var(--muted);font-weight:400}
+.cc.future{opacity:.4}
+.cc.today{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ink)}
+.cc .dots{display:flex;gap:3px;height:5px;margin-top:3px;align-items:center}
+.cc .dots i{width:4px;height:4px;border-radius:50%;display:block}
+.cc .dots i.g{background:var(--d1)} .cc .dots i.b{background:var(--pos)}
+/* on the darker shaded cells the coloured dots disappear — go white there */
+.cc.l3 .dots i, .cc.l4 .dots i{background:rgba(255,255,255,.92)}
+.cc.l4 .dots i{box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+/* One hue, four steps — a scale, not four categories. Flat fallbacks first
+   for anything without color-mix. */
+.cc.l1{background:var(--s1)} .cc.l2{background:var(--s2)}
+.cc.l3{background:var(--d3);border-color:var(--d3)}
+.cc.l4{background:var(--d3);border-color:var(--d3)}
+@supports (background: color-mix(in srgb, red 50%, blue)){
+  .cc.l1{background:color-mix(in srgb, var(--d3) 16%, var(--surface));border-color:color-mix(in srgb, var(--d3) 26%, var(--border))}
+  .cc.l2{background:color-mix(in srgb, var(--d3) 36%, var(--surface));border-color:color-mix(in srgb, var(--d3) 46%, var(--border))}
+  .cc.l3{background:color-mix(in srgb, var(--d3) 64%, var(--surface));border-color:color-mix(in srgb, var(--d3) 70%, var(--border))}
+  .cc.l4{background:var(--d3);border-color:var(--d3)}
+}
+.cc.l3 .n, .cc.l4 .n{color:#fff}
+.callegend{display:flex;flex-wrap:wrap;gap:12px;margin-top:13px;font-size:11px;color:var(--muted);align-items:center}
+.callegend .lk{display:flex;align-items:center;gap:4px}
+.callegend .sw{width:9px;height:9px;border-radius:2px;border:1px solid var(--border);display:block}
+.callegend .sw.l1{background:var(--s1)} .callegend .sw.l2{background:var(--s2)}
+.callegend .sw.l3{background:var(--d3)} .callegend .sw.l4{background:var(--d3)}
+@supports (background: color-mix(in srgb, red 50%, blue)){
+  .callegend .sw.l1{background:color-mix(in srgb, var(--d3) 16%, var(--surface))}
+  .callegend .sw.l2{background:color-mix(in srgb, var(--d3) 36%, var(--surface))}
+  .callegend .sw.l3{background:color-mix(in srgb, var(--d3) 64%, var(--surface))}
+}
+.callegend .dot{width:6px;height:6px;border-radius:50%;display:block}
+.callegend .dot.g{background:var(--d1)} .callegend .dot.b{background:var(--pos)}
+.calsum{margin-top:11px;padding-top:11px;border-top:1px solid var(--border);font-size:12.5px;color:var(--muted)}
+.calbig{margin-bottom:4px}
+.cb{display:flex;gap:9px;align-items:baseline;padding:5px 0;font-size:13.5px;line-height:1.4}
+.cb .tick{flex:none;width:14px;text-align:center;color:var(--muted);font-weight:700}
+.cb.done .tick{color:var(--pos)}
+.cb.done span{color:var(--muted);text-decoration:line-through}
+.cb i{font-style:normal;font-size:11.5px;color:var(--muted)}
+.calfacts{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 4px}
+.calfacts div{flex:1;min-width:72px;border:1px solid var(--border);border-radius:10px;padding:8px 6px;text-align:center;background:var(--s1)}
+.calfacts b{display:block;font-size:14px;font-weight:600;line-height:1.2}
+.calfacts span{display:block;font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:3px}
+.calrow{display:flex;gap:10px;align-items:baseline;padding:4px 0;font-size:13px;line-height:1.4}
+.calrow .m{flex:none;font-weight:600;font-variant-numeric:tabular-nums;min-width:52px}
+.calrow .t{flex:1;min-width:0}
+.calrow .s{flex:none;color:var(--muted);font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+/* an exercise name plus four sets never fits on one phone line */
+.calrow.gym{flex-direction:column;gap:1px;align-items:stretch;padding:6px 0}
+.calrow.gym .t{font-weight:600;font-size:13px}
+.calrow.gym .s{text-align:left;flex:1;font-size:12px;line-height:1.4}
+.calnote{font-size:13px;color:var(--muted);line-height:1.5;padding:3px 0}
+.calhab{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px}
+.calhab span{font-size:11.5px;background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:3px 8px;color:var(--muted)}
 /* ── Gym ─────────────────────────────────────────── */
 .gdays{display:flex;flex-direction:column;gap:8px;margin-top:14px}
 .gday{display:block;width:100%;text-align:left;padding:13px 14px;border:1px solid var(--border);
@@ -550,6 +618,11 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 .gexh span{font-size:11.5px;color:var(--muted);white-space:nowrap}
 .glast{font-size:12px;color:var(--muted);margin-top:4px}
 .gsug{font-size:12.5px;color:var(--pos);margin-top:5px;line-height:1.4}
+.gtech{display:inline-block;font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.05em;
+  background:var(--s2);color:var(--muted);border:1px solid var(--border);border-radius:5px;
+  padding:1px 5px;margin-left:6px;vertical-align:middle;cursor:pointer}
+.gnote{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45}
+.gsug.up{color:var(--pos);font-weight:600}
 .gsets{margin-top:9px;display:flex;flex-direction:column;gap:6px}
 .gset{display:flex;align-items:center;gap:7px}
 .gset>span{width:15px;flex:none;font-size:11.5px;color:var(--muted);font-weight:700;text-align:center}
@@ -1033,6 +1106,7 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 <section id="s-why"></section>
 <section id="s-focus"></section>
 <section id="s-gym"></section>
+<section id="s-cal"></section>
 <section id="s-sync"></section>
 
 </div>
@@ -1259,7 +1333,7 @@ function execScore(){
 }
 
 /* ══════════ TABS ══════════ */
-var TABS=[["today","Today"],["ask","Ask"],["week","Week"],["school","School"],["revise","Revise"],["tasks","Tasks"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["why","Why it works"],["focus","Focus"],["gym","Gym"],["sync","Sync"]];
+var TABS=[["today","Today"],["ask","Ask"],["week","Week"],["school","School"],["revise","Revise"],["tasks","Tasks"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["why","Why it works"],["focus","Focus"],["gym","Gym"],["cal","Calendar"],["sync","Sync"]];
 function buildTabs(){
   $("#tabs").innerHTML = TABS.map(function(t){
     return '<button class="tab" role="tab" data-t="'+t[0]+'" aria-selected="false">'+t[1]+'<span class="badge" data-bg="'+t[0]+'" style="display:none"></span></button>';
@@ -1595,23 +1669,75 @@ function fHrs(m){
 var GYM_VIEW="today", gDayPick=null;
 
 function gDefaultProgram(){
-  function ex(n,s,lo,hi,low){ return {id:nid(), n:n, s:s, lo:lo, hi:hi, inc:low?5:2.5}; }
+  /* Navid's Week 5 PPL, transcribed from his programme sheet.
+     w = the load he's working at, null where the sheet says calibrate or
+     bodyweight. tech: R-P rest-pause, DROP drop set, FST7 seven-set finisher —
+     all applied to the LAST set only. hi:0 means "to failure". */
+  function E(n,s,lo,hi,w,inc,tech,note){
+    return {id:nid(), n:n, s:s, lo:lo, hi:hi, w:(w===null?null:w), inc:inc, tech:tech||"", note:note||""};
+  }
   return [
-    {id:nid(), n:"Push", ex:[ex("Bench press",4,6,8), ex("Overhead press",3,6,8),
-      ex("Incline dumbbell press",3,8,10), ex("Triceps pushdown",3,10,12), ex("Lateral raise",3,12,15)]},
-    {id:nid(), n:"Pull", ex:[ex("Barbell row",4,6,8), ex("Lat pulldown",3,8,10),
-      ex("Face pull",3,12,15), ex("Barbell curl",3,8,10), ex("Hammer curl",2,10,12)]},
-    {id:nid(), n:"Legs", ex:[ex("Squat",4,5,8,true), ex("Romanian deadlift",3,6,8,true),
-      ex("Leg press",3,10,12,true), ex("Leg curl",3,10,12), ex("Calf raise",3,12,15)]}
+    {id:nid(), n:"Push", ex:[
+      E("DB chest press",4,8,10,30,2,"R-P","Rest-pause the last set."),
+      E("Incline DB press",4,8,8,24,2,"","All 4 sets this time."),
+      E("Chest press machine",3,10,12,50,2.5,"DROP","Double drop on the final set."),
+      E("Weighted dips or push-ups",2,0,0,null,0,"","Chest-lean, to failure. Straight into the finisher."),
+      E("Pec deck",7,10,12,59,2.5,"FST7","Hold the weight — you've completed all 7 here."),
+      E("Barbell OHP",4,6,8,32.5,2.5,"",""),
+      E("Converging shoulder press",3,10,12,32,2.5,"",""),
+      E("Cable lateral raise",7,12,15,4.5,1,"FST7","Stay light, get all 7. Side delts are width."),
+      E("Rear delt",4,12,15,25,2.5,"DROP","Drop on the last set. Backup: DB bent-over flye."),
+      E("Seated tricep extension",4,8,10,41,2.5,"","Heaviest tricep move first."),
+      E("Rope extension",3,12,15,23,2.5,"DROP","Drop set to finish. Squeeze hard at lockout.")
+    ]},
+    {id:nid(), n:"Pull", ex:[
+      E("Lat pulldown",4,8,10,70,2.5,"R-P","Rest-pause the last set."),
+      E("Seated machine row",4,8,10,55,2.5,"",""),
+      E("Chest-supported / T-bar row",3,10,12,null,2.5,"","New — thickness, no spinal load. Start conservative."),
+      E("Close-grip pulldown",3,10,12,50,2.5,"DROP","Drop on the final set."),
+      E("Straight-arm pulldown",7,12,15,13.5,1,"FST7",""),
+      E("Smith machine shrugs",4,12,15,60,5,"","One second pause at the top."),
+      E("Barbell curl",4,8,10,30,2.5,"",""),
+      E("Incline DB curl",3,10,12,10,2,"","New — stretched position, best for the long head."),
+      E("Cable curl",7,12,15,14,1,"FST7","Keep it light enough to finish all 7."),
+      E("Abdominal machine",4,12,12,50,5,"","")
+    ]},
+    {id:nid(), n:"Legs", ex:[
+      E("Leg press",4,10,12,235,10,"DROP","Hold the load, add the 4th set + drop. Full depth."),
+      E("Hack squat or goblet squat",3,10,12,null,5,"","New — quad depth without heavy spinal load."),
+      E("Leg extension",7,12,15,52,2.5,"FST7",""),
+      E("RDL",4,8,10,50,5,"","Only hinge you own. Brace hard — stop on any back pain."),
+      E("Lying leg curl",7,12,15,50,2.5,"FST7","Hamstrings have been under-trained."),
+      E("Glute trainer",3,12,15,48,2.5,"",""),
+      E("Calf press",4,12,15,72,5,"DROP","Pause and stretch at the bottom. Drop the last set."),
+      E("Hanging leg raise + crunch",3,15,20,null,0,"","")
+    ]}
   ];
 }
+var GYM_TECH = {
+  "R-P":"Rest-pause — go to failure, rack it, breathe 15 s, squeeze out more. Twice.",
+  "DROP":"Drop set — hit failure, cut the load about 30%, go again with no rest.",
+  "FST7":"FST-7 — 7 sets, one weight, 30–45 s rest. Chase the pump, not the load."
+};
 function gCfg(){
-  if(!S.gym) S.gym={unit:"kg", prog:gDefaultProgram(), log:[], draft:null};
+  if(!S.gym) S.gym={unit:"kg", prog:gDefaultProgram(), log:[], draft:null, v:5};
   var G=S.gym;
   if(!G.prog || !G.prog.length) G.prog=gDefaultProgram();
+  /* The first version shipped a generic PPL placeholder. Replace it with the
+     real programme — but only while it is still untouched and nothing has been
+     logged against it, so an edited plan or real history is never overwritten. */
+  if(G.v!==5 && !G.log.length && gIsStockOld(G.prog)){ G.prog=gDefaultProgram(); }
+  if(!G.v) G.v=5;
   if(!G.log) G.log=[];
   if(!G.unit) G.unit="kg";
   return G;
+}
+function gIsStockOld(prog){
+  if(!prog || prog.length!==3) return false;
+  var names=prog.map(function(d){ return d.n; }).join("/");
+  if(names!=="Push/Pull/Legs") return false;
+  var first=prog[0].ex[0];
+  return !!(first && first.n==="Bench press" && prog[0].ex.length===5);
 }
 function gDay(id){ return gCfg().prog.filter(function(d){ return d.id===id; })[0]; }
 function gNum(v){ v=parseFloat(v); return isFinite(v)&&v>=0 ? v : null; }
@@ -1645,16 +1771,40 @@ function gBest(name){
 }
 /* Double progression: clear the top of the range on every set, then add load. */
 function gSuggest(exDef){
-  var last=gLast(exDef.n);
-  if(!last) return {kind:"new", msg:"First time — pick a weight you could do "+(exDef.hi+2)+" times, and stop at "+exDef.hi+"."};
+  var last=gLast(exDef.n), unit=gCfg().unit;
+  var startW=(exDef.w===null||exDef.w===undefined)?null:exDef.w;
+  var toFail=!exDef.hi;
+  var fst=exDef.tech==="FST7";
+
+  if(!last){
+    if(startW===null) return {kind:"new", w:null,
+      msg:toFail ? "Bodyweight, both sets to failure."
+        : "Calibrate this one — pick a weight you can control for "+exDef.lo+"–"+exDef.hi+" and write down what you used."};
+    return {kind:"new", w:startW,
+      msg:fst ? "Programme says "+startW+unit+". Getting all "+exDef.s+" sets matters more than the load."
+        : "Programme says "+startW+unit+"."};
+  }
   var done=last.sets.filter(function(s){ return s.r>0; });
-  if(!done.length) return {kind:"new", msg:""};
-  var allTop=done.length>=exDef.s && done.every(function(s){ return s.r>=exDef.hi; });
+  if(!done.length) return {kind:"new", w:startW, msg:""};
   var top=done[0].w;
+
+  if(toFail) return {kind:"hold", w:top||null,
+    msg:"Last time: "+done.map(function(s){return s.r;}).join(" and ")+" reps. Beat one of them."};
+
+  /* FST-7 is pump work at a fixed load. Finish all seven sets before you touch
+     the weight — going up early is exactly how people fail to finish. */
+  if(fst){
+    if(done.length < exDef.s) return {kind:"hold", w:top,
+      msg:"You got "+done.length+" of "+exDef.s+" sets last time. Same weight until all "+exDef.s+" are done."};
+    if(done.every(function(s){ return s.r>=exDef.hi; })) return {kind:"up", w:top+exDef.inc,
+      msg:"All "+exDef.s+" sets at the top of the range. Small jump to "+gFmtW(top+exDef.inc)+"."};
+    return {kind:"hold", w:top, msg:"All "+exDef.s+" sets done. Hold "+gFmtW(top)+" and chase more reps."};
+  }
+
+  var allTop=done.length>=exDef.s && done.every(function(s){ return s.r>=exDef.hi; });
   if(allTop) return {kind:"up", w:top+exDef.inc,
     msg:"You cleared "+exDef.hi+" on every set. Go up to "+gFmtW(top+exDef.inc)+" and expect to drop back to about "+exDef.lo+"."};
-  var anyLow=done.some(function(s){ return s.r<exDef.lo; });
-  if(anyLow) return {kind:"hold", w:top,
+  if(done.some(function(s){ return s.r<exDef.lo; })) return {kind:"hold", w:top,
     msg:"You dropped below "+exDef.lo+" last time. Stay at "+gFmtW(top)+" until all "+exDef.s+" sets are back in range."};
   return {kind:"hold", w:top, msg:"Stay at "+gFmtW(top)+" and add a rep where you can."};
 }
@@ -1665,7 +1815,8 @@ function gStart(dayId){
   if(!d) return;
   G.draft={ dayId:dayId, n:d.n, at:Date.now(), d:iso(new Date()),
     ex:d.ex.map(function(e){
-      var last=gLast(e.n), sg=gSuggest(e), w=sg.w||(last&&last.sets[0]?last.sets[0].w:null);
+      var last=gLast(e.n), sg=gSuggest(e);
+      var w=(sg.w!=null)?sg.w:(last&&last.sets[0]?last.sets[0].w:(e.w!=null?e.w:null));
       var sets=[];
       for(var i=0;i<e.s;i++) sets.push({w:(w||w===0)?w:null, r:null});   // blank, not 0, on a lift you've never done
       return {n:e.n, id:e.id, sets:sets};
@@ -1949,12 +2100,17 @@ function gWirePick(){
 function gDraftHTML(){
   var G=gCfg(), d=G.draft, day=gDay(d.dayId);
   var body=d.ex.map(function(e,ei){
-    var def=(day?day.ex:[]).filter(function(x){ return x.n===e.n; })[0] || {s:e.sets.length, lo:6, hi:8, inc:2.5};
-    var last=gLast(e.n), sg=gSuggest(def.n?def:{n:e.n,s:def.s,lo:def.lo,hi:def.hi,inc:def.inc});
+    var def=(day?day.ex:[]).filter(function(x){ return x.n===e.n; })[0]
+      || {n:e.n, s:e.sets.length, lo:6, hi:8, inc:2.5, w:null, tech:"", note:""};
+    var last=gLast(e.n), sg=gSuggest(def);
+    var reps = def.hi ? (def.lo===def.hi ? def.lo : def.lo+'–'+def.hi) : 'failure';
     return '<div class="gex" data-ei="'+ei+'">'
-      + '<div class="gexh"><b>'+esc(e.n)+'</b><span>'+def.s+' × '+def.lo+'–'+def.hi+'</span></div>'
+      + '<div class="gexh"><b>'+esc(e.n)
+      +   (def.tech ? '<i class="gtech" data-gtech="'+esc(def.tech)+'">'+esc(def.tech==="FST7"?"FST-7":def.tech)+'</i>' : '')
+      +   '</b><span>'+def.s+' × '+reps+'</span></div>'
+      + (def.note ? '<div class="gnote">'+esc(def.note)+'</div>' : '')
       + (last ? '<div class="glast">Last ('+esc(fmtD(last.when))+'): '+last.sets.map(gSetStr).join(", ")+'</div>' : '')
-      + (sg.msg ? '<div class="gsug">'+esc(sg.msg)+'</div>' : '')
+      + (sg.msg ? '<div class="gsug'+(sg.kind==="up"?" up":"")+'">'+esc(sg.msg)+'</div>' : '')
       + '<div class="gsets">'+e.sets.map(function(s,si){
           return '<div class="gset"><span>'+(si+1)+'</span>'
             + '<input class="fld sm" inputmode="decimal" data-gw="'+ei+'-'+si+'" value="'+(s.w==null?"":s.w)+'" placeholder="'+esc(gCfg().unit)+'">'
@@ -1999,6 +2155,14 @@ function gWireDraft(){
       var p=b.dataset.gdel.split("-"), e=d.ex[+p[0]];
       if(e.sets.length>1) e.sets.splice(+p[1],1); else e.sets[0]={w:e.sets[0].w, r:null};
       touch(); renderGym();
+    });
+  });
+  each("[data-gtech]",root,function(b){
+    on(b,"click",function(){
+      var k=b.dataset.gtech;
+      openModal('<h2>'+esc(k==="FST7"?"FST-7":k)+'</h2><div class="md">'+esc(GYM_TECH[k]||"")+'</div>'
+        +'<div class="md">Apply it to the <b>last set only</b> of this exercise. On every set it will bury you.</div>'
+        +'<div class="row" style="margin-top:12px"><button class="ghost" data-close>Got it</button></div>');
     });
   });
   on($("#gNote"),"input",function(e){ d.note=e.target.value; touch(); });
@@ -2089,7 +2253,7 @@ function gProgHTML(){
           + '<button class="gx" data-gdd="'+di+'" aria-label="Remove day">×</button></div>'
           + d.ex.map(function(e,ei){
               return '<div class="gpe">'
-                + '<input class="fld sm nm" data-gen="'+di+'-'+ei+'" value="'+esc(e.n)+'">'
+                + '<input class="fld sm nm" data-gen="'+di+'-'+ei+'" value="'+esc(e.n)+(e.tech?" ["+(e.tech==="FST7"?"FST-7":e.tech)+"]":"")+'">'
                 + '<input class="fld sm n" inputmode="numeric" data-ges="'+di+'-'+ei+'" value="'+e.s+'" aria-label="Sets">'
                 + '<i>×</i>'
                 + '<input class="fld sm n" inputmode="numeric" data-gel="'+di+'-'+ei+'" value="'+e.lo+'" aria-label="Low reps">'
@@ -2108,7 +2272,8 @@ function gWireProg(){
   var G=gCfg(), root=$("#s-gym");
   function bind(sel,fn){ each(sel,root,function(el){ on(el,"input",function(){ fn(el); touch(); }); }); }
   bind("[data-gdn]",function(el){ G.prog[+el.dataset.gdn].n=el.value; });
-  bind("[data-gen]",function(el){ var p=el.dataset.gen.split("-"); G.prog[+p[0]].ex[+p[1]].n=el.value; });
+  bind("[data-gen]",function(el){ var p=el.dataset.gen.split("-");
+    G.prog[+p[0]].ex[+p[1]].n=el.value.replace(/\s*\[(FST-7|R-P|DROP)\]\s*$/,""); });
   bind("[data-ges]",function(el){ var p=el.dataset.ges.split("-"); G.prog[+p[0]].ex[+p[1]].s=Math.max(1,Math.min(10,+el.value||1)); });
   bind("[data-gel]",function(el){ var p=el.dataset.gel.split("-"); G.prog[+p[0]].ex[+p[1]].lo=Math.max(1,Math.min(30,+el.value||1)); });
   bind("[data-geh]",function(el){ var p=el.dataset.geh.split("-"); G.prog[+p[0]].ex[+p[1]].hi=Math.max(1,Math.min(30,+el.value||1)); });
@@ -2126,6 +2291,145 @@ function gWireProg(){
       function(root){ on(root.querySelector("#grYes"),"click",function(){
         G.prog=gDefaultProgram(); touch(); closeModal(); renderGym(); }); });
   });
+}
+
+/* ══════════ CALENDAR ══════════
+   Nothing new is stored here. Every day already carries sleep, energy, mood,
+   Big 3, habits, focus minutes and now gym sessions — this is the place that
+   puts one day's worth of that back together so you can look at it later. */
+var CAL_M = null;   // first of the month being viewed
+
+function calMonth(){
+  if(!CAL_M){ CAL_M=new Date(NOW.getFullYear(), NOW.getMonth(), 1); }
+  return CAL_M;
+}
+function calShift(n){
+  var m=calMonth();
+  CAL_M=new Date(m.getFullYear(), m.getMonth()+n, 1);
+  renderCal();
+}
+/* Everything recorded for one date, gathered in one place. */
+function calDay(k){
+  var d=S.days[k]||null;
+  var gym=(S.gym&&S.gym.log||[]).filter(function(x){ return x.d===k; });
+  var blocks=(S.focus&&S.focus.log||[]).filter(function(x){ return x.d===k; });
+  var big=d?(d.big3||[]).filter(function(b){ return b.t&&b.t.trim(); }):[];
+  var habits=d?S.habits.filter(function(h){ return d.habits&&d.habits[h.id]==="done"; }):[];
+  return {
+    k:k, d:d, gym:gym, blocks:blocks, big:big, habits:habits,
+    focus:d?(d.focus||0):0,
+    done:big.filter(function(b){ return b.d; }).length,
+    any: !!(d && ((d.focus||0)>0 || big.length || d.sleep>0 || d.mood || (d.win&&d.win.trim())
+      || (d.anchors&&d.anchors.length) || habits.length)) || gym.length>0
+  };
+}
+function calRender(){ renderCal(); }
+
+function renderCal(){
+  var sec=$("#s-cal"); if(!sec) return;
+  var m=calMonth(), y=m.getFullYear(), mo=m.getMonth();
+  var first=new Date(y,mo,1), lead=(first.getDay()+6)%7;          // Monday-first
+  var dim=new Date(y,mo+1,0).getDate();
+  var today=iso(new Date());
+
+  // the busiest focus day this month sets the shading scale
+  var peak=0;
+  for(var i=1;i<=dim;i++){ var v=calDay(iso(new Date(y,mo,i))).focus; if(v>peak) peak=v; }
+  var goal=(S.focus&&S.focus.goal)||60;
+  var scale=Math.max(peak, goal);
+
+  var cells="";
+  for(var b=0;b<lead;b++) cells+='<div class="cc empty"></div>';
+  var mTot=0, mGym=0, mDays=0;
+  for(var n=1;n<=dim;n++){
+    var k=iso(new Date(y,mo,n)), info=calDay(k);
+    mTot+=info.focus; mGym+=info.gym.length; if(info.any) mDays++;
+    var lvl = !info.focus ? 0 : Math.min(4, Math.ceil(info.focus/scale*4));
+    var cls="cc l"+lvl;
+    if(k===today) cls+=" today";
+    if(k>today) cls+=" future";
+    if(!info.any && k<=today) cls+=" blank";
+    cells+='<button class="'+cls+'" data-cal="'+k+'">'
+      + '<span class="n">'+n+'</span>'
+      + '<span class="dots">'
+      +   (info.gym.length?'<i class="g"></i>':'')
+      +   (info.done?'<i class="b"></i>':'')
+      + '</span></button>';
+  }
+
+  sec.innerHTML = '<div class="card">'
+    + '<div class="calhead">'
+    +   '<button class="ghost sm" id="calPrev" aria-label="Previous month">‹</button>'
+    +   '<h2>'+MON[mo]+' '+y+'</h2>'
+    +   '<button class="ghost sm" id="calNext" aria-label="Next month">›</button>'
+    + '</div>'
+    + '<div class="calw">'+["M","T","W","T","F","S","S"].map(function(x){ return '<span>'+x+'</span>'; }).join("")+'</div>'
+    + '<div class="calg">'+cells+'</div>'
+    + '<div class="callegend">'
+    +   '<span class="lk"><i class="sw l1"></i><i class="sw l2"></i><i class="sw l3"></i><i class="sw l4"></i> focus time</span>'
+    +   '<span class="lk"><i class="dot g"></i> gym</span>'
+    +   '<span class="lk"><i class="dot b"></i> Big 3 done</span>'
+    + '</div>'
+    + '<div class="calsum">'+fHrs(mTot)+' focused · '+mGym+' gym session'+(mGym===1?'':'s')
+    +   ' · '+mDays+' day'+(mDays===1?'':'s')+' with something logged</div>'
+    + '</div>'
+    + '<div id="calDetail"></div>';
+
+  on($("#calPrev"),"click",function(){ calShift(-1); });
+  on($("#calNext"),"click",function(){ calShift(1); });
+  each("[data-cal]",sec,function(b){ on(b,"click",function(){ calShow(b.dataset.cal); }); });
+  calShow(iso(new Date()) <= iso(new Date(y,mo,dim)) && iso(new Date(y,mo,1)) <= iso(new Date()) ? today : iso(new Date(y,mo,1)));
+}
+
+var MOODW={};
+function calShow(k){
+  var box=$("#calDetail"); if(!box) return;
+  var info=calDay(k), d=info.d;
+  var parts=[];
+
+  if(!info.any){
+    box.innerHTML='<div class="card"><div class="spread" style="margin-bottom:8px"><h2>'+esc(fmtD(k))+'</h2>'
+      +'<span class="src">'+esc(DAYN[pISO(k).getDay()])+'</span></div>'
+      +'<div class="hint" style="margin:0">Nothing recorded'+(k>iso(new Date())?" yet — this day hasn't happened.":" on this day.")+'</div></div>';
+    return;
+  }
+  if(info.big.length){
+    parts.push('<div class="eyebrow">Big 3</div><div class="calbig">'
+      + info.big.map(function(x){
+          return '<div class="cb'+(x.d?" done":"")+'"><span class="tick">'+(x.d?"✓":"·")+'</span><span>'+esc(x.t)
+            + (x.mins?' <i>'+x.mins+' min</i>':'')+'</span></div>'; }).join("")
+      + '</div>');
+  }
+  var facts=[];
+  if(info.focus) facts.push(["Focused", fHrs(info.focus)]);
+  if(d && d.sleep>0) facts.push(["Slept", d.sleep+" h"]);
+  if(d && d.energy) facts.push(["Energy", d.energy+"/5"]);
+  if(d && d.mood && d.mood.w) facts.push(["Mood", d.mood.w]);
+  if(d && d.anchors && d.anchors.length) facts.push(["Anchors", d.anchors.length+"/"+S.anchors.length]);
+  if(info.habits.length) facts.push(["Habits", info.habits.length+" ticked"]);
+  if(facts.length) parts.push('<div class="calfacts">'
+    + facts.map(function(f){ return '<div><b>'+esc(f[1])+'</b><span>'+esc(f[0])+'</span></div>'; }).join("")+'</div>');
+
+  if(info.blocks.length) parts.push('<div class="eyebrow">Focus blocks</div>'
+    + info.blocks.map(function(e){
+        return '<div class="calrow"><span class="m">'+fHrs(e.m)+'</span><span class="t">'+esc(e.t||"Deep work")+'</span></div>'; }).join(""));
+
+  info.gym.forEach(function(g){
+    parts.push('<div class="eyebrow">Gym · '+esc(g.n)+'</div>'
+      + (g.ex||[]).map(function(e){
+          return '<div class="calrow gym"><span class="t">'+esc(e.n)+'</span><span class="s">'+e.sets.map(gSetStr).join(", ")+'</span></div>'; }).join("")
+      + (g.note?'<div class="calnote">'+esc(g.note)+'</div>':''));
+  });
+
+  if(info.habits.length) parts.push('<div class="eyebrow">Habits</div><div class="calhab">'
+    + info.habits.map(function(h){ return '<span>'+esc(h.n)+'</span>'; }).join("")+'</div>');
+
+  if(d && d.win && d.win.trim()) parts.push('<div class="eyebrow">What went right</div><div class="calnote">'+esc(d.win)+'</div>');
+  if(d && d.q && d.q.trim()) parts.push('<div class="eyebrow">The question of the day</div><div class="calnote">'+esc(d.q)+'</div>');
+  if(d && d.dump && d.dump.trim()) parts.push('<div class="eyebrow">Brain dump</div><div class="calnote">'+esc(d.dump)+'</div>');
+
+  box.innerHTML='<div class="card"><div class="spread" style="margin-bottom:10px"><h2>'+esc(fmtD(k))+'</h2>'
+    + '<span class="src">'+esc(DAYN[pISO(k).getDay()])+'</span></div>'+parts.join("")+'</div>';
 }
 
 /* ══════════ WEEK ══════════ */
@@ -3077,7 +3381,7 @@ function saveModal(){
 /* ══════════ WIRING ══════════ */
 function renderAll(){
   renderToday(); renderWeek(); renderSchool(); renderRevise();
-  renderTasks(); renderGoals(); renderRituals(); renderReset(); renderWhy(); fPaint(true); renderGym();
+  renderTasks(); renderGoals(); renderRituals(); renderReset(); renderWhy(); fPaint(true); renderGym(); renderCal();
 }
 function applyTheme(){
   document.documentElement.setAttribute("data-theme",S.theme||"light");
@@ -3191,6 +3495,7 @@ window.CompassBridge={
   restoreTimer:function(){ fRestore(); },
   paintFocus:function(){ if(typeof fPaint==="function") fPaint(true); },
   paintGym:function(){ if(typeof renderGym==="function") renderGym(); },
+  paintCal:function(){ if(typeof renderCal==="function") renderCal(); },
   show:function(k){ show(k); },
   tab:function(){ return S.tab; },
   onChange:function(f){ touchHook=f; },
@@ -3239,6 +3544,7 @@ var I = {
   goals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',
   rituals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
   file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 11v6"/><path d="M9.5 14.5 12 17l2.5-2.5"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="14.5" r="1.1" fill="currentColor" stroke="none"/></svg>',
   gym:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4M6 7v10M18 7v10M21 10v4"/><path d="M6 12h12"/></svg>',
   focus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 10.5v3.2l2.1 1.4"/><path d="M9.5 2.8h5"/><path d="M12 2.8V6"/></svg>',
   reset:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>',
@@ -3528,7 +3834,7 @@ function pullSync(quiet){
    Sync used to be invisible: it quietly reused the AI connection, and if
    that was missing or wrong on a device, nothing happened and nothing
    said so. This screen is the cure — status, a real test, and a way in. */
-var BUILD = "2026-08-22e";
+var BUILD = "2026-08-23";
 var syncState = {kind:"unknown", msg:"", at:0};
 
 function setSyncState(kind,msg){
@@ -3711,6 +4017,7 @@ function doSave(){
 var PRIMARY=[["today","Today",I.today],["ask","Ask",I.ask],["school","School",I.school],["revise","Revise",I.revise]];
 var MORE=[
   ["focus","Focus",I.focus,"Timed deep-work blocks and the hours behind you"],
+  ["cal","Calendar",I.cal,"Every past day — what you did, slept, lifted and finished"],
   ["gym","Gym",I.gym,"Log your lifts and see the weight go up"],
   ["week","Week",I.week,"Habits, execution score, the six areas"],
   ["tasks","Tasks",I.tasks,"Capture everything, sort it later"],
@@ -3743,6 +4050,7 @@ function setTab(k){
   if(k==="sync"){ renderSync(); }
   if(k==="focus" && B.paintFocus) B.paintFocus();
   if(k==="gym" && B.paintGym) B.paintGym();
+  if(k==="cal" && B.paintCal) B.paintCal();
   Array.prototype.forEach.call(nav.querySelectorAll("[data-nt]"),function(b){
     b.setAttribute("aria-selected", String(b.dataset.nt===k)); });
   var isMore = MORE.some(function(m){return m[0]===k;});
