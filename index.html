@@ -533,6 +533,49 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 
 
 .bub.lookup{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted)}
+/* ── Gym ─────────────────────────────────────────── */
+.gdays{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.gday{display:block;width:100%;text-align:left;padding:13px 14px;border:1px solid var(--border);
+  border-radius:13px;background:var(--surface)}
+.gday.up{border-color:var(--pos);background:var(--s1)}
+.gday b{display:block;font-size:15.5px;font-weight:600}
+.gday small{display:block;font-size:12px;color:var(--muted);margin-top:3px}
+.gex{border-top:1px solid var(--border);padding:14px 0 10px}
+.gexh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.gexh b{font-size:15px;font-weight:600}
+.gexh span{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.glast{font-size:12px;color:var(--muted);margin-top:4px}
+.gsug{font-size:12.5px;color:var(--pos);margin-top:5px;line-height:1.4}
+.gsets{margin-top:9px;display:flex;flex-direction:column;gap:6px}
+.gset{display:flex;align-items:center;gap:7px}
+.gset>span{width:15px;flex:none;font-size:11.5px;color:var(--muted);font-weight:700;text-align:center}
+.gset input{flex:1;min-width:0;text-align:center;font-variant-numeric:tabular-nums}
+.gset i{font-style:normal;color:var(--muted);font-size:12px;flex:none}
+.gx{flex:none;width:26px;height:26px;border-radius:50%;border:0;background:transparent;
+  color:var(--muted);font-size:16px;line-height:1;padding:0;cursor:pointer}
+.gx:hover{background:var(--s2);color:var(--neg)}
+.gadd{margin-top:9px}
+.ghrow{border-top:1px solid var(--border);padding:12px 0;cursor:pointer}
+.ghrow:first-of-type{border-top:0}
+.ghh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.ghh b{font-size:15px;font-weight:600}
+.ghh span{font-size:12px;color:var(--muted);white-space:nowrap}
+.ghs{font-size:12.5px;color:var(--muted);margin-top:3px}
+.gmex{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:13.5px;border-top:1px solid var(--border)}
+.gmex b{font-weight:600;flex:none}
+.gmex span{color:var(--muted);text-align:right}
+.glift{border-top:1px solid var(--border);padding:13px 0 6px}
+.glh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+.glh b{font-size:14.5px;font-weight:600}
+.glh span{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.gls{font-size:12px;color:var(--muted);margin-top:4px}
+.gpd{border-top:1px solid var(--border);padding:13px 0 8px}
+.gpdh{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.gpdh input{font-weight:600}
+.gpe{display:flex;align-items:center;gap:5px;margin-bottom:6px}
+.gpe .nm{flex:1;min-width:0}
+.gpe .n{width:44px;flex:none;text-align:center;padding-left:4px;padding-right:4px}
+.gpe i{font-style:normal;color:var(--muted);font-size:11px;flex:none}
 /* ── Focus sessions ──────────────────────────────── */
 .fstep{display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 0 10px}
 .fstep button{width:44px;height:44px;border-radius:50%;font-size:22px;line-height:1;padding:0;flex:none}
@@ -985,6 +1028,7 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 <!-- ═══════════════ WHY ═══════════════ -->
 <section id="s-why"></section>
 <section id="s-focus"></section>
+<section id="s-gym"></section>
 <section id="s-sync"></section>
 
 </div>
@@ -1113,7 +1157,8 @@ function S_DEFAULT(){
     days:{}, weeks:{},
     lead:{},
     timer:{v:2, on:false, seg:null},
-    focus:{goal:60, plan:120, skip:false, log:[]}
+    focus:{goal:60, plan:120, skip:false, log:[]},
+    gym:null
   };
 }
 var S = S_DEFAULT();
@@ -1210,7 +1255,7 @@ function execScore(){
 }
 
 /* ══════════ TABS ══════════ */
-var TABS=[["today","Today"],["ask","Ask"],["week","Week"],["school","School"],["revise","Revise"],["tasks","Tasks"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["why","Why it works"],["focus","Focus"],["sync","Sync"]];
+var TABS=[["today","Today"],["ask","Ask"],["week","Week"],["school","School"],["revise","Revise"],["tasks","Tasks"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["why","Why it works"],["focus","Focus"],["gym","Gym"],["sync","Sync"]];
 function buildTabs(){
   $("#tabs").innerHTML = TABS.map(function(t){
     return '<button class="tab" role="tab" data-t="'+t[0]+'" aria-selected="false">'+t[1]+'<span class="badge" data-bg="'+t[0]+'" style="display:none"></span></button>';
@@ -1515,6 +1560,119 @@ function fHrs(m){
   return h+" h "+r+" min";
 }
 
+/* ══════════ GYM ══════════
+   Logging sets is only worth the typing if it tells you what to do next time.
+   So every exercise shows what you did last, and when you clear the top of the
+   rep range on every set it says to add weight. The draft survives closing the
+   app, because you log a set at a time with a phone in your hand. */
+var GYM_VIEW="today", gDayPick=null;
+
+function gDefaultProgram(){
+  function ex(n,s,lo,hi,low){ return {id:nid(), n:n, s:s, lo:lo, hi:hi, inc:low?5:2.5}; }
+  return [
+    {id:nid(), n:"Push", ex:[ex("Bench press",4,6,8), ex("Overhead press",3,6,8),
+      ex("Incline dumbbell press",3,8,10), ex("Triceps pushdown",3,10,12), ex("Lateral raise",3,12,15)]},
+    {id:nid(), n:"Pull", ex:[ex("Barbell row",4,6,8), ex("Lat pulldown",3,8,10),
+      ex("Face pull",3,12,15), ex("Barbell curl",3,8,10), ex("Hammer curl",2,10,12)]},
+    {id:nid(), n:"Legs", ex:[ex("Squat",4,5,8,true), ex("Romanian deadlift",3,6,8,true),
+      ex("Leg press",3,10,12,true), ex("Leg curl",3,10,12), ex("Calf raise",3,12,15)]}
+  ];
+}
+function gCfg(){
+  if(!S.gym) S.gym={unit:"kg", prog:gDefaultProgram(), log:[], draft:null};
+  var G=S.gym;
+  if(!G.prog || !G.prog.length) G.prog=gDefaultProgram();
+  if(!G.log) G.log=[];
+  if(!G.unit) G.unit="kg";
+  return G;
+}
+function gDay(id){ return gCfg().prog.filter(function(d){ return d.id===id; })[0]; }
+function gNum(v){ v=parseFloat(v); return isFinite(v)&&v>=0 ? v : null; }
+function gFmtW(w){ return (Math.round(w*10)/10)+gCfg().unit; }
+function gSetStr(s){ return gFmtW(s.w)+" × "+s.r; }
+/* Epley. Only meaningful up to about 10 reps, so we don't show it past that. */
+function g1RM(w,r){ return (r>0 && r<=12) ? w*(1+r/30) : 0; }
+
+/* The last session that contained this exercise. */
+function gLast(name, beforeId){
+  var G=gCfg();
+  for(var i=G.log.length-1;i>=0;i--){
+    if(beforeId && G.log[i].id===beforeId) continue;
+    var hit=(G.log[i].ex||[]).filter(function(e){ return e.n===name && e.sets && e.sets.length; })[0];
+    if(hit) return {when:G.log[i].d, sets:hit.sets};
+  }
+  return null;
+}
+function gBest(name){
+  var G=gCfg(), best=null;
+  G.log.forEach(function(s){
+    (s.ex||[]).forEach(function(e){
+      if(e.n!==name) return;
+      (e.sets||[]).forEach(function(x){
+        var v=g1RM(x.w,x.r);
+        if(v && (!best || v>best.v)) best={v:v, w:x.w, r:x.r, d:s.d};
+      });
+    });
+  });
+  return best;
+}
+/* Double progression: clear the top of the range on every set, then add load. */
+function gSuggest(exDef){
+  var last=gLast(exDef.n);
+  if(!last) return {kind:"new", msg:"First time — pick a weight you could do "+(exDef.hi+2)+" times, and stop at "+exDef.hi+"."};
+  var done=last.sets.filter(function(s){ return s.r>0; });
+  if(!done.length) return {kind:"new", msg:""};
+  var allTop=done.length>=exDef.s && done.every(function(s){ return s.r>=exDef.hi; });
+  var top=done[0].w;
+  if(allTop) return {kind:"up", w:top+exDef.inc,
+    msg:"You cleared "+exDef.hi+" on every set. Go up to "+gFmtW(top+exDef.inc)+" and expect to drop back to about "+exDef.lo+"."};
+  var anyLow=done.some(function(s){ return s.r<exDef.lo; });
+  if(anyLow) return {kind:"hold", w:top,
+    msg:"You dropped below "+exDef.lo+" last time. Stay at "+gFmtW(top)+" until all "+exDef.s+" sets are back in range."};
+  return {kind:"hold", w:top, msg:"Stay at "+gFmtW(top)+" and add a rep where you can."};
+}
+
+/* ── the draft: a workout in progress ── */
+function gStart(dayId){
+  var G=gCfg(), d=gDay(dayId);
+  if(!d) return;
+  G.draft={ dayId:dayId, n:d.n, at:Date.now(), d:iso(new Date()),
+    ex:d.ex.map(function(e){
+      var last=gLast(e.n), sg=gSuggest(e), w=sg.w||(last&&last.sets[0]?last.sets[0].w:null);
+      var sets=[];
+      for(var i=0;i<e.s;i++) sets.push({w:(w||w===0)?w:null, r:null});   // blank, not 0, on a lift you've never done
+      return {n:e.n, id:e.id, sets:sets};
+    }), note:"" };
+  touch(); renderGym();
+}
+function gDiscard(){ gCfg().draft=null; touch(); renderGym(); }
+function gFinish(){
+  var G=gCfg(), d=G.draft;
+  if(!d) return;
+  var ex=d.ex.map(function(e){
+    // reps are what make a set real; weight may genuinely be nothing (pull-ups, dips)
+    return {n:e.n, id:e.id, sets:(e.sets||[]).filter(function(s){ return s.r>0; })
+      .map(function(s){ return {w:s.w==null?0:s.w, r:s.r}; })};
+  }).filter(function(e){ return e.sets.length; });
+  if(!ex.length){ gDiscard(); return; }
+  var sess={ id:nid(), d:d.d, n:d.n, dayId:d.dayId, at:d.at, done:Date.now(), ex:ex, note:d.note||"" };
+  G.log.push(sess);
+  if(G.log.length>300) G.log=G.log.slice(-300);
+  G.draft=null;
+  var rec=day(sess.d);                       // a session counts as the day's movement
+  var mv=S.habits.filter(function(h){ return /mov|train|gym/i.test(h.n); })[0];
+  if(mv){ rec.habits[mv.id]="done"; }
+  touch(); renderGym(); renderWeek(); renderToday();
+}
+function gVolume(sess){
+  var v=0; (sess.ex||[]).forEach(function(e){ (e.sets||[]).forEach(function(s){ v+=(s.w||0)*(s.r||0); }); });
+  return v;
+}
+function gWeekSessions(){
+  var ws=iso(wkStart(NOW));
+  return gCfg().log.filter(function(s){ return s.d>=ws; });
+}
+
 /* ══════════ PART B FOLLOWS ══════════ */
 
 /* ══════════ CHART HELPERS ══════════ */
@@ -1703,6 +1861,233 @@ function fPaintStats(){
           on(b,"click",function(){ F.goal=+b.dataset.goal; touch(); closeModal(); fPaint(true); });
         });
       });
+  });
+}
+
+/* ══════════ GYM SCREEN ══════════ */
+function renderGym(){
+  var sec=$("#s-gym"); if(!sec) return;
+  var G=gCfg();
+  var tabs='<div class="pills" id="gymTabs" style="margin-bottom:12px">'
+    + [["today","Workout"],["hist","History"],["lifts","Lifts"],["prog","Program"]].map(function(t){
+        return '<button data-gv="'+t[0]+'" aria-pressed="'+(GYM_VIEW===t[0])+'">'+t[1]+'</button>'; }).join("")
+    + '</div>';
+  sec.innerHTML = '<div class="card"><div class="spread" style="margin-bottom:10px"><h2>Gym</h2>'
+    + '<span class="src">'+gWeekSessions().length+' this week</span></div>'+tabs+'</div>'
+    + (GYM_VIEW==="today" ? (G.draft ? gDraftHTML() : gPickHTML())
+      : GYM_VIEW==="hist" ? gHistHTML()
+      : GYM_VIEW==="lifts" ? gLiftsHTML() : gProgHTML());
+  each("[data-gv]",$("#gymTabs"),function(b){
+    on(b,"click",function(){ GYM_VIEW=b.dataset.gv; renderGym(); });
+  });
+  if(GYM_VIEW==="today"){ G.draft ? gWireDraft() : gWirePick(); }
+  else if(GYM_VIEW==="hist") gWireHist();
+  else if(GYM_VIEW==="lifts") gWireLifts();
+  else gWireProg();
+}
+
+/* ── pick a day ── */
+function gPickHTML(){
+  var G=gCfg(), last=G.log[G.log.length-1];
+  var next=null;
+  if(last){
+    var i=G.prog.map(function(d){return d.id;}).indexOf(last.dayId);
+    if(i>=0) next=G.prog[(i+1)%G.prog.length];
+  }
+  return '<div class="card">'
+    + '<h2>What are you training?</h2>'
+    + (next ? '<div class="hint">Last session was '+esc(last.n)+' on '+fmtD(last.d)+'. Next in the rotation is <b>'+esc(next.n)+'</b>.</div>'
+            : '<div class="hint">Pick a day to start logging. Each exercise will show what you lifted last time.</div>')
+    + '<div class="gdays">'+G.prog.map(function(d){
+        var l=G.log.filter(function(s){ return s.dayId===d.id; }).slice(-1)[0];
+        return '<button class="gday'+(next&&next.id===d.id?" up":"")+'" data-gstart="'+d.id+'">'
+          + '<b>'+esc(d.n)+'</b><small>'+d.ex.length+' exercises'+(l?' · last '+fmtD(l.d):' · never done')+'</small></button>';
+      }).join("")+'</div></div>';
+}
+function gWirePick(){
+  each("[data-gstart]",$("#s-gym"),function(b){ on(b,"click",function(){ gStart(b.dataset.gstart); }); });
+}
+
+/* ── logging a session ── */
+function gDraftHTML(){
+  var G=gCfg(), d=G.draft, day=gDay(d.dayId);
+  var body=d.ex.map(function(e,ei){
+    var def=(day?day.ex:[]).filter(function(x){ return x.n===e.n; })[0] || {s:e.sets.length, lo:6, hi:8, inc:2.5};
+    var last=gLast(e.n), sg=gSuggest(def.n?def:{n:e.n,s:def.s,lo:def.lo,hi:def.hi,inc:def.inc});
+    return '<div class="gex" data-ei="'+ei+'">'
+      + '<div class="gexh"><b>'+esc(e.n)+'</b><span>'+def.s+' × '+def.lo+'–'+def.hi+'</span></div>'
+      + (last ? '<div class="glast">Last ('+esc(fmtD(last.when))+'): '+last.sets.map(gSetStr).join(", ")+'</div>' : '')
+      + (sg.msg ? '<div class="gsug">'+esc(sg.msg)+'</div>' : '')
+      + '<div class="gsets">'+e.sets.map(function(s,si){
+          return '<div class="gset"><span>'+(si+1)+'</span>'
+            + '<input class="fld sm" inputmode="decimal" data-gw="'+ei+'-'+si+'" value="'+(s.w==null?"":s.w)+'" placeholder="'+esc(gCfg().unit)+'">'
+            + '<i>×</i>'
+            + '<input class="fld sm" inputmode="numeric" data-gr="'+ei+'-'+si+'" value="'+(s.r==null?"":s.r)+'" placeholder="reps">'
+            + '<button class="gx" data-gdel="'+ei+'-'+si+'" aria-label="Remove set">×</button></div>';
+        }).join("")
+      + '</div><button class="ghost sm gadd" data-gadd="'+ei+'">Add set</button></div>';
+  }).join("");
+  return '<div class="card">'
+    + '<div class="spread" style="margin-bottom:6px"><h2>'+esc(d.n)+'</h2>'
+    +   '<span class="src">'+esc(fmtD(d.d))+'</span></div>'
+    + '<div class="hint">Fill in what you actually did. Leave a set blank if you skipped it.</div>'
+    + body
+    + '<label class="lbl" style="margin-top:14px">Note</label>'
+    + '<input class="fld sm" id="gNote" placeholder="Felt heavy, left elbow twinge, gym was packed…" value="'+esc(d.note||"")+'">'
+    + '<div class="row" style="margin-top:16px;gap:8px">'
+    +   '<button class="primary sm" id="gFinish">Finish and save</button>'
+    +   '<button class="ghost sm" id="gDiscard">Discard</button></div>'
+    + '</div>';
+}
+function gWireDraft(){
+  var G=gCfg(), d=G.draft, root=$("#s-gym");
+  each("[data-gw]",root,function(el){
+    on(el,"input",function(){
+      var p=el.dataset.gw.split("-"); d.ex[+p[0]].sets[+p[1]].w=gNum(el.value); touch();
+    });
+  });
+  each("[data-gr]",root,function(el){
+    on(el,"input",function(){
+      var p=el.dataset.gr.split("-"); d.ex[+p[0]].sets[+p[1]].r=gNum(el.value); touch();
+    });
+  });
+  each("[data-gadd]",root,function(b){
+    on(b,"click",function(){
+      var e=d.ex[+b.dataset.gadd], prev=e.sets[e.sets.length-1];
+      e.sets.push({w:prev?prev.w:0, r:null}); touch(); renderGym();
+    });
+  });
+  each("[data-gdel]",root,function(b){
+    on(b,"click",function(){
+      var p=b.dataset.gdel.split("-"), e=d.ex[+p[0]];
+      if(e.sets.length>1) e.sets.splice(+p[1],1); else e.sets[0]={w:e.sets[0].w, r:null};
+      touch(); renderGym();
+    });
+  });
+  on($("#gNote"),"input",function(e){ d.note=e.target.value; touch(); });
+  on($("#gFinish"),"click",gFinish);
+  on($("#gDiscard"),"click",function(){
+    openModal('<h2>Throw this session away?</h2><div class="md">Everything you have typed for '+esc(d.n)+' will go.</div>'
+      +'<div class="row"><button class="primary" id="gdYes">Discard it</button><button class="ghost" data-close>Keep logging</button></div>',
+      function(root){ on(root.querySelector("#gdYes"),"click",function(){ closeModal(); gDiscard(); }); });
+  });
+}
+
+/* ── history ── */
+function gHistHTML(){
+  var G=gCfg(), list=G.log.slice().reverse().slice(0,25);
+  if(!list.length) return '<div class="card"><div class="hint" style="margin:0">Nothing logged yet. Your sessions will build up here.</div></div>';
+  return '<div class="card"><h2>Recent sessions</h2>'
+    + list.map(function(s){
+        var sets=0; (s.ex||[]).forEach(function(e){ sets+=e.sets.length; });
+        return '<div class="ghrow" data-gh="'+s.id+'">'
+          + '<div class="ghh"><b>'+esc(s.n)+'</b><span>'+esc(fmtD(s.d))+'</span></div>'
+          + '<div class="ghs">'+(s.ex||[]).length+' exercises · '+sets+' sets · '+Math.round(gVolume(s))+gCfg().unit+' total'
+          + (s.note?' · '+esc(s.note.slice(0,40)):'')+'</div></div>';
+      }).join("")
+    + '</div>';
+}
+function gWireHist(){
+  each("[data-gh]",$("#s-gym"),function(r){
+    on(r,"click",function(){
+      var s=gCfg().log.filter(function(x){ return x.id===r.dataset.gh; })[0];
+      if(!s) return;
+      openModal('<h2>'+esc(s.n)+'</h2><div class="eyebrow">'+esc(fmtD(s.d))+'</div>'
+        + (s.ex||[]).map(function(e){
+            return '<div class="gmex"><b>'+esc(e.n)+'</b><span>'+e.sets.map(gSetStr).join(", ")+'</span></div>'; }).join("")
+        + (s.note?'<div class="md" style="margin-top:10px">'+esc(s.note)+'</div>':'')
+        + '<div class="row" style="margin-top:14px"><button class="ghost" data-close>Close</button>'
+        + '<button class="ghost" id="gDel" style="margin-left:auto;color:var(--neg)">Delete</button></div>',
+        function(root){
+          on(root.querySelector("#gDel"),"click",function(){
+            var G=gCfg(); G.log=G.log.filter(function(x){ return x.id!==s.id; });
+            touch(); closeModal(); renderGym();
+          });
+        });
+    });
+  });
+}
+
+/* ── per-lift progress ── */
+function gLiftNames(){
+  var seen={}, out=[];
+  gCfg().log.forEach(function(s){ (s.ex||[]).forEach(function(e){ if(!seen[e.n]){ seen[e.n]=1; out.push(e.n); } }); });
+  return out;
+}
+function gLiftsHTML(){
+  var names=gLiftNames();
+  if(!names.length) return '<div class="card"><div class="hint" style="margin:0">Log a session or two and your lifts will show their progress here.</div></div>';
+  return '<div class="card"><h2>Lifts</h2>'
+    + '<div class="hint">Top set of each session, and your best estimated single.</div>'
+    + names.map(function(n){
+        var best=gBest(n), last=gLast(n);
+        var tops=[];
+        gCfg().log.forEach(function(s){
+          (s.ex||[]).forEach(function(e){
+            if(e.n!==n) return;
+            var t=0; (e.sets||[]).forEach(function(x){ if(x.w>t) t=x.w; });
+            if(t) tops.push(t);
+          });
+        });
+        tops=tops.slice(-10);
+        var mx=Math.max.apply(null,tops.concat([1]));
+        return '<div class="glift">'
+          + '<div class="glh"><b>'+esc(n)+'</b>'+(best?'<span>best '+gFmtW(Math.round(best.v*10)/10)+' est.</span>':'')+'</div>'
+          + (tops.length>1 ? miniBars(tops, mx*1.15, "var(--d1)", gCfg().unit) : '')
+          + '<div class="gls">'+(last?'Last: '+last.sets.map(gSetStr).join(", ")+' on '+esc(fmtD(last.when)):'')+'</div>'
+          + '</div>';
+      }).join("")
+    + '</div>';
+}
+function gWireLifts(){}
+
+/* ── program editor ── */
+function gProgHTML(){
+  var G=gCfg();
+  return '<div class="card"><h2>Your program</h2>'
+    + '<div class="hint">Sets and rep range per exercise. When you clear the top of the range on every set, Compass tells you to add weight.</div>'
+    + G.prog.map(function(d,di){
+        return '<div class="gpd">'
+          + '<div class="gpdh"><input class="fld sm" data-gdn="'+di+'" value="'+esc(d.n)+'">'
+          + '<button class="gx" data-gdd="'+di+'" aria-label="Remove day">×</button></div>'
+          + d.ex.map(function(e,ei){
+              return '<div class="gpe">'
+                + '<input class="fld sm nm" data-gen="'+di+'-'+ei+'" value="'+esc(e.n)+'">'
+                + '<input class="fld sm n" inputmode="numeric" data-ges="'+di+'-'+ei+'" value="'+e.s+'" aria-label="Sets">'
+                + '<i>×</i>'
+                + '<input class="fld sm n" inputmode="numeric" data-gel="'+di+'-'+ei+'" value="'+e.lo+'" aria-label="Low reps">'
+                + '<i>–</i>'
+                + '<input class="fld sm n" inputmode="numeric" data-geh="'+di+'-'+ei+'" value="'+e.hi+'" aria-label="High reps">'
+                + '<button class="gx" data-gex="'+di+'-'+ei+'" aria-label="Remove exercise">×</button></div>';
+            }).join("")
+          + '<button class="ghost sm gadd" data-gaddex="'+di+'">Add exercise</button></div>';
+      }).join("")
+    + '<div class="row" style="margin-top:14px;gap:8px">'
+    +   '<button class="ghost sm" id="gAddDay">Add a day</button>'
+    +   '<button class="ghost sm" id="gReset">Start from the default</button></div>'
+    + '</div>';
+}
+function gWireProg(){
+  var G=gCfg(), root=$("#s-gym");
+  function bind(sel,fn){ each(sel,root,function(el){ on(el,"input",function(){ fn(el); touch(); }); }); }
+  bind("[data-gdn]",function(el){ G.prog[+el.dataset.gdn].n=el.value; });
+  bind("[data-gen]",function(el){ var p=el.dataset.gen.split("-"); G.prog[+p[0]].ex[+p[1]].n=el.value; });
+  bind("[data-ges]",function(el){ var p=el.dataset.ges.split("-"); G.prog[+p[0]].ex[+p[1]].s=Math.max(1,Math.min(10,+el.value||1)); });
+  bind("[data-gel]",function(el){ var p=el.dataset.gel.split("-"); G.prog[+p[0]].ex[+p[1]].lo=Math.max(1,Math.min(30,+el.value||1)); });
+  bind("[data-geh]",function(el){ var p=el.dataset.geh.split("-"); G.prog[+p[0]].ex[+p[1]].hi=Math.max(1,Math.min(30,+el.value||1)); });
+  each("[data-gex]",root,function(b){ on(b,"click",function(){
+    var p=b.dataset.gex.split("-"); G.prog[+p[0]].ex.splice(+p[1],1); touch(); renderGym(); }); });
+  each("[data-gdd]",root,function(b){ on(b,"click",function(){
+    if(G.prog.length>1){ G.prog.splice(+b.dataset.gdd,1); touch(); renderGym(); } }); });
+  each("[data-gaddex]",root,function(b){ on(b,"click",function(){
+    G.prog[+b.dataset.gaddex].ex.push({id:nid(), n:"New exercise", s:3, lo:8, hi:12, inc:2.5});
+    touch(); renderGym(); }); });
+  on($("#gAddDay"),"click",function(){ G.prog.push({id:nid(), n:"New day", ex:[]}); touch(); renderGym(); });
+  on($("#gReset"),"click",function(){
+    openModal('<h2>Back to the default program?</h2><div class="md">Your logged sessions stay. Only the plan is replaced.</div>'
+      +'<div class="row"><button class="primary" id="grYes">Replace the plan</button><button class="ghost" data-close>Cancel</button></div>',
+      function(root){ on(root.querySelector("#grYes"),"click",function(){
+        G.prog=gDefaultProgram(); touch(); closeModal(); renderGym(); }); });
   });
 }
 
@@ -2655,7 +3040,7 @@ function saveModal(){
 /* ══════════ WIRING ══════════ */
 function renderAll(){
   renderToday(); renderWeek(); renderSchool(); renderRevise();
-  renderTasks(); renderGoals(); renderRituals(); renderReset(); renderWhy(); fPaint(true);
+  renderTasks(); renderGoals(); renderRituals(); renderReset(); renderWhy(); fPaint(true); renderGym();
 }
 function applyTheme(){
   document.documentElement.setAttribute("data-theme",S.theme||"light");
@@ -2768,6 +3153,7 @@ window.CompassBridge={
   applyTheme:function(){ applyTheme(); },
   restoreTimer:function(){ fRestore(); },
   paintFocus:function(){ if(typeof fPaint==="function") fPaint(true); },
+  paintGym:function(){ if(typeof renderGym==="function") renderGym(); },
   show:function(k){ show(k); },
   tab:function(){ return S.tab; },
   onChange:function(f){ touchHook=f; },
@@ -2816,6 +3202,7 @@ var I = {
   goals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',
   rituals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
   file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 11v6"/><path d="M9.5 14.5 12 17l2.5-2.5"/></svg>',
+  gym:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4M6 7v10M18 7v10M21 10v4"/><path d="M6 12h12"/></svg>',
   focus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 10.5v3.2l2.1 1.4"/><path d="M9.5 2.8h5"/><path d="M12 2.8V6"/></svg>',
   reset:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>',
   why:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4"/><circle cx="12" cy="16.6" r=".7" fill="currentColor"/></svg>',
@@ -3104,7 +3491,7 @@ function pullSync(quiet){
    Sync used to be invisible: it quietly reused the AI connection, and if
    that was missing or wrong on a device, nothing happened and nothing
    said so. This screen is the cure — status, a real test, and a way in. */
-var BUILD = "2026-08-22c";
+var BUILD = "2026-08-22d";
 var syncState = {kind:"unknown", msg:"", at:0};
 
 function setSyncState(kind,msg){
@@ -3287,6 +3674,7 @@ function doSave(){
 var PRIMARY=[["today","Today",I.today],["ask","Ask",I.ask],["school","School",I.school],["revise","Revise",I.revise]];
 var MORE=[
   ["focus","Focus",I.focus,"Timed deep-work blocks and the hours behind you"],
+  ["gym","Gym",I.gym,"Log your lifts and see the weight go up"],
   ["week","Week",I.week,"Habits, execution score, the six areas"],
   ["tasks","Tasks",I.tasks,"Capture everything, sort it later"],
   ["goals","Goals",I.goals,"Two or three, on a 90-day horizon"],
@@ -3317,6 +3705,7 @@ function setTab(k){
   B.show(k);
   if(k==="sync"){ renderSync(); }
   if(k==="focus" && B.paintFocus) B.paintFocus();
+  if(k==="gym" && B.paintGym) B.paintGym();
   Array.prototype.forEach.call(nav.querySelectorAll("[data-nt]"),function(b){
     b.setAttribute("aria-selected", String(b.dataset.nt===k)); });
   var isMore = MORE.some(function(m){return m[0]===k;});
