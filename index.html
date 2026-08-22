@@ -533,6 +533,10 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 
 
 .bub.lookup{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted)}
+.fblocks{margin-top:12px;border-top:1px solid var(--border);padding-top:8px}
+.fbl{display:flex;align-items:center;gap:9px;padding:4px 0;font-size:12.5px}
+.fbl .m{flex:none;font-weight:600;font-variant-numeric:tabular-nums;min-width:56px}
+.fbl .t{flex:1;min-width:0;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* ── Gym ─────────────────────────────────────────── */
 .gdays{display:flex;flex-direction:column;gap:8px;margin-top:14px}
 .gday{display:block;width:100%;text-align:left;padding:13px 14px;border:1px solid var(--border);
@@ -1489,8 +1493,31 @@ function fResume(){
   t.pausedAt=null; t.on=true; touch(); fLoop(); fPaint(true);
 }
 function fStop(){
-  if(fLive()) fHarvest();
+  if(fLive()){
+    fHarvest();
+    // Stopping part-way through a block used to throw that block away. Time you
+    // actually sat and worked counts, whether or not you saw the timer out.
+    var t=S.timer, w=fWhere(fPos());
+    if(w.k==="f"){
+      var done=Math.floor((w.len-w.left)/60);
+      if(done>0) fRecord(done, t.label, t.sub);
+    }
+  }
   S.timer={v:2, on:false, seg:null}; touch(); fLoop(); fPaint(true); renderToday();
+}
+/* Remove one logged block — for a session left running by mistake, or a
+   mis-tap. Takes the minutes back off the day and the subject too. */
+function fUnlog(at){
+  var F=fCfg(), i=-1;
+  for(var j=0;j<F.log.length;j++) if(F.log[j].at===at){ i=j; break; }
+  if(i<0) return;
+  var e=F.log[i];
+  F.log.splice(i,1);
+  var d=S.days[e.d];
+  if(d) d.focus=Math.max(0,(d.focus||0)-e.m);
+  if(e.s){ var su=S.subjects.filter(function(x){ return x.id===e.s; })[0];
+    if(su) su.mins=Math.max(0,(su.mins||0)-e.m); }
+  touch(); fPaint(true); renderToday();
 }
 /* Jump to the end of the current segment (skip a break, or end a block early
    without losing the minutes already done). */
@@ -1819,6 +1846,8 @@ function fPaintStats(){
   for(var i=0;i<7;i++){ var k=iso(addD(ws,i)); var v=fMins(k); days.push(v); wk+=v; }
   var mx=Math.max(60, Math.max.apply(null,days.concat([goal])));
 
+  var todayK=iso(new Date());
+  var todayBlocks=F.log.filter(function(e){ return e.d===todayK; }).slice(-8);
   var bysub={}, wsk=iso(ws);
   F.log.forEach(function(e){ if(e.d>=wsk && e.s){ bysub[e.s]=(bysub[e.s]||0)+e.m; } });
   var subRows=Object.keys(bysub).sort(function(a,b){ return bysub[b]-bysub[a]; }).map(function(id){
@@ -1841,6 +1870,11 @@ function fPaintStats(){
     +   '<div class="fcol"><b>'+fStreak()+'</b><span>Day streak</span></div>'
     + '</div>'
     + '<div class="fdone">Focused today: <b>'+fHrs(today)+'</b>'+(today>=goal?' · goal met':'')+'</div>'
+    + (todayBlocks.length ? '<div class="fblocks">'+todayBlocks.map(function(e){
+        return '<div class="fbl"><span class="m">'+fHrs(e.m)+'</span>'
+          + '<span class="t">'+esc(e.t||"Deep work")+'</span>'
+          + '<button class="gx" data-funlog="'+e.at+'" aria-label="Remove this block">×</button></div>';
+      }).join("")+'</div>' : '')
     + '</div>'
     + '<div class="card">'
     +   '<div class="spread" style="margin-bottom:4px"><h2>This week</h2><span class="src">'+fHrs(wk)+' total</span></div>'
@@ -1849,6 +1883,9 @@ function fPaintStats(){
     +   (subRows ? '<div class="eyebrow" style="margin-top:16px">Where it went</div>'+subRows : '')
     + '</div>';
 
+  each("[data-funlog]",box,function(b){
+    on(b,"click",function(){ fUnlog(+b.dataset.funlog); });
+  });
   on($("#fGoalEdit"),"click",function(){
     openModal('<h2>Daily focus goal</h2>'
       + '<div class="md">How many minutes of real deep work counts as a day done? Two blocks is a solid target on a school day.</div>'
@@ -3491,7 +3528,7 @@ function pullSync(quiet){
    Sync used to be invisible: it quietly reused the AI connection, and if
    that was missing or wrong on a device, nothing happened and nothing
    said so. This screen is the cure — status, a real test, and a way in. */
-var BUILD = "2026-08-22d";
+var BUILD = "2026-08-22e";
 var syncState = {kind:"unknown", msg:"", at:0};
 
 function setSyncState(kind,msg){
