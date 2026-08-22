@@ -378,152 +378,241 @@ input.bare::placeholder{color:var(--muted)}
 .tbl tr:last-child td{border-bottom:0}
 .tbl td b{color:var(--ink);font-weight:600}
 
-/* ═══ ASK ═══════════════════════════════════════════════════════════════ */
-.askcard{padding:0;overflow:hidden}
-.asklog{max-height:min(58vh,560px);overflow-y:auto;padding:18px 18px 6px;display:flex;flex-direction:column;gap:12px}
-.askempty{color:var(--muted);font-size:13.5px;line-height:1.6;padding:14px 2px 20px}
-.msg{display:flex}
-.msg.me{justify-content:flex-end}
-.msg .bub{max-width:82%;padding:11px 14px;border-radius:15px;font-size:14px;line-height:1.6}
-.msg.me .bub{background:var(--ink);color:var(--plane);border-bottom-right-radius:5px;white-space:pre-wrap}
-.msg.ai .bub{background:var(--surface-2);color:var(--ink);border-bottom-left-radius:5px}
-.msg.ai .bub p{margin:0 0 9px}
-.msg.ai .bub p:last-child{margin-bottom:0}
-.msg.ai .bub h4{font-size:13.5px;margin:12px 0 6px;color:var(--ink)}
-.msg.ai .bub h4:first-child{margin-top:0}
-.msg.ai .bub ul{margin:0 0 9px;padding-left:19px}
-.msg.ai .bub li{margin-bottom:4px}
-.msg.ai .bub li::marker{color:var(--muted)}
-.msg.ai .bub code{background:var(--surface-3);padding:1px 5px;border-radius:4px;font-size:12.5px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-.msg.ai .bub pre{background:var(--surface-3);padding:11px 13px;border-radius:9px;overflow-x:auto;
-  font-size:12.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin:0 0 9px;line-height:1.5}
-/* ── Ask: kept features, old look ──────────────────── */
-.logwrap{position:relative}
-.mwrap{max-width:82%;min-width:0;display:flex;flex-direction:column;gap:6px}
-.msg.me .mwrap{align-items:flex-end}
-.msg .mwrap .bub{max-width:100%}
-.msg.ai .bub.err{color:var(--crit)}
-.btag{align-self:flex-start;font-size:10.5px;font-weight:600;letter-spacing:.03em;
-  text-transform:uppercase;color:var(--muted);border:1px solid var(--border);
-  border-radius:999px;padding:2px 8px}
-.msg.ai .bub h3{font-size:14.5px;margin:13px 0 6px;color:var(--ink)}
-.msg.ai .bub h5{font-size:12.5px;margin:11px 0 5px;color:var(--ink)}
-.msg.ai .bub h3:first-child,.msg.ai .bub h5:first-child{margin-top:0}
-.msg.ai .bub ol{margin:0 0 9px;padding-left:21px}
-.msg.ai .bub li>ul,.msg.ai .bub li>ol{margin:4px 0 0}
-.msg.ai .bub a{color:var(--d1);text-decoration:underline;text-underline-offset:2px}
-.msg.ai .bub hr{border:0;border-top:1px solid var(--border);margin:11px 0}
-.msg.ai .bub del{color:var(--muted)}
-.msg.ai .bub blockquote{margin:0 0 9px;padding:2px 0 2px 11px;border-left:2px solid var(--axis);color:var(--ink-2)}
-.msg.ai .bub blockquote>:last-child{margin-bottom:0}
-.msg.ai .bub table{width:100%;border-collapse:collapse;margin:0 0 9px;font-size:12.5px;display:block;overflow-x:auto}
-.msg.ai .bub th,.msg.ai .bub td{border:1px solid var(--border);padding:5px 8px;text-align:left}
-.msg.ai .bub th{background:var(--surface-3);font-weight:600}
-.msg .bub>:first-child{margin-top:0}
-.msg .bub>:last-child{margin-bottom:0}
-.caret{display:inline-block;width:2px;height:1em;vertical-align:-.14em;margin-left:2px;
-  background:var(--ink);animation:cblink 1s steps(1) infinite}
-@keyframes cblink{0%,50%{opacity:1}50.01%,100%{opacity:0}}
+/* ═══ ASK — chat ════════════════════════════════════════════════════════ */
+:root{--mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
 
-/* message actions */
-.tacts{display:flex;gap:4px;opacity:0;transition:opacity .12s}
-.msg:hover .tacts,.msg:focus-within .tacts{opacity:1}
-@media (hover:none){.tacts{opacity:1}}
-.tacts button{display:inline-flex;align-items:center;gap:4px;border:1px solid transparent;
-  background:none;color:var(--muted);font-size:11.5px;font-weight:500;padding:3px 7px;
-  border-radius:7px;cursor:pointer}
+.askshell{position:relative;display:flex;flex-direction:column;
+  height:760px;height:min(760px,calc(100vh - 200px));height:min(760px,calc(100dvh - 200px));
+  min-height:430px;background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:15px}
+
+/* ── header ─────────────────────────────────────── */
+.askhead{flex:none;display:flex;align-items:center;gap:6px;padding:9px 10px 9px 12px;
+  border-bottom:1px solid var(--border)}
+.askhead .ttl{flex:1;min-width:0;padding-right:4px}
+.askhead .ttl b{display:block;font-size:14px;font-weight:600;letter-spacing:-.011em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.askhead .ttl i{display:block;margin-top:1px;font-style:normal;font-size:11.5px;color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.askhead .ttl i .dot{display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--good);margin-right:5px;vertical-align:middle}
+.askhead .ttl i .dot.off{background:var(--muted)}
+
+.iconbtn{flex:none;width:33px;height:33px;border-radius:9px;border:1px solid transparent;
+  background:transparent;color:var(--ink-2);display:grid;place-items:center;padding:0;
+  transition:background .12s,color .12s}
+.iconbtn:hover{background:var(--surface-2);color:var(--ink)}
+.iconbtn[aria-pressed="true"]{background:var(--surface-2);color:var(--ink)}
+.iconbtn:disabled{opacity:.35;cursor:default}
+.iconbtn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* ── mode strip ─────────────────────────────────── */
+.askmodes{flex:none;display:flex;gap:5px;padding:8px 12px;border-bottom:1px solid var(--border);
+  overflow-x:auto;scrollbar-width:none}
+.askmodes::-webkit-scrollbar{display:none}
+.askmodes button{flex:none;border:1px solid var(--border);background:var(--surface);
+  border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:500;color:var(--ink-2);
+  white-space:nowrap;transition:background .12s,color .12s,border-color .12s}
+.askmodes button:hover{background:var(--surface-2);color:var(--ink)}
+.askmodes button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--plane)}
+
+/* ── log ────────────────────────────────────────── */
+.logwrap{position:relative;flex:1;min-height:0;display:flex}
+.asklog{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  padding:16px 16px 8px;scrollbar-width:thin;scrollbar-color:var(--axis) transparent}
+.asklog::-webkit-scrollbar{width:10px}
+.asklog::-webkit-scrollbar-track{background:transparent}
+.asklog::-webkit-scrollbar-thumb{background:var(--axis);border-radius:99px;
+  border:3px solid transparent;background-clip:content-box}
+.asklog::-webkit-scrollbar-thumb:hover{background:var(--muted);background-clip:content-box}
+
+/* ── one turn ───────────────────────────────────── */
+.turn{display:flex;gap:11px;padding:2px 0 16px}
+.turn:last-child{padding-bottom:6px}
+.av{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;
+  font-size:11.5px;font-weight:700;letter-spacing:.02em;margin-top:1px}
+.av.user{background:var(--surface-3);color:var(--ink-2)}
+.av.bot{background:var(--d1);color:#fff}
+.av.bot svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.tbody{flex:1;min-width:0}
+.tmeta{display:flex;align-items:center;gap:7px;margin:0 0 5px;font-size:12px;font-weight:600;color:var(--ink)}
+.tmeta time{font-weight:400;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tmeta .tag{font-weight:500;font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;
+  color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:0 5px;line-height:15px}
+
+.bub{font-size:14.5px;line-height:1.62;color:var(--ink);word-wrap:break-word;overflow-wrap:anywhere}
+.turn.user .bub{white-space:pre-wrap;background:var(--surface-2);border-radius:12px;
+  padding:10px 13px;display:inline-block;max-width:100%}
+.turn.user .bub.editing{display:block}
+.turn.bot .bub.err{color:var(--crit)}
+.bub.lookup{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted)}
+
+/* streaming caret */
+.caret{display:inline-block;width:2px;height:1.02em;margin-left:2px;vertical-align:-.16em;
+  background:var(--ink);animation:blink 1s steps(2,start) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ── message actions ────────────────────────────── */
+.tacts{display:flex;gap:2px;margin-top:6px;opacity:0;transition:opacity .14s}
+.turn:hover .tacts,.turn:focus-within .tacts,.tacts.pin{opacity:1}
+.tacts button{display:flex;align-items:center;gap:5px;border-radius:7px;padding:3px 7px;
+  font-size:11.5px;font-weight:500;color:var(--muted);transition:background .12s,color .12s}
 .tacts button:hover{background:var(--surface-2);color:var(--ink)}
-.tacts button.ok{color:var(--good)}
 .tacts button svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.9;
   stroke-linecap:round;stroke-linejoin:round}
+.tacts button.ok{color:var(--ok-text)}
+@media(hover:none){.tacts{opacity:1}}
 
-/* fenced code blocks */
-.cb{border:1px solid var(--border);border-radius:9px;overflow:hidden;margin:0 0 9px;background:var(--surface-3)}
-.cb .cbh{display:flex;align-items:center;gap:8px;padding:5px 8px 5px 11px;border-bottom:1px solid var(--border)}
-.cb .cbh span{flex:1;font-size:11px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase}
-.cb .cbh button{display:inline-flex;align-items:center;gap:4px;border:0;background:none;
-  color:var(--muted);font-size:11.5px;padding:3px 6px;border-radius:6px;cursor:pointer}
+/* ── markdown inside a reply ────────────────────── */
+.bub>:first-child{margin-top:0}
+.bub>:last-child{margin-bottom:0}
+.bub p{margin:0 0 11px}
+.bub h3,.bub h4,.bub h5{margin:17px 0 7px;color:var(--ink);letter-spacing:-.011em;line-height:1.35}
+.bub h3{font-size:16px}
+.bub h4{font-size:14.5px}
+.bub h5{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.bub ul,.bub ol{margin:0 0 11px;padding-left:21px}
+.bub li{margin-bottom:5px}
+.bub li>ul,.bub li>ol{margin:5px 0 0}
+.bub li::marker{color:var(--muted)}
+.bub ol{list-style:decimal}
+.bub a{color:var(--d1);text-decoration:underline;text-underline-offset:2px}
+.bub b,.bub strong{font-weight:650}
+.bub del{color:var(--muted)}
+.bub hr{border:0;border-top:1px solid var(--grid);margin:16px 0}
+.bub blockquote{margin:0 0 11px;padding:2px 0 2px 13px;border-left:2px solid var(--axis);color:var(--ink-2)}
+.bub blockquote>:last-child{margin-bottom:0}
+.bub code{background:var(--surface-2);padding:1.5px 5px;border-radius:5px;font-size:.86em;
+  font-family:var(--mono);border:1px solid var(--border)}
+.bub table{border-collapse:collapse;width:100%;margin:0 0 12px;font-size:13.5px;display:block;overflow-x:auto}
+.bub th,.bub td{border:1px solid var(--grid);padding:7px 10px;text-align:left;vertical-align:top}
+.bub th{background:var(--surface-2);font-weight:650;font-size:12.5px}
+
+/* code block with a header */
+.cb{margin:0 0 12px;border:1px solid var(--border);border-radius:11px;overflow:hidden;background:var(--surface-2)}
+.cb .cbh{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:5px 7px 5px 11px;border-bottom:1px solid var(--border);background:var(--surface-3)}
+.cb .cbh span{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cb .cbh button{display:flex;align-items:center;gap:5px;border-radius:6px;padding:2px 7px;
+  font-size:11px;font-weight:500;color:var(--muted)}
 .cb .cbh button:hover{background:var(--surface-2);color:var(--ink)}
-.cb .cbh button.ok{color:var(--good)}
-.cb .cbh button svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.9;
-  stroke-linecap:round;stroke-linejoin:round}
-.cb pre{margin:0;padding:11px 13px;overflow-x:auto;background:none;
-  font-size:12.5px;line-height:1.5;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-.cb pre code{background:none;padding:0;font-size:inherit}
+.cb .cbh button.ok{color:var(--ok-text)}
+.cb pre{margin:0;padding:11px 13px;overflow-x:auto;font-size:12.5px;line-height:1.55;
+  font-family:var(--mono);background:transparent}
+.cb pre code{background:none;border:0;padding:0;font-size:inherit}
 
-/* empty state */
-.askempty .eb{display:none}
-.askempty h3{font-size:14.5px;color:var(--ink);margin:0 0 4px}
-.askempty p{margin:0 0 12px}
-.sugg{display:flex;flex-direction:column;gap:7px}
-.sugg button{text-align:left;border:1px solid var(--border);background:var(--surface);
-  border-radius:11px;padding:9px 12px;font-size:12.5px;color:var(--muted);cursor:pointer;line-height:1.45}
-.sugg button:hover{border-color:var(--axis);background:var(--surface-2)}
-.sugg button b{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px}
+/* maths shouldn't force a horizontal page scroll on a phone */
+.bub .math[data-display="1"]{display:block;overflow-x:auto;overflow-y:hidden;padding:2px 0}
 
-/* jump-to-latest + toast */
-.tobot{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:5;
-  display:none;align-items:center;gap:5px;border:1px solid var(--border);background:var(--surface);
-  box-shadow:var(--shadow);border-radius:999px;padding:5px 12px;font-size:11.5px;
-  color:var(--ink);cursor:pointer}
-.tobot.on{display:inline-flex}
-.tobot svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;
-  stroke-linecap:round;stroke-linejoin:round}
-.asktoast{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:6;
-  display:none;background:var(--ink);color:var(--plane);border-radius:999px;
-  padding:6px 14px;font-size:12px;box-shadow:var(--shadow-lg)}
-.asktoast.on{display:block}
-
-/* composer footer */
-.cfoot{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:11px;color:var(--muted)}
-.cfoot .kb{display:flex;gap:10px;flex-wrap:wrap;flex:1}
-.cfoot kbd{font-family:inherit;font-size:10.5px;border:1px solid var(--border);
-  border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--surface-3);color:var(--ink-2)}
-@media (max-width:520px){.cfoot .kb{display:none}}
-
-/* conversations drawer */
-.iconbtn{flex:none;width:31px;height:31px;border-radius:8px;border:1px solid transparent;
-  background:none;color:var(--muted);display:grid;place-items:center;cursor:pointer}
-.iconbtn:hover{background:var(--surface-2);color:var(--ink)}
-.iconbtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;
-  stroke-linecap:round;stroke-linejoin:round}
-.askdrawer{position:fixed;inset:0;z-index:120;display:none}
-.askdrawer.on{display:block}
-.askdrawer .scrim{position:absolute;inset:0;background:rgba(11,11,11,.32)}
-.askdrawer .panel{position:absolute;top:0;bottom:0;left:0;width:min(310px,86%);
-  background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
-.askdrawer .dh{flex:none;display:flex;align-items:center;gap:6px;
-  padding:10px 8px 10px 13px;border-bottom:1px solid var(--border)}
-.askdrawer .dh b{flex:1;font-size:13px;font-weight:650}
-.askdrawer .dl{flex:1;min-height:0;overflow-y:auto;padding:7px}
-.askdrawer .dempty{padding:20px 12px;font-size:12.5px;color:var(--muted);text-align:center}
-.askdrawer .df{flex:none;padding:9px 11px;border-top:1px solid var(--border)}
-.chatrow{display:flex;align-items:center;gap:2px;border-radius:9px}
-.chatrow:hover{background:var(--surface-2)}
-.chatrow.on{background:var(--surface-2)}
-.chatrow>button.pick{flex:1;min-width:0;text-align:left;border:0;background:none;
-  padding:8px 4px 8px 10px;cursor:pointer}
-.chatrow .cn{display:block;font-size:13px;color:var(--ink);white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis}
-.chatrow.on .cn{font-weight:600}
-.chatrow .cm{display:block;font-size:11px;color:var(--muted);margin-top:1px}
-.chatrow .x{flex:none;width:28px;height:28px;margin-right:5px;border:0;background:none;
-  color:var(--muted);border-radius:7px;cursor:pointer;opacity:0;display:grid;place-items:center}
-.chatrow:hover .x,.chatrow.on .x{opacity:1}
-.chatrow .x:hover{background:var(--surface-3);color:var(--crit)}
-.chatrow .x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.9;
-  stroke-linecap:round;stroke-linejoin:round}
-@media (hover:none){.chatrow .x{opacity:1}}
-.dots{display:inline-flex;gap:4px;padding:3px 0}
+/* ── typing dots ────────────────────────────────── */
+.dots{display:inline-flex;gap:4px;padding:5px 0;align-items:center}
 .dots i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:dot 1.2s infinite}
 .dots i:nth-child(2){animation-delay:.18s}
 .dots i:nth-child(3){animation-delay:.36s}
 @keyframes dot{0%,60%,100%{opacity:.28;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
-.composer{display:flex;gap:9px;align-items:flex-end}
-.composer textarea{flex:1;min-height:46px;max-height:150px;resize:none}
-.composer .primary{flex:none;height:40px}
+
+/* ── empty state ────────────────────────────────── */
+.askempty{padding:22px 4px 8px;max-width:620px;margin:0 auto}
+.askempty .eb{width:38px;height:38px;border-radius:12px;background:var(--d1);color:#fff;
+  display:grid;place-items:center;margin-bottom:14px}
+.askempty .eb svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.askempty h3{font-size:19px;letter-spacing:-.015em;margin-bottom:5px}
+.askempty p{color:var(--ink-2);font-size:13.5px;line-height:1.6;margin:0 0 16px}
+.sugg{display:grid;gap:7px;grid-template-columns:1fr 1fr}
+@media(max-width:640px){.sugg{grid-template-columns:1fr}}
+.sugg button{border:1px solid var(--border);background:var(--surface);border-radius:11px;
+  padding:10px 12px;font-size:13px;line-height:1.45;color:var(--ink-2);
+  transition:background .12s,border-color .12s,color .12s}
+.sugg button:hover{background:var(--surface-2);border-color:var(--axis);color:var(--ink)}
+.sugg button b{display:block;font-weight:600;color:var(--ink);margin-bottom:2px;font-size:13px}
+
+/* ── scroll-to-bottom ───────────────────────────── */
+.tobot{position:absolute;left:50%;bottom:12px;transform:translateX(-50%) translateY(8px);z-index:12;
+  display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:999px;
+  border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow);
+  font-size:12px;font-weight:600;color:var(--ink-2);
+  opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
+.tobot.on{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.tobot svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* ── composer ───────────────────────────────────── */
+.askfoot{flex:none;border-top:1px solid var(--border);padding:10px 12px 11px;background:var(--surface)}
+.composer{position:relative;display:flex;gap:8px;align-items:flex-end;
+  border:1px solid var(--border);border-radius:16px;background:var(--surface-2);padding:6px}
+.composer:focus-within{border-color:var(--d1);background:var(--surface)}
+.composer textarea{flex:1;min-width:0;background:transparent;border:0;outline:none;resize:none;
+  padding:8px 2px 8px 4px;font-size:14.5px;line-height:1.5;max-height:190px;overflow-y:auto;
+  min-height:36px;color:var(--ink);scrollbar-width:thin}
+.composer textarea::placeholder{color:var(--muted)}
+.sendbtn{flex:none;width:36px;height:36px;border-radius:11px;background:var(--ink);color:var(--plane);
+  display:grid;place-items:center;padding:0;transition:opacity .12s,background .12s}
+.sendbtn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.1;
+  stroke-linecap:round;stroke-linejoin:round}
+.sendbtn:disabled{opacity:.3;cursor:default}
+.sendbtn.stop{background:var(--crit);color:#fff}
+.sendbtn.stop svg{fill:currentColor;stroke:none}
+.cfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-top:7px;font-size:11px;color:var(--muted);line-height:1.4}
+.cfoot .kb{display:flex;gap:9px;flex-wrap:wrap}
+.cfoot kbd{font-family:inherit;font-size:10px;font-weight:600;border:1px solid var(--border);
+  border-radius:4px;padding:0 4px;background:var(--surface-2);color:var(--ink-2)}
+
+/* ── history drawer ─────────────────────────────── */
+.askdrawer{position:absolute;inset:0;z-index:30;display:none}
+.askdrawer.on{display:block}
+.askdrawer .scrim{position:absolute;inset:0;background:rgba(11,11,11,.32)}
+.askdrawer .panel{position:absolute;top:0;bottom:0;left:0;width:min(310px,86%);
+  background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;
+  animation:slideIn .2s cubic-bezier(.32,.72,0,1)}
+@keyframes slideIn{from{transform:translateX(-14px);opacity:.5}to{transform:none;opacity:1}}
+.askdrawer .dh{flex:none;display:flex;align-items:center;gap:6px;padding:10px 8px 10px 13px;
+  border-bottom:1px solid var(--border)}
+.askdrawer .dh b{flex:1;font-size:13px;font-weight:650}
+.askdrawer .dl{flex:1;min-height:0;overflow-y:auto;padding:7px}
+.chatrow{display:flex;align-items:center;gap:4px;border-radius:10px;padding:2px 2px 2px 10px;
+  transition:background .12s}
+.chatrow:hover{background:var(--surface-2)}
+.chatrow.on{background:var(--surface-2)}
+.chatrow>button.pick{flex:1;min-width:0;padding:7px 0;text-align:left}
+.chatrow .cn{display:block;font-size:13px;font-weight:500;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chatrow.on .cn{font-weight:650}
+.chatrow .cm{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+.chatrow .x{flex:none;width:26px;height:26px;border-radius:7px;color:var(--muted);
+  display:grid;place-items:center;opacity:0;transition:opacity .12s,background .12s}
+.chatrow:hover .x,.chatrow.on .x{opacity:1}
+.chatrow .x:hover{background:var(--surface-3);color:var(--crit)}
+.chatrow .x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.askdrawer .dempty{padding:20px 12px;font-size:12.5px;color:var(--muted);text-align:center}
+.askdrawer .df{flex:none;padding:9px 11px;border-top:1px solid var(--border)}
+
+/* ── toast ──────────────────────────────────────── */
+.asktoast{position:absolute;left:50%;top:10px;transform:translateX(-50%) translateY(-6px);z-index:40;
+  background:var(--ink);color:var(--plane);border-radius:999px;padding:7px 15px;
+  font-size:12px;font-weight:600;opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;white-space:nowrap;max-width:90%;
+  overflow:hidden;text-overflow:ellipsis}
+.asktoast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── telegram / small screens ───────────────────── */
+body.tg .askshell{height:calc(100dvh - var(--tgtop) - var(--tgnav) - var(--tgsafe) - 116px);
+  min-height:360px;border-radius:15px}
+@media(max-width:560px){
+  .askshell{height:min(760px,calc(100dvh - 168px))}
+  .asklog{padding:14px 12px 8px}
+  .turn{gap:9px;padding-bottom:14px}
+  .av{width:25px;height:25px;border-radius:8px;font-size:11px}
+  .av.bot svg{width:14px;height:14px}
+  .bub{font-size:14px}
+  .askfoot{padding:9px 10px 10px}
+  .askempty{padding:14px 2px 6px}
+  .askempty h3{font-size:17px}
+}
 
 /* ═══════════════ TELEGRAM MINI APP SHELL ═══════════════ */
 :root{
@@ -828,12 +917,12 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 .syncbar .sb-b{display:flex;gap:8px}
 .syncbar .sb-b button{flex:1}
 /* ── Attachments ─────────────────────────────────── */
-.atts{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+.atts{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
 .att{display:flex;align-items:center;gap:8px;max-width:100%;padding:6px 6px 6px 6px;
-  border:1px solid var(--border);border-radius:11px;background:var(--s1)}
+  border:1px solid var(--border);border-radius:11px;background:var(--surface-2)}
 .att img{width:30px;height:30px;object-fit:cover;border-radius:7px;flex:none}
 .att .fi{width:30px;height:30px;border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;
-  background:var(--s2);font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase}
+  background:var(--surface-3);font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase}
 .att .an{min-width:0;display:flex;flex-direction:column;line-height:1.25}
 .att .an b{font-size:12.5px;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .att .an i{font-size:11px;font-style:normal;color:var(--muted)}
@@ -841,27 +930,31 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 .att.bad .an i{color:var(--neg)}
 .att .ax{flex:none;width:22px;height:22px;border-radius:50%;border:0;background:transparent;
   color:var(--muted);font-size:15px;line-height:1;cursor:pointer;padding:0}
-.att .ax:hover{background:var(--s2);color:var(--ink)}
+.att .ax:hover{background:var(--surface-3);color:var(--ink)}
 .composer{position:relative}
-.plus{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--border);
-  background:var(--surface);color:var(--ink);font-size:20px;line-height:1;padding:0;cursor:pointer}
-.plus[aria-expanded="true"]{background:var(--s2)}
-.plusmenu{position:absolute;bottom:50px;left:0;z-index:40;min-width:215px;border:1px solid var(--border);
-  border-radius:14px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden;display:none}
+.plus{flex:none;width:36px;height:36px;border-radius:11px;border:0;
+  background:transparent;color:var(--muted);font-size:0;line-height:0;padding:0;cursor:pointer;
+  display:grid;place-items:center;transition:background .12s,color .12s}
+.plus svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.plus:hover{background:var(--surface-3);color:var(--ink)}
+.plus[aria-expanded="true"]{background:var(--surface-3);color:var(--ink)}
+.plusmenu{position:absolute;bottom:46px;left:0;z-index:40;min-width:232px;border:1px solid var(--border);
+  border-radius:14px;background:var(--surface);box-shadow:var(--shadow-lg);overflow:hidden;display:none}
 .plusmenu.on{display:block}
 .plusmenu button{display:block;width:100%;text-align:left;padding:10px 14px;border:0;
-  background:transparent;color:var(--ink);font-size:14px;cursor:pointer;font-family:inherit}
-.plusmenu button:hover{background:var(--s1)}
+  background:transparent;color:var(--ink);font-size:13.5px;cursor:pointer;font-family:inherit}
+.plusmenu button:hover{background:var(--surface-2)}
 .plusmenu button small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
-.mineatts{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;margin-bottom:5px}
-.mineatts img{width:74px;height:74px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
+.mineatts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.mineatts img{width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
 .mineatts .fc{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:9px;
-  background:var(--s1);border:1px solid var(--border);font-size:12px;color:var(--muted)}
+  background:var(--surface-2);border:1px solid var(--border);font-size:12px;color:var(--muted)}
 .dropz{outline:2px dashed var(--pos);outline-offset:4px;border-radius:16px}
 
 /* ── AI action cards ─────────────────────────────── */
 .acts{margin:8px 0 2px;border:1px solid var(--border);border-radius:14px;background:var(--surface);overflow:hidden}
-.acts .ah{display:flex;align-items:center;gap:7px;padding:9px 12px;background:var(--s1);border-bottom:1px solid var(--border);
+.acts .ah{display:flex;align-items:center;gap:7px;padding:9px 12px;background:var(--surface-2);border-bottom:1px solid var(--border);
   font-size:11.5px;font-weight:650;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .acts ul{list-style:none;margin:0;padding:6px 12px 8px}
 .acts li{display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:13.5px;line-height:1.42;color:var(--ink)}
@@ -5673,19 +5766,22 @@ function emptyHTML(){
 
 function userTurn(m,i){
   var editing = editIx===i;
-  return '<div class="msg me" data-i="'+i+'"><div class="mwrap">'
-    + mineAttsHTML(m.chips)
-    + (editing
-        ? '<textarea class="fld" id="askEdit" rows="3">'+esc(m.content||"")+'</textarea>'
-          + '<div class="row" style="gap:7px;margin-top:7px;justify-content:flex-end">'
-          + '<button class="primary sm" data-savedit="'+i+'">Send again</button>'
-          + '<button class="ghost sm" data-canceledit="1">Cancel</button></div>'
-        : (m.content ? '<div class="bub">'+esc(m.content)+'</div>' : ''))
-    + (editing ? '' :
-        '<div class="tacts">'
-        + '<button type="button" data-copy="'+i+'">'+ICO.copy+'Copy</button>'
-        + (busy ? '' : '<button type="button" data-edit="'+i+'">'+ICO.pencil+'Edit</button>')
-        + '</div>')
+  return '<div class="turn user" data-i="'+i+'">'
+    + '<div class="av user">N</div>'
+    + '<div class="tbody">'
+    +   '<div class="tmeta">You'+(m.at?'<time>'+hhmm(m.at)+'</time>':'')+'</div>'
+    +   mineAttsHTML(m.chips)
+    +   (editing
+          ? '<textarea class="fld" id="askEdit" rows="3">'+esc(m.content||"")+'</textarea>'
+            + '<div class="row" style="gap:7px;margin-top:7px">'
+            + '<button class="primary sm" data-savedit="'+i+'">Send again</button>'
+            + '<button class="ghost sm" data-canceledit="1">Cancel</button></div>'
+          : (m.content ? '<div class="bub">'+esc(m.content)+'</div>' : ''))
+    +   (editing ? '' :
+          '<div class="tacts">'
+          + '<button type="button" data-copy="'+i+'">'+ICO.copy+'Copy</button>'
+          + (busy ? '' : '<button type="button" data-edit="'+i+'">'+ICO.pencil+'Edit</button>')
+          + '</div>')
     + '</div></div>';
 }
 
@@ -5714,9 +5810,14 @@ function botTurn(m,i){
       + (last && !busy ? '<button type="button" data-regen="1">'+ICO.redo+'Regenerate</button>' : '')
       + '</div>';
   }
-  return '<div class="msg ai" data-i="'+i+'"><div class="mwrap">'
-    + (m.tag && m.tag!==MODES[mode].label ? '<div class="btag">'+esc(m.tag)+'</div>' : '')
-    + parts + acts
+  return '<div class="turn bot" data-i="'+i+'">'
+    + '<div class="av bot">'+ICO.bot+'</div>'
+    + '<div class="tbody">'
+    +   '<div class="tmeta">Compass'
+    +     (m.tag ? '<span class="tag">'+esc(m.tag)+'</span>' : '')
+    +     (m.at?'<time>'+hhmm(m.at)+'</time>':'')
+    +   '</div>'
+    +   parts + acts
     + '</div></div>';
 }
 
@@ -5744,7 +5845,7 @@ function paintTail(){
     var box=logEl(); if(!box) return;
     var i=history.length-1, m=history[i];
     if(!m || m.role!=="assistant"){ paint(); return; }
-    var turn=box.querySelector('.msg[data-i="'+i+'"]');
+    var turn=box.querySelector('.turn[data-i="'+i+'"]');
     if(!turn){ paint(); return; }
     var bub=turn.querySelector('.bub[data-body="1"]');
     if(!bub){ paint(); return; }
@@ -5777,10 +5878,12 @@ function renderDrawer(){
 /* ── UI ────────────────────────────────────────────── */
 function render(){
   var conn = ready();
-  var hint=$("#askHint");
-  if(hint) hint.textContent = conn
-    ? MODES[mode].hint
-    : "Not connected \u2014 open Settings and paste your Worker address.";
+  $("#askTitle").textContent = cur ? titleFor(cur) : "New chat";
+  $("#askSub").innerHTML = conn
+    ? '<span class="dot"></span>'+esc(MODES[mode].label)
+      + (cfg.model ? " \u00b7 "+esc(cfg.model) : " \u00b7 worker default")
+      + (notionOn ? " \u00b7 Notion" : "")
+    : '<span class="dot off"></span>Not connected';
 
   $("#askModes").innerHTML = Object.keys(MODES).map(function(k){
     return '<button type="button" data-mode="'+k+'" aria-pressed="'+(mode===k)+'">'+esc(MODES[k].label)+'</button>';
@@ -5809,7 +5912,7 @@ function setSend(){
   var b=$("#askSend"); if(!b) return;
   var input=$("#askInput");
   b.classList.toggle("stop", busy);
-  b.textContent = busy ? "Stop" : "Send";
+  b.innerHTML = busy ? ICO.stop : ICO.send;
   b.setAttribute("aria-label", busy ? "Stop generating" : "Send");
   b.disabled = !busy && !(input && input.value.trim()) && !atts.length;
   var n=$("#askCount");
@@ -5987,20 +6090,10 @@ function boot(){
   loadChats();
 
   sec.innerHTML = ''
-  + '<div class="card">'
-  +   '<div class="spread" style="margin-bottom:10px"><h2>Ask</h2>'
-  +   '<div class="row" style="gap:6px;flex:none">'
-  +   '<button class="ghost sm" id="askHistory">Chats</button>'
-  +   '<button class="ghost sm" id="askClear">New chat</button>'
-  +   '<button class="ghost sm" id="askCfg" aria-pressed="false">Settings</button></div></div>'
-  +   '<div class="pills" id="askModes" style="margin-bottom:8px" role="group" aria-label="What kind of help"></div>'
-  +   '<div class="hint" id="askHint" style="margin:0"></div>'
-  + '</div>'
-
   + '<div class="card" id="askSetup" style="display:none">'
   +   '<h2 id="askSetupH">Connect it first</h2>'
   +   '<div class="hint">Paste your Worker address and the passphrase you set as <b>APP_SECRET</b> in Cloudflare. '
-  +   'Both stay on this device only \u2014 they are never written into the app file or the backup.</div>'
+  +   'Both stay on this device only — they are never written into the app file or the backup.</div>'
   +   '<label class="lbl">Worker URL</label>'
   +   '<input class="fld sm" id="cfgUrl" placeholder="https://compass-ai.yourname.workers.dev" autocomplete="off" spellcheck="false">'
   +   '<label class="lbl" style="margin-top:11px">Passphrase</label>'
@@ -6016,46 +6109,54 @@ function boot(){
   +   '<span id="cfgMsg" style="font-size:12px;color:var(--muted)"></span></div>'
   + '</div>'
 
-  + '<div class="card askcard logwrap">'
-  +   '<div id="askLog" class="asklog" role="log" aria-live="polite" aria-atomic="false"></div>'
-  +   '<button class="tobot" id="askToBot" type="button">'+ICO.down+'Jump to latest</button>'
-  +   '<div class="asktoast" id="askToast"></div>'
-  + '</div>'
-
-  + '<div class="card" id="askFoot">'
-  +   '<div class="atts" id="askAtts" style="display:none"></div>'
-  +   '<div class="hint" id="askAttNote" style="display:none;margin:0 0 8px"></div>'
-  +   '<div class="composer">'
-  +     '<button class="plus" id="askPlus" aria-label="Attach a file or photo" aria-expanded="false">+</button>'
-  +     '<div class="plusmenu" id="askPlusMenu">'
-  +       '<button type="button" data-pick="camera">Take a photo<small>Point it at a question or your notes</small></button>'
-  +       '<button type="button" data-pick="image">Photo library<small>A screenshot or a picture you already have</small></button>'
-  +       '<button type="button" data-pick="file">Choose a file<small>PDF, Word, text, CSV</small></button>'
-  +     '</div>'
-  +     '<textarea class="fld" id="askInput" rows="2" placeholder="Ask something, or attach a file\u2026" '
-  +       'autocomplete="off" autocapitalize="sentences"></textarea>'
-  +     '<button class="primary" id="askSend">Send</button>'
+  + '<div class="askshell">'
+  +   '<div class="askhead">'
+  +     '<button class="iconbtn" id="askHistory" aria-label="Your conversations" title="Conversations">'+ICO.menu+'</button>'
+  +     '<div class="ttl"><b id="askTitle">New chat</b><i id="askSub"></i></div>'
+  +     '<button class="iconbtn" id="askClear" aria-label="New chat" title="New chat">'+ICO.plus+'</button>'
+  +     '<button class="iconbtn" id="askCfg" aria-label="Connection settings" title="Settings" aria-pressed="false">'+ICO.cog+'</button>'
   +   '</div>'
-  +   '<div class="cfoot"><div class="kb"><span><kbd>Enter</kbd> send</span>'
-  +     '<span><kbd>Shift</kbd>+<kbd>Enter</kbd> new line</span><span><kbd>Esc</kbd> stop</span></div>'
-  +     '<span id="askCount" class="mono"></span></div>'
-  +   '<div class="src" style="margin-top:9px">It can see today\u2019s readiness, your Big 3, this week\u2019s habits, deadlines and revision queue. In <b>Organise</b> it can also propose changes \u2014 you approve them before anything moves. Attach a PDF, a Word file or a photo and it reads it.</div>'
-  + '</div>'
-
-  + '<div class="askdrawer" id="askDrawer">'
-  +   '<div class="scrim" data-closedrawer="1"></div>'
-  +   '<div class="panel">'
-  +     '<div class="dh"><b>Conversations</b>'
-  +       '<button class="iconbtn" data-closedrawer="1" aria-label="Close">'+ICO.close+'</button></div>'
-  +     '<div class="dl" id="askChatList"></div>'
-  +     '<div class="df"><button class="ghost sm" id="askNewFromDrawer" style="width:100%;text-align:center">New chat</button></div>'
+  +   '<div class="askmodes" id="askModes" role="group" aria-label="What kind of help"></div>'
+  +   '<div class="logwrap">'
+  +     '<div id="askLog" class="asklog" role="log" aria-live="polite" aria-atomic="false"></div>'
+  +     '<button class="tobot" id="askToBot" type="button">'+ICO.down+'Jump to latest</button>'
+  +     '<div class="asktoast" id="askToast"></div>'
+  +   '</div>'
+  +   '<div class="askfoot" id="askFoot">'
+  +     '<div class="atts" id="askAtts" style="display:none"></div>'
+  +     '<div class="hint" id="askAttNote" style="display:none;margin:0 0 8px"></div>'
+  +     '<div class="composer">'
+  +       '<button class="plus" id="askPlus" aria-label="Attach a file or photo" aria-expanded="false">'+ICO.clip+'</button>'
+  +       '<div class="plusmenu" id="askPlusMenu">'
+  +         '<button type="button" data-pick="camera">Take a photo<small>Point it at a question or your notes</small></button>'
+  +         '<button type="button" data-pick="image">Photo library<small>A screenshot or a picture you already have</small></button>'
+  +         '<button type="button" data-pick="file">Choose a file<small>PDF, Word, text, CSV</small></button>'
+  +       '</div>'
+  +       '<textarea id="askInput" rows="1" placeholder="Ask something, or attach a file…" '
+  +         'autocomplete="off" autocapitalize="sentences"></textarea>'
+  +       '<button class="sendbtn" id="askSend" aria-label="Send"></button>'
+  +     '</div>'
+  +     '<div class="cfoot">'
+  +       '<div class="kb"><span><kbd>Enter</kbd> send</span><span><kbd>Shift</kbd>+<kbd>Enter</kbd> new line</span>'
+  +       '<span><kbd>Esc</kbd> stop</span></div>'
+  +       '<span id="askCount" class="mono"></span>'
+  +     '</div>'
+  +   '</div>'
+  +   '<div class="askdrawer" id="askDrawer">'
+  +     '<div class="scrim" data-closedrawer="1"></div>'
+  +     '<div class="panel">'
+  +       '<div class="dh"><b>Conversations</b>'
+  +         '<button class="iconbtn" data-closedrawer="1" aria-label="Close">'+ICO.close+'</button></div>'
+  +       '<div class="dl" id="askChatList"></div>'
+  +       '<div class="df"><button class="ghost sm" id="askNewFromDrawer" style="width:100%;text-align:center">New chat</button></div>'
+  +     '</div>'
   +   '</div>'
   + '</div>';
 
   var input   = document.getElementById("askInput");
   var log     = document.getElementById("askLog");
   var fileIn  = document.createElement("input");
-  fileIn.type="file"; fileIn.id="askFile"; fileIn.multiple=true; fileIn.hidden=true;
+  fileIn.type="file"; fileIn.multiple=true; fileIn.hidden=true;
   sec.appendChild(fileIn);
 
   if(ready()) checkNotion().then(function(){ render(); });
@@ -6270,7 +6371,6 @@ function boot(){
 }
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
 })();
-
 
 </script>
 </body>
