@@ -398,6 +398,124 @@ input.bare::placeholder{color:var(--muted)}
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .msg.ai .bub pre{background:var(--surface-3);padding:11px 13px;border-radius:9px;overflow-x:auto;
   font-size:12.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin:0 0 9px;line-height:1.5}
+/* ── Ask: kept features, old look ──────────────────── */
+.logwrap{position:relative}
+.mwrap{max-width:82%;min-width:0;display:flex;flex-direction:column;gap:6px}
+.msg.me .mwrap{align-items:flex-end}
+.msg .mwrap .bub{max-width:100%}
+.msg.ai .bub.err{color:var(--crit)}
+.btag{align-self:flex-start;font-size:10.5px;font-weight:600;letter-spacing:.03em;
+  text-transform:uppercase;color:var(--muted);border:1px solid var(--border);
+  border-radius:999px;padding:2px 8px}
+.msg.ai .bub h3{font-size:14.5px;margin:13px 0 6px;color:var(--ink)}
+.msg.ai .bub h5{font-size:12.5px;margin:11px 0 5px;color:var(--ink)}
+.msg.ai .bub h3:first-child,.msg.ai .bub h5:first-child{margin-top:0}
+.msg.ai .bub ol{margin:0 0 9px;padding-left:21px}
+.msg.ai .bub li>ul,.msg.ai .bub li>ol{margin:4px 0 0}
+.msg.ai .bub a{color:var(--d1);text-decoration:underline;text-underline-offset:2px}
+.msg.ai .bub hr{border:0;border-top:1px solid var(--border);margin:11px 0}
+.msg.ai .bub del{color:var(--muted)}
+.msg.ai .bub blockquote{margin:0 0 9px;padding:2px 0 2px 11px;border-left:2px solid var(--axis);color:var(--ink-2)}
+.msg.ai .bub blockquote>:last-child{margin-bottom:0}
+.msg.ai .bub table{width:100%;border-collapse:collapse;margin:0 0 9px;font-size:12.5px;display:block;overflow-x:auto}
+.msg.ai .bub th,.msg.ai .bub td{border:1px solid var(--border);padding:5px 8px;text-align:left}
+.msg.ai .bub th{background:var(--surface-3);font-weight:600}
+.msg .bub>:first-child{margin-top:0}
+.msg .bub>:last-child{margin-bottom:0}
+.caret{display:inline-block;width:2px;height:1em;vertical-align:-.14em;margin-left:2px;
+  background:var(--ink);animation:cblink 1s steps(1) infinite}
+@keyframes cblink{0%,50%{opacity:1}50.01%,100%{opacity:0}}
+
+/* message actions */
+.tacts{display:flex;gap:4px;opacity:0;transition:opacity .12s}
+.msg:hover .tacts,.msg:focus-within .tacts{opacity:1}
+@media (hover:none){.tacts{opacity:1}}
+.tacts button{display:inline-flex;align-items:center;gap:4px;border:1px solid transparent;
+  background:none;color:var(--muted);font-size:11.5px;font-weight:500;padding:3px 7px;
+  border-radius:7px;cursor:pointer}
+.tacts button:hover{background:var(--surface-2);color:var(--ink)}
+.tacts button.ok{color:var(--good)}
+.tacts button svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* fenced code blocks */
+.cb{border:1px solid var(--border);border-radius:9px;overflow:hidden;margin:0 0 9px;background:var(--surface-3)}
+.cb .cbh{display:flex;align-items:center;gap:8px;padding:5px 8px 5px 11px;border-bottom:1px solid var(--border)}
+.cb .cbh span{flex:1;font-size:11px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase}
+.cb .cbh button{display:inline-flex;align-items:center;gap:4px;border:0;background:none;
+  color:var(--muted);font-size:11.5px;padding:3px 6px;border-radius:6px;cursor:pointer}
+.cb .cbh button:hover{background:var(--surface-2);color:var(--ink)}
+.cb .cbh button.ok{color:var(--good)}
+.cb .cbh button svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.cb pre{margin:0;padding:11px 13px;overflow-x:auto;background:none;
+  font-size:12.5px;line-height:1.5;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.cb pre code{background:none;padding:0;font-size:inherit}
+
+/* empty state */
+.askempty .eb{display:none}
+.askempty h3{font-size:14.5px;color:var(--ink);margin:0 0 4px}
+.askempty p{margin:0 0 12px}
+.sugg{display:flex;flex-direction:column;gap:7px}
+.sugg button{text-align:left;border:1px solid var(--border);background:var(--surface);
+  border-radius:11px;padding:9px 12px;font-size:12.5px;color:var(--muted);cursor:pointer;line-height:1.45}
+.sugg button:hover{border-color:var(--axis);background:var(--surface-2)}
+.sugg button b{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px}
+
+/* jump-to-latest + toast */
+.tobot{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:5;
+  display:none;align-items:center;gap:5px;border:1px solid var(--border);background:var(--surface);
+  box-shadow:var(--shadow);border-radius:999px;padding:5px 12px;font-size:11.5px;
+  color:var(--ink);cursor:pointer}
+.tobot.on{display:inline-flex}
+.tobot svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.asktoast{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:6;
+  display:none;background:var(--ink);color:var(--plane);border-radius:999px;
+  padding:6px 14px;font-size:12px;box-shadow:var(--shadow-lg)}
+.asktoast.on{display:block}
+
+/* composer footer */
+.cfoot{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:11px;color:var(--muted)}
+.cfoot .kb{display:flex;gap:10px;flex-wrap:wrap;flex:1}
+.cfoot kbd{font-family:inherit;font-size:10.5px;border:1px solid var(--border);
+  border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--surface-3);color:var(--ink-2)}
+@media (max-width:520px){.cfoot .kb{display:none}}
+
+/* conversations drawer */
+.iconbtn{flex:none;width:31px;height:31px;border-radius:8px;border:1px solid transparent;
+  background:none;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.iconbtn:hover{background:var(--surface-2);color:var(--ink)}
+.iconbtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.askdrawer{position:fixed;inset:0;z-index:120;display:none}
+.askdrawer.on{display:block}
+.askdrawer .scrim{position:absolute;inset:0;background:rgba(11,11,11,.32)}
+.askdrawer .panel{position:absolute;top:0;bottom:0;left:0;width:min(310px,86%);
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.askdrawer .dh{flex:none;display:flex;align-items:center;gap:6px;
+  padding:10px 8px 10px 13px;border-bottom:1px solid var(--border)}
+.askdrawer .dh b{flex:1;font-size:13px;font-weight:650}
+.askdrawer .dl{flex:1;min-height:0;overflow-y:auto;padding:7px}
+.askdrawer .dempty{padding:20px 12px;font-size:12.5px;color:var(--muted);text-align:center}
+.askdrawer .df{flex:none;padding:9px 11px;border-top:1px solid var(--border)}
+.chatrow{display:flex;align-items:center;gap:2px;border-radius:9px}
+.chatrow:hover{background:var(--surface-2)}
+.chatrow.on{background:var(--surface-2)}
+.chatrow>button.pick{flex:1;min-width:0;text-align:left;border:0;background:none;
+  padding:8px 4px 8px 10px;cursor:pointer}
+.chatrow .cn{display:block;font-size:13px;color:var(--ink);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.chatrow.on .cn{font-weight:600}
+.chatrow .cm{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+.chatrow .x{flex:none;width:28px;height:28px;margin-right:5px;border:0;background:none;
+  color:var(--muted);border-radius:7px;cursor:pointer;opacity:0;display:grid;place-items:center}
+.chatrow:hover .x,.chatrow.on .x{opacity:1}
+.chatrow .x:hover{background:var(--surface-3);color:var(--crit)}
+.chatrow .x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+@media (hover:none){.chatrow .x{opacity:1}}
 .dots{display:inline-flex;gap:4px;padding:3px 0}
 .dots i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:dot 1.2s infinite}
 .dots i:nth-child(2){animation-delay:.18s}
@@ -4264,6 +4382,30 @@ var $ = function(s){ return document.querySelector(s); };
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 
+/* ── icons ─────────────────────────────────────────
+   Inline so the chat has no network dependency and matches the app's stroke. */
+function svg(d,extra){
+  return '<svg viewBox="0 0 24 24" aria-hidden="true"'+(extra||"")+'>'+d+'</svg>';
+}
+var ICO = {
+  spark:  svg('<path d="M12 3v4M12 17v4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M3 12h4M17 12h4M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/>'),
+  bot:    svg('<rect x="4" y="8" width="16" height="12" rx="4"/><path d="M12 4v4M9 14h.01M15 14h.01"/>'),
+  menu:   svg('<path d="M4 6h16M4 12h16M4 18h16"/>'),
+  plus:   svg('<path d="M12 5v14M5 12h14"/>'),
+  clip:   svg('<path d="M20 11.5l-8.1 8.1a4.6 4.6 0 0 1-6.5-6.5l8.4-8.4a3.1 3.1 0 0 1 4.4 4.4l-8.4 8.4a1.6 1.6 0 0 1-2.2-2.2l7.4-7.4"/>'),
+  send:   svg('<path d="M12 19V5M5 12l7-7 7 7"/>'),
+  stop:   svg('<rect x="7" y="7" width="10" height="10" rx="2"/>'),
+  copy:   svg('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>'),
+  check:  svg('<path d="M4 12.5l5 5L20 6.5"/>'),
+  redo:   svg('<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>'),
+  pencil: svg('<path d="M4 20h4L20 8a2.8 2.8 0 0 0-4-4L4 16v4z"/>'),
+  trash:  svg('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'),
+  down:   svg('<path d="M12 5v14M6 13l6 6 6-6"/>'),
+  cog:    svg('<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.6M12 18.9v2.6M4.2 7l2.2 1.3M17.6 15.7l2.2 1.3M4.2 17l2.2-1.3M17.6 8.3l2.2-1.3"/>'),
+  close:  svg('<path d="M6 6l12 12M18 6L6 18"/>'),
+  clock:  svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>')
+};
+
 /* ── provider noise ────────────────────────────────────
    The upstream proxy sometimes wraps replies in a <details> block holding
    Response/Request IDs. That is plumbing, not an answer — strip it. */
@@ -4360,36 +4502,167 @@ function dropMath(html, store){
   });
 }
 
-/* ── tiny markdown ─────────────────────────────────── */
+/* ── markdown ───────────────────────────────────────
+   Everything is escaped first and only then transformed, so nothing the model
+   returns can inject markup. Code fences, inline code and maths are lifted out
+   before any of it so their contents are never reinterpreted. */
+var CTOK="\u0002", ITOK="\u0003";
+
+function liftCode(src, store){
+  function take(lang, body){
+    store.push({lang:String(lang||"").toLowerCase(), code:body.replace(/\s+$/,"")});
+    return "\n\n"+CTOK+(store.length-1)+CTOK+"\n\n";
+  }
+  return String(src)
+    .replace(/```[ \t]*([A-Za-z0-9_+.#-]*)[ \t]*\r?\n([\s\S]*?)```/g, function(_,l,b){ return take(l,b); })
+    /* a fence still arriving mid-stream: render what we have rather than raw backticks */
+    .replace(/```[ \t]*([A-Za-z0-9_+.#-]*)[ \t]*\r?\n([\s\S]*)$/, function(_,l,b){ return take(l,b); });
+}
+function dropCode(html, store){
+  return html.replace(new RegExp(CTOK+"(\\d+)"+CTOK,"g"), function(_,i){
+    var c=store[+i]; if(!c) return "";
+    return '<div class="cb"><div class="cbh"><span>'+esc(c.lang||"code")+'</span>'
+      + '<button type="button" data-copycode="1" data-code="'+esc(c.code)+'">'
+      + ICO.copy+'Copy</button></div><pre><code>'+esc(c.code)+'</code></pre></div>';
+  });
+}
+function liftInline(src, store){
+  return String(src).replace(/`([^`\n]+)`/g, function(_,c){
+    store.push(c); return ITOK+(store.length-1)+ITOK;
+  });
+}
+function dropInline(html, store){
+  return html.replace(new RegExp(ITOK+"(\\d+)"+ITOK,"g"), function(_,i){
+    return '<code>'+esc(store[+i]==null?"":store[+i])+'</code>';
+  });
+}
+function safeHref(u){
+  var s=String(u||"").trim().replace(/&amp;/gi,"&");
+  return /^(https?:\/\/|mailto:)[^\s<>"']+$/i.test(s) ? esc(s) : null;
+}
+function inlineMd(l){
+  var ic=[];
+  l = liftInline(l, ic);
+  l = l
+    .replace(/\*\*\*([^*\n]+)\*\*\*/g,"<b><em>$1</em></b>")
+    .replace(/\*\*([^*\n]+)\*\*/g,"<b>$1</b>")
+    .replace(/__([^_\n]+)__/g,"<b>$1</b>")
+    .replace(/(^|[\s(\[])\*([^*\n]+)\*/g,"$1<em>$2</em>")
+    .replace(/(^|[\s(\[])_([^_\n]+)_(?=$|[\s).,;:!?\]])/g,"$1<em>$2</em>")
+    .replace(/~~([^~\n]+)~~/g,"<del>$1</del>")
+    .replace(/\[([^\]\n]*)\]\(([^)\s]+)\)/g, function(m,t,u){
+      var h=safeHref(u); return h ? '<a href="'+h+'" target="_blank" rel="noopener noreferrer">'+(t||h)+'</a>' : m;
+    })
+    /* a bare url the model wrote without brackets */
+    .replace(/(^|[\s(])(https?:\/\/[^\s<>"')]+)/g, function(m,p,u){
+      var h=safeHref(u); return h ? p+'<a href="'+h+'" target="_blank" rel="noopener noreferrer">'+u+'</a>' : m;
+    });
+  return dropInline(l, ic);
+}
+
 function md(src){
-  var mathStore=[];
-  src = liftMath(scrub(src), mathStore);
-  var lines = esc(String(src||"")).split("\n"), out=[], inList=false, inCode=false, buf=[];
-  function closeList(){ if(inList){ out.push("</ul>"); inList=false; } }
-  for(var i=0;i<lines.length;i++){
-    var l=lines[i];
-    if(/^\s*```/.test(l)){
-      if(inCode){ out.push("<pre>"+buf.join("\n")+"</pre>"); buf=[]; inCode=false; }
-      else { closeList(); inCode=true; }
+  var codes=[], maths=[];
+  var s = liftMath(liftCode(scrub(src), codes), maths);
+  var lines = esc(String(s||"")).split("\n");
+  var out=[], stack=[], i, m;
+
+  function popList(){
+    var t=stack.pop();
+    if(t.li) out.push("</li>");
+    out.push(t.tag==="ol" ? "</ol>" : "</ul>");
+  }
+  function closeLists(){ while(stack.length) popList(); }
+  function item(depth, tag, body){
+    while(stack.length && depth < stack[stack.length-1].depth) popList();
+    var top = stack[stack.length-1];
+    if(!top || depth > top.depth){
+      out.push(tag==="ol" ? "<ol>" : "<ul>");
+      stack.push({tag:tag, depth:depth, li:false});
+    } else if(top.tag !== tag){
+      popList();
+      out.push(tag==="ol" ? "<ol>" : "<ul>");
+      stack.push({tag:tag, depth:depth, li:false});
+    }
+    top = stack[stack.length-1];
+    if(top.li) out.push("</li>");
+    out.push("<li>"+inlineMd(body));
+    top.li = true;
+  }
+  function isSep(l){ return /^[ \t]*\|?[ \t]*:?-{2,}:?[ \t]*(\|[ \t]*:?-{2,}:?[ \t]*)*\|?[ \t]*$/.test(l||""); }
+  function cells(l){
+    return String(l).replace(/^[ \t]*\|/,"").replace(/\|[ \t]*$/,"").split("|")
+      .map(function(c){ return inlineMd(c.trim()); });
+  }
+
+  for(i=0;i<lines.length;i++){
+    var l = lines[i];
+
+    /* a lifted code block sits on its own line */
+    if(new RegExp("^[ \\t]*"+CTOK+"\\d+"+CTOK+"[ \\t]*$").test(l)){ closeLists(); out.push(l.trim()); continue; }
+
+    if(/^[ \t]*$/.test(l)){ closeLists(); continue; }
+
+    if(/^[ \t]*(?:\*\s*){3,}$|^[ \t]*(?:-\s*){3,}$|^[ \t]*(?:_\s*){3,}$/.test(l)){
+      closeLists(); out.push("<hr>"); continue;
+    }
+
+    if((m=l.match(/^[ \t]{0,3}(#{1,6})[ \t]+(.*)$/))){
+      closeLists();
+      var lv = Math.min(5, Math.max(3, m[1].length + 2));
+      out.push("<h"+lv+">"+inlineMd(m[2].replace(/[ \t]+#+[ \t]*$/,""))+"</h"+lv+">");
       continue;
     }
-    if(inCode){ buf.push(l); continue; }
-    if(/^\s*$/.test(l)){ closeList(); continue; }
-    var inline = l
-      .replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>")
-      .replace(/(^|[\s(])\*([^*\n]+)\*/g,"$1<em>$2</em>")
-      .replace(/`([^`]+)`/g,"<code>$1</code>");
-    var m;
-    if((m=inline.match(/^\s*#{1,6}\s+(.*)$/))){ closeList(); out.push("<h4>"+m[1]+"</h4>"); continue; }
-    if((m=inline.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)$/))){
-      if(!inList){ out.push("<ul>"); inList=true; }
-      out.push("<li>"+m[1]+"</li>"); continue;
+
+    /* table: a pipe row followed by a separator row */
+    if(l.indexOf("|")>=0 && isSep(lines[i+1])){
+      closeLists();
+      var head=cells(l), body=[];
+      i += 2;
+      for(; i<lines.length && lines[i].indexOf("|")>=0 && !/^[ \t]*$/.test(lines[i]); i++) body.push(cells(lines[i]));
+      i--;
+      out.push('<table><thead><tr>'
+        + head.map(function(c){ return "<th>"+c+"</th>"; }).join("")
+        + '</tr></thead><tbody>'
+        + body.map(function(r){
+            var row=r.slice(0,head.length);
+            while(row.length<head.length) row.push("");
+            return "<tr>"+row.map(function(c){ return "<td>"+c+"</td>"; }).join("")+"</tr>";
+          }).join("")
+        + '</tbody></table>');
+      continue;
     }
-    closeList(); out.push("<p>"+inline+"</p>");
+
+    /* blockquote: consume the whole run */
+    if(/^[ \t]{0,3}&gt;[ \t]?/.test(l)){
+      closeLists();
+      var q=[];
+      for(; i<lines.length && /^[ \t]{0,3}&gt;[ \t]?/.test(lines[i]); i++){
+        q.push(lines[i].replace(/^[ \t]{0,3}&gt;[ \t]?/,""));
+      }
+      i--;
+      out.push("<blockquote>"
+        + q.join("\n").split(/\n{2,}/).map(function(p){
+            return p.trim() ? "<p>"+inlineMd(p.replace(/\n/g,"<br>"))+"</p>" : "";
+          }).join("")
+        + "</blockquote>");
+      continue;
+    }
+
+    if((m=l.match(/^([ \t]*)(\d{1,3})[.)][ \t]+(.*)$/))){
+      item(Math.min(3, Math.floor(m[1].replace(/\t/g,"  ").length/2)), "ol", m[3]); continue;
+    }
+    if((m=l.match(/^([ \t]*)[-*•+][ \t]+(.*)$/))){
+      item(Math.min(3, Math.floor(m[1].replace(/\t/g,"  ").length/2)), "ul", m[2]); continue;
+    }
+
+    /* a plain line that continues the list item above it */
+    if(stack.length && /^[ \t]{2,}\S/.test(l)){ out.push(" "+inlineMd(l.trim())); continue; }
+
+    closeLists();
+    out.push("<p>"+inlineMd(l.trim())+"</p>");
   }
-  if(inCode && buf.length) out.push("<pre>"+buf.join("\n")+"</pre>");
-  closeList();
-  return dropMath(out.join(""), mathStore);
+  closeLists();
+  return dropCode(dropMath(out.join(""), maths), codes);
 }
 
 function niceErr(txt){
@@ -4704,14 +4977,16 @@ async function applyActs(msg){
   msg.result=out;
   msg.undo=before;
   B.set(S); if(B.touch) B.touch(); B.render();
-  paint();
+  paint(); saveChats();
+  toast(out.filter(Boolean).length ? "Applied with some misses" : "Applied");
 }
 function undoActs(msg){
   if(!msg.undo) return;
   B.set(JSON.parse(JSON.stringify(msg.undo)));
   if(B.touch) B.touch(); B.render();
   msg.result=null; msg.undo=null; msg.undone=true;
-  paint();
+  paint(); saveChats();
+  toast("Reverted");
 }
 
 function actsHTML(m,i){
@@ -4732,7 +5007,7 @@ function actsHTML(m,i){
   } else {
     var bad=m.result.filter(Boolean).length, good=m.acts.length-bad;
     head="Applied · "+good+" of "+m.acts.length;
-    foot='<div class="af"><button class="ghost sm" data-actundo="'+i+'">Undo</button></div>'
+    foot=(m.undo ? '<div class="af"><button class="ghost sm" data-actundo="'+i+'">Undo</button></div>' : "")
        + (bad?'<div class="note">The ones marked × didn’t go through. Tell it which item you meant.</div>':'');
   }
   return '<div class="acts'+(applied?" done":"")+'"><div class="ah">'+head+'</div><ul>'+rows+'</ul>'+foot+'</div>';
@@ -5203,22 +5478,320 @@ var MODES = {
 
 Object.keys(ACT_MODES).forEach(function(k){ if(MODES[k]) MODES[k].sys += ACTIONS_SPEC; });
 
-var mode="advise", history=[], busy=false, ctl=null, showCfg=false;
+/* ── conversation store ─────────────────────────────
+   Chats live in this browser only, in their own key, deliberately outside the
+   Compass backup — the same rule the passphrase follows. Image data is dropped
+   on save: a thread of photos would fill the quota and evict everything. */
+var CHATS_KEY="compass_ai_chats", MAX_CHATS=24, MAX_KEEP=60;
+var chats=[], cur=null, history=[];
+var mode="advise", busy=false, ctl=null, showCfg=false, drawerOn=false;
+
+function newId(){ return "c"+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+
+function slimMsg(m){
+  var o={role:m.role, at:m.at||0, content:String(m.content||"")};
+  if(m.body!=null) o.body=m.body;
+  if(m.tag) o.tag=m.tag;
+  if(m.err) o.err=1;
+  if(m.chips&&m.chips.length) o.chips=m.chips.map(function(c){ return {name:c.name, thumb:null}; });
+  if(m.acts) o.acts=m.acts;
+  if(m.result) o.result=m.result;
+  if(m.undone) o.undone=1;
+  return o;
+}
+function saveChats(){
+  try{
+    localStorage.setItem(CHATS_KEY, JSON.stringify({
+      v:1, cur:cur&&cur.id,
+      chats:chats.slice(0,MAX_CHATS).map(function(c){
+        return {id:c.id, title:c.title, mode:c.mode, at:c.at,
+                messages:c.messages.slice(-MAX_KEEP).map(slimMsg)};
+      })
+    }));
+  }catch(e){ /* quota — the thread simply isn't kept */ }
+}
+function loadChats(){
+  var j=null;
+  try{ var raw=localStorage.getItem(CHATS_KEY); if(raw) j=JSON.parse(raw); }catch(e){}
+  chats = (j && Array.isArray(j.chats) ? j.chats : []).filter(function(c){
+    return c && c.id && Array.isArray(c.messages);
+  }).map(function(c){
+    return {id:c.id, title:c.title||"", mode:MODES[c.mode]?c.mode:"advise", at:c.at||0,
+            messages:c.messages.filter(function(m){ return m && (m.role==="user"||m.role==="assistant"); })};
+  });
+  var want = j && j.cur;
+  cur = chats.filter(function(c){ return c.id===want; })[0] || chats[0] || null;
+  if(!cur) cur = blankChat();
+  history = cur.messages; mode = cur.mode;
+}
+function blankChat(){
+  var c={id:newId(), title:"", mode:mode, at:Date.now(), messages:[]};
+  chats.unshift(c);
+  if(chats.length>MAX_CHATS) chats.length=MAX_CHATS;
+  return c;
+}
+/* A chat with nothing in it is scratch space — reuse it rather than pile up. */
+function newChat(keepMode){
+  if(!keepMode) mode = cur ? cur.mode : mode;
+  var empty = chats.filter(function(c){ return !c.messages.length; })[0];
+  chats = chats.filter(function(c){ return c.messages.length || c===empty; });
+  cur = empty || blankChat();
+  cur.mode = mode; cur.at = Date.now(); cur.title = "";
+  chats = chats.filter(function(c){ return c!==cur; }); chats.unshift(cur);
+  history = cur.messages;
+  atts=[]; saveChats();
+}
+function pickChat(id){
+  var c=chats.filter(function(x){ return x.id===id; })[0];
+  if(!c || c===cur) return;
+  stop(); cur=c; history=c.messages; mode=c.mode; atts=[]; drawerOn=false;
+  saveChats(); render();
+}
+function dropChat(id){
+  var was = cur && cur.id===id;
+  chats = chats.filter(function(c){ return c.id!==id; });
+  if(was){ cur=null; if(chats.length){ cur=chats[0]; history=cur.messages; mode=cur.mode; } else newChat(true); }
+  saveChats(); render();
+}
+function titleFor(c){
+  if(c.title) return c.title;
+  var u=c.messages.filter(function(m){ return m.role==="user"; })[0];
+  var t=u && (u.content || (u.chips&&u.chips.length?u.chips[0].name:""));
+  return t ? clip(t,52) : "New chat";
+}
+function touchChat(){
+  if(!cur) return;
+  cur.at=Date.now(); cur.mode=mode;
+  if(!cur.title) cur.title=titleFor(cur);
+  chats = chats.filter(function(c){ return c!==cur; }); chats.unshift(cur);
+  saveChats();
+}
+
+/* ── small formatters ───────────────────────────── */
+function two(n){ return (n<10?"0":"")+n; }
+function hhmm(ts){ var d=new Date(ts); return two(d.getHours())+":"+two(d.getMinutes()); }
+function relTime(ts){
+  if(!ts) return "";
+  var s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return "just now";
+  if(s<3600) return Math.floor(s/60)+"m ago";
+  if(s<86400) return Math.floor(s/3600)+"h ago";
+  if(s<172800) return "yesterday";
+  if(s<604800) return Math.floor(s/86400)+"d ago";
+  var d=new Date(ts);
+  return d.getDate()+" "+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()];
+}
+function toast(txt){
+  var t=$("#askToast"); if(!t) return;
+  t.textContent=txt; t.classList.add("on");
+  clearTimeout(toast._t);
+  toast._t=setTimeout(function(){ t.classList.remove("on"); },1700);
+}
+function copyText(txt){
+  var s=String(txt==null?"":txt);
+  if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(s);
+  return new Promise(function(res,rej){
+    try{
+      var a=document.createElement("textarea");
+      a.value=s; a.style.position="fixed"; a.style.opacity="0";
+      document.body.appendChild(a); a.select();
+      document.execCommand("copy"); document.body.removeChild(a); res();
+    }catch(e){ rej(e); }
+  });
+}
+/* What Copy puts on the clipboard: the markdown, not the rendered html. */
+function rawOf(m){
+  if(!m) return "";
+  if(m.role==="user") return m.content||"";
+  return (m.body!=null ? m.body : streamBody(m.content||"")) || m.content || "";
+}
+
+/* ── opening suggestions ────────────────────────── */
+var MODEUI = {
+  advise:   ["What's worth doing today?","It can see today's readiness, your Big 3, this week's habits, deadlines and revision queue — and it will tell you what to drop, not just what to add."],
+  quiz:     ["Let's test what's due","It pulls whatever Revise says is due, asks one question at a time with the mark allocation, and marks your answer the way an examiner would."],
+  explain:  ["Ask about anything you're studying","A tutor for Maths AA HL, Physics SL, Chemistry HL and Danish B HL. Attach a worksheet or photograph a question and it will work through it."],
+  stuck:    ["What can't you start?","One line is enough. It works out what you're avoiding and gives you a single first step small enough to actually do."],
+  organise: ["Tell it what to change","Describe it in plain words and it turns it into concrete edits to your tasks, Big 3, deadlines and revision list. Nothing moves until you approve it."]
+};
+var SUGGEST = {
+  advise: [
+    ["What should I actually do today?","Reads your readiness, load and deadlines"],
+    ["I have three hours. What matters most?","Ranks the day and names what to drop"],
+    ["Am I overcommitted today?","Checks the Big 3 against your capacity"],
+    ["What have I been avoiding this week?","Looks for untouched and overdue items"]
+  ],
+  quiz: [
+    ["Start","Pulls whatever is due in Revise"],
+    ["Quiz me on Chemistry only","One question at a time, with marks"],
+    ["Ask me something hard from Maths HL","IB command terms, marked honestly"],
+    ["Give me a 6-mark Physics question","Then mark my answer like an examiner"]
+  ],
+  explain: [
+    ["Why does entropy increase?","A real explanation, not a definition"],
+    ["Teach me anti-differentiation","Where the rule comes from, then an example"],
+    ["Walk me through question 4","Attach the worksheet first with +"],
+    ["What do examiners want in a Chemistry IA?","Only what your context actually supports"]
+  ],
+  stuck: [
+    ["I can't start my Physics IA","One physical first step, nothing else"],
+    ["I've been putting off Danish all week","Works out what you're avoiding"],
+    ["Everything feels like too much","Drops the productivity framing"]
+  ],
+  organise: [
+    ["Add a task to redo the titration writeup, 45 min, today","Proposes it; you approve before anything moves"],
+    ["Move the Danish oral prep to this week","Edits an existing item by name"],
+    ["Set my Big 3 for today","Fills the three slots"],
+    ["Tick off the maths problem set","Marks it done"]
+  ]
+};
+
+/* ── the log ────────────────────────────────────── */
+var stick=true, rafPending=false, editIx=null;
+
+function logEl(){ return $("#askLog"); }
+function nearBottom(el){ return el.scrollHeight - el.scrollTop - el.clientHeight < 90; }
+function toBottom(smooth){
+  var el=logEl(); if(!el) return;
+  stick=true;
+  if(smooth && el.scrollTo) el.scrollTo({top:el.scrollHeight, behavior:"smooth"});
+  else el.scrollTop=el.scrollHeight;
+  var b=$("#askToBot"); if(b) b.classList.remove("on");
+}
+
+function emptyHTML(){
+  var s=SUGGEST[mode]||[], u=MODEUI[mode]||[MODES[mode].label, MODES[mode].hint];
+  return '<div class="askempty">'
+    + '<div class="eb">'+ICO.spark+'</div>'
+    + '<h3>'+esc(u[0])+'</h3>'
+    + '<p>'+esc(u[1])+'</p>'
+    + '<div class="sugg">'+s.map(function(x){
+        return '<button type="button" data-sugg="'+esc(x[0])+'"><b>'+esc(x[0])+'</b>'+esc(x[1])+'</button>';
+      }).join("")+'</div>'
+    + '</div>';
+}
+
+function userTurn(m,i){
+  var editing = editIx===i;
+  return '<div class="msg me" data-i="'+i+'"><div class="mwrap">'
+    + mineAttsHTML(m.chips)
+    + (editing
+        ? '<textarea class="fld" id="askEdit" rows="3">'+esc(m.content||"")+'</textarea>'
+          + '<div class="row" style="gap:7px;margin-top:7px;justify-content:flex-end">'
+          + '<button class="primary sm" data-savedit="'+i+'">Send again</button>'
+          + '<button class="ghost sm" data-canceledit="1">Cancel</button></div>'
+        : (m.content ? '<div class="bub">'+esc(m.content)+'</div>' : ''))
+    + (editing ? '' :
+        '<div class="tacts">'
+        + '<button type="button" data-copy="'+i+'">'+ICO.copy+'Copy</button>'
+        + (busy ? '' : '<button type="button" data-edit="'+i+'">'+ICO.pencil+'Edit</button>')
+        + '</div>')
+    + '</div></div>';
+}
+
+function botTurn(m,i){
+  var last = i===history.length-1;
+  var streaming = busy && last;
+  var body = (m.acts || m.body!=null) ? (m.body||"") : streamBody(m.content);
+  var parts = "";
+  if(body){
+    parts += '<div class="bub'+(m.err?" err":"")+'" data-body="1">'
+           + md(body) + (streaming && !m.reading ? '<span class="caret"></span>' : '') + '</div>';
+  } else if(streaming && !m.reading){
+    parts += '<div class="bub" data-body="1"><span class="dots"><i></i><i></i><i></i></span></div>';
+  }
+  if(m.reading){
+    parts += '<div class="bub lookup"><span class="dots"><i></i><i></i><i></i></span>'
+           + 'Looking through your Notion notes\u2026</div>';
+  }
+  if(m.acts) parts += actsHTML(m,i);
+  if(m.undone) parts += '<div class="bub" style="color:var(--muted)"><em>Reverted \u2014 nothing was changed.</em></div>';
+
+  var acts="";
+  if(!streaming && (body || m.content)){
+    acts = '<div class="tacts">'
+      + '<button type="button" data-copy="'+i+'">'+ICO.copy+'Copy</button>'
+      + (last && !busy ? '<button type="button" data-regen="1">'+ICO.redo+'Regenerate</button>' : '')
+      + '</div>';
+  }
+  return '<div class="msg ai" data-i="'+i+'"><div class="mwrap">'
+    + (m.tag && m.tag!==MODES[mode].label ? '<div class="btag">'+esc(m.tag)+'</div>' : '')
+    + parts + acts
+    + '</div></div>';
+}
+
+function paint(){
+  var box=logEl(); if(!box) return;
+  if(!history.length){ box.innerHTML=emptyHTML(); stick=true; return; }
+  box.innerHTML = history.map(function(m,i){
+    return m.role==="user" ? userTurn(m,i) : botTurn(m,i);
+  }).join("");
+  typeset(box);
+  if(stick) box.scrollTop = box.scrollHeight;
+  if(editIx!=null){ var t=$("#askEdit"); if(t){ grow(t); t.focus(); t.setSelectionRange(t.value.length,t.value.length); } }
+}
+
+/* Streaming repaints touch only the last bubble. Rebuilding the whole log per
+   token loses the selection, fights the scrollbar and burns a phone battery.
+   The frame is dropped if the turn finished while it was queued, otherwise it
+   would put the caret back after the final paint had removed it. */
+function paintTail(){
+  if(rafPending) return;
+  rafPending=true;
+  requestAnimationFrame(function(){
+    rafPending=false;
+    if(!busy) return;
+    var box=logEl(); if(!box) return;
+    var i=history.length-1, m=history[i];
+    if(!m || m.role!=="assistant"){ paint(); return; }
+    var turn=box.querySelector('.msg[data-i="'+i+'"]');
+    if(!turn){ paint(); return; }
+    var bub=turn.querySelector('.bub[data-body="1"]');
+    if(!bub){ paint(); return; }
+    var body=streamBody(m.content);
+    bub.innerHTML = body ? md(body)+'<span class="caret"></span>'
+                         : '<span class="dots"><i></i><i></i><i></i></span>';
+    if(stick) box.scrollTop = box.scrollHeight;
+  });
+}
+
+/* ── chat list drawer ───────────────────────────── */
+function renderDrawer(){
+  var d=$("#askDrawer"); if(!d) return;
+  d.classList.toggle("on", drawerOn);
+  if(!drawerOn) return;
+  var list=$("#askChatList");
+  var real=chats.filter(function(c){ return c.messages.length || c===cur; });
+  list.innerHTML = real.length ? real.map(function(c){
+    var meta=(MODES[c.mode]?MODES[c.mode].label:"Advise")+(c.at?" \u00b7 "+relTime(c.at):"");
+    return '<div class="chatrow'+(c===cur?" on":"")+'">'
+      + '<button class="pick" type="button" data-chat="'+esc(c.id)+'">'
+      +   '<span class="cn">'+esc(titleFor(c))+'</span>'
+      +   '<span class="cm">'+esc(meta)+'</span>'
+      + '</button>'
+      + '<button class="x" type="button" data-dropchat="'+esc(c.id)+'" aria-label="Delete this chat">'+ICO.trash+'</button>'
+      + '</div>';
+  }).join("") : '<div class="dempty">No conversations yet.</div>';
+}
 
 /* ── UI ────────────────────────────────────────────── */
 function render(){
+  var conn = ready();
+  var hint=$("#askHint");
+  if(hint) hint.textContent = conn
+    ? MODES[mode].hint
+    : "Not connected \u2014 open Settings and paste your Worker address.";
+
   $("#askModes").innerHTML = Object.keys(MODES).map(function(k){
-    return '<button data-mode="'+k+'" aria-pressed="'+(mode===k)+'">'+MODES[k].label+'</button>';
+    return '<button type="button" data-mode="'+k+'" aria-pressed="'+(mode===k)+'">'+esc(MODES[k].label)+'</button>';
   }).join("");
-  Array.prototype.forEach.call($("#askModes").querySelectorAll("[data-mode]"),function(b){
-    b.addEventListener("click",function(){ mode=b.dataset.mode; history=[]; render(); });
-  });
-  $("#askHint").textContent = MODES[mode].hint;
-  $("#askSetup").style.display = (ready() && !showCfg) ? "none" : "block";
-  var cfgBtn=$("#askCfg"); if(cfgBtn){ cfgBtn.style.display = ready() ? "" : "none"; cfgBtn.textContent = showCfg ? "Hide settings" : "Settings"; }
-  var h=$("#askSetupH"); if(h) h.textContent = ready() ? "Connection" : "Connect it first";
-  var fg=$("#cfgForget"); if(fg) fg.style.display = ready() ? "" : "none";
-  $("#askComposer").style.display = ready() ? "" : "none";
+
+  $("#askSetup").style.display = (conn && !showCfg) ? "none" : "block";
+  var cfgBtn=$("#askCfg");
+  if(cfgBtn){ cfgBtn.setAttribute("aria-pressed", String(!!showCfg)); }
+  var h=$("#askSetupH"); if(h) h.textContent = conn ? "Connection" : "Connect it first";
+  var fg=$("#cfgForget"); if(fg) fg.style.display = conn ? "" : "none";
+  $("#askFoot").style.display = conn ? "" : "none";
   $("#cfgUrl").value = cfg.url || "";
   $("#cfgSecret").value = cfg.secret || "";
   var sel=$("#cfgModel");
@@ -5226,53 +5799,71 @@ function render(){
     var o=document.createElement("option"); o.value=cfg.model; o.textContent=cfg.model; sel.appendChild(o);
   }
   if(sel) sel.value = cfg.model || "";
+  renderDrawer();
+  setSend();
   paint();
-}
-function paint(){
-  var box=$("#askLog");
-  if(!history.length){
-    box.innerHTML='<div class="askempty">'+({
-      advise:"Ask it to look at today. Try: “what should I actually do today?” or “I have three hours, what matters most?”",
-      quiz:"It pulls whatever is due in Revise. Say “start” when you’re ready — or attach a past paper and it will quiz you from that.",
-      explain:"Ask anything from your four subjects. Try: “why does entropy increase”, or attach a worksheet with + and ask it to work through question 4.",
-      stuck:"Say what you can’t start. One line is enough.",
-      organise:"Tell it what to add or change. Try: “add a task to redo the titration writeup, 45 min, today” or “move the Danish oral prep to this week and tick off the maths problem set”."
-    }[mode])+'</div>';
-    return;
-  }
-  box.innerHTML = history.map(function(m,i){
-    if(m.role==="user") return '<div class="msg me">'+mineAttsHTML(m.chips)
-      + (m.content ? '<div class="bub">'+esc(m.content)+'</div>' : '') + '</div>';
-    var body = m.acts ? m.body : streamBody(m.content);
-    var bub = (body || !m.reading)
-      ? '<div class="msg ai"><div class="bub">'
-        + (body ? md(body) : (m.acts ? "" : '<span class="dots"><i></i><i></i><i></i></span>'))
-        + '</div></div>'
-      : "";
-    if(m.reading) bub += '<div class="msg ai"><div class="bub lookup">'
-      + '<span class="dots"><i></i><i></i><i></i></span> Looking through your Notion notes\u2026</div></div>';
-    if(m.undone) bub += '<div class="msg ai"><div class="bub"><i>Reverted \u2014 nothing was changed.</i></div></div>';
-    return bub + (m.acts ? actsHTML(m,i) : "");
-  }).join("");
-  typeset(box);
-  box.scrollTop = box.scrollHeight;
 }
 
 function stop(){ if(ctl){ try{ ctl.abort(); }catch(e){} ctl=null; } busy=false; setSend(); }
-function setSend(){ $("#askSend").textContent = busy ? "Stop" : "Send"; }
+function setSend(){
+  var b=$("#askSend"); if(!b) return;
+  var input=$("#askInput");
+  b.classList.toggle("stop", busy);
+  b.textContent = busy ? "Stop" : "Send";
+  b.setAttribute("aria-label", busy ? "Stop generating" : "Send");
+  b.disabled = !busy && !(input && input.value.trim()) && !atts.length;
+  var n=$("#askCount");
+  if(n){
+    var len=input?input.value.length:0;
+    n.textContent = len>600 ? len+" characters" : "";
+  }
+}
+function grow(t){
+  if(!t) return;
+  t.style.height="auto";
+  t.style.height=Math.min(190, Math.max(36, t.scrollHeight))+"px";
+}
 
 async function send(text){
   if(busy){ stop(); return; }
+  if(!ready()){ showCfg=true; render(); return; }
   text=String(text||"").trim();
   var pending=atts.filter(function(a){ return a.status==="reading"; }).length;
   if(pending){ attNote("Still reading "+pending+" file"+(pending>1?"s":"")+" — one second."); return; }
   var turn=buildTurn(text);
   if(!text && !turn.chips.length) return;
-  history.push({role:"user", content:text, api:turn.api, chips:turn.chips});
-  var box=$("#askInput"); if(box) box.value="";
+  editIx=null;
+  history.push({role:"user", content:text, api:turn.api, chips:turn.chips, at:Date.now()});
+  var box=$("#askInput"); if(box){ box.value=""; grow(box); }
   atts=[]; paintAtts(); attNote("");
-  history.push({role:"assistant",content:""});
-  paint(); busy=true; setSend();
+  await runTurn();
+}
+
+/* Throw away the last reply and ask the same question again. */
+function regen(){
+  if(busy) return;
+  while(history.length && history[history.length-1].role==="assistant") history.pop();
+  if(!history.length){ paint(); return; }
+  runTurn();
+}
+
+function startEdit(i){ if(!busy){ editIx=i; paint(); } }
+function saveEdit(i){
+  var t=$("#askEdit"); if(!t) return;
+  var v=t.value.trim();
+  editIx=null;
+  if(!v || !history[i]){ paint(); return; }
+  history.length = i+1;                 // everything after the edited turn is stale
+  history[i].content = v;
+  history[i].at = Date.now();
+  runTurn();
+}
+
+/* One request/response cycle against whatever is at the end of the thread.
+   send, regenerate and edit all funnel through here so they behave alike. */
+async function runTurn(){
+  history.push({role:"assistant", content:"", at:Date.now(), tag:MODES[mode].label});
+  stick=true; busy=true; touchChat(); render();
 
   var slot = history[history.length-1];
   ctl = new AbortController();
@@ -5286,6 +5877,7 @@ async function send(text){
       slot.content = scrub(slot.content);
       if(!slot.content){
         slot.content="No reply came back. Try again, or check the worker logs in Cloudflare.";
+        slot.err=1;
         break;
       }
       var sp = canAct() ? splitActions(slot.content) : {body:slot.content, acts:null};
@@ -5311,10 +5903,17 @@ async function send(text){
     }
   }catch(err){
     if(err && err.name==="AbortError"){ if(!slot.content) slot.content="(stopped)"; }
-    else slot.content = "Couldn\u2019t reach the worker. Check the URL in Settings and that you\u2019re online.\n\n"+String(err&&err.message||err);
+    else {
+      slot.err=1;
+      slot.content = "Couldn\u2019t reach the worker. Check the URL in Settings and that you\u2019re online.\n\n"
+        + String(err&&err.message||err);
+    }
   }
   slot.reading=false;
-  busy=false; ctl=null; setSend(); paint();
+  busy=false; ctl=null;
+  setSend();
+  paint();
+  touchChat();
 }
 
 function canAct(){ return !!ACT_MODES[mode] || !!notionOn; }
@@ -5351,6 +5950,7 @@ async function streamTurn(msgs, slot){
   if(!res.ok){
     var t=""; try{ t=(await res.json()).error||""; }catch(e){ t=await res.text().catch(function(){return "";}); }
     var msg=niceErr(t);
+    slot.err=1;
     slot.content = res.status===401
       ? "Passphrase rejected — open Settings and check it matches APP_SECRET in Cloudflare."
       : /model not found/i.test(msg)
@@ -5373,7 +5973,7 @@ async function streamTurn(msgs, slot){
       try{
         var j = JSON.parse(data);
         var delta = j.choices && j.choices[0] && j.choices[0].delta;
-        if(delta && delta.content){ slot.content += delta.content; paint(); }
+        if(delta && delta.content){ slot.content += delta.content; paintTail(); }
       }catch(e){}
     }
   }
@@ -5384,21 +5984,25 @@ async function streamTurn(msgs, slot){
 function boot(){
   var sec = document.getElementById("s-ask");
   if(!sec) return;
+  loadChats();
+
   sec.innerHTML = ''
   + '<div class="card">'
   +   '<div class="spread" style="margin-bottom:10px"><h2>Ask</h2>'
   +   '<div class="row" style="gap:6px;flex:none">'
-  +   '<button class="ghost sm" id="askCfg" style="display:none">Settings</button>'
-  +   '<button class="ghost sm" id="askClear">New chat</button></div></div>'
-  +   '<div class="pills" id="askModes" style="margin-bottom:8px"></div>'
+  +   '<button class="ghost sm" id="askHistory">Chats</button>'
+  +   '<button class="ghost sm" id="askClear">New chat</button>'
+  +   '<button class="ghost sm" id="askCfg" aria-pressed="false">Settings</button></div></div>'
+  +   '<div class="pills" id="askModes" style="margin-bottom:8px" role="group" aria-label="What kind of help"></div>'
   +   '<div class="hint" id="askHint" style="margin:0"></div>'
   + '</div>'
+
   + '<div class="card" id="askSetup" style="display:none">'
   +   '<h2 id="askSetupH">Connect it first</h2>'
   +   '<div class="hint">Paste your Worker address and the passphrase you set as <b>APP_SECRET</b> in Cloudflare. '
-  +   'Both stay on this device only — they are never written into the app file or the backup.</div>'
+  +   'Both stay on this device only \u2014 they are never written into the app file or the backup.</div>'
   +   '<label class="lbl">Worker URL</label>'
-  +   '<input class="fld sm" id="cfgUrl" placeholder="https://compass-ai.yourname.workers.dev" autocomplete="off">'
+  +   '<input class="fld sm" id="cfgUrl" placeholder="https://compass-ai.yourname.workers.dev" autocomplete="off" spellcheck="false">'
   +   '<label class="lbl" style="margin-top:11px">Passphrase</label>'
   +   '<input class="fld sm" id="cfgSecret" type="password" placeholder="the APP_SECRET you chose" autocomplete="off">'
   +   '<label class="lbl" style="margin-top:11px">Model</label>'
@@ -5411,36 +6015,133 @@ function boot(){
   +   '<button class="ghost sm" id="cfgForget" style="display:none">Forget</button>'
   +   '<span id="cfgMsg" style="font-size:12px;color:var(--muted)"></span></div>'
   + '</div>'
-  + '<div class="card askcard"><div id="askLog" class="asklog"></div></div>'
-  + '<div class="card" id="askComposer">'
+
+  + '<div class="card askcard logwrap">'
+  +   '<div id="askLog" class="asklog" role="log" aria-live="polite" aria-atomic="false"></div>'
+  +   '<button class="tobot" id="askToBot" type="button">'+ICO.down+'Jump to latest</button>'
+  +   '<div class="asktoast" id="askToast"></div>'
+  + '</div>'
+
+  + '<div class="card" id="askFoot">'
   +   '<div class="atts" id="askAtts" style="display:none"></div>'
   +   '<div class="hint" id="askAttNote" style="display:none;margin:0 0 8px"></div>'
   +   '<div class="composer">'
-  +     '<button class="plus" id="askPlus" aria-label="Attach a file" aria-expanded="false">+</button>'
+  +     '<button class="plus" id="askPlus" aria-label="Attach a file or photo" aria-expanded="false">+</button>'
   +     '<div class="plusmenu" id="askPlusMenu">'
-  +       '<button data-pick="camera">Take a photo<small>Point it at a question or your notes</small></button>'
-  +       '<button data-pick="image">Photo library<small>A screenshot or a picture you already have</small></button>'
-  +       '<button data-pick="file">Choose a file<small>PDF, Word, text, CSV</small></button>'
+  +       '<button type="button" data-pick="camera">Take a photo<small>Point it at a question or your notes</small></button>'
+  +       '<button type="button" data-pick="image">Photo library<small>A screenshot or a picture you already have</small></button>'
+  +       '<button type="button" data-pick="file">Choose a file<small>PDF, Word, text, CSV</small></button>'
   +     '</div>'
-  +     '<textarea class="fld" id="askInput" rows="2" placeholder="Ask something, or attach a file…"></textarea>'
+  +     '<textarea class="fld" id="askInput" rows="2" placeholder="Ask something, or attach a file\u2026" '
+  +       'autocomplete="off" autocapitalize="sentences"></textarea>'
   +     '<button class="primary" id="askSend">Send</button>'
   +   '</div>'
-  +   '<input type="file" id="askFile" multiple hidden accept="">'
-  +   '<div class="src" style="margin-top:9px">It can see today’s readiness, your Big 3, this week’s habits, deadlines and revision queue. In <b>Organise</b> it can also propose changes — you approve them before anything moves. Attach a PDF, a Word file or a photo and it reads it.</div>'
+  +   '<div class="cfoot"><div class="kb"><span><kbd>Enter</kbd> send</span>'
+  +     '<span><kbd>Shift</kbd>+<kbd>Enter</kbd> new line</span><span><kbd>Esc</kbd> stop</span></div>'
+  +     '<span id="askCount" class="mono"></span></div>'
+  +   '<div class="src" style="margin-top:9px">It can see today\u2019s readiness, your Big 3, this week\u2019s habits, deadlines and revision queue. In <b>Organise</b> it can also propose changes \u2014 you approve them before anything moves. Attach a PDF, a Word file or a photo and it reads it.</div>'
+  + '</div>'
+
+  + '<div class="askdrawer" id="askDrawer">'
+  +   '<div class="scrim" data-closedrawer="1"></div>'
+  +   '<div class="panel">'
+  +     '<div class="dh"><b>Conversations</b>'
+  +       '<button class="iconbtn" data-closedrawer="1" aria-label="Close">'+ICO.close+'</button></div>'
+  +     '<div class="dl" id="askChatList"></div>'
+  +     '<div class="df"><button class="ghost sm" id="askNewFromDrawer" style="width:100%;text-align:center">New chat</button></div>'
+  +   '</div>'
   + '</div>';
+
+  var input   = document.getElementById("askInput");
+  var log     = document.getElementById("askLog");
+  var fileIn  = document.createElement("input");
+  fileIn.type="file"; fileIn.id="askFile"; fileIn.multiple=true; fileIn.hidden=true;
+  sec.appendChild(fileIn);
 
   if(ready()) checkNotion().then(function(){ render(); });
   render();
-  document.getElementById("askClear").addEventListener("click",function(){ history=[]; paint(); });
-  var fileIn=document.getElementById("askFile"), plus=document.getElementById("askPlus"),
-      menu=document.getElementById("askPlusMenu");
+
+  /* ── header ── */
+  document.getElementById("askClear").addEventListener("click",function(){
+    stop(); newChat(true); render(); input.focus();
+  });
+  document.getElementById("askCfg").addEventListener("click",function(){ showCfg=!showCfg; render(); });
+  document.getElementById("askHistory").addEventListener("click",function(){
+    drawerOn=!drawerOn; renderDrawer();
+  });
+  document.getElementById("askNewFromDrawer").addEventListener("click",function(){
+    stop(); drawerOn=false; newChat(true); render(); input.focus();
+  });
+  document.getElementById("askDrawer").addEventListener("click",function(e){
+    var t=e.target.closest && e.target.closest("[data-closedrawer],[data-chat],[data-dropchat]");
+    if(!t) return;
+    if(t.dataset.closedrawer){ drawerOn=false; renderDrawer(); return; }
+    if(t.dataset.dropchat){ dropChat(t.dataset.dropchat); drawerOn=true; renderDrawer(); return; }
+    if(t.dataset.chat){ pickChat(t.dataset.chat); }
+  });
+
+  /* ── modes: keep the thread, change the brief ── */
+  document.getElementById("askModes").addEventListener("click",function(e){
+    var b=e.target.closest && e.target.closest("[data-mode]");
+    if(!b || b.dataset.mode===mode) return;
+    mode=b.dataset.mode;
+    if(cur){ cur.mode=mode; saveChats(); }
+    render();
+  });
+
+  /* ── log: suggestions, copy, edit, regenerate, action cards ── */
+  log.addEventListener("scroll",function(){
+    stick = nearBottom(log);
+    var b=document.getElementById("askToBot");
+    if(b) b.classList.toggle("on", !stick && history.length>0);
+  });
+  document.getElementById("askToBot").addEventListener("click",function(){ toBottom(true); });
+
+  log.addEventListener("click",function(e){
+    var t=e.target.closest && e.target.closest(
+      "[data-sugg],[data-copy],[data-copycode],[data-edit],[data-regen],[data-savedit],[data-canceledit],"+
+      "[data-actapply],[data-actskip],[data-actundo]");
+    if(!t) return;
+
+    if(t.dataset.sugg!=null){ send(t.dataset.sugg); return; }
+
+    if(t.dataset.copycode!=null){
+      copyText(t.getAttribute("data-code")).then(function(){
+        t.classList.add("ok"); t.innerHTML=ICO.check+"Copied";
+        setTimeout(function(){ t.classList.remove("ok"); t.innerHTML=ICO.copy+"Copy"; },1400);
+      }).catch(function(){ toast("Couldn't copy"); });
+      return;
+    }
+    if(t.dataset.copy!=null){
+      copyText(rawOf(history[+t.dataset.copy])).then(function(){
+        t.classList.add("ok"); t.innerHTML=ICO.check+"Copied";
+        setTimeout(function(){ t.classList.remove("ok"); t.innerHTML=ICO.copy+"Copy"; },1400);
+      }).catch(function(){ toast("Couldn't copy"); });
+      return;
+    }
+    if(t.dataset.edit!=null){ startEdit(+t.dataset.edit); return; }
+    if(t.dataset.savedit!=null){ saveEdit(+t.dataset.savedit); return; }
+    if(t.dataset.canceledit!=null){ editIx=null; paint(); return; }
+    if(t.dataset.regen!=null){ regen(); return; }
+
+    var i=+(t.dataset.actapply||t.dataset.actskip||t.dataset.actundo), m=history[i];
+    if(!m) return;
+    if(t.dataset.actapply!=null && m.acts) applyActs(m);
+    else if(t.dataset.actskip!=null){ m.acts=null; m.undone=true; paint(); saveChats(); }
+    else if(t.dataset.actundo!=null) undoActs(m);
+    try{ if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.HapticFeedback)
+      window.Telegram.WebApp.HapticFeedback.impactOccurred("light"); }catch(err){}
+  });
+
+  /* ── attachments ── */
+  var plus=document.getElementById("askPlus"), menu=document.getElementById("askPlusMenu");
   function closeMenu(){ menu.classList.remove("on"); plus.setAttribute("aria-expanded","false"); }
   plus.addEventListener("click",function(e){
     e.stopPropagation();
     var on=!menu.classList.contains("on");
     menu.classList.toggle("on",on); plus.setAttribute("aria-expanded",String(on));
   });
-  document.addEventListener("click",function(e){ if(!menu.contains(e.target)&&e.target!==plus) closeMenu(); });
+  document.addEventListener("click",function(e){ if(!menu.contains(e.target)&&e.target!==plus&&!plus.contains(e.target)) closeMenu(); });
   menu.addEventListener("click",function(e){
     var b=e.target.closest && e.target.closest("[data-pick]"); if(!b) return;
     var p=b.dataset.pick;
@@ -5450,37 +6151,29 @@ function boot(){
     else { fileIn.accept=".pdf,.docx,.txt,.md,.csv,.tsv,.json,.rtf,.html,.xml,.log,.srt,.vtt,text/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"; }
     closeMenu(); fileIn.click();
   });
-  fileIn.addEventListener("change",function(){ addFiles(fileIn.files); fileIn.value=""; });
+  fileIn.addEventListener("change",function(){
+    addFiles(fileIn.files).then(function(){ setSend(); }); fileIn.value="";
+  });
   document.getElementById("askAtts").addEventListener("click",function(e){
     var b=e.target.closest && e.target.closest("[data-attx]"); if(!b) return;
-    atts=atts.filter(function(a){ return a.id!==b.dataset.attx; }); paintAtts();
+    atts=atts.filter(function(a){ return a.id!==b.dataset.attx; }); paintAtts(); setSend();
   });
-  var zone=document.getElementById("s-ask"), dragN=0;
-  zone.addEventListener("dragover",function(e){ e.preventDefault(); });
-  zone.addEventListener("dragenter",function(e){ e.preventDefault(); if(++dragN===1) zone.classList.add("dropz"); });
-  zone.addEventListener("dragleave",function(){ if(--dragN<=0){ dragN=0; zone.classList.remove("dropz"); } });
-  zone.addEventListener("drop",function(e){
-    e.preventDefault(); dragN=0; zone.classList.remove("dropz");
-    if(ready() && e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files);
+  var dragN=0;
+  sec.addEventListener("dragover",function(e){ e.preventDefault(); });
+  sec.addEventListener("dragenter",function(e){ e.preventDefault(); if(++dragN===1) sec.classList.add("dropz"); });
+  sec.addEventListener("dragleave",function(){ if(--dragN<=0){ dragN=0; sec.classList.remove("dropz"); } });
+  sec.addEventListener("drop",function(e){
+    e.preventDefault(); dragN=0; sec.classList.remove("dropz");
+    if(ready() && e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files).then(setSend);
   });
-  document.getElementById("askInput").addEventListener("paste",function(e){
+  input.addEventListener("paste",function(e){
     var items=(e.clipboardData&&e.clipboardData.files)||null;
-    if(items && items.length){ e.preventDefault(); addFiles(items); }
+    if(items && items.length){ e.preventDefault(); addFiles(items).then(setSend); }
   });
-  document.getElementById("askLog").addEventListener("click",function(e){
-    var b=e.target.closest && e.target.closest("[data-actapply],[data-actskip],[data-actundo]");
-    if(!b) return;
-    var i=+(b.dataset.actapply||b.dataset.actskip||b.dataset.actundo), m=history[i];
-    if(!m||!m.acts&&!m.undo) { if(!m) return; }
-    if(b.dataset.actapply!=null){ applyActs(m); }
-    else if(b.dataset.actskip!=null){ m.acts=null; m.undone=true; paint(); }
-    else { undoActs(m); }
-    try{ if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.HapticFeedback)
-      window.Telegram.WebApp.HapticFeedback.impactOccurred("light"); }catch(err){}
-  });
-  document.getElementById("askCfg").addEventListener("click",function(){ showCfg=!showCfg; render(); });
+
+  /* ── settings ── */
   document.getElementById("cfgForget").addEventListener("click",function(){
-    cfg={url:"",secret:""}; saveCfg(); showCfg=false; render();
+    cfg={url:"",secret:"",model:""}; saveCfg(); notionOn=null; showCfg=false; render();
     var m=document.getElementById("cfgMsg"); if(m){ m.textContent="Cleared."; m.style.color="var(--muted)"; }
   });
   document.getElementById("cfgSave").addEventListener("click",function(){
@@ -5488,13 +6181,14 @@ function boot(){
     cfg.secret=document.getElementById("cfgSecret").value;
     saveCfg(); showCfg=false; render();
     if(ready()) checkNotion().then(function(){ render(); });
-    document.getElementById("cfgMsg") && (document.getElementById("cfgMsg").textContent="Saved.");
+    var m=document.getElementById("cfgMsg"); if(m) m.textContent="Saved.";
   });
   document.getElementById("cfgModel").addEventListener("change",function(e){
     cfg.model=e.target.value; saveCfg();
     var m=document.getElementById("cfgMsg");
     m.textContent = cfg.model ? "Using "+cfg.model : "Using the worker default";
     m.style.color="var(--muted)";
+    render();
   });
   document.getElementById("cfgLoad").addEventListener("click",async function(){
     var m=document.getElementById("cfgMsg");
@@ -5520,6 +6214,7 @@ function boot(){
         : (names.filter(function(n){return /qwen/i.test(n)&&!/vl|audio|image|embed|asr|omni/i.test(n);})[0] || names[0]);
       sel.value=pick; cfg.model=pick; saveCfg();
       m.textContent=names.length+" models found — selected "+pick; m.style.color="var(--ok-text)";
+      render();
     }catch(err){ m.textContent="Couldn't reach the worker."; m.style.color="var(--crit)"; }
   });
   document.getElementById("cfgTest").addEventListener("click",async function(){
@@ -5532,7 +6227,8 @@ function boot(){
       var r=await fetch(cfg.url,{method:"POST",
         headers:{"Content-Type":"application/json","X-Compass-Secret":cfg.secret},
         body:JSON.stringify({messages:[{role:"user",content:"Reply with the single word: ready"}],stream:false,model:cfg.model||undefined})});
-      if(r.ok){ m.textContent="Working."; m.style.color="var(--ok-text)"; render(); }
+      if(r.ok){ m.textContent="Working."; m.style.color="var(--ok-text)";
+        checkNotion().then(function(){ render(); }); }
       else { var e=""; try{ e=(await r.json()).error||""; }catch(x){}
         var em=niceErr(e);
         m.textContent = /model not found/i.test(em)
@@ -5541,24 +6237,40 @@ function boot(){
         m.style.color="var(--crit)"; }
     }catch(err){ m.textContent="Couldn't reach it — check the URL."; m.style.color="var(--crit)"; }
   });
-  var input=document.getElementById("askInput");
+
+  /* ── composer ── */
   document.getElementById("askSend").addEventListener("click",function(){
     if(busy){ stop(); return; }
     send(input.value);
   });
+  input.addEventListener("input",function(){ grow(input); setSend(); });
   input.addEventListener("keydown",function(e){
-    if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); send(input.value); }
+    if(e.key==="Enter" && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey){
+      e.preventDefault(); send(input.value);
+    }
   });
+  sec.addEventListener("keydown",function(e){
+    if(e.key==="Escape"){
+      if(drawerOn){ drawerOn=false; renderDrawer(); return; }
+      if(menu.classList.contains("on")){ closeMenu(); return; }
+      if(editIx!=null){ editIx=null; paint(); return; }
+      if(busy){ stop(); paint(); }
+    }
+  });
+  grow(input);
 
   window.CompassAsk = function(m, seed){
     if(m && MODES[m]) mode=m;
-    history=[]; render();
+    stop(); newChat(true);
     if(window.CompassSetTab) window.CompassSetTab("ask"); else B.show("ask");
+    render();
     if(seed) setTimeout(function(){ send(seed); }, 120);
+    else setTimeout(function(){ try{ input.focus(); }catch(e){} }, 120);
   };
 }
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
 })();
+
 
 </script>
 </body>
