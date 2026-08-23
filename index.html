@@ -444,13 +444,13 @@ input.bare::placeholder{color:var(--muted)}
 
 .bub{font-size:14.5px;line-height:1.62;color:var(--ink);word-wrap:break-word;overflow-wrap:anywhere}
 .turn.user .bub{white-space:pre-wrap;background:var(--surface-2);border-radius:12px;
-  padding:10px 13px;display:inline-block;max-width:100%}
+  padding:10px 13px;display:inline-block;max-width:100%;unicode-bidi:plaintext}
 .turn.user .bub.editing{display:block}
 .turn.bot .bub.err{color:var(--crit)}
 .bub.lookup{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted)}
 
 /* streaming caret */
-.caret{display:inline-block;width:2px;height:1.02em;margin-left:2px;vertical-align:-.16em;
+.caret{display:inline-block;width:2px;height:1.02em;margin-inline-start:2px;vertical-align:-.16em;
   background:var(--ink);animation:blink 1s steps(2,start) infinite}
 @keyframes blink{50%{opacity:0}}
 
@@ -473,7 +473,7 @@ input.bare::placeholder{color:var(--muted)}
 .bub h3{font-size:16px}
 .bub h4{font-size:14.5px}
 .bub h5{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
-.bub ul,.bub ol{margin:0 0 11px;padding-left:21px}
+.bub ul,.bub ol{margin:0 0 11px;padding-inline-start:21px}
 .bub li{margin-bottom:5px}
 .bub li>ul,.bub li>ol{margin:5px 0 0}
 .bub li::marker{color:var(--muted)}
@@ -482,13 +482,26 @@ input.bare::placeholder{color:var(--muted)}
 .bub b,.bub strong{font-weight:650}
 .bub del{color:var(--muted)}
 .bub hr{border:0;border-top:1px solid var(--grid);margin:16px 0}
-.bub blockquote{margin:0 0 11px;padding:2px 0 2px 13px;border-left:2px solid var(--axis);color:var(--ink-2)}
+.bub blockquote{margin:0 0 11px;padding:2px 0;padding-inline-start:13px;
+  border-inline-start:2px solid var(--axis);color:var(--ink-2)}
 .bub blockquote>:last-child{margin-bottom:0}
 .bub code{background:var(--surface-2);padding:1.5px 5px;border-radius:5px;font-size:.86em;
   font-family:var(--mono);border:1px solid var(--border)}
 .bub table{border-collapse:collapse;width:100%;margin:0 0 12px;font-size:13.5px;display:block;overflow-x:auto}
-.bub th,.bub td{border:1px solid var(--grid);padding:7px 10px;text-align:left;vertical-align:top}
+.bub th,.bub td{border:1px solid var(--grid);padding:7px 10px;text-align:start;vertical-align:top}
 .bub th{background:var(--surface-2);font-weight:650;font-size:12.5px}
+
+/* ── mixed Persian / English ─────────────────────
+   Every block above carries dir="auto", so a paragraph, heading, list item or
+   table cell takes its direction from its own first strong letter: a Persian
+   sentence reads right to left, an English one left to right, in the same reply.
+   Inline runs are then isolated, so an English phrase, a url, a number or a
+   formula sitting inside a Persian sentence cannot drag the punctuation and
+   brackets around it to the wrong end of the line. Code and maths are always
+   left to right — a flipped formula is a wrong formula. */
+.bub code,.bub a,.bub b,.bub strong,.bub em,.bub del{unicode-bidi:isolate}
+.bub .math{unicode-bidi:isolate;direction:ltr}
+.bub .cb,.bub .cb pre,.bub .cb code{direction:ltr;text-align:left}
 
 /* code block with a header */
 .cb{margin:0 0 12px;border:1px solid var(--border);border-radius:11px;overflow:hidden;background:var(--surface-2)}
@@ -4678,7 +4691,7 @@ function md(src){
     }
     top = stack[stack.length-1];
     if(top.li) out.push("</li>");
-    out.push("<li>"+inlineMd(body));
+    out.push('<li dir="auto">'+inlineMd(body));
     top.li = true;
   }
   function isSep(l){ return /^[ \t]*\|?[ \t]*:?-{2,}:?[ \t]*(\|[ \t]*:?-{2,}:?[ \t]*)*\|?[ \t]*$/.test(l||""); }
@@ -4702,7 +4715,7 @@ function md(src){
     if((m=l.match(/^[ \t]{0,3}(#{1,6})[ \t]+(.*)$/))){
       closeLists();
       var lv = Math.min(5, Math.max(3, m[1].length + 2));
-      out.push("<h"+lv+">"+inlineMd(m[2].replace(/[ \t]+#+[ \t]*$/,""))+"</h"+lv+">");
+      out.push("<h"+lv+' dir="auto">'+inlineMd(m[2].replace(/[ \t]+#+[ \t]*$/,""))+"</h"+lv+">");
       continue;
     }
 
@@ -4714,12 +4727,12 @@ function md(src){
       for(; i<lines.length && lines[i].indexOf("|")>=0 && !/^[ \t]*$/.test(lines[i]); i++) body.push(cells(lines[i]));
       i--;
       out.push('<table><thead><tr>'
-        + head.map(function(c){ return "<th>"+c+"</th>"; }).join("")
+        + head.map(function(c){ return '<th dir="auto">'+c+"</th>"; }).join("")
         + '</tr></thead><tbody>'
         + body.map(function(r){
             var row=r.slice(0,head.length);
             while(row.length<head.length) row.push("");
-            return "<tr>"+row.map(function(c){ return "<td>"+c+"</td>"; }).join("")+"</tr>";
+            return "<tr>"+row.map(function(c){ return '<td dir="auto">'+c+"</td>"; }).join("")+"</tr>";
           }).join("")
         + '</tbody></table>');
       continue;
@@ -4735,7 +4748,7 @@ function md(src){
       i--;
       out.push("<blockquote>"
         + q.join("\n").split(/\n{2,}/).map(function(p){
-            return p.trim() ? "<p>"+inlineMd(p.replace(/\n/g,"<br>"))+"</p>" : "";
+            return p.trim() ? '<p dir="auto">'+inlineMd(p.replace(/\n/g,"<br>"))+"</p>" : "";
           }).join("")
         + "</blockquote>");
       continue;
@@ -4752,7 +4765,7 @@ function md(src){
     if(stack.length && /^[ \t]{2,}\S/.test(l)){ out.push(" "+inlineMd(l.trim())); continue; }
 
     closeLists();
-    out.push("<p>"+inlineMd(l.trim())+"</p>");
+    out.push('<p dir="auto">'+inlineMd(l.trim())+"</p>");
   }
   closeLists();
   return dropCode(dropMath(out.join(""), maths), codes);
@@ -6042,11 +6055,11 @@ function userTurn(m,i){
     +   '<div class="tmeta">You'+(m.at?'<time>'+hhmm(m.at)+'</time>':'')+'</div>'
     +   mineAttsHTML(m.chips)
     +   (editing
-          ? '<textarea class="fld" id="askEdit" rows="3">'+esc(m.content||"")+'</textarea>'
+          ? '<textarea class="fld" id="askEdit" rows="3" dir="auto">'+esc(m.content||"")+'</textarea>'
             + '<div class="row" style="gap:7px;margin-top:7px">'
             + '<button class="primary sm" data-savedit="'+i+'">Send again</button>'
             + '<button class="ghost sm" data-canceledit="1">Cancel</button></div>'
-          : (m.content ? '<div class="bub">'+esc(m.content)+'</div>' : ''))
+          : (m.content ? '<div class="bub" dir="auto">'+esc(m.content)+'</div>' : ''))
     +   (editing ? '' :
           '<div class="tacts">'
           + '<button type="button" data-copy="'+i+'">'+ICO.copy+'Copy</button>'
@@ -6061,7 +6074,7 @@ function botTurn(m,i){
   var body = (m.acts || m.body!=null) ? (m.body||"") : streamBody(m.content);
   var parts = "";
   if(body){
-    parts += '<div class="bub'+(m.err?" err":"")+'" data-body="1">'
+    parts += '<div class="bub'+(m.err?" err":"")+'" data-body="1" dir="auto">'
            + md(body) + (streaming && !m.reading ? '<span class="caret"></span>' : '') + '</div>';
   } else if(streaming && !m.reading){
     parts += '<div class="bub" data-body="1"><span class="dots"><i></i><i></i><i></i></span></div>';
@@ -6244,7 +6257,12 @@ async function runTurn(){
   try{
     var extra=[], seen=[];           // lookup round-trips, kept out of the visible chat
     for(var round=0; round<=TOOL_ROUNDS; round++){
-      slot.content="";
+      /* Every round rewrites the reply from scratch, so anything derived from an
+         earlier round has to be cleared with it. A `body` left over from a lookup
+         round ("let me check your tasks") outranks `content` both on screen and in
+         baseMessages, so it would hide the real answer and then be the only thing
+         the model was told it had said — the thread would lose its memory. */
+      slot.content=""; slot.body=null; slot.acts=null; slot.reading=false;
       var stopped = await streamTurn(baseMessages().concat(extra), slot);
       if(stopped) break;
       slot.content = scrub(slot.content);
@@ -6418,7 +6436,7 @@ function boot(){
   +         '<button type="button" data-pick="screen">Capture screen<small>Pick a window and send a still of it</small></button>'
   +       '</div>'
   +       '<textarea id="askInput" rows="1" placeholder="Ask something, or attach a file…" '
-  +         'autocomplete="off" autocapitalize="sentences"></textarea>'
+  +         'autocomplete="off" autocapitalize="sentences" dir="auto"></textarea>'
   +       '<button class="sendbtn" id="askSend" aria-label="Send"></button>'
   +     '</div>'
   +     '<div class="cfoot">'
