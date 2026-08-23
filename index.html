@@ -4859,6 +4859,59 @@ function snapshot(mode){
 var BK={inbox:"Inbox",today:"Today",week:"This week",waiting:"Waiting on",someday:"Someday"};
 var ACT_MODES={advise:1,organise:1};
 
+/* ── OPENING THINGS ───────────────────────────────────────────────────
+   A web page cannot launch a program. What it can do is hand a URL to the
+   operating system, which then opens whatever is registered for that scheme —
+   tg:// reaches Telegram Desktop, and so on. An allowlist, because letting the
+   model name any scheme it liked would be a way into file:// and javascript:. */
+var APP_LINKS={
+  telegram:  {label:"Telegram",         url:"tg://"},
+  whatsapp:  {label:"WhatsApp",         url:"whatsapp://"},
+  spotify:   {label:"Spotify",          url:"spotify://"},
+  notion:    {label:"Notion",           url:"notion://"},
+  mail:      {label:"your mail app",    url:"mailto:"},
+  calendar:  {label:"Google Calendar",  url:"https://calendar.google.com/"},
+  drive:     {label:"Google Drive",     url:"https://drive.google.com/"},
+  classroom: {label:"Google Classroom", url:"https://classroom.google.com/"},
+  lectio:    {label:"Lectio",           url:"https://www.lectio.dk/"}
+};
+
+function isOpen(a){ return a.do==="open.app" || a.do==="open.url"; }
+
+function openTarget(a){
+  var u;
+  if(a.do==="open.app"){
+    var app=APP_LINKS[String(a.app||"").trim().toLowerCase()];
+    if(!app) return "Compass doesn’t know an app called “"+clip(a.app,30)+"”";
+    u=app.url;
+  }else{
+    u=String(a.url||"").trim();
+    if(!/^https?:\/\//i.test(u)) return "only http and https addresses can be opened";
+  }
+  try{
+    var w=window.open(u,"_blank","noopener");
+    /* A protocol hand-off returns no window even when it worked, so only treat a
+       missing window as a block for ordinary web addresses. */
+    if(!w && /^https?:/i.test(u)) return "the browser blocked that popup";
+  }catch(e){
+    return "the browser wouldn’t open it";
+  }
+  return null;
+}
+
+/* These must fire on his actual tap. Anything after an await has lost the
+   gesture and the popup blocker eats it, and browsers only ever allow one. */
+function preOpen(acts){
+  var done={}, used=false;
+  for(var i=0;i<acts.length;i++){
+    if(!isOpen(acts[i])) continue;
+    if(used){ done[i]="only one thing can be opened per tap — apply this one on its own"; continue; }
+    used=true;
+    done[i]=openTarget(acts[i]);
+  }
+  return done;
+}
+
 var ACTIONS_SPEC =
 "\n\n=== CHANGING HIS COMPASS ===\n"+
 "You can propose changes to his data. He sees them as a list and taps Apply before anything happens.\n"+
@@ -4884,7 +4937,14 @@ var ACTIONS_SPEC =
 '  {"do":"big3.clear","slot":2}\n'+
 '  {"do":"deadline.add","title":"...","date":"2026-11-25","subject":"Chemistry HL","type":"IA|EE|TOK|Exam|Other"}\n'+
 '  {"do":"deadline.done","match":"..."}\n'+
-'  {"do":"revise.add","subject":"Chemistry HL","topic":"Le Chatelier and Kc"}\n';
+'  {"do":"revise.add","subject":"Chemistry HL","topic":"Le Chatelier and Kc"}\n'+
+"\n"+
+"You can also offer to open something for him, when it is the obvious next move and he asked for it — never "+
+"unprompted, and at most one per reply, because the browser only permits one:\n"+
+'  {"do":"open.app","app":"telegram"}   one of: '+Object.keys(APP_LINKS).join(", ")+"\n"+
+'  {"do":"open.url","url":"https://..."}   http and https only\n'+
+"You cannot launch other programs, see his screen, or click anything for him. If he asks for that, say plainly "+
+"that a web app isn't allowed to, and offer the screen-capture button (the + menu) so he can show you instead.\n";
 
 function actId(){ return "ai"+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
 function clip(s,n){ return String(s==null?"":s).replace(/\s+/g," ").trim().slice(0,n||200); }
@@ -4958,6 +5018,11 @@ function describe(a){
     case "deadline.add": return {t:"Add deadline "+qt(a.title)+" on "+esc(okDate(a.date)||"?")+(a.subject?" · "+esc(clip(a.subject,30)):"")};
     case "deadline.done":return {t:"Mark deadline "+qt(a.match)+" done"};
     case "revise.add":   return {t:"Add revision topic "+qt(a.topic)+" to "+esc(clip(resolveSubj(a.subject),30))};
+    case "open.app": {
+      var app=APP_LINKS[String(a.app||"").trim().toLowerCase()];
+      return {t:"Open "+(app ? esc(app.label) : qt(a.app))};
+    }
+    case "open.url":     return {t:"Open "+qt(a.url)+" in a new tab"};
     default: {
       var nd = describeNotion(a);
       if(nd) return nd;
@@ -5062,10 +5127,12 @@ async function applyActs(msg){
   var S=B.get();
   var before=JSON.parse(JSON.stringify({tasks:S.tasks, ms:S.ms, rev:S.rev, days:S.days}));
   var today=iso(new Date()), out=[];
+  var pre=preOpen(msg.acts);          // fires now, while his tap still counts
   msg.busy=true; paint();
   for(var i=0;i<msg.acts.length;i++){
     var why=null;
-    try{ why=await runAct(S,msg.acts[i],today); }catch(e){ why="it failed ("+(e&&e.message||e)+")"; }
+    if(Object.prototype.hasOwnProperty.call(pre,i)) why=pre[i];
+    else try{ why=await runAct(S,msg.acts[i],today); }catch(e){ why="it failed ("+(e&&e.message||e)+")"; }
     out.push(why||null);
   }
   msg.busy=false;
@@ -5230,6 +5297,78 @@ function readImage(file){
     im.onerror=function(){ URL.revokeObjectURL(url); rej(new Error("that image wouldn’t open (HEIC photos need converting to JPEG)")); };
     im.src=url;
   });
+}
+
+/* ── SCREEN CAPTURE ───────────────────────────────────────────────────
+   Chrome hands back a video stream of whatever window he picks; we take one
+   frame from it and treat it as an ordinary image attachment, so everything
+   downstream — the send path, the worker's validation, the model — is unchanged.
+   It cannot happen quietly: the browser always shows its own picker, and this
+   only ever runs from a tap. Not available on iOS Safari, which has no
+   getDisplayMedia at all, so the button hides itself there. */
+function canCapture(){
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+}
+
+async function grabScreen(){
+  if(!canCapture()){
+    attNote("This browser can’t capture the screen — use Photo library instead.");
+    return;
+  }
+  if(atts.length>=MAX_FILES){ attNote("You can attach "+MAX_FILES+" things at a time."); return; }
+  if(atts.filter(function(x){ return x.kind==="image"; }).length>=MAX_IMAGES){
+    attNote("Four images is the limit per message."); return;
+  }
+
+  var stream=null;
+  try{
+    stream = await navigator.mediaDevices.getDisplayMedia({ video:{ frameRate:1 }, audio:false });
+  }catch(e){
+    /* He closed the picker, which is not an error worth shouting about. */
+    if(e && (e.name==="NotAllowedError" || e.name==="AbortError")) return;
+    attNote("Couldn’t start the capture: "+((e&&e.message)||"unknown error"));
+    return;
+  }
+
+  var a={id:actId(), name:"screen.jpg", size:0, mime:"image/jpeg", kind:"image", status:"reading"};
+  atts.push(a); paintAtts();
+
+  var vid=document.createElement("video");
+  try{
+    vid.srcObject=stream; vid.muted=true; vid.playsInline=true;
+    await new Promise(function(res,rej){
+      vid.onloadedmetadata=function(){ res(); };
+      vid.onerror=function(){ rej(new Error("the capture stream wouldn’t open")); };
+      setTimeout(res, 3000);                    // don't hang if the event never lands
+    });
+    try{ await vid.play(); }catch(e){}
+    /* Wait for a painted frame — drawing too early gives a blank canvas. */
+    await new Promise(function(res){
+      requestAnimationFrame(function(){ requestAnimationFrame(res); });
+    });
+
+    var w=vid.videoWidth, h=vid.videoHeight;
+    if(!w || !h) throw new Error("the capture came back empty");
+    function draw(max){
+      var sc=Math.min(1, max/Math.max(w,h));
+      var c=document.createElement("canvas");
+      c.width=Math.max(1,Math.round(w*sc)); c.height=Math.max(1,Math.round(h*sc));
+      c.getContext("2d").drawImage(vid,0,0,c.width,c.height);
+      return c;
+    }
+    /* Screenshots are mostly small text, so this keeps more detail than a photo
+       would — an unreadable screenshot is worse than none. */
+    var c=draw(1600), q=0.85, data=c.toDataURL("image/jpeg",q);
+    while(data.length>1800000 && q>0.4){ q-=0.1; data=c.toDataURL("image/jpeg",q); }
+    a.dataUrl=data; a.thumb=draw(120).toDataURL("image/jpeg",0.7);
+    a.w=c.width; a.h=c.height; a.size=data.length; a.status="ready";
+  }catch(e){
+    a.status="error"; a.err=(e&&e.message)||"the capture failed";
+  }
+  /* Always drop the stream, or Chrome leaves "sharing your screen" on display. */
+  try{ vid.pause(); vid.srcObject=null; }catch(e){}
+  try{ stream.getTracks().forEach(function(t){ t.stop(); }); }catch(e){}
+  paintAtts(); setSend();
 }
 
 function attNote(msg){
@@ -6276,6 +6415,7 @@ function boot(){
   +         '<button type="button" data-pick="camera">Take a photo<small>Point it at a question or your notes</small></button>'
   +         '<button type="button" data-pick="image">Photo library<small>A screenshot or a picture you already have</small></button>'
   +         '<button type="button" data-pick="file">Choose a file<small>PDF, Word, text, CSV</small></button>'
+  +         '<button type="button" data-pick="screen">Capture screen<small>Pick a window and send a still of it</small></button>'
   +       '</div>'
   +       '<textarea id="askInput" rows="1" placeholder="Ask something, or attach a file…" '
   +         'autocomplete="off" autocapitalize="sentences"></textarea>'
@@ -6381,6 +6521,11 @@ function boot(){
 
   /* ── attachments ── */
   var plus=document.getElementById("askPlus"), menu=document.getElementById("askPlusMenu");
+  /* iOS Safari has no getDisplayMedia — offering it there would just fail. */
+  if(!canCapture()){
+    var sb=menu.querySelector('[data-pick="screen"]');
+    if(sb && sb.parentNode) sb.parentNode.removeChild(sb);
+  }
   function closeMenu(){ menu.classList.remove("on"); plus.setAttribute("aria-expanded","false"); }
   plus.addEventListener("click",function(e){
     e.stopPropagation();
@@ -6391,6 +6536,7 @@ function boot(){
   menu.addEventListener("click",function(e){
     var b=e.target.closest && e.target.closest("[data-pick]"); if(!b) return;
     var p=b.dataset.pick;
+    if(p==="screen"){ closeMenu(); grabScreen(); return; }
     fileIn.removeAttribute("capture");
     if(p==="camera"){ fileIn.accept="image/*"; fileIn.setAttribute("capture","environment"); }
     else if(p==="image"){ fileIn.accept="image/*"; }
