@@ -1227,6 +1227,24 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
   </div>
 </section>
 
+<!-- ═══════════════ SCHOOL SCHEDULE ═══════════════ -->
+<section id="s-classes">
+  <div class="card">
+    <h2>Your week at school</h2>
+    <div class="hint">The lessons that repeat every week, so Compass knows when you are actually free. Everything you plan sits in the gaps between these — and the Ask tab can read this and add to it when you tell it to.</div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      <select class="fld sm" id="clDay" style="flex:0 0 7.5rem"></select>
+      <input class="fld sm" id="clFrom" placeholder="08:10" inputmode="numeric" style="flex:0 0 5.5rem" maxlength="5">
+      <input class="fld sm" id="clTo" placeholder="09:40" inputmode="numeric" style="flex:0 0 5.5rem" maxlength="5">
+      <input class="fld sm" id="clSubj" placeholder="Chemistry HL" style="flex:1 1 10rem">
+      <input class="fld sm" id="clRoom" placeholder="Room (optional)" style="flex:0 0 8.5rem">
+      <button class="ghost sm" id="clAdd" style="flex:none">Add</button>
+    </div>
+    <div id="clMsg" class="note" style="display:none"></div>
+  </div>
+  <div id="clWeek"></div>
+</section>
+
 <!-- ═══════════════ REVISE ═══════════════ -->
 <section id="s-revise">
   <div class="card">
@@ -3624,7 +3642,12 @@ function saveModal(){
 function renderAll(){
   renderToday(); renderWeek(); renderSchool(); renderRevise();
   renderTasks(); renderGoals(); renderRituals(); renderReset(); renderWhy(); fPaint(true); renderGym(); renderCal();
+  renderClasses();
 }
+on($("#clAdd"),"click",clAddFromForm);
+each("#clSubj,#clRoom,#clFrom,#clTo",null,function(e){
+  on(e,"keydown",function(ev){ if(ev.key==="Enter"){ ev.preventDefault(); clAddFromForm(); } });
+});
 function applyTheme(){
   document.documentElement.setAttribute("data-theme",S.theme||"light");
   $("#themeBtn").textContent=(S.theme==="dark")?"Light":"Dark";
@@ -3775,6 +3798,107 @@ var STANDALONE = !!(window.navigator.standalone || (window.matchMedia && window.
 var $ = function(s){ return document.querySelector(s); };
 function el(tag,cls,html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
 
+/* ── SCHOOL SCHEDULE ──────────────────────────────────
+   The lessons that repeat every week. Kept separate from S.ms (dated one-offs)
+   and from the ICS feed (which the school owns and we only read): this is the
+   recurring skeleton, editable by hand and by the assistant with approval. */
+/* Monday-first, unlike the app's DAYN which is Sunday-first to match
+   Date.getDay(). A timetable reads Monday to Friday, so keep them separate. */
+var WDAY=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+
+/* Older saved states predate this list, so never touch S.classes directly. */
+function CL(){ if(!Array.isArray(S.classes)) S.classes=[]; return S.classes; }
+
+/** "8:5" → "08:05", "0810" → "08:10". Returns null if it isn't a time. */
+function okTime(v){
+  var s=String(v==null?"":v).trim();
+  var m=/^(\d{1,2})[:.]?(\d{2})$/.exec(s);
+  if(!m) return null;
+  var h=+m[1], mi=+m[2];
+  if(h>23||mi>59) return null;
+  return (h<10?"0":"")+h+":"+(mi<10?"0":"")+mi;
+}
+/** Accepts 0-6, "monday", "mon", "Tue". Returns 0-6 or null. */
+function okDay(v){
+  if(typeof v==="number" && v>=0 && v<=6) return Math.round(v);
+  var s=String(v==null?"":v).trim().toLowerCase();
+  if(/^[0-6]$/.test(s)) return +s;
+  for(var i=0;i<7;i++){
+    var n=WDAY[i].toLowerCase();
+    if(s===n || (s.length>=3 && n.indexOf(s)===0)) return i;
+  }
+  return null;
+}
+function clSort(){ CL().sort(function(a,b){ return a.day-b.day || (a.from<b.from?-1:a.from>b.from?1:0); }); }
+
+/** Lessons for a given weekday, in order. */
+function classesOn(day){
+  return CL().filter(function(c){ return c.day===day; })
+             .sort(function(a,b){ return a.from<b.from?-1:1; });
+}
+function fmtClass(c){
+  return c.from+"\u2013"+c.to+"  "+c.subject+(c.room?" \u00b7 "+c.room:"");
+}
+/** Minutes of lessons on a weekday — used to spot an overloaded day. */
+function clMins(day){
+  return classesOn(day).reduce(function(n,c){
+    var a=c.from.split(":"), b=c.to.split(":");
+    return n + Math.max(0, (+b[0]*60 + +b[1]) - (+a[0]*60 + +a[1]));
+  },0);
+}
+
+function clNote(t){
+  var e=$("#clMsg"); if(!e) return;
+  e.textContent=t||""; e.style.display=t?"block":"none";
+}
+
+function renderClasses(){
+  var sel=$("#clDay");
+  if(sel && !sel.options.length){
+    sel.innerHTML=WDAY.map(function(n,i){ return '<option value="'+i+'">'+n+'</option>'; }).join("");
+    var t=(new Date().getDay()+6)%7; sel.value=String(t>4?0:t);
+  }
+  var box=$("#clWeek"); if(!box) return;
+  clSort();
+  var total=CL().length;
+  if(!total){
+    box.innerHTML='<div class="card"><div class="hint">Nothing here yet. Add your lessons above — or open Ask and say '
+      + '“my Monday is Chemistry 08:10 to 09:40 then Maths 10:00 to 11:30” and let it propose them.</div></div>';
+    return;
+  }
+  box.innerHTML = WDAY.map(function(n,i){
+    var rows=classesOn(i);
+    if(!rows.length) return "";
+    var mins=clMins(i);
+    return '<div class="card"><h2>'+esc(n)+' <span class="chip tag">'
+      + rows.length+" lesson"+(rows.length===1?"":"s")+" \u00b7 "+Math.round(mins/60*10)/10+"h</span></h2>"
+      + '<table class="tbl"><tbody>' + rows.map(function(c){
+          return '<tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">'+esc(c.from)+'\u2013'+esc(c.to)+'</td>'
+            + '<td dir="auto">'+esc(c.subject)+(c.room?' <span style="color:var(--muted)">\u00b7 '+esc(c.room)+'</span>':'')+'</td>'
+            + '<td style="text-align:end"><button class="del" data-clx="'+esc(c.id)+'" style="opacity:1" aria-label="Remove this lesson">&times;</button></td></tr>';
+        }).join("") + '</tbody></table></div>';
+  }).join("") || '<div class="card"><div class="hint">Nothing on weekdays yet.</div></div>';
+
+  each("[data-clx]",box,function(b){
+    on(b,"click",function(){
+      S.classes=CL().filter(function(c){ return c.id!==b.dataset.clx; });
+      touch(); renderClasses(); renderToday();
+    });
+  });
+}
+
+function clAddFromForm(){
+  var day=okDay($("#clDay").value), from=okTime($("#clFrom").value), to=okTime($("#clTo").value);
+  var subj=String($("#clSubj").value||"").trim(), room=String($("#clRoom").value||"").trim();
+  if(!subj){ clNote("Give the lesson a name."); return; }
+  if(day===null){ clNote("Pick a day."); return; }
+  if(!from||!to){ clNote("Times look like 08:10."); return; }
+  if(to<=from){ clNote("The end time has to be after the start."); return; }
+  CL().push({id:nid(), day:day, from:from, to:to, subject:subj.slice(0,60), room:room.slice(0,40)});
+  $("#clSubj").value=""; $("#clRoom").value="";
+  clNote(""); touch(); renderClasses(); renderToday();
+}
+
 /* ── icons ─────────────────────────────────────────── */
 var I = {
   today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
@@ -3785,6 +3909,7 @@ var I = {
   tasks:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg>',
   goals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',
   rituals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+  grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M9 9v12M15 9v12"/></svg>',
   file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 11v6"/><path d="M9.5 14.5 12 17l2.5-2.5"/></svg>',
   cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="14.5" r="1.1" fill="currentColor" stroke="none"/></svg>',
   gym:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4M6 7v10M18 7v10M21 10v4"/><path d="M6 12h12"/></svg>',
@@ -4258,6 +4383,7 @@ function doSave(){
 /* ── bottom nav ────────────────────────────────────── */
 var PRIMARY=[["today","Today",I.today],["ask","Ask",I.ask],["school","School",I.school],["revise","Revise",I.revise]];
 var MORE=[
+  ["classes","School schedule",I.grid,"Your weekly lessons, so plans land in the gaps"],
   ["focus","Focus",I.focus,"Timed deep-work blocks and the hours behind you"],
   ["cal","Calendar",I.cal,"Every past day — what you did, slept, lifted and finished"],
   ["gym","Gym",I.gym,"Log your lifts and see the weight go up"],
@@ -4290,6 +4416,7 @@ window.CompassSetTab=function(k){ setTab(k); };
 function setTab(k){
   B.show(k);
   if(k==="sync"){ renderSync(); }
+  if(k==="classes"){ renderClasses(); }
   if(k==="focus" && B.paintFocus) B.paintFocus();
   if(k==="gym" && B.paintGym) B.paintGym();
   if(k==="cal" && B.paintCal) B.paintCal();
@@ -4952,12 +5079,26 @@ var ACTIONS_SPEC =
 '  {"do":"deadline.done","match":"..."}\n'+
 '  {"do":"revise.add","subject":"Chemistry HL","topic":"Le Chatelier and Kc"}\n'+
 "\n"+
+"His weekly school timetable — the lessons that repeat every week, in School schedule:\n"+
+'  {"do":"class.add","day":"Monday","from":"08:10","to":"09:40","subject":"Chemistry HL","room":"Lab 2"}\n'+
+'  {"do":"class.edit","match":"Chemistry","day":"Monday","from":"08:10","to":"09:40","subject":"...","room":"..."}\n'+
+'  {"do":"class.delete","match":"Chemistry","day":"Monday"}\n'+
+"- day is a weekday name, from and to are 24-hour HH:MM. Every field on edit is optional except match.\n"+
+"- A subject usually appears several times a week, so always pass day as well when you edit or delete one, "+
+"or it will come back saying it was too vague.\n"+
+"- Overlapping lessons are refused, which is deliberate: if he dictates a day and one clashes, tell him rather "+
+"than quietly shifting it.\n"+
+"- When he reads out a whole day, propose every lesson in one block so he approves the day once.\n"+
+"\n"+
 "You can also offer to open something for him, when it is the obvious next move and he asked for it — never "+
 "unprompted, and at most one per reply, because the browser only permits one:\n"+
 '  {"do":"open.app","app":"telegram"}   one of: '+Object.keys(APP_LINKS).join(", ")+"\n"+
 '  {"do":"open.url","url":"https://..."}   http and https only\n'+
-"You cannot launch other programs, see his screen, or click anything for him. If he asks for that, say plainly "+
-"that a web app isn't allowed to, and offer the screen-capture button (the + menu) so he can show you instead.\n";
+"You can see his screen when he shares it: the capture button in the + menu takes a still frame of a window he "+
+"picks and attaches it, so ask him to grab one whenever a reply depends on what is actually on screen. You "+
+"cannot start that yourself, and you cannot launch other programs or click anything for him — Compass runs in a "+
+"browser tab, so a click from you would be indistinguishable from a click by him and the browser does not permit "+
+"it. If he asks for that, say so plainly and offer what you do have: a screen capture, his timetable, his notes.\n";
 
 function actId(){ return "ai"+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
 function clip(s,n){ return String(s==null?"":s).replace(/\s+/g," ").trim().slice(0,n||200); }
@@ -5031,6 +5172,20 @@ function describe(a){
     case "deadline.add": return {t:"Add deadline "+qt(a.title)+" on "+esc(okDate(a.date)||"?")+(a.subject?" · "+esc(clip(a.subject,30)):"")};
     case "deadline.done":return {t:"Mark deadline "+qt(a.match)+" done"};
     case "revise.add":   return {t:"Add revision topic "+qt(a.topic)+" to "+esc(clip(resolveSubj(a.subject),30))};
+    case "class.add": {
+      var cd=okDay(a.day);
+      return {t:"Add lesson "+qt(a.subject)+" on "+esc(cd===null?"?":WDAY[cd])
+        +" "+esc(okTime(a.from)||"?")+"\u2013"+esc(okTime(a.to)||"?")+(a.room?" \u00b7 "+esc(clip(a.room,20)):"")};
+    }
+    case "class.edit": {
+      var ce=[];
+      if(a.subject) ce.push("rename to "+qt(a.subject));
+      if(okDay(a.day)!==null) ce.push("move to "+WDAY[okDay(a.day)]);
+      if(okTime(a.from)||okTime(a.to)) ce.push("retime to "+esc(okTime(a.from)||"?")+"\u2013"+esc(okTime(a.to)||"?"));
+      if(a.room!=null) ce.push("room "+qt(a.room));
+      return {t:"Change lesson "+qt(a.match)+(ce.length?" \u2014 "+ce.join(", "):"")};
+    }
+    case "class.delete": return {t:"Remove lesson "+qt(a.match)+" from your timetable", del:true};
     case "open.app": {
       var app=APP_LINKS[String(a.app||"").trim().toLowerCase()];
       return {t:"Open "+(app ? esc(app.label) : qt(a.app))};
@@ -5059,6 +5214,57 @@ function pickTask(S,a){
     return {t:exact[0]};
   }
   return {t:hits[0]};
+}
+
+/* Timetable helpers. Each script block is its own closure, so these are
+   deliberate duplicates of the ones beside renderClasses — the same reason this
+   block carries its own esc, clip and okDate. Monday-first, unlike the DAYN
+   above, which is Sunday-first to line up with Date.getDay(). */
+var WDAY=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+function CL(S){ if(!Array.isArray(S.classes)) S.classes=[]; return S.classes; }
+function okTime(v){
+  var s=String(v==null?"":v).trim();
+  var m=/^(\d{1,2})[:.]?(\d{2})$/.exec(s);
+  if(!m) return null;
+  var h=+m[1], mi=+m[2];
+  if(h>23||mi>59) return null;
+  return (h<10?"0":"")+h+":"+(mi<10?"0":"")+mi;
+}
+function okDay(v){
+  if(typeof v==="number" && v>=0 && v<=6) return Math.round(v);
+  var s=String(v==null?"":v).trim().toLowerCase();
+  if(/^[0-6]$/.test(s)) return +s;
+  for(var i=0;i<7;i++){
+    var n=WDAY[i].toLowerCase();
+    if(s===n || (s.length>=3 && n.indexOf(s)===0)) return i;
+  }
+  return null;
+}
+function classesOn(S,day){
+  return CL(S).filter(function(c){ return c.day===day; })
+              .sort(function(a,b){ return a.from<b.from?-1:1; });
+}
+function clSort(S){ CL(S).sort(function(a,b){ return a.day-b.day || (a.from<b.from?-1:a.from>b.from?1:0); }); }
+function fmtClass(c){ return c.from+"\u2013"+c.to+"  "+c.subject+(c.room?" \u00b7 "+c.room:""); }
+
+/* Same idea as pickTask: a fragment of the subject, optionally narrowed by day,
+   because a subject usually appears several times a week. */
+function pickClass(S,a){
+  var q=clip(a.match||a.subject||"",120).toLowerCase();
+  if(!q) return {err:"no lesson named"};
+  var day=okDay(a.day!=null?a.day:a.onDay);
+  var hits=CL(S).filter(function(c){ return String(c.subject||"").toLowerCase().indexOf(q)>=0; });
+  if(!hits.length) return {err:"no lesson matches that"};
+  if(hits.length>1 && day!==null){
+    var sameDay=hits.filter(function(c){ return c.day===day; });
+    if(sameDay.length) hits=sameDay;
+  }
+  if(hits.length>1 && okTime(a.from)){
+    var sameTime=hits.filter(function(c){ return c.from===okTime(a.from); });
+    if(sameTime.length) hits=sameTime;
+  }
+  if(hits.length>1) return {err:hits.length+" lessons match — say which day"};
+  return {c:hits[0]};
 }
 
 function dayRec(S,k){
@@ -5096,6 +5302,36 @@ function runAct(S,a,today){
       return null;
     case "big3.clear":
       t=dayRec(S,today).big3[slotOf(a)]; t.t=""; t.d=false; t.plan=""; t.mins=60; return null;
+    case "class.add": {
+      var nd=okDay(a.day), nf=okTime(a.from), nt=okTime(a.to);
+      var ns=clip(a.subject,60);
+      if(!ns) return "the lesson had no subject";
+      if(nd===null) return "the day wasn't a weekday I recognise";
+      if(!nf||!nt) return "the times weren't in 08:10 form";
+      if(nt<=nf) return "the end time wasn't after the start";
+      var clash=classesOn(S,nd).filter(function(c){ return nf<c.to && nt>c.from; })[0];
+      if(clash) return "it overlaps "+clash.subject+" ("+clash.from+"\u2013"+clash.to+")";
+      CL(S).push({id:actId(), day:nd, from:nf, to:nt, subject:ns, room:clip(a.room,40)});
+      clSort(S); return null;
+    }
+    case "class.edit": {
+      var pc=pickClass(S,a); if(pc.err) return pc.err;
+      var cc=pc.c;
+      var ed=okDay(a.day), ef=okTime(a.from), et=okTime(a.to);
+      var eday=ed===null?cc.day:ed, efrom=ef||cc.from, eto=et||cc.to;
+      if(eto<=efrom) return "that would end before it starts";
+      var over=classesOn(S,eday).filter(function(x){ return x.id!==cc.id && efrom<x.to && eto>x.from; })[0];
+      if(over) return "it would overlap "+over.subject+" ("+over.from+"\u2013"+over.to+")";
+      cc.day=eday; cc.from=efrom; cc.to=eto;
+      if(a.subject) cc.subject=clip(a.subject,60);
+      if(a.room!=null) cc.room=clip(a.room,40);
+      clSort(S); return null;
+    }
+    case "class.delete": {
+      var dc=pickClass(S,a); if(dc.err) return dc.err;
+      S.classes=CL(S).filter(function(x){ return x.id!==dc.c.id; });
+      return null;
+    }
     case "deadline.add":
       v=clip(a.title,160); var dt=okDate(a.date);
       if(!v) return "the deadline had no title";
@@ -5138,7 +5374,9 @@ function runAct(S,a,today){
 
 async function applyActs(msg){
   var S=B.get();
-  var before=JSON.parse(JSON.stringify({tasks:S.tasks, ms:S.ms, rev:S.rev, days:S.days}));
+  /* Every key an action can write has to be in here, or Undo silently leaves
+     that part changed. Add to both lists together. */
+  var before=JSON.parse(JSON.stringify({tasks:S.tasks, ms:S.ms, rev:S.rev, days:S.days, classes:S.classes||[]}));
   var today=iso(new Date()), out=[];
   var pre=preOpen(msg.acts);          // fires now, while his tap still counts
   msg.busy=true; paint();
@@ -5486,6 +5724,7 @@ function buildTurn(text){
    question about his notes answers itself in one turn. Writes go through
    the same approve-first card as everything else. */
 var notionOn = null;                 // null = not checked yet
+var schedOn = null;                  // school timetable feed configured in the worker?
 var TOOL_ROUNDS = 2;                 // how many look-then-think cycles in one turn
 var MAX_READS = 5;                   // lookups allowed in a single block
 var QUERY_LIMIT = 40;                // rows returned by one query
@@ -5503,9 +5742,11 @@ function workerCall(payload){
 function checkNotion(){
   if(!ready()) return Promise.resolve(false);
   return workerCall({action:"capabilities"}).then(function(r){
-    notionOn = !!(r.status===200 && r.body && r.body.notion);
+    var ok = r.status===200 && r.body;
+    notionOn = !!(ok && r.body.notion);
+    schedOn  = !!(ok && r.body.schedule);
     return notionOn;
-  }).catch(function(){ notionOn=false; return false; });
+  }).catch(function(){ notionOn=false; schedOn=false; return false; });
 }
 
 var NOTION_SPEC =
@@ -5545,6 +5786,7 @@ var QUERY_SPEC =
 '  {"do":"query.revise","due":"due|fresh|all","subject":"Physics SL"}\n'+
 '  {"do":"query.day","date":"2027-01-14"}                           that day\u2019s sleep, energy, mood and Big 3\n'+
 "Every field is optional. query.tasks with nothing set returns every open task.\n"+
+'  {"do":"query.classes","day":"Monday"}   his weekly lessons; omit day for the whole week\n'+
 "Rules for looking up:\n"+
 "- Only look when the answer depends on it. If the CONTEXT already says it, just answer — a wasted round makes "+
 "him wait for nothing.\n"+
@@ -5552,10 +5794,35 @@ var QUERY_SPEC =
 "- These only read. To actually change anything you still propose it the normal way and he approves it.\n"+
 "- If a lookup comes back empty, say so plainly. Never fill the gap with something you assumed.\n";
 
+var SCHEDULE_SPEC =
+"\n\n=== HIS SCHOOL TIMETABLE ===\n"+
+"You can read his real school timetable from the calendar feed his school publishes. Use it whenever the "+
+"question is about when he is free, what his day looks like, or how to fit work around lessons.\n"+
+'  {"do":"schedule.get","from":"2026-08-24","to":"2026-08-24"}   lessons between two dates, inclusive\n'+
+"Rules:\n"+
+"- Dates are YYYY-MM-DD and come from the CONTEXT — never guess today's date.\n"+
+"- Keep the range tight: one day for planning today, up to a week for planning ahead.\n"+
+"- This is read-only. It shows what school has already fixed; you cannot move a lesson.\n"+
+"- Plan around the gaps, not over the lessons. Free periods and after-school time are what you have to work with, "+
+"and travel time between a lesson and home is real.\n"+
+"- If it comes back empty, say the feed shows nothing for that day rather than assuming he is free — a holiday "+
+"and a broken feed look identical from here.\n";
+
 function isNotionRead(a){ return a.do==="notion.find" || a.do==="notion.read"; }
+function isSchedRead(a){ return a.do==="schedule.get"; }
 function isQuery(a){ return typeof a.do==="string" && a.do.indexOf("query.")===0; }
-function isRead(a){ return isNotionRead(a) || isQuery(a); }
+function isRead(a){ return isNotionRead(a) || isQuery(a) || isSchedRead(a); }
 function hasReads(acts){ return acts.some(isRead); }
+
+/* One lesson, as a line the model reads back. Times come from the feed as ISO;
+   a trailing Z means the browser converts, otherwise it is already wall clock. */
+function fmtEvent(e){
+  if(e.allDay) return (e.summary||"(untitled)") + (e.location?" · "+e.location:"") + " (all day)";
+  var a=new Date(e.start), b=e.end?new Date(e.end):null;
+  function hm(d){ return isNaN(d) ? "?" : two(d.getHours())+":"+two(d.getMinutes()); }
+  return hm(a)+(b?"\u2013"+hm(b):"")+"  "+(e.summary||"(untitled)")
+    + (e.location?" · "+e.location:"");
+}
 
 function describeNotion(a){
   switch(a.do){
@@ -5569,10 +5836,12 @@ function describeNotion(a){
 
 function describeQuery(a){
   switch(a.do){
+    case "schedule.get":    return {t:"Check your school timetable"+(a.from?" for "+esc(okDate(a.from)||"?")+(a.to&&a.to!==a.from?" to "+esc(okDate(a.to)||"?"):""):"")};
     case "query.tasks":     return {t:"Look through your tasks"+(a.bucket&&BK[a.bucket]?" in "+BK[a.bucket]:"")};
     case "query.deadlines": return {t:"Check your deadlines"+(a.subject?" for "+qt(a.subject):"")};
     case "query.revise":    return {t:"Check your revision queue"+(a.subject?" for "+qt(a.subject):"")};
     case "query.day":       return {t:"Look at your log for "+esc(okDate(a.date)||"today")};
+    case "query.classes":   return {t:"Check your weekly timetable"+(okDay(a.day)!==null?" for "+WDAY[okDay(a.day)]:"")};
   }
   return null;
 }
@@ -5641,6 +5910,15 @@ function runQuery(S,a,today){
         return "["+subjName(S,x.s)+"] "+x.t+" (box "+x.box+", "+x.reps+" reps"+(x.next?", next "+x.next:"")+")";
       }));
     }
+    case "query.classes": {
+      var qd=okDay(a.day);
+      var rows=[];
+      (qd===null?[0,1,2,3,4,5,6]:[qd]).forEach(function(i){
+        classesOn(S,i).forEach(function(c){ rows.push(WDAY[i]+"  "+fmtClass(c)); });
+      });
+      head="WEEKLY TIMETABLE"+(qd===null?"":" for "+WDAY[qd]);
+      return capRows(head, rows);
+    }
     case "query.day": {
       var k=okDate(a.date)||today, d=S.days[k];
       if(!d) return "DAY "+k+": nothing logged.";
@@ -5670,6 +5948,19 @@ async function runReads(acts){
       if(isQuery(a)){
         var txt=runQuery(B.get(),a,today);
         out.push(txt!=null ? txt : "Compass has no lookup called \u201C"+clip(a.do,40)+"\u201D.");
+        continue;
+      }
+      if(isSchedRead(a)){
+        var f=okDate(a.from)||today, t2=okDate(a.to)||f;
+        if(t2<f) t2=f;
+        var sr=await workerCall({action:"schedule.get", from:f, to:t2});
+        if(sr.status!==200){ out.push("TIMETABLE lookup failed: "+clip(sr.body&&sr.body.error,140)); continue; }
+        var evs=(sr.body.events||[]);
+        out.push("SCHOOL TIMETABLE "+f+(t2!==f?" to "+t2:"")+" \u2014 "+evs.length+" lesson"+(evs.length===1?"":"s")+":\n"
+          + (evs.length ? evs.map(function(e){ return "  "+e.date+"  "+fmtEvent(e); }).join("\n")
+                        : "  (the feed returned nothing for this range)")
+          + (sr.body.truncated ? "\n  \u2026list was capped" : "")
+          + (sr.body.repeats ? "\n  NOTE: this feed uses repeat rules, which are not expanded \u2014 it may be showing fewer lessons than he really has." : ""));
         continue;
       }
       if(a.do==="notion.find"){
@@ -6327,6 +6618,7 @@ function readKey(a){ try{ return JSON.stringify(a); }catch(e){ return String(a&&
 function baseMessages(){
   var sys = MODES[mode].sys
     + (notionOn ? NOTION_SPEC : "")
+    + (schedOn ? SCHEDULE_SPEC : "")
     + "\n\n=== LIVE COMPASS CONTEXT ===\n" + snapshot(mode);
   var sl=history.slice(0,-1).slice(-12), rich=-1;
   for(var k=sl.length-1;k>=0;k--){ if(sl[k].role==="user" && sl[k].api){ rich=k; break; } }
