@@ -3639,6 +3639,107 @@ function saveModal(){
 }
 
 /* ══════════ WIRING ══════════ */
+/* ── SCHOOL SCHEDULE ──────────────────────────────────
+   The lessons that repeat every week. Kept separate from S.ms (dated one-offs)
+   and from the ICS feed (which the school owns and we only read): this is the
+   recurring skeleton, editable by hand and by the assistant with approval.
+
+   This must stay in this script block: it reads S and calls touch() and
+   renderToday(), and each <script> here is its own closure. */
+/* Monday-first, unlike DAYN above, which is Sunday-first to match
+   Date.getDay(). A timetable reads Monday to Friday, so keep them separate. */
+var WDAY=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+
+/* Older saved states predate this list, so never touch S.classes directly. */
+function CL(){ if(!Array.isArray(S.classes)) S.classes=[]; return S.classes; }
+
+/** "0810" → "08:10", "8.10" → "08:10". Returns null if it isn't a time. */
+function okTime(v){
+  var s=String(v==null?"":v).trim();
+  var m=/^(\d{1,2})[:.]?(\d{2})$/.exec(s);
+  if(!m) return null;
+  var h=+m[1], mi=+m[2];
+  if(h>23||mi>59) return null;
+  return (h<10?"0":"")+h+":"+(mi<10?"0":"")+mi;
+}
+/** Accepts 0-6, "monday", "mon", "Tue". Returns 0-6 or null. */
+function okDay(v){
+  if(typeof v==="number" && v>=0 && v<=6) return Math.round(v);
+  var s=String(v==null?"":v).trim().toLowerCase();
+  if(/^[0-6]$/.test(s)) return +s;
+  for(var i=0;i<7;i++){
+    var n=WDAY[i].toLowerCase();
+    if(s===n || (s.length>=3 && n.indexOf(s)===0)) return i;
+  }
+  return null;
+}
+function clSort(){ CL().sort(function(a,b){ return a.day-b.day || (a.from<b.from?-1:a.from>b.from?1:0); }); }
+
+/** Lessons for a given weekday, in order. */
+function classesOn(day){
+  return CL().filter(function(c){ return c.day===day; })
+             .sort(function(a,b){ return a.from<b.from?-1:1; });
+}
+/** Minutes of lessons on a weekday — used to spot an overloaded day. */
+function clMins(day){
+  return classesOn(day).reduce(function(n,c){
+    var a=c.from.split(":"), b=c.to.split(":");
+    return n + Math.max(0, (+b[0]*60 + +b[1]) - (+a[0]*60 + +a[1]));
+  },0);
+}
+
+function clNote(t){
+  var e=$("#clMsg"); if(!e) return;
+  e.textContent=t||""; e.style.display=t?"block":"none";
+}
+
+function renderClasses(){
+  var sel=$("#clDay");
+  if(sel && !sel.options.length){
+    sel.innerHTML=WDAY.map(function(n,i){ return '<option value="'+i+'">'+n+'</option>'; }).join("");
+    var t=(new Date().getDay()+6)%7; sel.value=String(t>4?0:t);
+  }
+  var box=$("#clWeek"); if(!box) return;
+  clSort();
+  if(!CL().length){
+    box.innerHTML='<div class="card"><div class="hint">Nothing here yet. Add your lessons above — or open Ask and say '
+      + '“my Monday is Chemistry 08:10 to 09:40 then Maths 10:00 to 11:30” and let it propose them.</div></div>';
+    return;
+  }
+  box.innerHTML = WDAY.map(function(n,i){
+    var rows=classesOn(i);
+    if(!rows.length) return "";
+    var mins=clMins(i);
+    return '<div class="card"><h2>'+esc(n)+' <span class="chip tag">'
+      + rows.length+" lesson"+(rows.length===1?"":"s")+" \u00b7 "+Math.round(mins/60*10)/10+"h</span></h2>"
+      + '<table class="tbl"><tbody>' + rows.map(function(c){
+          return '<tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">'+esc(c.from)+'\u2013'+esc(c.to)+'</td>'
+            + '<td dir="auto">'+esc(c.subject)+(c.room?' <span style="color:var(--muted)">\u00b7 '+esc(c.room)+'</span>':'')+'</td>'
+            + '<td style="text-align:end"><button class="del" data-clx="'+esc(c.id)+'" style="opacity:1" aria-label="Remove this lesson">&times;</button></td></tr>';
+        }).join("") + '</tbody></table></div>';
+  }).join("") || '<div class="card"><div class="hint">Nothing on weekdays yet.</div></div>';
+
+  each("[data-clx]",box,function(b){
+    on(b,"click",function(){
+      S.classes=CL().filter(function(c){ return c.id!==b.dataset.clx; });
+      touch(); renderClasses(); renderToday();
+    });
+  });
+}
+
+function clAddFromForm(){
+  if(!$("#clDay")) return;
+  var day=okDay($("#clDay").value), from=okTime($("#clFrom").value), to=okTime($("#clTo").value);
+  var subj=String($("#clSubj").value||"").trim(), room=String($("#clRoom").value||"").trim();
+  if(!subj){ clNote("Give the lesson a name."); return; }
+  if(day===null){ clNote("Pick a day."); return; }
+  if(!from||!to){ clNote("Times look like 08:10."); return; }
+  if(to<=from){ clNote("The end time has to be after the start."); return; }
+  CL().push({id:nid(), day:day, from:from, to:to, subject:subj.slice(0,60), room:room.slice(0,40)});
+  $("#clSubj").value=""; $("#clRoom").value="";
+  clNote(""); touch(); renderClasses(); renderToday();
+}
+
 function renderAll(){
   renderToday(); renderWeek(); renderSchool(); renderRevise();
   renderTasks(); renderGoals(); renderRituals(); renderReset(); renderWhy(); fPaint(true); renderGym(); renderCal();
@@ -3760,6 +3861,7 @@ window.CompassBridge={
   restoreTimer:function(){ fRestore(); },
   paintFocus:function(){ if(typeof fPaint==="function") fPaint(true); },
   paintGym:function(){ if(typeof renderGym==="function") renderGym(); },
+  paintClasses:function(){ if(typeof renderClasses==="function") renderClasses(); },
   paintCal:function(){ if(typeof renderCal==="function") renderCal(); },
   show:function(k){ show(k); },
   tab:function(){ return S.tab; },
@@ -3797,107 +3899,6 @@ var STANDALONE = !!(window.navigator.standalone || (window.matchMedia && window.
 
 var $ = function(s){ return document.querySelector(s); };
 function el(tag,cls,html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
-
-/* ── SCHOOL SCHEDULE ──────────────────────────────────
-   The lessons that repeat every week. Kept separate from S.ms (dated one-offs)
-   and from the ICS feed (which the school owns and we only read): this is the
-   recurring skeleton, editable by hand and by the assistant with approval. */
-/* Monday-first, unlike the app's DAYN which is Sunday-first to match
-   Date.getDay(). A timetable reads Monday to Friday, so keep them separate. */
-var WDAY=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-
-/* Older saved states predate this list, so never touch S.classes directly. */
-function CL(){ if(!Array.isArray(S.classes)) S.classes=[]; return S.classes; }
-
-/** "8:5" → "08:05", "0810" → "08:10". Returns null if it isn't a time. */
-function okTime(v){
-  var s=String(v==null?"":v).trim();
-  var m=/^(\d{1,2})[:.]?(\d{2})$/.exec(s);
-  if(!m) return null;
-  var h=+m[1], mi=+m[2];
-  if(h>23||mi>59) return null;
-  return (h<10?"0":"")+h+":"+(mi<10?"0":"")+mi;
-}
-/** Accepts 0-6, "monday", "mon", "Tue". Returns 0-6 or null. */
-function okDay(v){
-  if(typeof v==="number" && v>=0 && v<=6) return Math.round(v);
-  var s=String(v==null?"":v).trim().toLowerCase();
-  if(/^[0-6]$/.test(s)) return +s;
-  for(var i=0;i<7;i++){
-    var n=WDAY[i].toLowerCase();
-    if(s===n || (s.length>=3 && n.indexOf(s)===0)) return i;
-  }
-  return null;
-}
-function clSort(){ CL().sort(function(a,b){ return a.day-b.day || (a.from<b.from?-1:a.from>b.from?1:0); }); }
-
-/** Lessons for a given weekday, in order. */
-function classesOn(day){
-  return CL().filter(function(c){ return c.day===day; })
-             .sort(function(a,b){ return a.from<b.from?-1:1; });
-}
-function fmtClass(c){
-  return c.from+"\u2013"+c.to+"  "+c.subject+(c.room?" \u00b7 "+c.room:"");
-}
-/** Minutes of lessons on a weekday — used to spot an overloaded day. */
-function clMins(day){
-  return classesOn(day).reduce(function(n,c){
-    var a=c.from.split(":"), b=c.to.split(":");
-    return n + Math.max(0, (+b[0]*60 + +b[1]) - (+a[0]*60 + +a[1]));
-  },0);
-}
-
-function clNote(t){
-  var e=$("#clMsg"); if(!e) return;
-  e.textContent=t||""; e.style.display=t?"block":"none";
-}
-
-function renderClasses(){
-  var sel=$("#clDay");
-  if(sel && !sel.options.length){
-    sel.innerHTML=WDAY.map(function(n,i){ return '<option value="'+i+'">'+n+'</option>'; }).join("");
-    var t=(new Date().getDay()+6)%7; sel.value=String(t>4?0:t);
-  }
-  var box=$("#clWeek"); if(!box) return;
-  clSort();
-  var total=CL().length;
-  if(!total){
-    box.innerHTML='<div class="card"><div class="hint">Nothing here yet. Add your lessons above — or open Ask and say '
-      + '“my Monday is Chemistry 08:10 to 09:40 then Maths 10:00 to 11:30” and let it propose them.</div></div>';
-    return;
-  }
-  box.innerHTML = WDAY.map(function(n,i){
-    var rows=classesOn(i);
-    if(!rows.length) return "";
-    var mins=clMins(i);
-    return '<div class="card"><h2>'+esc(n)+' <span class="chip tag">'
-      + rows.length+" lesson"+(rows.length===1?"":"s")+" \u00b7 "+Math.round(mins/60*10)/10+"h</span></h2>"
-      + '<table class="tbl"><tbody>' + rows.map(function(c){
-          return '<tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">'+esc(c.from)+'\u2013'+esc(c.to)+'</td>'
-            + '<td dir="auto">'+esc(c.subject)+(c.room?' <span style="color:var(--muted)">\u00b7 '+esc(c.room)+'</span>':'')+'</td>'
-            + '<td style="text-align:end"><button class="del" data-clx="'+esc(c.id)+'" style="opacity:1" aria-label="Remove this lesson">&times;</button></td></tr>';
-        }).join("") + '</tbody></table></div>';
-  }).join("") || '<div class="card"><div class="hint">Nothing on weekdays yet.</div></div>';
-
-  each("[data-clx]",box,function(b){
-    on(b,"click",function(){
-      S.classes=CL().filter(function(c){ return c.id!==b.dataset.clx; });
-      touch(); renderClasses(); renderToday();
-    });
-  });
-}
-
-function clAddFromForm(){
-  var day=okDay($("#clDay").value), from=okTime($("#clFrom").value), to=okTime($("#clTo").value);
-  var subj=String($("#clSubj").value||"").trim(), room=String($("#clRoom").value||"").trim();
-  if(!subj){ clNote("Give the lesson a name."); return; }
-  if(day===null){ clNote("Pick a day."); return; }
-  if(!from||!to){ clNote("Times look like 08:10."); return; }
-  if(to<=from){ clNote("The end time has to be after the start."); return; }
-  CL().push({id:nid(), day:day, from:from, to:to, subject:subj.slice(0,60), room:room.slice(0,40)});
-  $("#clSubj").value=""; $("#clRoom").value="";
-  clNote(""); touch(); renderClasses(); renderToday();
-}
 
 /* ── icons ─────────────────────────────────────────── */
 var I = {
@@ -4416,7 +4417,7 @@ window.CompassSetTab=function(k){ setTab(k); };
 function setTab(k){
   B.show(k);
   if(k==="sync"){ renderSync(); }
-  if(k==="classes"){ renderClasses(); }
+  if(k==="classes" && B.paintClasses) B.paintClasses();
   if(k==="focus" && B.paintFocus) B.paintFocus();
   if(k==="gym" && B.paintGym) B.paintGym();
   if(k==="cal" && B.paintCal) B.paintCal();
