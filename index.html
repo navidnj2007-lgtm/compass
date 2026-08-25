@@ -255,6 +255,40 @@ input.bare::placeholder{color:var(--muted)}
 .defer{color:var(--serious);font-weight:700;font-size:12px;letter-spacing:-.5px}
 .defer.hot{color:var(--crit)}
 
+/* ═══ GOALS ═════════════════════════════════════════════════════════════ */
+.goal-card{position:relative}
+.goal-card.is-off{opacity:.55}
+.goal-top{display:flex;align-items:flex-start;gap:12px}
+.goal-top .dl-days{margin-top:1px}
+.gmeta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:9px 0 2px}
+.chip.hi{background:var(--crit);color:#fff}
+.chip.md{background:var(--serious);color:#0b0b0b}
+.chip.lo{background:var(--surface-3);color:var(--ink-2)}
+.chip.st-active{background:var(--surface-3);color:var(--ink-2)}
+.chip.st-hold{background:var(--warn);color:#0b0b0b}
+.chip.st-done{background:var(--good);color:#fff}
+.chip.st-dropped{background:var(--surface-2);color:var(--muted);text-decoration:line-through}
+.pace{font-size:11.5px;font-weight:600}
+.pace.on{color:var(--ok-text)} .pace.slip{color:var(--serious)} .pace.off{color:var(--crit)}
+.gtrack{margin:13px 0 3px}
+.gtrack .lbl{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.gtrack .meter{margin:5px 0 3px}
+.gtrack .meter.thin{height:5px}
+.gtrack .meter i.el{background:var(--axis)}
+.gms{margin-top:14px}
+.gms .line{padding:7px 0}
+.gms .line .d{font-size:11px;color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
+.gms .line.done .t{color:var(--muted);text-decoration:line-through}
+.gms .line .t{flex:1;min-width:0;font-size:13px}
+.gnote{font-size:12.5px;color:var(--ink-2);line-height:1.55;margin-top:12px;
+  padding-left:11px;border-left:2px solid var(--grid)}
+.gform{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:center}
+@media(max-width:720px){.gform{grid-template-columns:1fr 1fr}}
+.gdl{display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted)}
+.gdl input,.gdl select{margin-top:4px;text-transform:none;letter-spacing:0}
+
 /* ═══ BUCKETS / PILLS ═══════════════════════════════════════════════════ */
 .pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px}
 .pills button{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:500;
@@ -1316,9 +1350,29 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 <!-- ═══════════════ GOALS ═══════════════ -->
 <section id="s-goals">
   <div class="card">
-    <h2>Next 90 days</h2>
+    <div class="spread" style="align-items:flex-start">
+      <h2>Goals</h2>
+      <div class="row" style="gap:5px;flex:none"><button class="ghost sm" id="goalSort">Sort: deadline</button></div>
+    </div>
     <div class="hint">Three at most, on a 12-week horizon — long enough to matter, short enough that "there's plenty of time" is obviously false. Each goal carries a <b>lead measure</b> (what you do weekly, which you control) and a <b>lag measure</b> (the outcome, which you don't). Tracking only the outcome tells you you've failed after it's too late.</div>
-    <div class="row"><input class="fld" id="newGoal" placeholder="Add a goal" style="flex:1"><button class="ghost" id="addGoal">Add</button></div>
+    <div class="tiles" id="goalStats"></div>
+    <div class="divider"></div>
+    <div class="eyebrow">Add a goal</div>
+    <div class="gform">
+      <input class="fld sm" id="newGoal" placeholder="What you're committing to">
+      <input class="fld sm" id="newGoalCat" placeholder="Area (School, Health…)">
+      <input class="fld sm" id="newGoalDue" type="date" title="Target date">
+      <select class="fld sm" id="newGoalPri" style="width:auto" title="Priority">
+        <option value="hi">High</option><option value="md" selected>Medium</option><option value="lo">Low</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:9px">
+      <button class="ghost" id="addGoal">Add goal</button>
+      <span class="hint" style="margin:0;font-size:11.5px">Leave the date blank and you get a 12-week horizon by default. You'll be walked through WOOP straight after.</span>
+    </div>
+  </div>
+  <div class="card flat" style="padding:0;background:none;border:0;box-shadow:none;margin-bottom:15px">
+    <div class="pills" style="margin:0" id="goalFilter"></div>
   </div>
   <div id="goalCards"></div>
 </section>
@@ -1459,15 +1513,19 @@ function S_DEFAULT(){
     ],
     goals:[
       {id:"g1", title:"Hold one sleep window for 12 weeks", why:"Everything else is downstream of this. When sleep is stable, the same workload stops feeling impossible.",
+       cat:"Health", pri:"hi", status:"active", start:"", due:"",
        w:"Sleep on a fixed schedule", o:"Waking without an alarm fight, thinking clearly in first period, not needing the whole weekend to recover.",
        ob:"I tell myself I'll do one more thing and it's suddenly 01:00.",
        plan:"If it's 22:30 and I'm still on my laptop, then I close it and put the phone in the hall.",
-       leadN:"Nights in the sleep window", leadT:5, lagN:"Weeks held", lagC:0, lagT:12},
+       leadN:"Nights in the sleep window", leadT:5, lagN:"Weeks held", lagC:0, lagT:12, unit:"weeks",
+       notes:"", ms:[]},
       {id:"g2", title:"Maths AA IA — finished draft, not a perfect one", why:"A finished rough draft can be improved. An unstarted perfect one can't.",
+       cat:"School", pri:"hi", status:"active", start:"", due:"",
        w:"Complete the IA exploration", o:"Handing it in early, having time to act on feedback instead of writing through the night before.",
        ob:"I don't feel ready to start writing, so I keep 'researching'.",
        plan:"If I catch myself reading one more source, then I open the doc and write 150 bad words.",
-       leadN:"Writing sessions", leadT:3, lagN:"Percent drafted", lagC:0, lagT:100}
+       leadN:"Writing sessions", leadT:3, lagN:"Percent drafted", lagC:0, lagT:100, unit:"%",
+       notes:"", ms:[]}
     ],
     subjects:subs,
     ms:SEED_MS.slice(),
@@ -3149,17 +3207,153 @@ function clarify(t){
 }
 
 /* ══════════ GOALS ══════════ */
+var GPRI={hi:"High", md:"Medium", lo:"Low"};
+var GSTATUS={active:"Active", hold:"On hold", done:"Achieved", dropped:"Dropped"};
+var GHORIZON=84;                       /* 12 weeks — the default horizon */
+
+/* Older saved goals predate the date and milestone fields. Normalise once here so
+   nothing downstream has to keep asking whether a field exists. */
+function gNorm(g){
+  if(!GSTATUS[g.status]) g.status="active";
+  if(!GPRI[g.pri]) g.pri="md";
+  if(typeof g.cat!=="string") g.cat="";
+  if(typeof g.notes!=="string") g.notes="";
+  if(typeof g.unit!=="string") g.unit="";
+  if(!g.start) g.start=TODAY;
+  if(!g.due) g.due=iso(addD(pISO(g.start),GHORIZON));
+  if(g.due<g.start) g.due=iso(addD(pISO(g.start),GHORIZON));
+  if(!Array.isArray(g.ms)) g.ms=[];
+  if(typeof g.lagC!=="number") g.lagC=0;
+  if(typeof g.lagT!=="number"||g.lagT<=0) g.lagT=100;
+  if(typeof g.leadT!=="number"||g.leadT<=0) g.leadT=3;
+  if(!g.leadN) g.leadN="Sessions this week";
+  if(!g.lagN) g.lagN="Progress";
+  return g;
+}
+
+/* Everything the card needs to say something honest about where the goal stands:
+   how much of the window is gone, how much of the outcome is done, and whether
+   the second is keeping up with the first. */
+function gStat(g){
+  gNorm(g);
+  var total=Math.max(1, dBetween(g.start,g.due));
+  var gone=clamp(dBetween(g.start,TODAY),0,total);
+  var left=dBetween(TODAY,g.due);
+  var prog=clamp(g.lagC/g.lagT,0,1);
+  var elapsed=clamp(gone/total,0,1);
+  var open=(g.status==="active"||g.status==="hold");
+  var band="on", label="On track";
+  if(g.status==="done"||prog>=1){ band="on"; label="Complete"; }
+  else if(!open){ band="off"; label=GSTATUS[g.status]; }
+  else if(left<0){ band="off"; label="Past deadline"; }
+  else if(prog>=elapsed-0.05){ band="on"; label="On track"; }
+  else if(prog>=elapsed-0.18){ band="slip"; label="Slipping"; }
+  else { band="off"; label="Behind"; }
+  var wksLeft=Math.max(0,left)/7;
+  var need=(prog>=1)?0:(g.lagT-g.lagC)/Math.max(1,wksLeft);
+  return {total:total, gone:gone, left:left, prog:prog, elapsed:elapsed, pct:Math.round(prog*100),
+          open:open, band:band, label:label, need:need, wksLeft:wksLeft};
+}
+function gRound(n){ return n>=10?Math.round(n):Math.round(n*10)/10; }
+
+function gDays(st, live){
+  var n=st.left, bg="var(--surface-2)", fg="var(--ink-2)", lab="days left";
+  if(live){
+    if(n<0){bg="var(--crit)";fg="#fff";lab="overdue";}
+    else if(n===0){bg="var(--crit)";fg="#fff";lab="due today";}
+    else if(n<=7){bg="var(--crit)";fg="#fff";}
+    else if(n<=21){bg="var(--serious)";fg="#0b0b0b";}
+    else if(n<=42){bg="var(--warn)";fg="#0b0b0b";}
+  }
+  var big=(n<0)?Math.abs(n):(n===0?"!":n);
+  return '<div class="dl-days" style="background:'+bg+';color:'+fg+'">'+big+'<span>'+lab+'</span></div>';
+}
+
+function gStatsHtml(){
+  var act=S.goals.filter(function(g){ return gNorm(g).status==="active"; });
+  var onT=0, sum=0, next=null;
+  act.forEach(function(g){
+    var st=gStat(g); sum+=st.prog; if(st.band==="on") onT++;
+    if(!next||g.due<next.due) next=g;
+  });
+  var avg=act.length?Math.round(sum/act.length*100):0;
+  return '<div class="tile"><div class="lb">Active goals</div><div class="vl">'+act.length+'</div>'
+    +   '<div class="dl">'+(act.length>3?"More than three is how none of them happen":"Three is the ceiling")+'</div></div>'
+    + '<div class="tile"><div class="lb">On track</div><div class="vl">'+onT+'</div>'
+    +   '<div class="dl">'+(act.length-onT)+' need attention</div></div>'
+    + '<div class="tile"><div class="lb">Avg. progress</div><div class="vl">'+avg+'%</div>'
+    +   '<div class="dl">Across active goals</div></div>'
+    + '<div class="tile"><div class="lb">Next deadline</div>'
+    +   '<div class="vl">'+(next?(dBetween(TODAY,next.due)<0?"—":dBetween(TODAY,next.due)+"d"):"—")+'</div>'
+    +   '<div class="dl">'+(next?esc(next.title.slice(0,44)):"Nothing scheduled")+'</div></div>';
+}
+
 function renderGoals(){
-  $("#goalCards").innerHTML = S.goals.length ? S.goals.map(function(g,i){
-    var pct=g.lagT>0?Math.min(100,Math.round(g.lagC/g.lagT*100)):0;
-    var ws=iso(wkStart(NOW)), lead=(S.lead[g.id]&&S.lead[g.id][ws])||0;
-    return '<div class="card">'
-      + '<div class="spread" style="align-items:flex-start">'
-      + '<input class="bare" data-gt="'+i+'" value="'+esc(g.title)+'" style="font-size:16px;font-weight:600;flex:1">'
-      + '<div class="row" style="gap:5px;flex:none"><button class="ghost sm" data-gw="'+i+'">WOOP it</button>'
-      + '<button class="del" data-gx="'+i+'" style="opacity:1">&times;</button></div></div>'
-      + '<div style="font-size:12.5px;color:var(--ink-2);margin:8px 0 16px;font-style:italic">'+(g.why?"“"+esc(g.why)+"”":"")+'</div>'
-      + '<div class="g2" style="gap:16px">'
+  if(!GSTATUS[S.goalFilter] && S.goalFilter!=="all") S.goalFilter="active";
+  if(["due","pri","prog"].indexOf(S.goalSort)<0) S.goalSort="due";
+  S.goals.forEach(gNorm);
+
+  $("#goalStats").innerHTML=gStatsHtml();
+  $("#goalSort").textContent="Sort: "+({due:"deadline",pri:"priority",prog:"progress"}[S.goalSort]);
+
+  var counts={all:S.goals.length};
+  ["active","hold","done","dropped"].forEach(function(k){
+    counts[k]=S.goals.filter(function(g){return g.status===k;}).length; });
+  $("#goalFilter").innerHTML=[["active","Active"],["hold","On hold"],["done","Achieved"],["dropped","Dropped"],["all","All"]]
+    .map(function(p){ return '<button data-gf="'+p[0]+'" aria-pressed="'+(S.goalFilter===p[0])+'">'+p[1]+' · '+counts[p[0]]+'</button>'; }).join("");
+  each("[data-gf]",$("#goalFilter"),function(e){on(e,"click",function(){
+    S.goalFilter=e.dataset.gf; touch(); renderGoals(); });});
+
+  var PRI={hi:0,md:1,lo:2}, ORD={active:0,hold:1,done:2,dropped:3};
+  var list=S.goals.map(function(g,i){ return {g:g,i:i}; })
+    .filter(function(r){ return S.goalFilter==="all"||r.g.status===S.goalFilter; });
+  list.sort(function(a,b){
+    if(ORD[a.g.status]!==ORD[b.g.status]) return ORD[a.g.status]-ORD[b.g.status];
+    if(S.goalSort==="pri" && PRI[a.g.pri]!==PRI[b.g.pri]) return PRI[a.g.pri]-PRI[b.g.pri];
+    if(S.goalSort==="prog") return gStat(b.g).prog-gStat(a.g).prog;
+    return a.g.due<b.g.due?-1:(a.g.due>b.g.due?1:0);
+  });
+
+  var ws=iso(wkStart(NOW));
+  $("#goalCards").innerHTML = list.length ? list.map(function(r){
+    var g=r.g, i=r.i, st=gStat(g);
+    var lead=(S.lead[g.id]&&S.lead[g.id][ws])||0;
+    var mDone=g.ms.filter(function(m){return m.done;}).length;
+    var msSorted=g.ms.slice().sort(function(a,b){
+      if(a.done!==b.done) return a.done?1:-1;
+      return (a.date||"9999")<(b.date||"9999")?-1:1; });
+
+    return '<div class="card goal-card'+(st.open?"":" is-off")+'">'
+      + '<div class="goal-top">'
+      +   gDays(st, st.open && g.status==="active")
+      +   '<div style="flex:1;min-width:0">'
+      +     '<input class="bare" data-gt="'+i+'" value="'+esc(g.title)+'" style="font-size:16px;font-weight:600;width:100%">'
+      +     '<div class="gmeta">'
+      +       '<span class="chip st-'+g.status+'">'+GSTATUS[g.status]+'</span>'
+      +       '<span class="chip '+g.pri+'">'+GPRI[g.pri]+' priority</span>'
+      +       (g.cat?'<span class="chip tag">'+esc(g.cat)+'</span>':"")
+      +       '<span class="chip">'+fmtD(g.start)+' → '+fmtD(g.due)+'</span>'
+      +       '<span class="pace '+st.band+'">'+st.label+'</span>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div class="row" style="gap:5px;flex:none">'
+      +     '<button class="ghost sm" data-ge="'+i+'">Details</button>'
+      +     '<button class="ghost sm" data-gw="'+i+'">WOOP it</button>'
+      +     '<button class="del" data-gx="'+i+'" style="opacity:1">&times;</button>'
+      +   '</div>'
+      + '</div>'
+      + (g.why?'<div style="font-size:12.5px;color:var(--ink-2);margin:11px 0 0;font-style:italic">\u201C'+esc(g.why)+'\u201D</div>':"")
+      + '<div class="gtrack">'
+      +   '<div class="lbl"><span>Time used · day '+st.gone+' of '+st.total+'</span><span>'+Math.round(st.elapsed*100)+'%</span></div>'
+      +   '<div class="meter thin"><i class="el" style="width:'+Math.round(st.elapsed*100)+'%"></i></div>'
+      +   '<div class="lbl" style="margin-top:9px"><span>Outcome · '+esc(g.lagN)+'</span>'
+      +     '<span>'+g.lagC+' / '+g.lagT+(g.unit?" "+esc(g.unit):"")+' · '+st.pct+'%</span></div>'
+      +   '<div class="meter"><i style="width:'+st.pct+'%"></i></div>'
+      + '</div>'
+      + (st.open&&st.prog<1&&st.left>=0
+          ? '<div style="font-size:11.5px;color:var(--muted);margin-top:2px">To finish on time: <b style="color:var(--ink-2)">'
+            + gRound(st.need)+' '+(g.unit||"per")+' per week</b> for the remaining '+gRound(st.wksLeft)+' weeks</div>' : "")
+      + '<div class="g2" style="gap:16px;margin-top:16px">'
       + '<div><div class="eyebrow">Lead — what you control</div>'
       + '<div class="spread"><span style="font-size:13.5px">'+esc(g.leadN)+'</span>'
       + '<span class="mono" style="font-size:13px;color:'+(lead>=g.leadT?"var(--ok-text)":"var(--ink-2)")+'">'+lead+' / '+g.leadT+' this week</span></div>'
@@ -3168,20 +3362,168 @@ function renderGoals(){
       + '<div><div class="eyebrow">Lag — the outcome</div>'
       + '<div class="spread"><span style="font-size:13.5px">'+esc(g.lagN)+'</span>'
       + '<span class="mono" style="font-size:13px;color:var(--ink-2)">'+g.lagC+' / '+g.lagT+'</span></div>'
-      + '<div class="meter"><i style="width:'+pct+'%"></i></div>'
-      + '<div class="row" style="gap:5px"><button class="ghost sm" data-am="'+i+'">−</button><button class="ghost sm" data-ap="'+i+'">+1</button></div></div>'
+      + '<div class="meter"><i style="width:'+st.pct+'%"></i></div>'
+      + '<div class="row" style="gap:5px"><button class="ghost sm" data-am="'+i+'">−</button><button class="ghost sm" data-ap="'+i+'">+1</button>'
+      + '<button class="ghost sm" data-as="'+i+'">Set…</button></div></div>'
       + '</div>'
+      + '<div class="gms"><div class="eyebrow">Milestones · '+mDone+' of '+g.ms.length+'</div>'
+      + (msSorted.length ? msSorted.map(function(m){
+          var od=(!m.done&&m.date&&dBetween(TODAY,m.date)<0);
+          return '<div class="line'+(m.done?" done":"")+'">'
+            + '<button class="box" data-gmk="'+i+'" data-gmid="'+m.id+'" aria-pressed="'+!!m.done+'" aria-label="Done">'+CHECK+'</button>'
+            + '<span class="t">'+esc(m.t)+'</span>'
+            + '<span class="d"'+(od?' style="color:var(--crit)"':'')+'>'+(m.date?fmtD(m.date):"no date")+'</span>'
+            + '<button class="del" data-gmx="'+i+'" data-gmid="'+m.id+'">&times;</button></div>';
+        }).join("")
+        : '<div style="color:var(--muted);font-size:12.5px;padding:6px 0">No steps yet. A 12-week goal that isn\'t broken into steps is a wish with a date on it.</div>')
+      + '<div class="row" style="gap:6px;margin-top:9px">'
+      +   '<input class="fld sm" data-gmt="'+i+'" placeholder="Next concrete step" style="flex:1;min-width:150px">'
+      +   '<input class="fld sm" data-gmd="'+i+'" type="date" style="width:auto">'
+      +   '<button class="ghost sm" data-gma="'+i+'">Add step</button>'
+      + '</div></div>'
       + (g.ob?'<div class="callout warm" style="margin:16px 0 0;font-size:13px"><b>The obstacle you named:</b> '+esc(g.ob)+'<br><b style="color:var(--ink)">Your plan:</b> '+esc(g.plan)+'</div>':"")
+      + (g.notes?'<div class="gnote">'+esc(g.notes)+'</div>':"")
       + '</div>';
-  }).join("") : '<div class="card" style="color:var(--muted);font-size:13px">No goals yet. Two is plenty.</div>';
-  each("[data-gt]",$("#goalCards"),function(e){on(e,"input",function(){S.goals[+e.dataset.gt].title=e.value;touch();});});
-  each("[data-gx]",$("#goalCards"),function(e){on(e,"click",function(){S.goals.splice(+e.dataset.gx,1);touch();renderGoals();});});
-  each("[data-gw]",$("#goalCards"),function(e){on(e,"click",function(){woop(S.goals[+e.dataset.gw]);});});
-  each("[data-ap]",$("#goalCards"),function(e){on(e,"click",function(){var g=S.goals[+e.dataset.ap];g.lagC=Math.min(g.lagT,g.lagC+1);touch();renderGoals();});});
-  each("[data-am]",$("#goalCards"),function(e){on(e,"click",function(){var g=S.goals[+e.dataset.am];g.lagC=Math.max(0,g.lagC-1);touch();renderGoals();});});
-  each("[data-lp]",$("#goalCards"),function(e){on(e,"click",function(){bumpLead(+e.dataset.lp,1);});});
-  each("[data-lm]",$("#goalCards"),function(e){on(e,"click",function(){bumpLead(+e.dataset.lm,-1);});});
+  }).join("") : '<div class="card" style="color:var(--muted);font-size:13px">Nothing in this view. Two active goals is plenty.</div>';
+
+  var box=$("#goalCards");
+  each("[data-gt]",box,function(e){on(e,"input",function(){S.goals[+e.dataset.gt].title=e.value;touch();});});
+  each("[data-gx]",box,function(e){on(e,"click",function(){ goalRemove(+e.dataset.gx); });});
+  each("[data-ge]",box,function(e){on(e,"click",function(){ goalEditor(S.goals[+e.dataset.ge]); });});
+  each("[data-gw]",box,function(e){on(e,"click",function(){ woop(S.goals[+e.dataset.gw]); });});
+  each("[data-ap]",box,function(e){on(e,"click",function(){var g=S.goals[+e.dataset.ap];g.lagC=Math.min(g.lagT,g.lagC+1);touch();renderGoals();});});
+  each("[data-am]",box,function(e){on(e,"click",function(){var g=S.goals[+e.dataset.am];g.lagC=Math.max(0,g.lagC-1);touch();renderGoals();});});
+  each("[data-as]",box,function(e){on(e,"click",function(){ goalSetValue(S.goals[+e.dataset.as]); });});
+  each("[data-lp]",box,function(e){on(e,"click",function(){bumpLead(+e.dataset.lp,1);});});
+  each("[data-lm]",box,function(e){on(e,"click",function(){bumpLead(+e.dataset.lm,-1);});});
+  each("[data-gma]",box,function(e){on(e,"click",function(){ gmAdd(+e.dataset.gma); });});
+  each("[data-gmt]",box,function(e){on(e,"keydown",function(ev){ if(ev.key==="Enter"){ ev.preventDefault(); gmAdd(+e.dataset.gmt); } });});
+  each("[data-gmk]",box,function(e){on(e,"click",function(){
+    var g=S.goals[+e.dataset.gmk], m=gmFind(g,e.dataset.gmid);
+    if(m){ m.done=!m.done; touch(); renderGoals(); } });});
+  each("[data-gmx]",box,function(e){on(e,"click",function(){
+    var g=S.goals[+e.dataset.gmx], id=e.dataset.gmid;
+    g.ms=g.ms.filter(function(m){return m.id!==id;}); touch(); renderGoals(); });});
 }
+function gmFind(g,id){ return g.ms.filter(function(m){return m.id===id;})[0]; }
+
+/* Deleting a goal you've put weeks into loses the record of what happened, so
+   retiring it is offered first and deletion has to be chosen deliberately. */
+function goalRemove(i){
+  var g=S.goals[i];
+  if(!g) return;
+  if(g.status!=="active" && !g.lagC && !g.ms.length){
+    S.goals.splice(i,1); touch(); renderGoals(); return;
+  }
+  openModal('<h2>Remove \u201C'+esc(g.title)+'\u201D?</h2>'
+    + '<div class="hint">Dropping it keeps the record — what you tried, how far you got, when you stopped. Deleting throws that away.</div>'
+    + '<div class="stepnav"><button class="primary" id="grDrop">Mark dropped</button>'
+    + '<button class="ghost" id="grDel" style="color:var(--crit)">Delete permanently</button>'
+    + '<button class="ghost" data-close style="margin-left:auto">Cancel</button></div>',
+  function(){
+    on($("#grDrop"),"click",function(){ g.status="dropped"; touch(); closeModal(); renderGoals(); });
+    on($("#grDel"),"click",function(){ S.goals.splice(i,1); touch(); closeModal(); renderGoals(); });
+  });
+}
+
+function gmAdd(i){
+  var g=S.goals[i], box=$("#goalCards");
+  var t=box.querySelector('[data-gmt="'+i+'"]'), d=box.querySelector('[data-gmd="'+i+'"]');
+  var txt=(t.value||"").trim(); if(!txt) return;
+  g.ms.push({id:nid(), t:txt.slice(0,120), date:d.value||"", done:false});
+  touch(); renderGoals();
+}
+
+/* Typing a number beats clicking +1 forty times. */
+function goalSetValue(g){
+  openModal('<h2>Where are you actually at?</h2>'
+    + '<div class="hint">'+esc(g.lagN)+' — out of '+g.lagT+(g.unit?" "+esc(g.unit):"")+'.</div>'
+    + '<input class="fld" id="gsv" type="number" min="0" step="any" value="'+g.lagC+'">'
+    + '<div class="stepnav"><button class="primary" id="gsvSave">Save</button>'
+    + '<button class="ghost" data-close style="margin-left:auto">Cancel</button></div>',
+    function(){
+      var f=$("#gsv"); f.focus(); f.select();
+      function save(){ var v=parseFloat(f.value); if(isNaN(v)) v=0;
+        g.lagC=clamp(v,0,g.lagT); touch(); closeModal(); renderGoals(); }
+      on($("#gsvSave"),"click",save);
+      on(f,"keydown",function(e){ if(e.key==="Enter") save(); });
+    });
+}
+
+/* The full record behind a goal: window, priority, status, both measures, notes. */
+function goalEditor(g){
+  gNorm(g);
+  openModal('<h2>Goal details</h2>'
+    + '<div class="hint">A goal with no date is a preference. Set the window, name both measures, then leave it alone until the weekly review.</div>'
+    + '<div class="eyebrow">The goal</div>'
+    + '<input class="fld" id="gdTitle" value="'+esc(g.title)+'" placeholder="What you\'re committing to">'
+    + '<div class="eyebrow" style="margin-top:14px">Why it matters</div>'
+    + '<textarea class="fld" id="gdWhy" placeholder="The reason you\'ll still care in week nine">'+esc(g.why||"")+'</textarea>'
+    + '<div class="eyebrow" style="margin-top:14px">Window</div>'
+    + '<div class="g2" style="gap:8px">'
+    +   '<label class="gdl">Start<input class="fld sm" id="gdStart" type="date" value="'+g.start+'"></label>'
+    +   '<label class="gdl">Target date<input class="fld sm" id="gdDue" type="date" value="'+g.due+'"></label>'
+    + '</div>'
+    + '<div class="row" style="gap:6px;margin-top:8px">'
+    +   '<span class="hint" style="margin:0;font-size:11.5px">Quick set:</span>'
+    +   '<button class="ghost sm" data-gh="28">4 weeks</button>'
+    +   '<button class="ghost sm" data-gh="84">12 weeks</button>'
+    +   '<button class="ghost sm" data-gh="180">6 months</button>'
+    + '</div>'
+    + '<div class="eyebrow" style="margin-top:14px">Classification</div>'
+    + '<div class="g3" style="gap:8px">'
+    +   '<label class="gdl">Area<input class="fld sm" id="gdCat" value="'+esc(g.cat)+'" placeholder="School, Health…"></label>'
+    +   '<label class="gdl">Priority<select class="fld sm" id="gdPri">'
+    +     ["hi","md","lo"].map(function(k){ return '<option value="'+k+'"'+(g.pri===k?" selected":"")+'>'+GPRI[k]+'</option>'; }).join("")
+    +   '</select></label>'
+    +   '<label class="gdl">Status<select class="fld sm" id="gdStatus">'
+    +     ["active","hold","done","dropped"].map(function(k){ return '<option value="'+k+'"'+(g.status===k?" selected":"")+'>'+GSTATUS[k]+'</option>'; }).join("")
+    +   '</select></label>'
+    + '</div>'
+    + '<div class="eyebrow" style="margin-top:14px">Lead measure — the weekly action you control</div>'
+    + '<div class="g2" style="gap:8px">'
+    +   '<label class="gdl">Name<input class="fld sm" id="gdLeadN" value="'+esc(g.leadN)+'"></label>'
+    +   '<label class="gdl">Per week<input class="fld sm" id="gdLeadT" type="number" min="1" max="21" value="'+g.leadT+'"></label>'
+    + '</div>'
+    + '<div class="eyebrow" style="margin-top:14px">Lag measure — the outcome you don\'t</div>'
+    + '<div class="g3" style="gap:8px">'
+    +   '<label class="gdl">Name<input class="fld sm" id="gdLagN" value="'+esc(g.lagN)+'"></label>'
+    +   '<label class="gdl">Target<input class="fld sm" id="gdLagT" type="number" min="1" step="any" value="'+g.lagT+'"></label>'
+    +   '<label class="gdl">Unit<input class="fld sm" id="gdUnit" value="'+esc(g.unit)+'" placeholder="%, weeks, kg"></label>'
+    + '</div>'
+    + '<div class="eyebrow" style="margin-top:14px">Notes</div>'
+    + '<textarea class="fld" id="gdNotes" placeholder="Constraints, who else is involved, what \u201Cdone\u201D looks like">'+esc(g.notes)+'</textarea>'
+    + '<div class="stepnav"><button class="primary" id="gdSave">Save</button>'
+    + '<button class="ghost" id="gdWoop">Run WOOP</button>'
+    + '<button class="ghost" data-close style="margin-left:auto">Cancel</button></div>',
+  function(root){
+    each("[data-gh]",root,function(b){ on(b,"click",function(){
+      var s=$("#gdStart").value||TODAY;
+      $("#gdStart").value=s;
+      $("#gdDue").value=iso(addD(pISO(s),+b.dataset.gh)); });});
+    function save(){
+      g.title=$("#gdTitle").value.trim()||g.title;
+      g.why=$("#gdWhy").value.trim();
+      g.start=$("#gdStart").value||g.start;
+      g.due=$("#gdDue").value||g.due;
+      if(g.due<g.start) g.due=iso(addD(pISO(g.start),GHORIZON));
+      g.cat=$("#gdCat").value.trim().slice(0,40);
+      g.pri=$("#gdPri").value; g.status=$("#gdStatus").value;
+      g.leadN=$("#gdLeadN").value.trim()||g.leadN;
+      g.leadT=clamp(Math.round(+$("#gdLeadT").value||1),1,21);
+      g.lagN=$("#gdLagN").value.trim()||g.lagN;
+      g.lagT=Math.max(1, +$("#gdLagT").value||g.lagT);
+      g.unit=$("#gdUnit").value.trim().slice(0,12);
+      g.notes=$("#gdNotes").value.trim();
+      g.lagC=clamp(g.lagC,0,g.lagT);
+      if(g.status==="done") g.lagC=g.lagT;
+      gNorm(g); touch();
+    }
+    on($("#gdSave"),"click",function(){ save(); closeModal(); renderGoals(); });
+    on($("#gdWoop"),"click",function(){ save(); closeModal(); woop(g); });
+  });
+}
+
 function bumpLead(i,d){
   var g=S.goals[i], ws=iso(wkStart(NOW));
   if(!S.lead[g.id]) S.lead[g.id]={};
@@ -3803,10 +4145,25 @@ on($("#tStart"),"click",function(){
 on($("#tStop"),"click",function(){ fStop(); });
 on($("#addTask"),"click",function(){ addTask($("#newTask").value); $("#newTask").value=""; renderTasks(); });
 on($("#newTask"),"keydown",function(e){ if(e.key==="Enter"){ addTask($("#newTask").value); $("#newTask").value=""; renderTasks(); } });
-on($("#addGoal"),"click",function(){
+function addGoalFromForm(){
   var v=$("#newGoal").value.trim(); if(!v) return;
-  var g={id:nid(),title:v,why:"",w:"",o:"",ob:"",plan:"",leadN:"Sessions this week",leadT:3,lagN:"Progress",lagC:0,lagT:100};
-  S.goals.push(g); $("#newGoal").value=""; touch(); renderGoals(); woop(g);
+  var due=$("#newGoalDue").value || iso(addD(NOW,GHORIZON));
+  if(due<TODAY) due=iso(addD(NOW,GHORIZON));
+  var g={id:nid(), title:v.slice(0,140), why:"",
+         cat:$("#newGoalCat").value.trim().slice(0,40), pri:$("#newGoalPri").value,
+         status:"active", start:TODAY, due:due,
+         w:"", o:"", ob:"", plan:"", notes:"", ms:[],
+         leadN:"Sessions this week", leadT:3, lagN:"Progress", lagC:0, lagT:100, unit:"%"};
+  gNorm(g);
+  S.goals.push(g);
+  $("#newGoal").value=""; $("#newGoalCat").value=""; $("#newGoalDue").value="";
+  touch(); renderGoals(); woop(g);
+}
+on($("#addGoal"),"click",addGoalFromForm);
+on($("#newGoal"),"keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); addGoalFromForm(); } });
+on($("#goalSort"),"click",function(){
+  var order=["due","pri","prog"], n=order.indexOf(S.goalSort||"due");
+  S.goalSort=order[(n+1)%order.length]; touch(); renderGoals();
 });
 on($("#addHabit"),"click",function(){
   var n=$("#nhName").value.trim(); if(!n) return;
@@ -3873,6 +4230,8 @@ window.CompassBridge={
   closeTop:function(){ closeModal(); $("#focusOv").classList.remove("on"); },
   wizards:{ plan:planWizard, shutdown:shutdownWizard, review:reviewWizard, stuck:stuckFlow },
   readiness:function(){ return readiness(); },
+  goalStat:function(g){ return gStat(g); },
+  goalLabels:function(){ return {pri:GPRI, status:GSTATUS}; },
   execScore:function(){ return execScore(); },
   dueCount:function(){ return S.rev.filter(revDue).length; },
   inboxCount:function(){ return S.tasks.filter(function(t){return t.bucket==="inbox"&&!t.done;}).length; },
@@ -4966,9 +5325,18 @@ function snapshot(mode){
     L.push("Revision: "+due.length+" topics due, "+fresh.length+" never started");
   }
 
-  L.push("Goals: "+(S.goals.length? S.goals.map(function(g){
+  var GL=(B.goalLabels?B.goalLabels():{pri:{},status:{}});
+  var liveGoals=S.goals.filter(function(g){ return !g.status||g.status==="active"||g.status==="hold"; });
+  L.push("Goals: "+(liveGoals.length? liveGoals.map(function(g){
     var lead=(S.lead[g.id]&&S.lead[g.id][iso(ws)])||0;
-    return g.title+" (lead "+lead+"/"+g.leadT+" this week, lag "+g.lagC+"/"+g.lagT+" "+g.unit+")";
+    var st=B.goalStat?B.goalStat(g):null;
+    var open=(g.ms||[]).filter(function(m){return !m.done;})[0];
+    return g.title
+      + " ["+(GL.status[g.status]||"Active")+", "+(GL.pri[g.pri]||"Medium")+" priority"+(g.cat?", "+g.cat:"")+"]"
+      + (g.due?" due "+g.due+(st?" ("+(st.left<0?Math.abs(st.left)+" days overdue":st.left+" days left")+", "+st.label+")":""):"")
+      + " (lead "+lead+"/"+g.leadT+" this week, lag "+g.lagC+"/"+g.lagT+" "+(g.unit||"")
+      + (st?", "+st.pct+"%"+(st.prog<1&&st.left>=0?", needs "+Math.round(st.need*10)/10+"/week":""):"")+")"
+      + (open?" — next step: "+open.t+(open.date?" by "+open.date:""):"");
   }).join(" | ") : "none set"));
 
   var inbox=S.tasks.filter(function(t){return t.bucket==="inbox"&&!t.done;}).length;
