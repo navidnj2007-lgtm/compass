@@ -141,6 +141,73 @@ input.bare::placeholder{color:var(--muted)}
 .line:hover .del,.dom:hover .del{opacity:1}
 .del:hover{color:var(--crit)}
 
+/* ═══ TO-DO ═════════════════════════════════════════════════════════════ */
+.tdprog{position:relative;height:28px;background:var(--surface-2);border-radius:8px;overflow:hidden}
+.tdprog i{display:block;height:100%;width:0;background:var(--d1);border-radius:0 6px 6px 0;
+  transition:width .4s cubic-bezier(.4,0,.2,1)}
+.tdprog.full i{background:var(--good)}
+.tdprog b{position:absolute;inset:0;display:flex;align-items:center;padding:0 10px;
+  font-size:11.5px;font-weight:600;color:var(--ink);letter-spacing:.01em}
+.tdfigs{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--grid);
+  border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:9px 0 4px}
+.tdfigs div{background:var(--surface);padding:9px 8px;text-align:center;min-width:0}
+.tdfigs b{display:block;font-size:16px;font-weight:600;line-height:1.15;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums}
+.tdfigs span{display:block;font-size:9.5px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.05em;font-weight:700;margin-top:3px}
+.tdfigs div.warn b{color:var(--crit)}
+@media(max-width:560px){.tdfigs{grid-template-columns:repeat(2,1fr)}}
+
+.tdadd{display:flex;gap:8px;align-items:center;margin-top:14px}
+.tdadd .fld{flex:1;min-width:0}
+.tdadd select.fld{width:auto;flex:none}
+.tdadd button{flex:none}
+.tdsyn{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+.tdsyn code{font-family:inherit;font-weight:600;color:var(--ink-2);background:var(--surface-2);
+  border-radius:4px;padding:0 4px}
+
+.td{position:relative;padding-left:11px}
+.td:before{content:"";position:absolute;left:0;top:11px;bottom:11px;width:3px;border-radius:2px;
+  background:var(--axis);opacity:.55}
+.td[data-pri="hi"]:before{background:var(--crit);opacity:1}
+.td[data-pri="md"]:before{background:var(--d1);opacity:.85}
+.td[data-pri="lo"]:before{background:var(--axis);opacity:.5}
+.td.done:before{opacity:.25}
+.tdmain{display:flex;align-items:center;gap:9px;min-width:0}
+.tdmain input.bare{flex:1;min-width:0}
+.tdmain select.fld{flex:none;width:auto;min-width:70px}
+/* Every control after the task name travels together, so a narrow screen can
+   drop the whole group onto its own line instead of squeezing the name. */
+.tdctl{display:flex;align-items:center;gap:9px;flex:none;min-width:0;flex-wrap:wrap}
+.chip.pri{border:0;cursor:pointer;min-width:44px;justify-content:center}
+.chip.pri:hover{filter:brightness(1.08)}
+.tdord{display:inline-flex;gap:3px;flex:none}
+.tdord .mv{padding:2px 6px;font-size:11px;line-height:1.2}
+.tdord .mv:disabled{opacity:.25}
+/* Reordering and demoting are the point of this card, not incidental extras, so
+   they do not hide until hover. Deleting still does, everywhere with a pointer. */
+.td .mv{opacity:1}
+@media(hover:none){.td .del{opacity:1}}
+.tdplan{margin-left:30px;width:calc(100% - 30px)}
+.tdplan.empty{border:1px dashed var(--axis);background:transparent}
+.tdplantxt{margin-left:30px;font-size:12px;color:var(--muted);line-height:1.5;
+  padding-left:9px;border-left:2px solid var(--grid)}
+.tdempty{color:var(--muted);font-size:13px;line-height:1.6;padding:16px 0 6px}
+.tdempty b{color:var(--ink-2);font-weight:600}
+.tdsec{display:flex;align-items:center;gap:9px;margin:18px 0 2px}
+.tdsec span{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);flex:none}
+.tdsec i{flex:1;height:1px;background:var(--grid)}
+.tddue{font-variant-numeric:tabular-nums}
+.tdwarn{margin-top:12px}
+@media(max-width:620px){
+  .tdmain{flex-wrap:wrap;row-gap:8px}
+  .tdmain input.bare{flex:1 1 auto}
+  .tdctl{flex:1 1 100%;margin-left:30px;row-gap:7px}
+  .tdadd{flex-wrap:wrap}
+  .tdadd .fld{flex:1 1 100%}
+}
+
 /* ═══ TILES & HERO ══════════════════════════════════════════════════════ */
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;
   background:var(--grid);border-radius:12px;overflow:hidden;border:1px solid var(--border)}
@@ -348,9 +415,6 @@ input.bare::placeholder{color:var(--muted)}
 .quad .w[aria-pressed="true"]{background:var(--ink);color:var(--plane);border-color:var(--ink)}
 
 /* ═══ TIMER ═════════════════════════════════════════════════════════════ */
-.timer{text-align:center;padding:8px 0 4px}
-.timer .tt{font-size:52px;font-weight:600;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
-.timer .ts{font-size:12.5px;color:var(--muted);margin-top:7px}
 .gate{display:flex;flex-direction:column;gap:8px;margin:14px 0}
 .gatechk{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:10px;
   background:var(--surface-2);border:1px solid transparent;transition:all .13s}
@@ -761,7 +825,8 @@ body.tg .herotxt p{font-size:12.5px}
 body.tg .bd{grid-template-columns:74px 1fr auto;font-size:12px}
 body.tg #saveBtn{display:none}
 body.tg .tiles{grid-template-columns:1fr 1fr}
-body.tg .timer .tt{font-size:44px}
+body.tg .gauge.fmid{width:116px;height:116px}
+body.tg .gauge.fmid .num b{font-size:26px}
 body.tg .dl-row{gap:10px}
 body.tg .dl-days{width:52px}
 body.tg .focus .fq{font-size:23px}
@@ -909,7 +974,14 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 .gpe i{font-style:normal;color:var(--muted);font-size:11px;flex:none}
 /* ── Focus sessions ──────────────────────────────── */
 .fstep{display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 0 10px}
-.fstep button{width:44px;height:44px;border-radius:50%;font-size:22px;line-height:1;padding:0;flex:none}
+/* Drawn glyphs, not typed ones. A "−" and a "+" each sit at a different height
+   inside their em box, so no amount of line-height or padding centres both in a
+   round button — two strokes centred on a square viewBox always are. */
+.fstep button{width:44px;height:44px;border-radius:50%;padding:0;flex:none;line-height:1;
+  display:flex;align-items:center;justify-content:center}
+.fstep button svg{display:block;width:17px;height:17px;flex:none;
+  fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.fstep button:disabled{opacity:.35;cursor:default}
 .fnum{min-width:118px;text-align:center;border:1px solid var(--border);border-radius:14px;padding:10px 6px;background:var(--s1)}
 .fnum b{display:block;font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1}
 .fnum span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-top:3px}
@@ -919,6 +991,21 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 .fLiveCard{text-align:center}
 .gauge.fbig{width:172px;height:172px;margin:6px auto 4px}
 .gauge.fbig .num b{font-size:38px;font-variant-numeric:tabular-nums}
+.gauge.fmid{width:132px;height:132px;margin:2px auto 0}
+.gauge.fmid .num b{font-size:30px;font-variant-numeric:tabular-nums}
+.fbtns{margin-top:16px;gap:8px;justify-content:center}
+/* The Today tab shows the same card inside an existing card, so it drops the
+   frame and tightens the spacing. Everything else is identical. */
+.fSessionBox{text-align:center;padding:4px 0 0}
+.fSessionBox .fstep{margin:10px 0 8px}
+.fSessionBox .fnum{min-width:104px;padding:8px 6px}
+.fSessionBox .fnum b{font-size:29px}
+.fSessionBox .fstep button{width:40px;height:40px}
+.fSessionBox .fstep button svg{width:15px;height:15px}
+.fSessionBox .fbtns{margin-top:13px}
+.fSessionBox .pills{justify-content:center;margin-bottom:9px}
+.fSessionBox .lbl{text-align:left}
+.fLiveCard{text-align:center}
 .fmeta .fwhat{font-size:15.5px;font-weight:600;line-height:1.35;margin-top:6px}
 .fmeta .fsub{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:5px}
 .frow{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -1050,13 +1137,36 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
     <div class="src" style="margin-top:14px">A capacity estimate, not a grade. Its only job is to tell you whether today is a day to push or a day to protect. Modelled on the readiness scores used by Oura and WHOOP.</div>
   </div>
 
-  <div class="card">
+  <!-- ═══════════ TO-DO ═══════════ -->
+  <div class="card" id="todoCard">
     <div class="spread" style="margin-bottom:3px">
-      <h2>The Big 3</h2>
-      <button class="ghost sm" id="focusBtn">Focus mode</button>
+      <h2>To-do</h2>
+      <div class="row" style="gap:5px;flex:none">
+        <button class="ghost sm" id="todoSort">Sort: my order</button>
+        <button class="ghost sm" id="focusBtn">Focus mode</button>
+      </div>
     </div>
-    <div class="hint">Three things. Each needs an <b>if-then plan</b> — not because it's tidy, but because planning <em>when and where</em> is the specific thing that stops an unfinished task from occupying your head all day. Writing it down alone doesn't do it.</div>
-    <div id="big3"></div>
+    <div class="hint">Today's committed list at the top, everything else waiting behind it. Each item carries an honest time estimate and an <b>if-then plan</b> — not because it's tidy, but because deciding <em>when and where</em> is the specific thing that stops an unfinished task occupying your head all day. Writing it down alone doesn't do it.</div>
+
+    <div id="todoStat"></div>
+
+    <div class="tdadd">
+      <input class="fld" id="todoNew" placeholder="Add something and press Enter">
+      <select class="fld sm" id="todoNewPri" title="Priority">
+        <option value="hi">High</option><option value="md" selected>Medium</option><option value="lo">Low</option>
+      </select>
+      <select class="fld sm" id="todoNewMins" title="Time estimate">
+        <option value="15">15m</option><option value="30">30m</option><option value="45">45m</option>
+        <option value="60" selected>1h</option><option value="90">1.5h</option><option value="120">2h</option><option value="180">3h</option>
+      </select>
+      <button class="ghost" id="todoAdd">Add</button>
+    </div>
+    <div class="tdsyn">Shortcuts while typing: <code>!</code> at the end for high priority, <code>~</code> for low, <code>45m</code> or <code>2h</code> to set the estimate.</div>
+
+    <div class="pills" id="todoFilters" style="margin-top:14px"></div>
+    <div id="todoList"></div>
+    <div id="todoStale"></div>
+
     <div class="divider"></div>
     <div class="eyebrow">Today's load</div>
     <div class="cap" id="capBar"><i></i><b></b></div>
@@ -1087,19 +1197,14 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
     </div>
 
     <div class="card">
-      <div class="eyebrow">Deep block · phone in another room</div>
-      <div class="timer">
-        <div class="tt" id="tDisp">50:00</div>
-        <div class="ts" id="tSub">Not running</div>
+      <div class="spread" style="align-items:baseline">
+        <div class="eyebrow" style="margin:0">Deep block · phone in another room</div>
+        <span class="src" id="tToday"></span>
       </div>
+      <div id="todayTimer"></div>
       <div class="gate" id="gate"></div>
       <label class="lbl" style="margin-top:4px">The one question this block answers</label>
       <input class="fld sm" id="blockQ" placeholder="Not &quot;revise Chemistry&quot; — &quot;do the 8 equilibrium questions&quot;">
-      <div class="row" style="margin-top:12px">
-        <button class="primary sm" id="tStart">Start 50 min</button>
-        <button class="ghost sm" id="tStop">Reset</button>
-        <span style="font-size:12px;color:var(--muted);margin-left:auto" id="tToday"></span>
-      </div>
       <div class="src" style="margin-top:12px">A silenced phone on the desk still costs you working memory — the effect shows up whether it's on, off, or face down. Only distance removes it.</div>
     </div>
   </div>
@@ -1320,32 +1425,8 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
   </div>
 </section>
 
-<!-- ═══════════════ TASKS ═══════════════ -->
-<section id="s-tasks">
-  <div class="card">
-    <h2>Inbox</h2>
-    <div class="hint">Capture first, sort later. Everything goes here, then gets clarified — that second step is the one people skip, and it's the one that does the work.</div>
-    <div class="row" style="margin-bottom:14px">
-      <input class="fld" id="newTask" placeholder="Type it and press Enter" style="flex:1">
-      <button class="ghost" id="addTask">Capture</button>
-    </div>
-    <div id="inbox"></div>
-  </div>
-
-  <div class="card">
-    <div class="spread" style="margin-bottom:12px">
-      <h2>Sorted</h2>
-      <div class="pills" style="margin:0" id="buckets"></div>
-    </div>
-    <div id="taskList"></div>
-  </div>
-
-  <div class="card" id="staleCard" style="display:none">
-    <h2>Been sitting a while</h2>
-    <div class="hint">These have moved forward more than five times. Rewriting a task by hand is what filters out the ones that were never going to happen — so: recommit, reschedule, or let it go.</div>
-    <div id="staleList"></div>
-  </div>
-</section>
+<!-- The Tasks screen is gone: its inbox, buckets and stale list all live in the
+     To-do card on Today now, so there is one list instead of two. -->
 
 <!-- ═══════════════ GOALS ═══════════════ -->
 <section id="s-goals">
@@ -1486,6 +1567,7 @@ function S_DEFAULT(){
   seed(MATHS,"su1"); seed(PHYS,"su2"); seed(CHEM,"su3"); seed(DANSK,"su4");
   return {
     v:2, theme:"light", minMode:false, tab:"today", bucket:"today", revFilter:"all", msFilter:"all",
+    todoView:"today", todoSort:"manual",
     cap:240,
     domains:[
       {k:"body",  n:"Body",   c:"--d1", s:5, focus:"", next:"", hint:"Sleep, food, movement, energy"},
@@ -1553,6 +1635,11 @@ function on(el,ev,fn){ if(el) el.addEventListener(ev,fn); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
 function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
 var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+/* The stepper's − and + are drawn, not typed. A text glyph sits wherever its
+   font decides to put it inside the em box, which is why they rode low in the
+   round buttons; two lines centred on a square viewBox cannot be off-centre. */
+var IMINUS='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>';
+var IPLUS ='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
 
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function pISO(s){ var p=String(s).split("-"); return new Date(+p[0],(+p[1])-1,+p[2]); }
@@ -1571,32 +1658,110 @@ function day(k){
   if(!S.days[k]) S.days[k]={big3:[],anchors:[],habits:{},energy:3,sleep:0,mood:null,win:"",dump:"",focus:0,q:"",gate:{},planned:false,shut:[]};
   var o=S.days[k];
   if(!o.big3) o.big3=[];
-  while(o.big3.length<3) o.big3.push({t:"",d:false,plan:"",mins:60});
+  /* `big3` is the day's to-do list. The name is historical — it is no longer
+     capped at three — but the first three entries are still kept in place so the
+     wizards and the assistant's slot actions keep pointing at the same things.
+     Blank entries are spare slots and are never drawn. */
+  while(o.big3.length<3) o.big3.push({t:"",d:false,plan:"",mins:60,pri:"md"});
+  for(var bi=0;bi<o.big3.length;bi++){
+    var it=o.big3[bi];
+    if(!it.pri) it.pri="md";
+    if(typeof it.plan!=="string") it.plan="";
+    if(!it.mins) it.mins=60;
+  }
   if(!o.anchors) o.anchors=[]; if(!o.habits) o.habits={}; if(!o.gate) o.gate={}; if(!o.shut) o.shut=[];
   return o;
 }
 function T(){ return day(TODAY); }
 
-/* ══════════ READINESS ══════════ */
+/* ══════════ READINESS ══════════
+   Three inputs, 100 points: sleep 40, yesterday's follow-through 30, energy now 30.
+   Two rules matter more than the weights.
+   · The recommended range scores full marks. It is not a race to eleven hours,
+     so eight hours is 40/40, not 89% of it.
+   · A day with nothing recorded is missing data, not a failed day. Scoring an
+     empty yesterday as a failure is what made a well-slept, full-energy morning
+     read 75/100 — the opposite of informative. It now scores the same neutral as
+     having no record at all, and the breakdown says "no data" so it is visible. */
+var SLEEP_LOW=8, SLEEP_HIGH=10;          /* the 8–10 h range for his age */
+var NEUTRAL_SLEEP=24, NEUTRAL_FOLLOW=24; /* 60% and 80% — an honest "don't know" */
+
+function sleepScore(h){
+  h=+h||0;
+  if(h<=0) return {pts:NEUTRAL_SLEEP, has:false, note:"not logged"};
+  var f;
+  if(h<SLEEP_LOW)        f=clamp((h-3)/(SLEEP_LOW-3),0,1);      /* 3 h scores nothing, 8 h full */
+  else if(h<=SLEEP_HIGH) f=1;                                   /* anywhere in range is full marks */
+  else                   f=clamp(1-(h-SLEEP_HIGH)*0.10,0,1);    /* past 10 h, a gentle taper */
+  return {pts:f*40, has:true,
+    note:h+"h · "+(h<7?"short":h<SLEEP_LOW?"just under":h<=SLEEP_HIGH?"in range":"long")};
+}
+
+/* What an average day is meant to carry, from the weekly targets — the habits are
+   counted x-times-per-week everywhere else, so a daily denominator of "all of
+   them" would contradict the rest of the app. */
+function habitsPerDay(){
+  if(!S.habits.length) return 0;
+  var t=0; S.habits.forEach(function(h){ t+=(h.target||3); });
+  return clamp(Math.round(t/7),1,S.habits.length);
+}
+
+function followScore(y){
+  if(!y) return {pts:NEUTRAL_FOLLOW, has:false, note:"no data"};
+  var yb=y.big3||[], hb=y.habits||{};
+  var named=yb.filter(function(b){ return b.t&&b.t.trim(); }).length;
+  var doneN=yb.filter(function(b){ return b.d&&b.t&&b.t.trim(); }).length;
+  var hDone=0, hSkip=0;
+  S.habits.forEach(function(h){
+    if(hb[h.id]==="done") hDone++; else if(hb[h.id]==="skip") hSkip++; });
+  var anch=(y.anchors||[]).length, foc=y.focus||0;
+
+  /* Nothing was recorded at all: he wasn't here. Absence of evidence, not
+     evidence of a bad day. */
+  if(!named && !hDone && !hSkip && !anch && !foc)
+    return {pts:NEUTRAL_FOLLOW, has:false, note:"no data"};
+
+  var parts=[], wt=[];
+  if(named){ parts.push(doneN/named); wt.push(0.55); }
+  var per=habitsPerDay();
+  if(per){ parts.push(hDone/Math.max(1,per-hSkip)); wt.push(0.45); }
+  if(!parts.length){
+    /* He was here, but nothing measurable was planned. Anchors and deep work
+       stand in rather than scoring the day zero for lack of a list. */
+    var a=S.anchors.length ? anch/S.anchors.length : 0;
+    parts.push(Math.max(a, Math.min(1,foc/50))); wt.push(1);
+  }
+  var s=0, w=0;
+  for(var i=0;i<parts.length;i++){ s+=clamp(parts[i],0,1)*wt[i]; w+=wt[i]; }
+  return {pts:(w?s/w:0.8)*30, has:true,
+    note: named ? doneN+" of "+named+" done"
+        : hDone ? hDone+" habit"+(hDone===1?"":"s")+" ticked"
+        : foc ? fHrs(foc)+" focused" : anch+" anchor"+(anch===1?"":"s")};
+}
+
 function readiness(){
   var t=T(), y=S.days[iso(addD(NOW,-1))];
-  var sl = t.sleep>0 ? clamp((t.sleep-4)/4.5,0,1)*40 : 22;
-  var fw = 24;
-  if(y){
-    var named=y.big3.filter(function(b){return b.t&&b.t.trim();}).length;
-    var bd = named ? y.big3.filter(function(b){return b.d&&b.t.trim();}).length/named : 0.6;
-    var hd = S.habits.length ? Object.keys(y.habits||{}).filter(function(k){return y.habits[k]==="done";}).length/Math.min(S.habits.length,5) : 0.6;
-    fw = clamp((bd*0.55+Math.min(hd,1)*0.45),0,1)*30;
+  var s=sleepScore(t.sleep), f=followScore(y);
+  var e=(clamp(+t.energy||3,1,5)-1)/4*30;
+  var tot=Math.round(s.pts+f.pts+e), note="";
+  /* One night of real sleep loss caps the day however alert he reports feeling.
+     Subjective alertness recovers long before performance does, so three hours
+     that reads "full tank" is exactly the case where the number must not say
+     push. The cap is stated out loud rather than hidden in the arithmetic. */
+  if(s.has && t.sleep<5 && tot>44){
+    tot=44; note="Under five hours. Whatever the rest of this says, today is a day to protect.";
+  } else if(s.has && t.sleep<6.5 && tot>69){
+    tot=69; note="Under six and a half hours, so this isn't a push day even if you feel fine right now.";
   }
-  var en = ((t.energy||3)-1)/4*30;
-  var tot = Math.round(sl+fw+en);
-  return {total:clamp(tot,0,100), sleep:sl, follow:fw, energy:en, hasSleep:t.sleep>0, hasY:!!y};
+  return {total:clamp(tot,0,100),
+    sleep:s.pts, follow:f.pts, energy:e,
+    hasSleep:s.has, hasY:f.has, sleepNote:s.note, followNote:f.note, capNote:note};
 }
 function band(v){
   if(v<45) return {n:"Protect today", c:"--crit",
-    p:"Low capacity — that's information, not a verdict. Switch to Minimum day, do one anchor and one Big 3 item, and let the rest go. Days like this are in the design."};
+    p:"Low capacity — that's information, not a verdict. Switch to Minimum day, do one anchor and one thing off the to-do list, and let the rest go. Days like this are in the design."};
   if(v<70) return {n:"Steady", c:"--d4",
-    p:"Normal working capacity. Do the Big 3 in order, take the deep block, don't add anything extra to the list."};
+    p:"Normal working capacity. Work the to-do list in priority order, take the deep block, don't add anything extra to it."};
   return {n:"Good day to push", c:"--d3",
     p:"You have room today. This is the day to start the thing you've been circling — the hard one, not the easy one."};
 }
@@ -1627,13 +1792,17 @@ function execScore(){
   S.habits.forEach(function(h){ var r=habitWeek(h,ws); var eff=Math.max(1,(h.target||3)-r.skip); got+=Math.min(r.done,eff); want+=eff; });
   var bd=0,bn=0;
   for(var i=0;i<7;i++){ var k=iso(addD(ws,i)); if(k>TODAY) break; var d=S.days[k]; if(!d) continue;
-    d.big3.forEach(function(b){ if(b.t&&b.t.trim()){ bn++; if(b.d) bd++; } }); }
+    (d.big3||[]).forEach(function(b){ if(b.t&&b.t.trim()){ bn++; if(b.d) bd++; } }); }
   got+=bd; want+=bn;
   return want ? Math.round(got/want*100) : 0;
 }
 
 /* ══════════ TABS ══════════ */
-var TABS=[["today","Today"],["ask","Ask"],["week","Week"],["school","School"],["revise","Revise"],["tasks","Tasks"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["why","Why it works"],["focus","Focus"],["gym","Gym"],["cal","Calendar"],["sync","Sync"]];
+/* Tasks, Gym and "Why it works" are no longer reachable: the task list now lives
+   in the To-do card on Today, and the other two are retired. Their sections stay
+   in the document, unlinked, so nothing that still renders them has to change. */
+var TABS=[["today","Today"],["ask","Ask"],["week","Week"],["school","School"],["revise","Revise"],["goals","Goals"],["rituals","Rituals"],["reset","When it breaks"],["focus","Focus"],["cal","Calendar"],["sync","Sync"]];
+var GONE_TABS={tasks:1, gym:1, why:1};
 function buildTabs(){
   $("#tabs").innerHTML = TABS.map(function(t){
     return '<button class="tab" role="tab" data-t="'+t[0]+'" aria-selected="false">'+t[1]+'<span class="badge" data-bg="'+t[0]+'" style="display:none"></span></button>';
@@ -1641,6 +1810,7 @@ function buildTabs(){
   each(".tab",null,function(b){ on(b,"click",function(){ show(b.dataset.t); }); });
 }
 function show(k){
+  if(GONE_TABS[k]) k="today";
   S.tab=k;
   each(".tab",null,function(b){ b.setAttribute("aria-selected",String(b.dataset.t===k)); });
   each("section",null,function(s){ s.classList.toggle("on", s.id==="s-"+k); });
@@ -1649,7 +1819,7 @@ function show(k){
 function badges(){
   var due = S.rev.filter(revDue).length;
   var inbox = S.tasks.filter(function(t){return t.bucket==="inbox"&&!t.done;}).length;
-  setBadge("revise",due); setBadge("tasks",inbox);
+  setBadge("revise",due); setBadge("today",inbox);
 }
 function setBadge(t,n){ var e=document.querySelector('[data-bg="'+t+'"]'); if(!e) return;
   e.style.display = n>0?"inline-block":"none"; e.textContent=n>99?"99+":n; }
@@ -1666,36 +1836,15 @@ function renderToday(){
     + ' stroke-dasharray="'+C+'" stroke-dashoffset="'+(C*(1-r.total/100))+'" style="transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1)"/></svg>'
     + '<div class="num"><b>'+r.total+'</b><span>Readiness</span></div>';
   $("#rBand").textContent=b.n; $("#rBand").style.color="var("+b.c+")";
-  $("#rText").textContent=b.p;
+  $("#rText").textContent = r.capNote ? r.capNote+" "+b.p : b.p;
   $("#rBreak").innerHTML=[
-    bdRow("Sleep", r.sleep, 40, r.hasSleep? t.sleep+"h" : "not logged"),
-    bdRow("Yesterday", r.follow, 30, r.hasY? Math.round(r.follow/30*100)+"%" : "no data"),
-    bdRow("Energy now", r.energy, 30, ENERGY[t.energy||3])
+    bdRow("Sleep", r.sleep, 40, r.sleepNote),
+    bdRow("Yesterday", r.follow, 30, r.followNote),
+    bdRow("Energy now", r.energy, 30, ENERGY[clamp(+t.energy||3,1,5)])
   ].join("");
 
-  var named=t.big3.filter(function(x){return x.t.trim();}).length;
-  var done=t.big3.filter(function(x){return x.d&&x.t.trim();}).length;
-  $("#subline").textContent = DAYN[NOW.getDay()]+", "+NOW.getDate()+" "+MON[NOW.getMonth()]
-    + " · " + (named? done+" of "+named+" done" : "nothing set yet")
-    + (S.minMode? " · minimum day" : "");
-
-  $("#big3").innerHTML = t.big3.map(function(x,i){
-    return '<div class="line col'+(x.d?" done":"")+'">'
-      + '<div style="display:flex;align-items:center;gap:11px">'
-      + '<button class="box" data-b3="'+i+'" aria-pressed="'+!!x.d+'" aria-label="Done">'+CHECK+'</button>'
-      + '<input class="bare" data-b3t="'+i+'" value="'+esc(x.t)+'" placeholder="Thing '+(i+1)+'">'
-      + '<select class="fld sm" data-b3m="'+i+'" style="width:auto;flex:none">'
-      + [15,30,45,60,90,120,180].map(function(m){return '<option value="'+m+'"'+(x.mins===m?" selected":"")+'>'+(m<60?m+"m":(m/60)+"h")+'</option>';}).join("")
-      + '</select></div>'
-      + (x.t.trim()? '<input class="fld sm" data-b3p="'+i+'" style="margin-left:32px;width:calc(100% - 32px)" value="'+esc(x.plan)+'" placeholder="If it’s ___ and I’m ___, then I’ll start this">' : "")
-      + '</div>';
-  }).join("");
-  each("[data-b3]",$("#big3"),function(e){on(e,"click",function(){var i=+e.dataset.b3;T().big3[i].d=!T().big3[i].d;touch();renderToday();});});
-  each("[data-b3t]",$("#big3"),function(e){on(e,"input",function(){T().big3[+e.dataset.b3t].t=e.value;touch();cap();});
-    on(e,"blur",function(){renderToday();});});
-  each("[data-b3p]",$("#big3"),function(e){on(e,"input",function(){T().big3[+e.dataset.b3p].plan=e.value;touch();});});
-  each("[data-b3m]",$("#big3"),function(e){on(e,"change",function(){T().big3[+e.dataset.b3m].mins=+e.value;touch();cap();});});
-  cap();
+  subline();
+  renderTodo();
 
   var acts = S.minMode ? S.anchors.filter(function(a){return a.core;}) : S.anchors;
   $("#anchors").innerHTML = acts.map(function(a){
@@ -1724,17 +1873,19 @@ function renderToday(){
     touch(); renderToday();});});
 
   $("#sleepR").value=t.sleep||7.5;
-  $("#sleepTxt").textContent=(t.sleep? t.sleep+" hours" : "not logged")+(t.sleep&&t.sleep<7?" · below the 8–10 range for your age":"");
+  $("#sleepTxt").textContent = !t.sleep ? "not logged"
+    : t.sleep+" hours"+(t.sleep<SLEEP_LOW ? " · below the "+SLEEP_LOW+"–"+SLEEP_HIGH+"h range for your age"
+      : t.sleep>SLEEP_HIGH ? " · above it" : " · in range");
   $("#energyR").value=t.energy||3; $("#energyTxt").textContent=ENERGY[t.energy||3];
   if($("#win")!==document.activeElement) $("#win").value=t.win||"";
   if($("#dump")!==document.activeElement) $("#dump").value=t.dump||"";
   if($("#blockQ")!==document.activeElement) $("#blockQ").value=t.q||"";
   $("#tToday").textContent=fHrs(t.focus||0)+" focused today";
+  fPaintToday();
   renderGate();
   badges();
 }
-function bdRow(k,v,max,note){
-  return '<div class="bd"><span class="k">'+k+'</span>'
+function bdRow(k,v,max,note){  return '<div class="bd"><span class="k">'+k+'</span>'
     + '<span class="minibar"><i style="width:'+(v/max*100)+'%"></i></span>'
     + '<span class="v">'+note+'</span></div>';
 }
@@ -1746,10 +1897,21 @@ function cap(){
   el.querySelector("b").textContent=Math.round(used/60*10)/10+"h of "+Math.round(S.cap/60*10)/10+"h";
   var n=$("#capNote");
   n.className="capnote"+(over?" red":near?" amber":"");
-  n.textContent = used===0 ? "Nothing scheduled yet. Add your Big 3 above and give each one an honest time estimate."
+  n.textContent = used===0 ? "Nothing scheduled yet. Put today's tasks on the list above and give each one an honest time estimate."
     : over ? "That’s more than fits. Move one to tomorrow now, while it’s a calm decision — not at 22:00 when it’s a failure."
     : near ? "Right at the edge. Anything unexpected today will push something out."
     : "Fits, with room for the day to go sideways. Which it will.";
+}
+/* The header line under the wordmark. Lives on its own so the to-do card can
+   refresh it after a tick without rebuilding the whole tab. */
+function subline(){
+  var t=T();
+  var named=t.big3.filter(function(x){return String(x.t||"").trim();}).length;
+  var done=t.big3.filter(function(x){return x.d&&String(x.t||"").trim();}).length;
+  var e=$("#subline"); if(!e) return;
+  e.textContent = DAYN[NOW.getDay()]+", "+NOW.getDate()+" "+MON[NOW.getMonth()]
+    + " · " + (named? done+" of "+named+" done" : "nothing set yet")
+    + (S.minMode? " · minimum day" : "");
 }
 function renderGate(){
   var t=T(), G=[
@@ -1855,7 +2017,26 @@ function fStart(totalMin, label, sub, skip){
   F.plan=totalMin; F.skip=!!skip;
   S.timer={ v:2, on:true, startAt:Date.now(), paused:0, pausedAt:null,
     seg:fBuild(totalMin, skip), logged:0, label:label||"", sub:sub||null, planMin:totalMin };
-  touch(); fLoop(); fPaint(true);
+  touch(); fLoop(); fPaint(true); renderToday();
+}
+/* The phone gate used to sit on the Today button only, so starting from the
+   Focus tab skipped the one check that matters. Both go through here now, and
+   both remember the answer for the rest of the day. */
+function fStartGated(totalMin, label, sub, skip){
+  if(T().gate.phone){ fStart(totalMin, label, sub, skip); return; }
+  openModal('<h2>Phone in another room?</h2>'
+    +'<div class="md">Not face down. Not in your pocket. A phone in sight costs measurable working memory even switched off (Ward et al., 2017).</div>'
+    +'<div class="row"><button class="primary" id="gYes">It\'s in another room now</button>'
+    +'<button class="ghost" id="gNo">Start anyway</button></div>',
+    function(root){
+      on(root.querySelector("#gYes"),"click",function(){
+        T().gate.phone=true; touch(); closeModal(); renderGate();
+        fStart(totalMin, label, sub, skip);
+      });
+      on(root.querySelector("#gNo"),"click",function(){
+        closeModal(); fStart(totalMin, label, sub, skip);
+      });
+    });
 }
 function fPause(){
   var t=S.timer; if(!fLive()||!t.on) return;
@@ -2196,93 +2377,90 @@ function xLabels(days){
     + '</div>';
 }
 
-/* ══════════ FOCUS SCREEN ══════════ */
+/* ══════════ FOCUS SCREEN ══════════
+   fPaint is the single entry point for both places the session is shown. The
+   cheap once-a-second path updates every live card in the document, so the
+   Today clock and the Focus clock can never drift apart. */
 function fPaint(full){
-  var sec=$("#s-focus"); if(!sec) return;
   if(fLive()){
     if(!full && fTickLive()) return;                   // cheap path, once a second
     fPaintLive();
   } else fPaintSetup();
   fPaintStats();
+  fPaintToday();
 }
-/* Update just the clock and the ring. Returns false if the card isn't built
-   yet, or the segment changed and the whole thing needs redrawing. */
+/* Update just the clock and the ring, on every card showing this session.
+   Returns false if no card is built yet, or the segment changed and the whole
+   thing needs redrawing. */
 function fTickLive(){
-  var card=$("#fLiveCard"); if(!card) return false;
+  var cards=document.querySelectorAll(".fLiveCard");
+  if(!cards.length) return false;
   var t=S.timer, w=fWhere(fPos());
   if(w.k==="end") return false;
-  if(card.getAttribute("data-seg")!==String(w.i)) return false;
-  var mm=Math.floor(w.left/60), ss=w.left%60;
-  card.querySelector(".num b").textContent = mm+":"+String(ss).padStart(2,"0");
-  var ring=card.querySelector(".gauge circle:last-of-type"), C=2*Math.PI*54;
-  if(ring) ring.setAttribute("stroke-dashoffset", C*(w.left/w.len));
-  var pb=$("#fPause"); if(pb) pb.textContent = t.on?"Pause":"Resume";
-  return true;
+  var mm=Math.floor(w.left/60), ss=w.left%60, C=2*Math.PI*54, fresh=true;
+  Array.prototype.forEach.call(cards,function(card){
+    if(card.getAttribute("data-seg")!==String(w.i)){ fresh=false; return; }
+    var n=card.querySelector(".num b");
+    if(n) n.textContent = mm+":"+String(ss).padStart(2,"0");
+    var ring=card.querySelector(".gauge circle:last-of-type");
+    if(ring) ring.setAttribute("stroke-dashoffset", C*(w.left/w.len));
+    var pb=card.querySelector("[data-fpause]");
+    if(pb) pb.textContent = t.on?"Pause":"Resume";
+  });
+  return fresh;
 }
 
-function fSetupHTML(){
+/* ══════════ THE SESSION CARD ══════════
+   The Today tab and the Focus tab show the same session. These two builders
+   are the only place that markup exists, so there is nothing to keep in sync:
+   one engine, one config, one label, one set of controls. `compact` trims the
+   explanatory copy and shrinks the ring for the Today card — the session it
+   describes and starts is identical either way.
+   Controls are addressed by data-attribute, not id, because both cards are in
+   the document at once. */
+function fSetupHTML(compact){
   var F=fCfg(), seg=fBuild(F.plan, F.skip), n=fBlocks(seg), br=n-1;
-  return '<div class="card" id="fCard">'
-    + '<h2>Get ready to focus</h2>'
-    + '<div class="hint">Each block is deep work with the phone in another room. Between blocks you get a real '
-    +   'break — away from screens, or it doesn’t count as recovery.</div>'
+  var plan = F.skip
+    ? 'One unbroken block of '+fHrs(F.plan)
+    : n+' block'+(n===1?'':'s')+' of about '+Math.round(seg[0].s/60)+' min'
+      +(br? ' · '+br+' break'+(br===1?'':'s') : ' · no break');
+  return '<div class="'+(compact?'fSessionBox':'card')+'" data-fsetup="1">'
+    + (compact ? '' :
+        '<h2>Get ready to focus</h2>'
+      + '<div class="hint">Each block is deep work with the phone in another room. Between blocks you get a real '
+      +   'break — away from screens, or it doesn’t count as recovery.</div>')
     + '<div class="fstep">'
-    +   '<button class="ghost" id="fMinus" aria-label="Less time">−</button>'
+    +   '<button class="ghost" data-fminus="1" aria-label="Less time"'+(F.plan<=5?' disabled':'')+'>'+IMINUS+'</button>'
     +   '<div class="fnum"><b>'+F.plan+'</b><span>mins</span></div>'
-    +   '<button class="ghost" id="fPlus" aria-label="More time">+</button>'
+    +   '<button class="ghost" data-fplus="1" aria-label="More time"'+(F.plan>=480?' disabled':'')+'>'+IPLUS+'</button>'
     + '</div>'
-    + '<div class="fplan">'+(F.skip
-        ? 'One unbroken block of '+fHrs(F.plan)
-        : n+' block'+(n===1?'':'s')+' of about '+Math.round(seg[0].s/60)+' min'
-          +(br? ' · '+br+' break'+(br===1?'':'s') : ' · no break'))+'</div>'
-    + '<label class="fchk"><input type="checkbox" id="fSkip"'+(F.skip?' checked':'')+'> Skip breaks</label>'
-    + '<label class="lbl" style="margin-top:14px">What exactly are you doing?</label>'
-    + '<input class="fld sm" id="fLabel" placeholder="Not “revise Chemistry” — “the 8 equilibrium questions on p.212”" value="'+esc(T().q||"")+'">'
-    + '<label class="lbl" style="margin-top:11px">Count it towards</label>'
-    + '<div class="pills" id="fSubs">'
+    + '<div class="fplan">'+plan+'</div>'
+    + '<label class="fchk"><input type="checkbox" data-fbreaks="1"'+(F.skip?' checked':'')+'> Skip breaks</label>'
+    + (compact ? '' :
+        '<label class="lbl" style="margin-top:14px">What exactly are you doing?</label>'
+      + '<input class="fld sm" data-flabel="1" placeholder="Not “revise Chemistry” — “the 8 equilibrium questions on p.212”" value="'+esc(T().q||"")+'">')
+    + '<label class="lbl" style="margin-top:'+(compact?'13':'11')+'px">Count it towards</label>'
+    + '<div class="pills" data-fsubs="1">'
     +   '<button data-fsub="" aria-pressed="'+(!fPickSub?'true':'false')+'">Nothing</button>'
     +   S.subjects.map(function(x){
           return '<button data-fsub="'+x.id+'" aria-pressed="'+(fPickSub===x.id?'true':'false')+'">'+esc(x.name)+'</button>'; }).join("")
     + '</div>'
-    + '<button class="primary" id="fGo" style="width:100%;margin-top:16px">Start focus session</button>'
+    + '<button class="primary" data-fgo="1" style="width:100%;margin-top:'+(compact?'6':'16')+'px">'
+    +   (compact ? 'Start '+fHrs(F.plan) : 'Start focus session')+'</button>'
     + '</div>';
 }
 var fPickSub=null;
 
-function fPaintSetup(){
-  var sec=$("#s-focus");
-  var lab=$("#fLabel");
-  if(lab && document.activeElement===lab) return;      // he's mid-sentence; leave it alone
-  sec.innerHTML = fSetupHTML() + '<div id="fStats"></div>';
-  var F=fCfg();
-  function bump(d){
-    F.plan=Math.max(5, Math.min(480, F.plan+d));
-    touch(); fPaintSetup(); fPaintStats();
-  }
-  on($("#fMinus"),"click",function(){ bump(F.plan<=60?-5:-15); });
-  on($("#fPlus"),"click",function(){ bump(F.plan<60?5:15); });
-  on($("#fSkip"),"change",function(e){ F.skip=e.target.checked; touch(); fPaintSetup(); fPaintStats(); });
-  on($("#fLabel"),"input",function(e){ T().q=e.target.value; touch(); });
-  each("[data-fsub]",$("#fSubs"),function(b){
-    on(b,"click",function(){ fPickSub=b.dataset.fsub||null; fPaintSetup(); fPaintStats(); });
-  });
-  on($("#fGo"),"click",function(){
-    var lab=$("#fLabel").value.trim();
-    if(!lab){ $("#fLabel").focus(); $("#fLabel").placeholder="Name the actual task first"; return; }
-    T().q=lab; fStart(F.plan, lab, fPickSub, F.skip);
-  });
-}
-
-function fPaintLive(){
-  var sec=$("#s-focus"), t=S.timer, pos=fPos(), w=fWhere(pos);
-  if(w.k==="end") return fPaintSetup();
+/* The clock. Returns "" if the session has just run out, so callers know to
+   fall back to the setup card instead of drawing a dead ring. */
+function fLiveHTML(compact){
+  var t=S.timer, w=fWhere(fPos());
+  if(w.k==="end") return "";
   var mm=Math.floor(w.left/60), ss=w.left%60;
   var blocks=fBlocks(t.seg), no=fBlockNo(w.i);
-  var onBreak=w.k==="b";
-  var pct=1-(w.left/w.len);
-  var C=2*Math.PI*54;
-  var live = '<div class="card fLiveCard" id="fLiveCard" data-seg="'+w.i+'">'
-    + '<div class="gauge fbig">'
+  var onBreak=w.k==="b", pct=1-(w.left/w.len), C=2*Math.PI*54;
+  return '<div class="'+(compact?'fSessionBox':'card')+' fLiveCard" data-seg="'+w.i+'">'
+    + '<div class="gauge '+(compact?'fmid':'fbig')+'">'
     +   '<svg viewBox="0 0 132 132" style="width:100%;height:100%">'
     +     '<circle cx="66" cy="66" r="54" fill="none" stroke="var(--surface-2)" stroke-width="11"/>'
     +     '<circle cx="66" cy="66" r="54" fill="none" stroke="var('+(onBreak?"--d1":"--d3")+')" stroke-width="11" stroke-linecap="round"'
@@ -2295,15 +2473,69 @@ function fPaintLive(){
           ? "Off screens. Walk, stretch, look out of a window — scrolling isn’t a break."
           : "Block "+no+" of "+blocks+" · when you drift, come back without commentary")+'</div>'
     + '</div>'
-    + '<div class="row" style="margin-top:16px;gap:8px">'
-    +   '<button class="primary sm" id="fPause">'+(t.on?"Pause":"Resume")+'</button>'
-    +   '<button class="ghost sm" id="fNextSeg">'+(onBreak?"Skip break":"End block")+'</button>'
-    +   '<button class="ghost sm" id="fEnd">Stop</button>'
+    + '<div class="row fbtns">'
+    +   '<button class="primary sm" data-fpause="1">'+(t.on?"Pause":"Resume")+'</button>'
+    +   '<button class="ghost sm" data-fnext="1">'+(onBreak?"Skip break":"End block")+'</button>'
+    +   '<button class="ghost sm" data-fend="1">Stop</button>'
     + '</div></div>';
-  sec.innerHTML = live + '<div id="fStats"></div>';
-  on($("#fPause"),"click",function(){ S.timer.on?fPause():fResume(); });
-  on($("#fNextSeg"),"click",function(){ fSkip(); fPaint(true); });
-  on($("#fEnd"),"click",function(){ fStop(); });
+}
+
+function fBindLive(root){
+  on(root.querySelector("[data-fpause]"),"click",function(){ S.timer.on?fPause():fResume(); });
+  on(root.querySelector("[data-fnext]"),"click",function(){ fSkip(); fPaint(true); });
+  on(root.querySelector("[data-fend]"),"click",function(){ fStop(); });
+}
+function fBindSetup(root){
+  var F=fCfg();
+  function bump(d){ F.plan=Math.max(5, Math.min(480, F.plan+d)); touch(); fPaint(true); }
+  on(root.querySelector("[data-fminus]"),"click",function(){ bump(F.plan<=60?-5:-15); });
+  on(root.querySelector("[data-fplus]"),"click",function(){ bump(F.plan<60?5:15); });
+  on(root.querySelector("[data-fbreaks]"),"change",function(e){ F.skip=e.target.checked; touch(); fPaint(true); });
+  var lab=root.querySelector("[data-flabel]");
+  if(lab) on(lab,"input",function(e){
+    T().q=e.target.value; touch();
+    var bq=$("#blockQ"); if(bq && bq!==document.activeElement) bq.value=e.target.value;
+  });
+  each("[data-fsub]",root,function(b){
+    on(b,"click",function(){ fPickSub=b.dataset.fsub||null; fPaint(true); });
+  });
+  on(root.querySelector("[data-fgo]"),"click",function(){
+    /* The Today card has no label field of its own — the "one question" input
+       right beside it is the same field, so either page names the same task. */
+    var box=lab || $("#blockQ");
+    var text=String(box ? box.value : T().q||"").trim();
+    if(!text){
+      if(box){ box.focus(); box.placeholder="Name the actual task first"; }
+      return;
+    }
+    T().q=text; touch(); fStartGated(F.plan, text, fPickSub, F.skip);
+  });
+}
+
+function fPaintSetup(){
+  var sec=$("#s-focus"); if(!sec) return;
+  var lab=sec.querySelector("[data-flabel]");
+  if(lab && document.activeElement===lab) return;      // he's mid-sentence; leave it alone
+  sec.innerHTML = fSetupHTML(false) + '<div id="fStats"></div>';
+  fBindSetup(sec);
+}
+
+function fPaintLive(){
+  var sec=$("#s-focus"); if(!sec) return;
+  var html=fLiveHTML(false);
+  if(!html) return fPaintSetup();
+  sec.innerHTML = html + '<div id="fStats"></div>';
+  fBindLive(sec);
+}
+
+/* The same card, compact, on the Today tab. */
+function fPaintToday(){
+  var box=$("#todayTimer"); if(!box) return;
+  if(fLive()){
+    var html=fLiveHTML(true);
+    if(html){ box.innerHTML=html; fBindLive(box); return; }
+  }
+  box.innerHTML=fSetupHTML(true); fBindSetup(box);
 }
 
 function fPaintStats(){
@@ -2613,7 +2845,7 @@ function gWireProg(){
 
 /* ══════════ CALENDAR ══════════
    Nothing new is stored here. Every day already carries sleep, energy, mood,
-   Big 3, habits, focus minutes and now gym sessions — this is the place that
+   To-do items, habits, focus minutes and gym sessions — this is the place that
    puts one day's worth of that back together so you can look at it later. */
 var CAL_M = null;   // first of the month being viewed
 
@@ -2686,7 +2918,7 @@ function renderCal(){
     + '<div class="callegend">'
     +   '<span class="lk"><i class="sw l1"></i><i class="sw l2"></i><i class="sw l3"></i><i class="sw l4"></i> focus time</span>'
     +   '<span class="lk"><i class="dot g"></i> gym</span>'
-    +   '<span class="lk"><i class="dot b"></i> Big 3 done</span>'
+    +   '<span class="lk"><i class="dot b"></i> To-do done</span>'
     + '</div>'
     + '<div class="calsum">'+fHrs(mTot)+' focused · '+mGym+' gym session'+(mGym===1?'':'s')
     +   ' · '+mDays+' day'+(mDays===1?'':'s')+' with something logged</div>'
@@ -2712,7 +2944,7 @@ function calShow(k){
     return;
   }
   if(info.big.length){
-    parts.push('<div class="eyebrow">Big 3</div><div class="calbig">'
+    parts.push('<div class="eyebrow">To-do</div><div class="calbig">'
       + info.big.map(function(x){
           return '<div class="cb'+(x.d?" done":"")+'"><span class="tick">'+(x.d?"✓":"·")+'</span><span>'+esc(x.t)
             + (x.mins?' <i>'+x.mins+' min</i>':'')+'</span></div>'; }).join("")
@@ -2761,12 +2993,12 @@ function renderWeek(){
 
   var ws=wkStart(NOW), fm=0, done3=0, name3=0, mins=0;
   for(var i=0;i<7;i++){ var k=iso(addD(ws,i)); if(k>TODAY) break; var d=S.days[k]; if(!d) continue;
-    fm+=d.focus||0; d.big3.forEach(function(b){ if(b.t&&b.t.trim()){name3++; if(b.d) done3++;} }); }
+    fm+=d.focus||0; (d.big3||[]).forEach(function(b){ if(b.t&&b.t.trim()){name3++; if(b.d) done3++;} }); }
   S.subjects.forEach(function(s){ mins+=s.mins||0; });
   var avgS=0,cS=0; for(i=0;i<7;i++){ var kk=iso(addD(ws,i)); var dd=S.days[kk]; if(dd&&dd.sleep>0){avgS+=dd.sleep;cS++;} }
   $("#weekTiles").innerHTML=[
     tile("Deep focus", Math.round(fm/60*10)/10+"h", fm?"logged in blocks":"nothing logged"),
-    tile("Big 3", done3+"/"+name3, "completed this week"),
+    tile("To-do", done3+"/"+name3, "completed this week"),
     tile("Avg sleep", cS?(Math.round(avgS/cS*10)/10)+"h":"—", cS?(avgS/cS>=8?"in range":"below 8h"):"not logged"),
     tile("Study time", Math.round(mins/60*10)/10+"h", "across subjects")
   ].join("");
@@ -3093,67 +3325,326 @@ function paperPlan(){
   + '<div class="src" style="margin-top:12px">When you mark a paper, sort every lost mark into one of three piles: <b>didn’t know it</b> (back to notes), <b>knew it, applied it wrong</b> (more reps of that technique), <b>misread the command term</b> (drill the terms, not the content). Those three need completely different responses, and treating them the same is why past papers sometimes don’t improve anything.</div>';
 }
 
-/* ══════════ TASKS ══════════ */
-var BUCKETS=[["today","Today"],["week","This week"],["waiting","Waiting on"],["someday","Someday"]];
-function renderTasks(){
-  var inbox=S.tasks.filter(function(t){return t.bucket==="inbox";});
-  $("#inbox").innerHTML = inbox.length ? inbox.map(function(t){
-    return '<div class="line"><span class="dot" style="background:var(--d4)"></span>'
-      + '<input class="bare" data-it="'+t.id+'" value="'+esc(t.text)+'">'
-      + '<button class="ghost sm" data-ic="'+t.id+'">Clarify</button>'
-      + '<button class="del" data-ix="'+t.id+'">&times;</button></div>';
-  }).join("") : '<div style="color:var(--muted);font-size:13px;padding:8px 0">Inbox is empty. That is the goal state, not a failure to use the app.</div>';
-  function TK(id){ return S.tasks.filter(function(x){return x.id===id;})[0]; }
-  each("[data-it]",$("#inbox"),function(e){on(e,"input",function(){TK(e.dataset.it).text=e.value;touch();});});
-  each("[data-ic]",$("#inbox"),function(e){on(e,"click",function(){clarify(TK(e.dataset.ic));});});
-  each("[data-ix]",$("#inbox"),function(e){on(e,"click",function(){
-    S.tasks=S.tasks.filter(function(x){return x.id!==e.dataset.ix;});touch();renderTasks();});});
+/* ══════════ TO-DO ══════════
+   One list, two halves. `T().big3` is today's committed plan — the array keeps
+   its historical name, but it is no longer capped at three. `S.tasks` is the
+   backlog behind it: the inbox you capture into, plus this week, waiting-on and
+   someday. Nothing lives in both places at once, so there is nothing to keep in
+   sync: promoting a backlog item moves it, sending one back moves it again.
+   The old Tasks screen is gone and this card does its whole job. */
+var TD_VIEWS=[["today","Today"],["inbox","Inbox"],["week","This week"],["waiting","Waiting on"],["someday","Someday"],["done","Done"]];
+var TD_PRI={hi:"High", md:"Med", lo:"Low"};
+var TD_BACKLOG=[["inbox","Inbox"],["week","This week"],["waiting","Waiting on"],["someday","Someday"]];
+var TD_MINS=[15,30,45,60,90,120,180,240];
+var TD_SORTS=[["manual","my order"],["pri","priority"],["mins","shortest first"]];
 
-  $("#buckets").innerHTML=BUCKETS.map(function(b){
-    var n=S.tasks.filter(function(t){return t.bucket===b[0]&&!t.done;}).length;
-    return '<button data-bk="'+b[0]+'" aria-pressed="'+(S.bucket===b[0])+'">'+b[1]+(n?" · "+n:"")+'</button>';}).join("");
-  each("[data-bk]",$("#buckets"),function(e){on(e,"click",function(){S.bucket=e.dataset.bk;renderTasks();});});
+function tdView(){ var v=S.todoView||"today";
+  return TD_VIEWS.some(function(x){return x[0]===v;}) ? v : "today"; }
+function tdSortKey(){ var s=S.todoSort||"manual";
+  return TD_SORTS.some(function(x){return x[0]===s;}) ? s : "manual"; }
+function tdSortLabel(){ var k=tdSortKey();
+  return TD_SORTS.filter(function(x){return x[0]===k;})[0][1]; }
 
-  var list=S.tasks.filter(function(t){return t.bucket===S.bucket;});
-  $("#taskList").innerHTML = list.length ? list.map(function(t){
-    var age=t.created?dBetween(t.created,TODAY):0;
-    return '<div class="line col'+(t.done?" done":"")+'">'
-      + '<div style="display:flex;align-items:center;gap:11px">'
-      + '<button class="box" data-tk="'+t.id+'" aria-pressed="'+!!t.done+'">'+CHECK+'</button>'
-      + '<input class="bare" data-tt="'+t.id+'" value="'+esc(t.text)+'">'
-      + (t.mins?'<span class="chip">'+t.mins+'m</span>':"")
-      + (t.para?'<span class="chip tag">'+esc(t.para)+'</span>':"")
-      + ((t.moves||0)>2?'<span class="defer'+((t.moves||0)>5?" hot":"")+'">moved '+t.moves+'×</span>':"")
-      + BUCKETS.filter(function(b){return b[0]!==S.bucket;}).map(function(b){
-          return '<button class="mv" data-tm="'+t.id+'" data-to="'+b[0]+'">'+b[1]+'</button>';}).join("")
-      + '<button class="del" data-tx="'+t.id+'">&times;</button></div>'
-      + (t.plan?'<div style="margin-left:32px;font-size:12px;color:var(--muted)">'+esc(t.plan)+'</div>':"")
-      + '</div>';
-  }).join("") : '<div style="color:var(--muted);font-size:13px;padding:12px 0">Empty. That is allowed to feel good.</div>';
-  each("[data-tk]",$("#taskList"),function(e){on(e,"click",function(){var t=TK(e.dataset.tk);t.done=!t.done;touch();renderTasks();});});
-  each("[data-tt]",$("#taskList"),function(e){on(e,"input",function(){TK(e.dataset.tt).text=e.value;touch();});});
-  each("[data-tm]",$("#taskList"),function(e){on(e,"click",function(){
-    var t=TK(e.dataset.tm);t.bucket=e.dataset.to;t.moves=(t.moves||0)+1;touch();renderTasks();});});
-  each("[data-tx]",$("#taskList"),function(e){on(e,"click",function(){
-    S.tasks=S.tasks.filter(function(x){return x.id!==e.dataset.tx;});touch();renderTasks();});});
-
-  var stale=S.tasks.filter(function(t){return !t.done&&(t.moves||0)>5;});
-  $("#staleCard").style.display=stale.length?"block":"none";
-  $("#staleList").innerHTML=stale.map(function(t){
-    return '<div class="line"><span class="rt" style="flex:1">'+esc(t.text)+'<small style="display:block;color:var(--muted);font-size:11px">moved '+t.moves+' times</small></span>'
-      + '<button class="ghost sm" data-sr="'+t.id+'">Recommit</button>'
-      + '<button class="ghost sm" data-ss="'+t.id+'">Someday</button>'
-      + '<button class="ghost sm" data-sd="'+t.id+'">Let it go</button></div>';
-  }).join("");
-  each("[data-sr]",$("#staleList"),function(e){on(e,"click",function(){var t=TK(e.dataset.sr);t.moves=0;t.bucket="today";touch();renderTasks();});});
-  each("[data-ss]",$("#staleList"),function(e){on(e,"click",function(){var t=TK(e.dataset.ss);t.moves=0;t.bucket="someday";touch();renderTasks();});});
-  each("[data-sd]",$("#staleList"),function(e){on(e,"click",function(){
-    S.tasks=S.tasks.filter(function(x){return x.id!==e.dataset.sd;});touch();renderTasks();});});
-  badges();
+function TK(id){ return S.tasks.filter(function(x){return x.id===id;})[0]; }
+function tdMinOpts(v){ var m=+v||60;
+  if(TD_MINS.indexOf(m)<0) m=60;
+  return TD_MINS.map(function(n){
+    return '<option value="'+n+'"'+(n===m?" selected":"")+'>'+(n<60?n+"m":(n%60?(n/60).toFixed(1):n/60)+"h")+'</option>'; }).join(""); }
+function tdDue(d){
+  if(!d) return "";
+  var n=dBetween(TODAY,d);
+  return n<0 ? Math.abs(n)+"d overdue" : n===0 ? "due today" : n===1 ? "due tomorrow" : "in "+n+"d";
 }
+
+/* Today's real items, paired with their index in the array so the spare blank
+   slots the wizards and the assistant address by number keep working. */
+function tdItems(k){
+  var arr=day(k||TODAY).big3, out=[];
+  for(var i=0;i<arr.length;i++) if(String(arr[i].t||"").trim()) out.push({x:arr[i], i:i});
+  return out;
+}
+function tdOrdered(list){
+  var k=tdSortKey(); if(k==="manual") return list;
+  var rank={hi:0, md:1, lo:2};
+  return list.slice().sort(function(a,b){
+    if(!!a.x.d!==!!b.x.d) return a.x.d?1:-1;                  // done sinks, always
+    if(k==="pri") return (rank[a.x.pri||"md"]-rank[b.x.pri||"md"]) || (a.i-b.i);
+    return ((a.x.mins||60)-(b.x.mins||60)) || (a.i-b.i);
+  });
+}
+/* A free slot if there is one, otherwise a new entry on the end. */
+function tdPush(o){
+  var arr=T().big3, slot=null;
+  for(var i=0;i<arr.length;i++) if(!String(arr[i].t||"").trim()){ slot=arr[i]; break; }
+  if(!slot){ slot={t:"",d:false,plan:"",mins:60,pri:"md"}; arr.push(slot); }
+  slot.t=String(o.t||"").slice(0,200); slot.d=false;
+  slot.plan=String(o.plan||""); slot.mins=+o.mins||60; slot.pri=o.pri||"md";
+  return slot;
+}
+/* Anything the assistant or an older save filed under the "today" bucket belongs
+   on the list itself, not in a bucket nobody can see. */
+function tdPull(){
+  var moving=S.tasks.filter(function(t){ return t.bucket==="today" && !t.done; });
+  if(!moving.length) return;
+  moving.forEach(function(t){
+    tdPush({t:t.text, plan:t.plan, mins:t.mins||60, pri:t.pri||"md"});
+    S.tasks=S.tasks.filter(function(x){ return x.id!==t.id; });
+  });
+  touch();
+}
+function tdSlots(){ var a=T().big3; while(a.length<3) a.push({t:"",d:false,plan:"",mins:60,pri:"md"}); }
+
+/* "45m", "2h", a trailing "!" or "~" — typed once, so the row is right first
+   time instead of needing two more taps. */
+function tdParse(raw){
+  var s=String(raw||"").trim(), pri=null, mins=0, m;
+  s=s.replace(/\s*!+\s*$/,function(){ pri="hi"; return ""; });
+  s=s.replace(/\s*~+\s*$/,function(){ pri="lo"; return ""; });
+  s=s.replace(/^\s*!\s+/,function(){ pri="hi"; return ""; });
+  if((m=/(^|\s)(\d{1,3})\s*(?:m|min|mins|minutes)(?=$|\s)/i.exec(s))){ mins=+m[2]; s=s.replace(m[0]," "); }
+  else if((m=/(^|\s)(\d(?:[.,]\d)?)\s*(?:h|hr|hrs|hour|hours)(?=$|\s)/i.exec(s))){
+    mins=Math.round(parseFloat(m[2].replace(",","."))*60); s=s.replace(m[0]," "); }
+  if(mins) mins=clamp(mins,5,600);
+  return {text:s.replace(/\s+/g," ").trim(), pri:pri, mins:mins};
+}
+
+function renderTodo(){
+  var box=$("#todoList"); if(!box) return;
+  tdSlots(); tdPull();
+  var view=tdView();
+
+  /* ── the numbers at the top ── */
+  var items=tdItems(), total=items.length;
+  var done=items.filter(function(o){ return o.x.d; }).length;
+  var left=items.reduce(function(a,o){ return a+(o.x.d?0:(o.x.mins||60)); },0);
+  var hi=items.filter(function(o){ return !o.x.d && (o.x.pri||"md")==="hi"; }).length;
+  var inboxN=S.tasks.filter(function(t){ return t.bucket==="inbox" && !t.done; }).length;
+  var pct=total?Math.round(done/total*100):0;
+  var overdue=S.tasks.filter(function(t){ return !t.done && t.due && t.due<TODAY; });
+  $("#todoStat").innerHTML =
+      '<div class="tdprog'+(total&&done===total?" full":"")+'"><i style="width:'+pct+'%"></i>'
+    + '<b>'+(total ? done+" of "+total+" done today"+(done===total?" — the list is clear":"") : "Nothing committed for today yet")+'</b></div>'
+    + '<div class="tdfigs">'
+    +   '<div><b>'+pct+'%</b><span>Complete</span></div>'
+    +   '<div><b>'+(left?fHrs(left):"—")+'</b><span>Work left</span></div>'
+    +   '<div'+(hi?' class="warn"':'')+'><b>'+hi+'</b><span>High priority</span></div>'
+    +   '<div><b>'+inboxN+'</b><span>In inbox</span></div>'
+    + '</div>'
+    + (overdue.length ? '<div class="callout warm tdwarn" style="margin:12px 0 0"><b>'+overdue.length
+        +' backlog item'+(overdue.length>1?'s are':' is')+' past its date.</b> '
+        +esc(overdue.slice(0,3).map(function(t){return t.text;}).join("; "))
+        +(overdue.length>3?" and "+(overdue.length-3)+" more":"")+'</div>' : "");
+
+  /* ── filters ── */
+  $("#todoFilters").innerHTML = TD_VIEWS.map(function(v){
+    var n = v[0]==="today" ? items.filter(function(o){return !o.x.d;}).length
+      : v[0]==="done" ? done + S.tasks.filter(function(t){return t.done;}).length
+      : S.tasks.filter(function(t){ return t.bucket===v[0] && !t.done; }).length;
+    return '<button data-tdv="'+v[0]+'" aria-pressed="'+(view===v[0])+'">'+v[1]+(n?' · '+n:'')+'</button>';
+  }).join("");
+  each("[data-tdv]",$("#todoFilters"),function(e){ on(e,"click",function(){
+    S.todoView=e.dataset.tdv; renderTodo(); }); });
+  var sb=$("#todoSort"); if(sb) sb.textContent="Sort: "+tdSortLabel();
+  var nb=$("#todoNew");
+  if(nb) nb.placeholder = view==="today" ? "Add to today's list and press Enter"
+    : view==="done" ? "Add to today's list and press Enter"
+    : "Capture into "+TD_VIEWS.filter(function(x){return x[0]===view;})[0][1]+" and press Enter";
+
+  /* ── the list itself ── */
+  if(view==="today"){
+    var ord=tdOrdered(items);
+    box.innerHTML = ord.length
+      ? ord.map(function(o,pos){ return tdRowToday(o,pos,ord.length); }).join("")
+      : '<div class="tdempty"><b>Nothing on today\u2019s list.</b><br>Two or three real things beat ten hopeful ones. '
+        + 'Add them above, or pull one across from the inbox — an uncapped list is, by definition, an unprioritised one.</div>';
+    tdBindToday(box, ord);
+  } else if(view==="done"){
+    var dn=items.filter(function(o){ return o.x.d; });
+    var dt=S.tasks.filter(function(t){ return t.done; });
+    box.innerHTML = (dn.length||dt.length)
+      ? '<div class="tdsec"><span>Today</span><i></i></div>'
+        + (dn.length ? dn.map(function(o,pos){ return tdRowToday(o,pos,dn.length); }).join("")
+          : '<div class="tdempty">Nothing ticked off today yet.</div>')
+        + (dt.length ? '<div class="tdsec"><span>Earlier</span><i></i></div>'
+            + dt.slice(-25).reverse().map(tdRowTask).join("") : "")
+      : '<div class="tdempty"><b>Nothing finished yet.</b><br>It is early, or it was a hard day. Both happen.</div>';
+    tdBindToday(box, dn); tdBindTask(box);
+  } else {
+    var list=S.tasks.filter(function(t){ return t.bucket===view && !t.done; });
+    if(tdSortKey()==="pri"){ var rk={hi:0,md:1,lo:2};
+      list=list.slice().sort(function(a,b){ return rk[a.pri||"md"]-rk[b.pri||"md"]; }); }
+    else if(tdSortKey()==="mins") list=list.slice().sort(function(a,b){ return (a.mins||999)-(b.mins||999); });
+    box.innerHTML = list.length ? list.map(tdRowTask).join("")
+      : view==="inbox"
+        ? '<div class="tdempty"><b>Inbox is empty.</b><br>That is the goal state, not a failure to use the app. '
+          + 'Capture first and clarify second — the second step is the one people skip, and it is the one that does the work.</div>'
+        : '<div class="tdempty">Empty. That is allowed to feel good.</div>';
+    tdBindTask(box);
+  }
+
+  /* ── the ones that keep sliding ── */
+  var stale=S.tasks.filter(function(t){ return !t.done && (t.moves||0)>5; });
+  var sw=$("#todoStale");
+  sw.innerHTML = stale.length
+    ? '<div class="tdsec"><span>Been sitting a while</span><i></i></div>'
+      + '<div class="hint" style="margin:8px 0 2px">These have moved forward more than five times. Rewriting a task by hand is what '
+      + 'filters out the ones that were never going to happen — so: recommit, reschedule, or let it go.</div>'
+      + stale.map(function(t){
+          return '<div class="line"><span class="rt" style="flex:1">'+esc(t.text)
+            + '<small style="display:block;color:var(--muted);font-size:11px">moved '+t.moves+' times</small></span>'
+            + '<button class="ghost sm" data-sr="'+t.id+'">Recommit to today</button>'
+            + '<button class="ghost sm" data-ss="'+t.id+'">Someday</button>'
+            + '<button class="ghost sm" data-sd="'+t.id+'">Let it go</button></div>';
+        }).join("")
+    : "";
+  each("[data-sr]",sw,function(e){on(e,"click",function(){ var t=TK(e.dataset.sr);
+    t.moves=0; tdPush({t:t.text, plan:t.plan, mins:t.mins||60, pri:t.pri||"md"});
+    S.tasks=S.tasks.filter(function(x){return x.id!==t.id;}); touch(); S.todoView="today"; renderTodo(); afterTodo();});});
+  each("[data-ss]",sw,function(e){on(e,"click",function(){ var t=TK(e.dataset.ss);
+    t.moves=0; t.bucket="someday"; touch(); renderTodo();});});
+  each("[data-sd]",sw,function(e){on(e,"click",function(){
+    S.tasks=S.tasks.filter(function(x){return x.id!==e.dataset.sd;}); touch(); renderTodo();});});
+
+  cap(); badges();
+}
+/* renderToday owns the header line and the load bar, so anything that edits the
+   list from inside this card refreshes those two by hand rather than re-entering
+   renderToday and rebuilding the whole tab under the user's cursor. */
+function afterTodo(){ cap(); subline(); }
+
+function tdRowToday(o,pos,n){
+  var x=o.x, pri=x.pri||"md", i=o.i;
+  return '<div class="line col td'+(x.d?" done":"")+'" data-pri="'+pri+'">'
+    + '<div class="tdmain">'
+    +   '<button class="box" data-tdd="'+i+'" aria-pressed="'+!!x.d+'" aria-label="Mark done">'+CHECK+'</button>'
+    +   '<input class="bare" data-tdt="'+i+'" value="'+esc(x.t)+'" placeholder="Name the task">'
+    +   '<span class="tdctl">'
+    +     '<button class="chip pri '+pri+'" data-tdp="'+i+'" title="Priority — tap to change">'+TD_PRI[pri]+'</button>'
+    +     '<select class="fld sm" data-tdm="'+i+'" title="Time estimate">'+tdMinOpts(x.mins)+'</select>'
+    +     '<span class="tdord">'
+    +       '<button class="mv" data-tdu="'+pos+'" aria-label="Move up"'+(pos===0?" disabled":"")+'>\u2191</button>'
+    +       '<button class="mv" data-tdn="'+pos+'" aria-label="Move down"'+(pos===n-1?" disabled":"")+'>\u2193</button>'
+    +     '</span>'
+    +     '<button class="mv" data-tdb="'+i+'" title="Off today\u2019s list, into the backlog">Backlog</button>'
+    +     '<button class="del" data-tdx="'+i+'" aria-label="Delete">&times;</button>'
+    +   '</span>'
+    + '</div>'
+    + '<input class="fld sm tdplan'+(String(x.plan||"").trim()?"":" empty")+'" data-tdpl="'+i+'" value="'+esc(x.plan)+'"'
+    +   ' placeholder="If it\u2019s ___ and I\u2019m at ___, then I\u2019ll start this">'
+    + '</div>';
+}
+function tdBindToday(root, ord){
+  each("[data-tdd]",root,function(e){on(e,"click",function(){
+    var x=T().big3[+e.dataset.tdd]; x.d=!x.d; if(x.d) x.doneAt=new Date().toISOString(); touch();
+    renderTodo(); afterTodo();});});
+  each("[data-tdt]",root,function(e){
+    on(e,"input",function(){ T().big3[+e.dataset.tdt].t=e.value; touch(); afterTodo(); });
+    on(e,"blur",function(){ renderTodo(); });});
+  each("[data-tdpl]",root,function(e){on(e,"input",function(){
+    T().big3[+e.dataset.tdpl].plan=e.value; touch();});});
+  each("[data-tdm]",root,function(e){on(e,"change",function(){
+    T().big3[+e.dataset.tdm].mins=+e.value; touch(); renderTodo(); afterTodo();});});
+  each("[data-tdp]",root,function(e){on(e,"click",function(){
+    var x=T().big3[+e.dataset.tdp], seq=["hi","md","lo"];
+    x.pri=seq[(seq.indexOf(x.pri||"md")+1)%3]; touch(); renderTodo();});});
+  each("[data-tdb]",root,function(e){on(e,"click",function(){
+    var arr=T().big3, x=arr[+e.dataset.tdb];
+    if(String(x.t||"").trim()){
+      S.tasks.push({id:nid(), text:x.t, bucket:"week", done:false, created:TODAY, moves:1,
+        plan:x.plan||"", mins:x.mins||60, para:"", pri:x.pri||"md", due:""});
+    }
+    tdClear(+e.dataset.tdb); touch(); renderTodo(); afterTodo();});});
+  each("[data-tdx]",root,function(e){on(e,"click",function(){
+    tdClear(+e.dataset.tdx); touch(); renderTodo(); afterTodo();});});
+  if(ord){
+    each("[data-tdu]",root,function(e){on(e,"click",function(){ tdMove(ord,+e.dataset.tdu,-1); });});
+    each("[data-tdn]",root,function(e){on(e,"click",function(){ tdMove(ord,+e.dataset.tdn, 1); });});
+  }
+}
+/* Blank the slot when it is one of the first three the wizards address by
+   number, otherwise drop it out of the array entirely. */
+function tdClear(i){
+  var arr=T().big3;
+  if(i<3){ arr[i]={t:"",d:false,plan:"",mins:60,pri:"md"}; }
+  else arr.splice(i,1);
+}
+function tdMove(ord,pos,dir){
+  var to=pos+dir; if(to<0||to>=ord.length) return;
+  var arr=T().big3, a=ord[pos].i, b=ord[to].i, tmp=arr[a];
+  arr[a]=arr[b]; arr[b]=tmp;
+  S.todoSort="manual"; touch(); renderTodo(); afterTodo();
+}
+
+function tdRowTask(t){
+  var pri=t.pri||"md", late=t.due && t.due<TODAY;
+  return '<div class="line col td'+(t.done?" done":"")+'" data-pri="'+pri+'">'
+    + '<div class="tdmain">'
+    +   '<button class="box" data-tkd="'+t.id+'" aria-pressed="'+!!t.done+'" aria-label="Mark done">'+CHECK+'</button>'
+    +   '<input class="bare" data-tkt="'+t.id+'" value="'+esc(t.text)+'">'
+    +   '<span class="tdctl">'
+    +     '<button class="chip pri '+pri+'" data-tkp="'+t.id+'" title="Priority — tap to change">'+TD_PRI[pri]+'</button>'
+    +     (t.mins?'<span class="chip est">'+(t.mins<60?t.mins+"m":(t.mins/60)+"h")+'</span>':"")
+    +     (t.para?'<span class="chip tag">'+esc(t.para)+'</span>':"")
+    +     (t.due?'<span class="chip tddue '+(late?"hi":"lo")+'">'+esc(tdDue(t.due))+'</span>':"")
+    +     ((t.moves||0)>2?'<span class="defer'+((t.moves||0)>5?" hot":"")+'">moved '+t.moves+'\u00d7</span>':"")
+    +     (t.done ? '' :
+            '<button class="mv" data-tkgo="'+t.id+'" title="Put it on today\u2019s list">\u2192 Today</button>'
+          + '<button class="mv" data-tkc="'+t.id+'">Clarify</button>'
+          + '<select class="fld sm" data-tkb="'+t.id+'" title="Where it lives">'
+          +   TD_BACKLOG.map(function(b){ return '<option value="'+b[0]+'"'+(t.bucket===b[0]?" selected":"")+'>'+b[1]+'</option>'; }).join("")
+          + '</select>')
+    +     '<button class="del" data-tkx="'+t.id+'" aria-label="Delete">&times;</button>'
+    +   '</span>'
+    + '</div>'
+    + (String(t.plan||"").trim()?'<div class="tdplantxt">'+esc(t.plan)+'</div>':"")
+    + '</div>';
+}
+function tdBindTask(root){
+  each("[data-tkd]",root,function(e){on(e,"click",function(){
+    var t=TK(e.dataset.tkd); t.done=!t.done; touch(); renderTodo();});});
+  each("[data-tkt]",root,function(e){
+    on(e,"input",function(){ TK(e.dataset.tkt).text=e.value; touch(); });
+    on(e,"blur",function(){ renderTodo(); });});
+  each("[data-tkp]",root,function(e){on(e,"click",function(){
+    var t=TK(e.dataset.tkp), seq=["hi","md","lo"];
+    t.pri=seq[(seq.indexOf(t.pri||"md")+1)%3]; touch(); renderTodo();});});
+  each("[data-tkc]",root,function(e){on(e,"click",function(){ clarify(TK(e.dataset.tkc)); });});
+  each("[data-tkgo]",root,function(e){on(e,"click",function(){
+    var t=TK(e.dataset.tkgo);
+    tdPush({t:t.text, plan:t.plan, mins:t.mins||60, pri:t.pri||"md"});
+    S.tasks=S.tasks.filter(function(x){ return x.id!==t.id; });
+    touch(); S.todoView="today"; renderTodo(); afterTodo();});});
+  each("[data-tkb]",root,function(e){on(e,"change",function(){
+    var t=TK(e.dataset.tkb);
+    if(t.bucket!==e.value){ t.bucket=e.value; t.moves=(t.moves||0)+1; }
+    touch(); renderTodo();});});
+  each("[data-tkx]",root,function(e){on(e,"click",function(){
+    S.tasks=S.tasks.filter(function(x){ return x.id!==e.dataset.tkx; }); touch(); renderTodo();});});
+}
+
+/* The quick-add box. On the Today filter it commits straight to the day; on any
+   backlog filter it captures into that bucket instead. */
+function tdQuickAdd(){
+  var f=$("#todoNew"); if(!f) return;
+  var p=tdParse(f.value); if(!p.text) return;
+  var pri=p.pri || ($("#todoNewPri")?$("#todoNewPri").value:"md");
+  var mins=p.mins || (+($("#todoNewMins")?$("#todoNewMins").value:60) || 60);
+  var view=tdView();
+  if(view==="today"||view==="done"){
+    tdPush({t:p.text, mins:mins, pri:pri});
+    S.todoView="today";
+  } else {
+    S.tasks.push({id:nid(), text:p.text.slice(0,200), bucket:view, done:false, created:TODAY,
+      moves:0, plan:"", mins:mins, para:"", pri:pri, due:""});
+  }
+  f.value=""; touch(); renderTodo(); afterTodo(); f.focus();
+}
+/* Kept under its old name so every existing caller — the wizards, the assistant,
+   renderAll — still reaches the list. */
+function renderTasks(){ renderTodo(); }
 function addTask(text,bucket){
   var v=String(text||"").trim(); if(!v) return null;
-  var t={id:nid(),text:v,bucket:bucket||"inbox",done:false,created:TODAY,moves:0,plan:"",mins:0,para:""};
+  var t={id:nid(),text:v,bucket:bucket||"inbox",done:false,created:TODAY,moves:0,plan:"",mins:0,para:"",pri:"md",due:""};
   S.tasks.push(t); touch(); return t;
 }
 function clarify(t){
@@ -3171,8 +3662,8 @@ function clarify(t){
         +'<button data-c="bin">No — bin it</button></div>';
       each("[data-c]",b,function(e){on(e,"click",function(){
         var c=e.dataset.c;
-        if(c==="bin"){ S.tasks=S.tasks.filter(function(x){return x.id!==t.id;}); touch(); closeModal(); renderTasks(); return; }
-        if(c==="some"||c==="ref"){ t.bucket="someday"; t.para=c==="ref"?"Resource":""; touch(); closeModal(); renderTasks(); return; }
+        if(c==="bin"){ S.tasks=S.tasks.filter(function(x){return x.id!==t.id;}); touch(); closeModal(); renderTodo(); return; }
+        if(c==="some"||c==="ref"){ t.bucket="someday"; t.para=c==="ref"?"Resource":""; touch(); closeModal(); renderTodo(); return; }
         st.step=1; draw();});});
     } else if(st.step===1){
       b.innerHTML='<h2>What is the very next physical action?</h2>'
@@ -3185,7 +3676,7 @@ function clarify(t){
         if(t.mins===2){
           b.innerHTML='<h2>Then do it now.</h2><div class="md">Under two minutes means tracking it costs more than doing it. Go — this modal will wait.</div>'
             +'<div class="row"><button class="primary" data-done2>Done, it’s finished</button><button class="ghost" data-later2>Actually, later</button></div>';
-          on(b.querySelector("[data-done2]"),"click",function(){t.done=true;t.bucket="today";touch();closeModal();renderTasks();});
+          on(b.querySelector("[data-done2]"),"click",function(){t.done=true;t.bucket="week";touch();closeModal();renderTodo();});
           on(b.querySelector("[data-later2]"),"click",function(){st.step=2;draw();});
         } else { st.step=2; draw(); }
         touch();});});
@@ -3193,14 +3684,33 @@ function clarify(t){
       b.innerHTML='<h2>When and where?</h2>'
         +'<div class="md">This is the step that does the work. Writing a task down doesn’t stop it circling in your head — committing to <em>when and where</em> you’ll do it does. Vague reflection has no effect; a specific plan has a measurable one.</div>'
         +'<input class="fld" id="cxPlan" placeholder="If it’s Tuesday after dinner and I’m at my desk, then I’ll…" value="'+esc(t.plan||"")+'">'
+        +'<div class="row" style="margin-top:14px;gap:14px;align-items:flex-end">'
+        +  '<div style="flex:1;min-width:130px"><label class="lbl">Priority</label>'
+        +    '<select class="fld sm" id="cxPri">'
+        +      [["hi","High"],["md","Medium"],["lo","Low"]].map(function(p){
+                 return '<option value="'+p[0]+'"'+((t.pri||"md")===p[0]?" selected":"")+'>'+p[1]+'</option>'; }).join("")
+        +    '</select></div>'
+        +  '<div style="flex:1;min-width:130px"><label class="lbl">Do it by <span class="q">— optional</span></label>'
+        +    '<input class="fld sm" type="date" id="cxDue" value="'+esc(t.due||"")+'"></div>'
+        +'</div>'
         +'<label class="lbl" style="margin-top:14px">Where does it live?</label>'
-        +'<div class="pills" id="cxB">'+BUCKETS.map(function(x){return '<button data-b="'+x[0]+'">'+x[1]+'</button>';}).join("")+'</div>'
+        +'<div class="pills" id="cxB">'
+        +  '<button data-b="today">Today’s list</button>'
+        +  TD_BACKLOG.map(function(x){return '<button data-b="'+x[0]+'">'+x[1]+'</button>';}).join("")+'</div>'
         +'<label class="lbl" style="margin-top:6px">Type <span class="q">— optional</span></label>'
         +'<div class="pills" id="cxP">'+["Project","Area","Resource"].map(function(p){return '<button data-p="'+p+'">'+p+'</button>';}).join("")+'</div>';
       each("[data-p]",b,function(e){on(e,"click",function(){
         t.para=e.dataset.p; each("[data-p]",b,function(x){x.setAttribute("aria-pressed",String(x===e));});touch();});});
       each("[data-b]",b,function(e){on(e,"click",function(){
-        t.plan=$("#cxPlan").value; t.bucket=e.dataset.b; touch(); closeModal(); renderTasks();});});
+        t.plan=$("#cxPlan").value;
+        var pv=$("#cxPri"); if(pv) t.pri=pv.value;
+        var dv=$("#cxDue"); if(dv) t.due=dv.value||"";
+        if(e.dataset.b==="today"){
+          tdPush({t:t.text, plan:t.plan, mins:t.mins||60, pri:t.pri||"md"});
+          S.tasks=S.tasks.filter(function(x){ return x.id!==t.id; });
+          S.todoView="today";
+        } else t.bucket=e.dataset.b;
+        touch(); closeModal(); renderTodo(); afterTodo();});});
     }
   }
   draw();
@@ -3588,7 +4098,7 @@ function planWizard(){
     {h:"Yesterday", d:"Before you plan today, close yesterday. Anything unfinished either moves or goes.",
      body:function(){
        if(!y) return '<div style="color:var(--muted);font-size:13px">No record of yesterday. Fine — start here.</div>';
-       var un=y.big3.filter(function(b){return b.t.trim()&&!b.d;});
+       var un=(y.big3||[]).filter(function(b){return b.t&&b.t.trim()&&!b.d;});
        if(!un.length) return '<div class="callout ok" style="margin:0">Everything you named yesterday got done. Note that, then move on.</div>';
        return un.map(function(b,j){
          return '<div class="line"><span style="flex:1;font-size:14px">'+esc(b.t)+'</span>'
@@ -3597,8 +4107,7 @@ function planWizard(){
      },
      bind:function(root){
        each("[data-cy]",root,function(e){on(e,"click",function(){
-         var d=T(), slot=d.big3.filter(function(x){return !x.t.trim();})[0];
-         if(slot){ slot.t=e.dataset.ct; touch(); }
+         tdPush({t:e.dataset.ct}); touch();
          e.textContent="Added"; e.disabled=true;});});
        each("[data-dy]",root,function(e){on(e,"click",function(){ e.textContent="Gone"; e.disabled=true; });});
      }},
@@ -3609,18 +4118,18 @@ function planWizard(){
        if(!soon.length) return '<div class="callout ok" style="margin:0">Nothing inside ten days. Rare and worth enjoying.</div>';
        return soon.map(function(m){
          return '<div class="line"><span style="flex:1;font-size:13.5px">'+esc(m.title)+' <span class="chip">'+dBetween(TODAY,m.date)+'d</span></span>'
-           + '<button class="ghost sm" data-mk="'+esc(m.title)+'">Make it a Big 3</button></div>';}).join("");
+           + '<button class="ghost sm" data-mk="'+esc(m.title)+'">Put it on today\u2019s list</button></div>';}).join("");
      },
      bind:function(root){
        each("[data-mk]",root,function(e){on(e,"click",function(){
-         var d=T(), slot=d.big3.filter(function(x){return !x.t.trim();})[0];
-         if(slot){ slot.t=e.dataset.mk; touch(); }
+         tdPush({t:e.dataset.mk}); touch();
          e.textContent="Added"; e.disabled=true;});});
      }},
-    {h:"Three things", d:"Not five. Choosing what doesn't matter today is most of the work — and an uncapped list is, by definition, an unprioritised one.",
+    {h:"Today's list", d:"Two or three real things, not ten hopeful ones. Choosing what doesn't matter today is most of the work — an uncapped list is, by definition, an unprioritised one.",
      body:function(){
        return T().big3.map(function(x,j){
-         return '<div style="margin-bottom:9px"><input class="fld sm" data-p3="'+j+'" value="'+esc(x.t)+'" placeholder="Thing '+(j+1)+'"></div>';}).join("");
+         return '<div style="margin-bottom:9px"><input class="fld sm" data-p3="'+j+'" value="'+esc(x.t)+'" placeholder="'+(j<3?"Thing "+(j+1):"Something else")+'"></div>';}).join("")
+         + '<div class="hint" style="margin:2px 0 0">Leave the spare boxes empty. You can add more, and set priorities, from the To-do card on Today.</div>';
      },
      bind:function(root){ each("[data-p3]",root,function(e){on(e,"input",function(){T().big3[+e.dataset.p3].t=e.value;touch();});}); }},
     {h:"Does it fit?", d:"Estimate honestly. Almost everyone plans about twice what a day holds, and finds out at 22:00 instead of now.",
@@ -3679,11 +4188,11 @@ function shutdownWizard(){
        return soon.length? soon.map(function(m){
          return '<div class="line"><span class="chip">'+dBetween(TODAY,m.date)+'d</span><span style="flex:1;font-size:13.5px">'+esc(m.title)+'</span></div>';}).join("")
          : '<div class="callout ok" style="margin:0">Clear for two weeks.</div>'; }},
-    {h:"Tomorrow's three", d:"Decide tomorrow tonight, so the morning has no decisions in it.",
+    {h:"Tomorrow's list", d:"Decide tomorrow tonight, so the morning has no decisions in it.",
      body:function(){
        var tk=iso(addD(NOW,1)), d=day(tk);
        return d.big3.map(function(x,j){
-         return '<div style="margin-bottom:9px"><input class="fld sm" data-t3="'+j+'" value="'+esc(x.t)+'" placeholder="Thing '+(j+1)+'"></div>';}).join("");
+         return '<div style="margin-bottom:9px"><input class="fld sm" data-t3="'+j+'" value="'+esc(x.t)+'" placeholder="'+(j<3?"Thing "+(j+1):"Something else")+'"></div>';}).join("");
      },
      bind:function(root){ var tk=iso(addD(NOW,1));
        each("[data-t3]",root,function(e){on(e,"input",function(){day(tk).big3[+e.dataset.t3].t=e.value;touch();});}); }},
@@ -3697,7 +4206,7 @@ function reviewWizard(){
     {h:"Get clear", d:"Inbox to zero first. Reviewing against a stale list is worse than not reviewing.",
      body:function(){
        var n=S.tasks.filter(function(t){return t.bucket==="inbox";}).length;
-       return n? '<div class="callout warm" style="margin:0"><b>'+n+' item'+(n>1?"s":"")+' still uncleared.</b> Go to Tasks and clarify each one — decide what it is and when it happens. Then come back.</div>'
+       return n? '<div class="callout warm" style="margin:0"><b>'+n+' item'+(n>1?"s":"")+' still uncleared.</b> Open the To-do card on Today, switch to Inbox and clarify each one — decide what it is and when it happens. Then come back.</div>'
          : '<div class="callout ok" style="margin:0">Inbox is empty. Good.</div>'; }},
     {h:"Get current", d:"What the week actually looked like. Ask “what got in the way?”, not “why am I like this?” — only the first question has answers.",
      body:function(){
@@ -3767,8 +4276,8 @@ function stuckFlow(){
         +'<button class="ghost" id="stBack">Back</button>'
         +'<button class="ghost" data-close style="margin-left:auto">Close</button></div>';
       on($("#stGo"),"click",function(){
-        var slot=T().big3.filter(function(x){return !x.t.trim();})[0];
-        if(slot){ slot.t=$("#stAct").value; slot.mins=15; touch(); }
+        var v=String($("#stAct").value||"").trim();
+        if(v){ tdPush({t:v, mins:15, pri:"hi"}); touch(); }
         fStart(5, "Five minutes only — then you may stop", null, true); closeModal(); renderToday(); show("focus");});
       var talk=b.querySelector("#stTalk");
       if(talk) on(talk,"click",function(){ closeModal(); window.CompassAsk("stuck", $("#stAct").value ? "I can't start this: "+$("#stAct").value : "I'm stuck and can't start."); });
@@ -3783,7 +4292,7 @@ function stuckFlow(){
 var fIdx=0;
 function focusMode(){
   var t=T(), items=t.big3.filter(function(x){return x.t.trim()&&!x.d;});
-  if(!items.length){ openModal('<h2>Nothing left in the Big 3</h2><div class="md">Either you\'re done, or nothing is named yet. Both are fine — but focus mode has nothing to show you.</div><div class="row"><button class="ghost" data-close>Close</button></div>'); return; }
+  if(!items.length){ openModal('<h2>Nothing left on the list</h2><div class="md">Either you\'re done, or nothing is named yet. Both are fine — but focus mode has nothing to show you.</div><div class="row"><button class="ghost" data-close>Close</button></div>'); return; }
   fIdx=Math.min(fIdx,items.length-1);
   var it=items[fIdx];
   $("#fLabel").textContent="Now — "+(fIdx+1)+" of "+items.length;
@@ -3798,7 +4307,7 @@ function renderRituals(){
     ["Morning · about 30 min",[
       ["Feet on the floor, phone stays down","The first twenty minutes set the tone. Whatever is in your phone will still be there after breakfast — and a phone in the room costs you working memory even switched off."],
       ["Daylight, water, move a little","Curtains open or step outside. Morning light is the strongest lever you have on a teenage body clock that naturally wants to run late — much stronger than anything you do in the evening."],
-      ["Open Compass, set the Big 3","Two minutes. Three things, a time estimate each, and where they happen. Rate energy honestly — a low day needs a shorter list, not more guilt."],
+      ["Open Compass, write today's to-do list","Two minutes. Two or three things, a time estimate each, and where they happen. Rate energy honestly — a low day needs a shorter list, not more guilt."],
       ["Start the first one before you feel ready","Five minutes is the whole commitment. Motivation arrives after you start."]]],
     ["Study block · 60 min",[
       ["Phone in another room","Not face down, not in a pocket. Another room. On, off, silent — makes no difference; only distance does."],
@@ -3808,12 +4317,12 @@ function renderRituals(){
     ["Evening shutdown · 5 min",[
       ["Tick what actually happened","Honestly. An accurate bad day is more useful than a flattering one."],
       ["Write one thing that went right","You'll resist this most on the days you need it most."],
-      ["Brain dump, then tomorrow's three","Everything unfinished onto the page, then decide tomorrow tonight."],
+      ["Brain dump, then tomorrow's list","Everything unfinished onto the page, then decide tomorrow tonight."],
       ["Say “shutdown complete” out loud","It works because the steps above actually happened. A day with no ending bleeds into the night."]]],
     ["Sunday reset · 20 min",[
       ["Inbox to zero","Clarify every captured item. A stale list is worse than no list, because you still trust it."],
       ["Look at the week without judging it","Execution score, the grid, what got in the way. Around 85% is the target — not 100%."],
-      ["Re-rate the six areas, check 14 days ahead","Anything inside a week that hasn't started becomes a Big 3 this week."],
+      ["Re-rate the six areas, check 14 days ahead","Anything inside a week that hasn't started goes onto this week's to-do list."],
       ["Pick one area to push, let the rest coast","One. The lowest bar."],
       ["Download your file","Ten seconds, and the whole history survives."]]]
   ];
@@ -3882,22 +4391,22 @@ function renderReset(){
       +'<div class="row"><button class="primary" id="rsYes">Do it</button><button class="ghost" data-close>Cancel</button></div>',
       function(root){ on(root.querySelector("#rsYes"),"click",function(){
         S.habits=S.habits.slice(0,3); S.minMode=true;
-        var t=T(); t.big3=[{t:"",d:false,plan:"",mins:60},{t:"",d:false,plan:"",mins:60},{t:"",d:false,plan:"",mins:60}];
+        var t=T(); t.big3=[{t:"",d:false,plan:"",mins:60,pri:"md"},{t:"",d:false,plan:"",mins:60,pri:"md"},{t:"",d:false,plan:"",mins:60,pri:"md"}];
         touch(); closeModal(); renderAll(); show("week");});});
   });
 }
 function renderWhy(){
   var W=[
-    ["Every task asks when and where","The if-then line under each Big 3 item, and the last step of the daily plan.","Writing a task down doesn't stop it interrupting you — deciding when and where does. In the studies, people who made a specific plan for an unfinished task had no more intrusive thoughts about it than people with nothing pending at all, and solved noticeably more anagrams on an unrelated task. Vague reflection did nothing.","Masicampo &amp; Baumeister 2011; Gollwitzer &amp; Sheeran 2006 meta-analysis, d = 0.65"],
+    ["Every task asks when and where","The if-then line under every to-do item, and the last step of the daily plan.","Writing a task down doesn't stop it interrupting you — deciding when and where does. In the studies, people who made a specific plan for an unfinished task had no more intrusive thoughts about it than people with nothing pending at all, and solved noticeably more anagrams on an unrelated task. Vague reflection did nothing.","Masicampo &amp; Baumeister 2011; Gollwitzer &amp; Sheeran 2006 meta-analysis, d = 0.65"],
     ["No streaks anywhere","The strength bar is a rolling average that dips and recovers; it can't hit zero from one bad week.","Hard streak resets are the most commonly reported reason people abandon habit trackers — the reset reads as 'all progress erased', which licenses giving up entirely. Meanwhile the actual habit-formation data shows one missed day barely dents automaticity.","Lally et al. 2010 (median 66 days to automaticity, range 18–254); habit-tracker retention reviews"],
     ["Weekly targets, not daily","Habits are counted x-times-per-week; deliberate skips reduce the denominator.","A 2,500-person randomised trial compared incentivising exercise at a fixed time versus any time. Flexible beat rigid both during the incentive period and — the part that matters — after incentives stopped.","Milkman et al. 2021, Management Science"],
     ["A deliberate skip is its own colour","Amber, not red, and it doesn't count against you.","Binary done/not-done trackers punish a planned rest day exactly like a failure, which teaches people to stop logging honestly rather than to rest less.","Habit-tracker design reviews; Way of Life's three-state model"],
     ["Self-forgiveness before restarting","The restart flow on 'When it breaks' asks you to let the gap go before rebuilding.","Students who forgave themselves for procrastinating before one exam procrastinated less before the next. Shame makes the task a reminder of failure, so you avoid the task to avoid the feeling.","Wohl, Pychyl &amp; Bennett 2010"],
     ["'I'm stuck' asks what you're feeling","Not 'why haven't you started' — which only produces excuses.","Procrastination is much better explained as short-term mood repair than as poor time management. You're avoiding how the task makes you feel, so more reminders and deadlines target the wrong thing.","Sirois &amp; Pychyl 2013"],
-    ["Five minutes, not the whole thing","The stuck flow starts a five-minute timer and adds the smallest step to your Big 3.","Behavioural activation — doing the thing before you feel ready — performs about as well as full cognitive therapy for depression, with a large effect against controls. Action comes first; motivation follows.","Cuijpers et al. 2007 meta-analysis, d = 0.87"],
+    ["Five minutes, not the whole thing","The stuck flow starts a five-minute timer and puts the smallest step on today's list.","Behavioural activation — doing the thing before you feel ready — performs about as well as full cognitive therapy for depression, with a large effect against controls. Action comes first; motivation follows.","Cuijpers et al. 2007 meta-analysis, d = 0.87"],
     ["Phone in another room, as a checkbox","The deep-block gate won't accept 'silenced' or 'face down'.","Across ~800 participants, cognitive capacity was highest with the phone in another room, lower in a bag, lowest on the desk — and it made no difference whether it was on or off. People also reported not thinking about it, so you can't feel this cost happening.","Ward et al. 2017, 'Brain Drain'"],
     ["Capacity check before you commit","The load bar on Today and step four of the daily plan.","Almost everyone plans roughly twice what a day holds. Finding out at 09:00 is a scheduling decision; finding out at 22:00 is a failure — and the second one is what makes people quit planning altogether.","Sunsama's workload model; long-term user reports"],
-    ["Three things, capped","The Big 3, and the daily plan won't offer a fourth slot.","Every durable daily method caps the list — six for Ivy Lee, one to three for MITs, nine sized items for 1-3-5. An uncapped list is by definition unprioritised.","Ivy Lee method (1918); MIT / 1-3-5 rule"],
+    ["A short list, deliberately","The to-do list opens with three slots and the daily plan only ever offers three.","Every durable daily method caps the list — six for Ivy Lee, one to three for MITs, nine sized items for 1-3-5. An uncapped list is by definition unprioritised, which is why the extras belong in the backlog rather than on today.","Ivy Lee method (1918); MIT / 1-3-5 rule"],
     ["Lead and lag on every goal","Each goal tracks a weekly action you control and an outcome you don't.","Tracking only the outcome tells you you're off course after it's too late to correct. Around 85% weekly completion of the controllable actions is the level that reliably delivers a twelve-week goal.","Moran, The 12 Week Year"],
     ["Ninety-day goals","The goals page runs on a twelve-week horizon.","On an annual horizon there is always 'plenty of time', so effort back-loads to the deadline. Twelve weeks is long enough to finish something and short enough that the deadline is real.","12 Week Year; individual OKR practice"],
     ["WOOP, not visualisation","The goal wizard makes you name the inner obstacle after imagining the outcome.","Imagining a good outcome on its own measurably lowers energy — blood pressure drops, and people achieve fewer of that week's goals. Contrasting it against the real obstacle is what turns the image into effort.","Oettingen; Kappes &amp; Oettingen 2011; MCII meta-analysis g = 0.34"],
@@ -4121,30 +4630,27 @@ on($("#sleepR"),"input",function(){ T().sleep=+$("#sleepR").value; touch(); rend
 on($("#energyR"),"input",function(){ T().energy=+$("#energyR").value; touch(); renderToday(); });
 on($("#win"),"input",function(){ T().win=$("#win").value; touch(); });
 on($("#dump"),"input",function(){ T().dump=$("#dump").value; touch(); });
-on($("#blockQ"),"input",function(){ T().q=$("#blockQ").value; touch(); });
+on($("#blockQ"),"input",function(){
+  T().q=$("#blockQ").value; touch();
+  /* Same field, two places. Keep the Focus tab's copy in step without a repaint. */
+  var lab=$("#s-focus") && $("#s-focus").querySelector("[data-flabel]");
+  if(lab && lab!==document.activeElement) lab.value=$("#blockQ").value;
+});
 on($("#dumpToTasks"),"click",function(){
   var lines=String(T().dump||"").split("\n").map(function(s){return s.trim();}).filter(Boolean);
   if(!lines.length) return;
   lines.forEach(function(l){ addTask(l,"inbox"); });
-  T().dump=""; $("#dump").value=""; touch(); renderTasks(); show("tasks");
+  T().dump=""; $("#dump").value=""; touch();
+  S.todoView="inbox"; renderTodo(); show("today");
+  var c=$("#todoCard"); if(c) c.scrollIntoView({behavior:"smooth",block:"start"});
 });
-on($("#tStart"),"click",function(){
-  if(fLive()){ S.timer.on ? fPause() : fResume(); return; }
-  if(!T().gate.phone){
-    openModal('<h2>Phone in another room?</h2>'
-      +'<div class="md">Not face down. Not in your pocket. A phone in sight costs measurable working memory even switched off (Ward et al., 2017).</div>'
-      +'<div class="row"><button class="primary" id="gYes">It\'s in another room now</button><button class="ghost" id="gNo">Start anyway</button></div>',
-      function(root){
-        on(root.querySelector("#gYes"),"click",function(){ T().gate.phone=true; touch(); closeModal(); renderGate(); fStart(F_BLOCK, T().q||"Deep work", null, true); });
-        on(root.querySelector("#gNo"),"click",function(){ closeModal(); fStart(F_BLOCK, T().q||"Deep work", null, true); });
-      });
-    return;
-  }
-  fStart(F_BLOCK, T().q||"Deep work", null, true);
+on($("#todoAdd"),"click",tdQuickAdd);
+on($("#todoNew"),"keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); tdQuickAdd(); } });
+on($("#todoSort"),"click",function(){
+  var k=tdSortKey(), i=0;
+  TD_SORTS.forEach(function(x,n){ if(x[0]===k) i=n; });
+  S.todoSort=TD_SORTS[(i+1)%TD_SORTS.length][0]; touch(); renderTodo();
 });
-on($("#tStop"),"click",function(){ fStop(); });
-on($("#addTask"),"click",function(){ addTask($("#newTask").value); $("#newTask").value=""; renderTasks(); });
-on($("#newTask"),"keydown",function(e){ if(e.key==="Enter"){ addTask($("#newTask").value); $("#newTask").value=""; renderTasks(); } });
 function addGoalFromForm(){
   var v=$("#newGoal").value.trim(); if(!v) return;
   var due=$("#newGoalDue").value || iso(addD(NOW,GHORIZON));
@@ -4745,14 +5251,11 @@ var PRIMARY=[["today","Today",I.today],["ask","Ask",I.ask],["school","School",I.
 var MORE=[
   ["classes","School schedule",I.grid,"Your weekly lessons, so plans land in the gaps"],
   ["focus","Focus",I.focus,"Timed deep-work blocks and the hours behind you"],
-  ["cal","Calendar",I.cal,"Every past day — what you did, slept, lifted and finished"],
-  ["gym","Gym",I.gym,"Log your lifts and see the weight go up"],
+  ["cal","Calendar",I.cal,"Every past day — what you did, slept and finished"],
   ["week","Week",I.week,"Habits, execution score, the six areas"],
-  ["tasks","Tasks",I.tasks,"Capture everything, sort it later"],
   ["goals","Goals",I.goals,"Two or three, on a 90-day horizon"],
   ["rituals","Rituals",I.rituals,"The four scripts and the wizards"],
   ["reset","When it breaks",I.reset,"Read this on the day you've stopped"],
-  ["why","Why it works",I.why,"Every decision, with its source"],
   ["sync","Sync",I.sync,"Share one copy across your phone, iPad and computer"]
 ];
 var nav=el("div","tgnav");
@@ -4827,7 +5330,7 @@ sheet.addEventListener("click",function(e){
   }
 });
 function refreshBadges(){
-  var m={revise:B.dueCount(), tasks:B.inboxCount()};
+  var m={revise:B.dueCount(), today:B.inboxCount()};
   var moreN=0; MORE.forEach(function(x){ if(m[x[0]]) moreN+=m[x[0]]; });
   Array.prototype.forEach.call(nav.querySelectorAll("[data-nb]"),function(i){
     var k=i.dataset.nb, n = k==="more" ? moreN : (m[k]||0);
@@ -5289,8 +5792,9 @@ function snapshot(mode){
     +" | Mood: "+(d.mood?d.mood.w:"not logged"));
 
   var big=(d.big3||[]).filter(function(x){return x.t&&x.t.trim();});
-  L.push("Big 3 today: "+(big.length
-    ? big.map(function(x){return "“"+x.t+"” ("+(x.mins||60)+"m"+(x.d?", done":", not done")+(x.plan?", plan: "+x.plan:", NO PLAN SET")+")";}).join(" | ")
+  var PRIN={hi:"high",md:"medium",lo:"low"};
+  L.push("Today's to-do list: "+(big.length
+    ? big.map(function(x){return "“"+x.t+"” ("+(x.mins||60)+"m, "+(PRIN[x.pri||"md"])+" priority"+(x.d?", done":", not done")+(x.plan?", plan: "+x.plan:", NO PLAN SET")+")";}).join(" | ")
     : "nothing set"));
   var load=big.reduce(function(a,x){return a+(x.d?0:(x.mins||60));},0);
   L.push("Remaining load: "+Math.round(load/6)/10+"h of a "+Math.round(S.cap/6)/10+"h day");
@@ -5354,11 +5858,13 @@ function snapshot(mode){
     });
     if(open.length>30) L.push("  \u2026and "+(open.length-30)+" more");
     var b3=d.big3||[];
-    L.push("BIG 3 SLOTS TODAY: "+[0,1,2].map(function(i){
-      var x=b3[i]||{}; return (i+1)+"="+(x.t&&x.t.trim()?"\u201C"+x.t+"\u201D"+(x.d?" (done)":""):"empty");
+    L.push("TODAY'S LIST SLOTS \u2014 slot numbers for big3.set / big3.clear:");
+    if(!b3.length) L.push("  1=empty, 2=empty, 3=empty");
+    else L.push("  "+b3.map(function(x,i){
+      return (i+1)+"="+(x.t&&String(x.t).trim()?"\u201C"+x.t+"\u201D"+(x.d?" (done)":""):"empty");
     }).join(", "));
     L.push("Subject names you may use in revise.add: "+S.subjects.map(function(x){return x.name;}).join(", "));
-    L.push("Valid buckets: inbox, today, week, waiting, someday");
+    L.push("Valid buckets: inbox, today, week, waiting, someday \u2014 \"today\" puts it straight on the list above");
   }
   return L.join("\n");
 }
@@ -5442,7 +5948,7 @@ var ACTIONS_SPEC =
 '  {"do":"task.edit","match":"...","text":"...","bucket":"...","mins":0,"plan":"..."}\n'+
 '  {"do":"task.done","match":"..."}\n'+
 '  {"do":"task.delete","match":"..."}\n'+
-'  {"do":"big3.set","slot":1,"text":"...","mins":60,"plan":"..."}   slot is 1, 2 or 3 — today only\n'+
+'  {"do":"big3.set","slot":1,"text":"...","mins":60,"plan":"..."}   a slot on today\'s to-do list, today only\n'+
 '  {"do":"big3.clear","slot":2}\n'+
 '  {"do":"deadline.add","title":"...","date":"2026-11-25","subject":"Chemistry HL","type":"IA|EE|TOK|Exam|Other"}\n'+
 '  {"do":"deadline.done","match":"..."}\n'+
@@ -5475,7 +5981,10 @@ function qt(s){ return "“"+esc(clip(s,90))+"”"; }
 function okBucket(b){ return BK[b] ? b : null; }
 function okMins(m){ return typeof m==="number" && isFinite(m) ? Math.max(0,Math.min(600,Math.round(m))) : null; }
 function okDate(d){ return /^\d{4}-\d{2}-\d{2}$/.test(String(d||"")) ? String(d) : null; }
-function slotOf(a){ var n=parseInt(a.slot,10); if(!isFinite(n)) n=1; return Math.max(0,Math.min(2,n-1)); }
+/* Today's list is no longer capped at three, so a slot number is clamped to the
+   list that actually exists rather than to a hard 3. */
+function slotOf(a,len){ var n=parseInt(a.slot,10); if(!isFinite(n)) n=1;
+  return Math.max(0,Math.min(Math.max(2,(len||3)-1),n-1)); }
 
 /* Pull the action block out of the reply text. */
 function splitActions(txt){
@@ -5536,8 +6045,8 @@ function describe(a){
       return {t:"Change "+qt(resolveName(a))+" — "+(c.join(", ")||"nothing")};
     case "task.done":    return {t:"Tick off "+qt(resolveName(a))};
     case "task.delete":  return {t:"Delete "+qt(resolveName(a)), del:true};
-    case "big3.set":     return {t:"Big 3 · slot "+(slotOf(a)+1)+" → "+qt(a.text)+(okMins(a.mins)?" ("+okMins(a.mins)+" min)":"")};
-    case "big3.clear":   return {t:"Clear Big 3 slot "+(slotOf(a)+1), del:true};
+    case "big3.set":     return {t:"Today's list · slot "+(slotOf(a)+1)+" → "+qt(a.text)+(okMins(a.mins)?" ("+okMins(a.mins)+" min)":"")};
+    case "big3.clear":   return {t:"Clear slot "+(slotOf(a)+1)+" of today's list", del:true};
     case "deadline.add": return {t:"Add deadline "+qt(a.title)+" on "+esc(okDate(a.date)||"?")+(a.subject?" · "+esc(clip(a.subject,30)):"")};
     case "deadline.done":return {t:"Mark deadline "+qt(a.match)+" done"};
     case "revise.add":   return {t:"Add revision topic "+qt(a.topic)+" to "+esc(clip(resolveSubj(a.subject),30))};
@@ -5640,7 +6149,7 @@ function dayRec(S,k){
   if(!S.days[k]) S.days[k]={big3:[],anchors:[],habits:{},energy:3,sleep:0,mood:null,win:"",dump:"",focus:0,q:"",gate:{},planned:false,shut:[]};
   var o=S.days[k];
   if(!o.big3) o.big3=[];
-  while(o.big3.length<3) o.big3.push({t:"",d:false,plan:"",mins:60});
+  while(o.big3.length<3) o.big3.push({t:"",d:false,plan:"",mins:60,pri:"md"});
   return o;
 }
 
@@ -5666,11 +6175,14 @@ function runAct(S,a,today){
       S.tasks=S.tasks.filter(function(x){ return x.id!==r.t.id; }); return null;
     case "big3.set":
       v=clip(a.text,140); if(!v) return "no text for the slot";
-      t=dayRec(S,today).big3[slotOf(a)];
+      b=dayRec(S,today).big3;
+      t=b[slotOf(a,b.length)];
       t.t=v; t.d=false; if(okMins(a.mins)) t.mins=okMins(a.mins); if(a.plan) t.plan=clip(a.plan,200);
+      if(!t.pri) t.pri="md";
       return null;
     case "big3.clear":
-      t=dayRec(S,today).big3[slotOf(a)]; t.t=""; t.d=false; t.plan=""; t.mins=60; return null;
+      b=dayRec(S,today).big3;
+      t=b[slotOf(a,b.length)]; t.t=""; t.d=false; t.plan=""; t.mins=60; t.pri="md"; return null;
     case "class.add": {
       var nd=okDay(a.day), nf=okTime(a.from), nt=okTime(a.to);
       var ns=clip(a.subject,60);
