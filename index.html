@@ -5820,7 +5820,19 @@ function spec(){
 
   return "\n\n=== HIS WINDOWS PC ===\n"+
   "Compass is running as a desktop application on his PC, so you can act on the machine itself and not just "+
-  "talk about it. Use these the same way as every other tool: end your reply with a fenced compass block.\n\n"+
+  "talk about it.\n\n"+
+
+  "HOW TO ASK, and there is only one way. You do NOT have function calling here, and there is no API to call. "+
+  "Everything below works exactly like his Compass lookups and changes: you end your reply with a fenced block, "+
+  "and Compass reads it. Never emit a tool call, a function call, or JSON outside the fence — none of those reach "+
+  "anything, and a provider may reject them outright. Like this:\n\n"+
+  "```compass\n"+
+  '[{"do":"win.list_files","path":"~/Downloads"}]\n'+
+  "```\n\n"+
+
+  "This section overrides anything earlier that says you cannot launch programs, open things, or reach outside a "+
+  "browser tab. That described the web version. He is on the desktop app now, so open.app and open.url really do "+
+  "open, and the actions below really do run — and there is no longer a one-per-reply limit on opening things.\n\n"+
 
   "You may only touch these folders, and only ever inside them:\n"+ rootLine + "\n"+
   "Write ~ for his home folder. Anything outside the list is refused by the desktop app before it runs, and no "+
@@ -6021,6 +6033,21 @@ function paintLog(){
   });
 }
 
+/* Opening a link or an app.
+   Compass has had `open.app` and `open.url` since long before the desktop
+   existed, and both worked by calling window.open — which a desktop webview
+   refuses, so on the desktop they always failed with "the browser blocked that
+   popup". This routes them to the OS instead. Rust re-validates the scheme
+   against an allowlist, so a hostile frontend cannot turn this into a way to
+   launch file:// or ms-msdt:// URLs. */
+function openUrl(url){
+  if(typeof url!=="string" || !url.trim()) return Promise.resolve("there was no address to open");
+  return invoke("open_url", {req:{url:url.trim()}}).then(function(r){
+    if(r && r.ok===false) return why({message:r.error});
+    return null;
+  }).catch(function(e){ return why(e); });
+}
+
 /* ── what the rest of Compass sees ───────────────────────────────── */
 window.CompassAgent = {
   /* true only in the desktop build, and only after Rust has answered */
@@ -6038,6 +6065,7 @@ window.CompassAgent = {
   readingLabel:readingLabel,
   runRead:runRead,
   runWrite:runWrite,
+  openUrl:openUrl,
   paintPanel:paintPanel
 };
 
@@ -6493,16 +6521,24 @@ var APP_LINKS={
 
 function isOpen(a){ return a.do==="open.app" || a.do==="open.url"; }
 
-function openTarget(a){
-  var u;
+/* Work out what address an open action means, without opening it. Split out so
+   the desktop can hand the result to the OS while the browser still hands it to
+   window.open. Returns {url} or {err}. */
+function openAddress(a){
   if(a.do==="open.app"){
     var app=APP_LINKS[String(a.app||"").trim().toLowerCase()];
-    if(!app) return "Compass doesn’t know an app called “"+clip(a.app,30)+"”";
-    u=app.url;
-  }else{
-    u=String(a.url||"").trim();
-    if(!/^https?:\/\//i.test(u)) return "only http and https addresses can be opened";
+    if(!app) return {err:"Compass doesn’t know an app called “"+clip(a.app,30)+"”"};
+    return {url:app.url};
   }
+  var u=String(a.url||"").trim();
+  if(!/^https?:\/\//i.test(u)) return {err:"only http and https addresses can be opened"};
+  return {url:u};
+}
+
+function openTarget(a){
+  var got=openAddress(a);
+  if(got.err) return got.err;
+  var u=got.url;
   try{
     var w=window.open(u,"_blank","noopener");
     /* A protocol hand-off returns no window even when it worked, so only treat a
@@ -6515,8 +6551,14 @@ function openTarget(a){
 }
 
 /* These must fire on his actual tap. Anything after an await has lost the
-   gesture and the popup blocker eats it, and browsers only ever allow one. */
+   gesture and the popup blocker eats it, and browsers only ever allow one.
+
+   None of that applies in the desktop app: there is no popup blocker to satisfy
+   and no gesture to preserve, because the OS does the opening. So on the desktop
+   this stands aside and runAct handles these properly and asynchronously — which
+   also lifts the one-per-reply limit. */
 function preOpen(acts){
+  if(agent()) return {};
   var done={}, used=false;
   for(var i=0;i<acts.length;i++){
     if(!isOpen(acts[i])) continue;
@@ -6852,6 +6894,16 @@ function runAct(S,a,today){
         });
     }
     default:
+      /* An open action, on the desktop. In a browser preOpen already dealt with
+         these on his tap and runAct never sees them; here the OS does it, so it
+         can happen after an await like everything else. */
+      if(isOpen(a)){
+        var A0 = agent();
+        if(!A0) return "opening things needs a browser tab";
+        var got = openAddress(a);
+        if(got.err) return got.err;
+        return A0.openUrl(got.url);
+      }
       /* A desktop tool, if this is the Windows build and it names one. runAct is
          awaited by applyActs, so returning the promise here is enough. */
       if(isNativeWrite(a)) return agent().runWrite(a);
