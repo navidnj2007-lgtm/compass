@@ -1,0 +1,44 @@
+# Line endings, decided once instead of per commit.
+#
+# This file exists because of a near miss. The repository was built by uploading
+# files through the GitHub web UI, which stored them with CRLF, while the working
+# copy on disk had LF for some files and CRLF for others. Committing the LF copies
+# would have produced a whole-file diff on top of the real change — 8,600 changed
+# lines to hide 350 — and the fix that time was converting two files by hand
+# before staging them. That works exactly once and then someone forgets.
+#
+# `text=auto` puts the decision in git's hands: every file git considers text is
+# normalised to LF in the object store, whatever the working copy happens to use.
+# Diffs then show what changed rather than which editor last saved the file.
+
+* text=auto
+
+# Shell scripts must be LF in the worktree as well as in the repository. bash
+# treats a trailing \r as part of the command and fails with messages that point
+# nowhere near the cause, and these two are run under WSL.
+*.sh text eol=lf
+
+# Batch files are the mirror image: cmd.exe wants CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binaries, listed explicitly. Without this, `text=auto` guesses from content, and
+# a PNG that happens to look textual enough would be "normalised" — which for an
+# image means corrupted, silently, in a way that only shows up when someone looks
+# at the installer icon.
+*.png binary
+*.ico binary
+*.icns binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.exe binary
+*.dll binary
+*.tar.gz binary
+*.zip binary
+
+# The updater signing key is gitignored and must never be committed, but if one
+# ever reaches the index by accident it should at least not be mangled on the way.
+*.key binary
+*.pub binary

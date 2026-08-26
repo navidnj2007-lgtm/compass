@@ -82,5 +82,9 @@ updater signature verifies against the public key compiled into the app, that th
 `__TAURI_BUNDLE_TYPE` marker survived (if it did not, the updater silently will
 not work), and that both artefacts are real PE files.
 
-Both shell scripts are stored with Windows line endings, so run them through
-`tr -d '\r'` first if bash complains.
+Both shell scripts are LF, pinned that way by `.gitattributes` (`*.sh text eol=lf`)
+regardless of what any editor or checkout would otherwise do. bash treats a
+trailing `\r` as part of the command and then fails with a message that points
+nowhere near the cause, so this is enforced rather than remembered. An earlier note
+here said the opposite and told you to pipe them through `tr -d '\r'`; that advice
+was already out of date when it was checked.
