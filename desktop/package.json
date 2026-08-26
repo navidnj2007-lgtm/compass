@@ -1,0 +1,19 @@
+{
+  "name": "compass-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Windows shell for Compass. Holds no frontend of its own — it loads the live one and carries the native agent tools.",
+  "scripts": {
+    "snapshot": "node scripts/snapshot.mjs",
+    "dev": "npm run snapshot && tauri dev",
+    "build": "npm run snapshot && tauri build",
+    "verify": "cargo run --release --manifest-path verify/Cargo.toml",
+    "check": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings",
+    "icons": "tauri icon ../icon-512.png",
+    "keygen": "tauri signer generate -w .tauri-updater.key",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.9.2"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "compass-local",
+  "description": "What the offline copy of Compass may do. Identical to what the live frontend may do, deliberately: the two must not drift, or a bug would only appear in one of them.",
+  "local": true,
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:webview:allow-internal-toggle-devtools",
+    "updater:default",
+
+    "allow-agent-handshake",
+    "allow-agent-audit",
+    "allow-agent-open-settings",
+    "allow-list-files",
+    "allow-search-files",
+    "allow-read-file",
+    "allow-get-system-information",
+    "allow-clipboard-read",
+    "allow-create-folder",
+    "allow-write-file",
+    "allow-move-file",
+    "allow-rename-file",
+    "allow-delete-file",
+    "allow-open-application",
+    "allow-open-url",
+    "allow-browser-tabs",
+    "allow-browser-open",
+    "allow-browser-read",
+    "allow-browser-click",
+    "allow-browser-type",
+    "allow-clipboard-write",
+    "allow-show-notification"
+  ]
+}

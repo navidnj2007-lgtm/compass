@@ -1,0 +1,120 @@
+name: Compass desktop
+
+# Two jobs with different purposes.
+#
+# `verify` runs on every push and is the one that catches mistakes: it type-checks
+# the Rust, runs the path-guard tests, and runs the frontend and worker checks. It
+# does not build an installer, so it is fast.
+#
+# `installer` runs only on a version tag and produces the signed artefacts the
+# updater serves.
+#
+# This workflow also exists because Windows machines with Smart App Control
+# enforced cannot run Cargo build scripts locally — GitHub's runners can, so the
+# installer can be produced without weakening anyone's machine.
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Frontend and worker checks
+        run: |
+          node .build/verify-frontend.mjs
+          node .build/test-worker.mjs
+          node .build/test-orchestrator.mjs
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri
+
+      - name: Generate the offline snapshot
+        working-directory: desktop
+        run: node scripts/snapshot.mjs
+
+      - name: Formatting
+        working-directory: desktop/src-tauri
+        run: cargo fmt --check
+
+      - name: Type-check
+        working-directory: desktop/src-tauri
+        run: cargo check --all-targets
+
+      - name: Clippy
+        working-directory: desktop/src-tauri
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Path guard and policy tests
+        working-directory: desktop/src-tauri
+        run: cargo test
+
+      # The security core, run against a real filesystem including NTFS
+      # junctions. Separate from `cargo test` because it has no dependencies and
+      # so runs even on machines where Smart App Control blocks the libtest
+      # harness — see desktop/README.md.
+      - name: Path guard verification
+        working-directory: desktop/verify
+        run: |
+          cargo fmt --check
+          cargo run --release
+
+  installer:
+    name: Installer
+    needs: verify
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri
+
+      - name: Install the Tauri CLI
+        working-directory: desktop
+        run: npm ci
+
+      - name: Build the installer
+        working-directory: desktop
+        env:
+          # The private key never leaves the secret store, and the build fails
+          # rather than shipping an unsigned update if it is missing.
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: npm run build
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          files: |
+            desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
+            desktop/src-tauri/target/release/bundle/nsis/*-setup.exe.sig

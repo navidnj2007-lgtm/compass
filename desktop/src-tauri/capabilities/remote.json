@@ -1,0 +1,42 @@
+{
+  "$schema": "../gen/schemas/remote-schema.json",
+  "identifier": "compass-remote",
+  "description": "What the live frontend served from GitHub Pages may do. This is the capability that makes 'one frontend, updated by pushing to GitHub' possible, so it is also the most security-relevant file in the project.",
+
+  "remote": {
+    "urls": [
+      "https://navidnj2007-lgtm.github.io",
+      "https://navidnj2007-lgtm.github.io/*"
+    ]
+  },
+  "windows": ["main"],
+  "platforms": ["windows"],
+
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+
+    "allow-agent-handshake",
+    "allow-agent-audit",
+    "allow-agent-open-settings",
+    "allow-list-files",
+    "allow-search-files",
+    "allow-read-file",
+    "allow-get-system-information",
+    "allow-clipboard-read",
+    "allow-create-folder",
+    "allow-write-file",
+    "allow-move-file",
+    "allow-rename-file",
+    "allow-delete-file",
+    "allow-open-application",
+    "allow-open-url",
+    "allow-browser-tabs",
+    "allow-browser-open",
+    "allow-browser-read",
+    "allow-browser-click",
+    "allow-browser-type",
+    "allow-clipboard-write",
+    "allow-show-notification"
+  ]
+}

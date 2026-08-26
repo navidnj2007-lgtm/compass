@@ -1,0 +1,21 @@
+# The updater signing key. If this leaks, anyone can push a signed "update" to
+# every Compass install. It must never be committed.
+.tauri-updater.key
+.tauri-updater.key.pub
+*.key
+
+# Rust build output
+src-tauri/target/
+verify/target/
+
+# Installers produced by a local build. Releases come from CI.
+dist/
+
+# Tauri's generated ACL schemas and permission glue
+src-tauri/gen/
+
+# The offline snapshot is generated from ../index.html at build time, so it is
+# not a second copy of the frontend to keep in step by hand.
+local/
+
+node_modules/

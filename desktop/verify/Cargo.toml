@@ -1,0 +1,23 @@
+[package]
+name = "compass-guard-verify"
+version = "1.0.0"
+edition = "2021"
+publish = false
+
+# Deliberately no dependencies at all.
+#
+# Three reasons. It proves `guard.rs` and `rules.rs` genuinely depend on nothing
+# but std, which is a property worth having in the security-critical path and
+# easy to lose by accident. It means these checks compile in about a second. And
+# it means they can be run on a machine with Smart App Control enforced, which
+# blocks the build scripts that registry crates need — so the sandbox stays
+# verifiable on exactly the sort of locked-down machine the app should be safe on.
+[dependencies]
+
+# A plain binary rather than a `cargo test` harness, for the same reason: Smart
+# App Control blocks the libtest harness executable on some machines but permits
+# an ordinary one. The checks and assertions are identical; only the runner is
+# hand-rolled. `cargo test` still runs the full suite in CI.
+[[bin]]
+name = "verify"
+path = "src/main.rs"
