@@ -143,6 +143,8 @@ const expected = [
   "browser_tabs", "browser_open", "browser_read", "browser_click", "browser_type",
   // computer use: the read half
   "pc_list_windows", "pc_list_monitors", "pc_cursor_position", "pc_wait", "pc_screenshot",
+  // computer use: the acting half
+  "pc_focus_window", "pc_mouse_move", "pc_scroll", "pc_click", "pc_drag", "pc_type", "pc_hotkey",
 ];
 ok(`${names.length} tools registered`);
 for (const e of expected) {
@@ -319,6 +321,64 @@ if (localAllows && remoteAllows) {
       )
     : ok("both capability files allow exactly the same tools");
 }
+
+/* ── 6. computer use cannot be reached without its restraints ────── */
+/* These are the assertions worth having in a machine rather than in a review comment.
+   Each one is a property that would be silently lost by a plausible refactor. */
+console.log("\ncomputer use keeps its restraints");
+const tauriSrc = join(REPO, "desktop", "src-tauri", "src");
+const inputRs = mustRead(join(tauriSrc, "tools", "input.rs"), "tools/input.rs");
+const screenRs = mustRead(join(tauriSrc, "tools", "screen.rs"), "tools/screen.rs");
+const grantRs = mustRead(join(tauriSrc, "grant.rs"), "grant.rs");
+
+const pcRules = [
+  [inputRs, "state.grants.claim()?", "every acting command claims against the session grant"],
+  [inputRs, "consent::require_always(", "the dangerous four use the consent path that takes no policy"],
+  [inputRs, "pub fn looks_secret(", "the secret filter exists"],
+  [inputRs, "if let Some(why) = looks_secret(&req.text)", "typing is checked against it"],
+  [inputRs, "pub fn parse_keys(", "hotkeys go through an allow-list"],
+  [inputRs, "REFUSED_COMBOS", "some combinations are refused outright"],
+  [inputRs, "pub fn point_on_screen(", "coordinates are checked against real monitors"],
+  [inputRs, "fn target_at(", "the window under the pointer is what gets checked"],
+  [screenRs, "grant::is_blocked(", "the exclusion list gates the screen reads too"],
+  [grantRs, "pub const BLOCKED_WINDOWS", "the exclusion list is compiled in"],
+];
+for (const [src, needle, label] of pcRules) {
+  src.includes(needle) ? ok(label) : bad(label + ` (missing: ${needle})`);
+}
+
+/* The properties that are about ABSENCE, which a positive assertion cannot cover.
+   Run against the source with comments removed: the first version of this check failed
+   because the module comment *explains* that `Key::Raw` was rejected and that a paste
+   tool would bypass consent, and a check that cannot tell an explanation from an
+   implementation is a check that punishes writing the explanation down. */
+function stripRustComments(src) {
+  return src
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .split("\n")
+    .map((l) => l.replace(/\/\/.*$/, ""))
+    .join("\n");
+}
+const inputCode = stripRustComments(inputRs);
+
+const pcAbsences = [
+  [inputCode, /Key::Raw|from_scancode|VIRTUAL_KEY\(\s*req\./, "no way to send a raw key code"],
+  [inputCode, /fn pc_paste/, "no paste tool that would bypass the consent text"],
+  [inputCode, /looks_secret[^)]*\)\s*\{\s*\}/, "the secret filter is not stubbed out"],
+  [html, /register\(\{[^}]*name:"pc\.(grant|revoke)"/, "granting is not a tool the model can call"],
+];
+for (const [src, rx, label] of pcAbsences) {
+  rx.test(src) ? bad(label + " — FOUND one") : ok(label);
+}
+
+/* And that typing's consent shows the text rather than a count, which is the whole
+   reason that dialog exists. */
+inputRs.includes("wants to type this into")
+  ? ok("the typing dialog shows the literal text")
+  : bad("the typing dialog no longer shows the text it will type");
+inputRs.includes('format!("Typed {} character(s)", req.text.chars().count())')
+  ? ok("the audit log records the length of typed text, never the text")
+  : bad("the audit log may be recording typed text verbatim");
 
 /* no generic command execution anywhere in the frontend */
 const danger = /execute_any_command|run_command|exec_shell|"eval"|\bnew Function\(/;

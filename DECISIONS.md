@@ -745,3 +745,116 @@ image, and there are now three ways an image gets into a turn — the file picke
 browser's screen capture, and `pc.screenshot`. The one thing always true is that the
 image is in the message, so that is what gets asked. With no `VISION_MODEL` binding the
 worker ignores the field entirely.
+
+---
+
+## D33 — Raw `SendInput` rather than `enigo`
+
+**Decided:** input synthesis is written directly against the `windows` crate.
+
+**Options:** `enigo`, which is the obvious choice and is well maintained; raw
+`SendInput`.
+
+**Rule:** 2 (security posture), and the reason is specific rather than aesthetic.
+`enigo` exposes `Key::Raw(u16)` and `Key::Other`, so anything that can reach it can
+send any virtual-key code — and the hotkey allow-list would then be a suggestion rather
+than a boundary. What is wanted here is a deliberately *incomplete* keyboard, and the
+way to have one is to write only the parts that are wanted. There is no syntax in
+`pc.hotkey` for "key 0x5B", and there is no code behind it either.
+
+The cost is about 150 lines of unsafe, which is real. It is bounded, it is all in one
+module, and the CI check now asserts that no raw-code path has appeared.
+
+**Revisit if:** the key list needs to grow often enough that maintaining the mapping
+becomes the bigger risk.
+
+---
+
+## D34 — `MOUSEEVENTF_VIRTUALDESK`, and why it is not optional
+
+**Decided:** absolute mouse coordinates are converted against the whole virtual desktop
+with `MOUSEEVENTF_VIRTUALDESK` set.
+
+**Options:** the default, which maps 0–65535 over the primary monitor.
+
+**Rule:** correctness, recorded because the bug it prevents is silent. Without the flag
+every click intended for a second monitor lands on the first, at a scaled-down position
+— so the agent would report clicking a button, the click would land somewhere else
+entirely, and the verify screenshot of the *second* monitor would show nothing had
+changed. A wrong click that reports success is the worst failure this feature can have.
+
+---
+
+## D35 — The exclusion check happens at the coordinate, not the named window
+
+**Decided:** `target_at()` finds whatever window is under the point and checks that,
+rather than trusting a window id the model supplied.
+
+**Options:** check the window the model named; check the coordinate.
+
+**Rule:** 2 (security posture). The click lands on whatever is under the pointer. A
+model that names a permitted window and then clicks at coordinates over a password
+manager sitting on top of it must be refused, and only the coordinate knows that. Both
+ends of a drag are checked for the same reason: a drag that starts somewhere permitted
+and ends over an excluded window is still a drop onto it.
+
+An unrecognised point — the desktop, or a window with no title — is permitted but named
+honestly in the dialog as "(the desktop, or an untitled window)", because refusing it
+would make the feature unusable and claiming to know what it is would be worse.
+
+---
+
+## D36 — Typing is refused before consent, not shown in a dialog
+
+**Decided:** `looks_secret()` runs before `require_always`, so a refused string never
+reaches a dialog.
+
+**Options:** show the dialog and let him decide; refuse first.
+
+**Rule:** 2 (security posture). Showing a dialog containing a card number invites
+approval out of habit — the dialog is a prompt someone learns to click — and it would
+also put the number in front of him in a context where the safe answer is that Compass
+never types it at all. Refusing first also means the secret is never echoed into the
+audit log, which records only the length of typed text and never the text.
+
+**Accepted false positive, found by a failing test rather than by reasoning:**
+`9876543210987` is thirteen digits and satisfies Luhn, so it is indistinguishable from a
+card number. It is refused. There is now a test asserting that, with the trade written
+next to it: a false refusal costs one sentence and he types it himself, a false allow
+costs a card number typed into a form by an agent acting on something it read.
+
+---
+
+## D37 — Some key combinations are refused however they are spelled
+
+**Decided:** Ctrl+Alt+Del, Ctrl+Shift+Esc, Win+R, Win+E, Win+X, Win+L and Alt+F4 are
+refused on the sorted, normalised combination.
+
+**Options:** rely on the allow-list of individual keys; refuse the combinations too.
+
+**Rule:** 2 (security posture). Every key in those combinations is individually
+reasonable — Ctrl, Alt, Delete, R — so an allow-list of keys permits all of them. But
+their effect is not "a keystroke in the focused application", it is "something about the
+machine": a run dialog is a command line, and Win+L would end the session mid-task.
+Normalising and sorting before comparing means `alt+ctrl+delete` is the same thing as
+`ctrl+alt+delete` to the check.
+
+**Note on what this does not do:** Ctrl+Alt+Del is a secure attention sequence that
+`SendInput` cannot deliver anyway. It is on the list so the refusal is explicit rather
+than mysterious.
+
+---
+
+## D38 — No `pc.paste`
+
+**Decided:** there is no tool that puts text on the clipboard and presses Ctrl+V.
+
+**Options:** add one, since it is faster and more reliable than typing.
+
+**Rule:** 2 (security posture). The consent dialog for typing shows the literal text,
+and that is the entire reason it is worth having. A paste tool's dialog could only name
+the keystroke, so the payload would never be shown — the text would arrive having been
+approved by a prompt that did not mention it. The frontend's `win.clipboard_write`
+already exists and is separately approved, which makes the combination reachable in two
+deliberate steps rather than one invisible one; the CI check asserts no `pc_paste`
+appears.

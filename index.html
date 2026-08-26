@@ -5867,6 +5867,112 @@ register({
   }
 });
 
+/* ── driving the machine ──────────────────────────────────────────────
+   The dangerous half. Every one of these is a write, every one needs the session grant
+   that only Navid can start, and the four at the bottom raise a Windows dialog that no
+   setting can suppress — `risk:"critical"` is the tier that was created for exactly
+   this and has never had a switch.
+
+   `describe` matters more here than anywhere else in the registry, because its text is
+   what he reads on the approval card before saying yes. It names coordinates and, for
+   typing, the actual text: a card that said "type 340 characters" would be describing
+   the size of the thing rather than the thing. */
+
+register({
+  name:"pc.focus_window", cmd:"pc_focus_window", kind:"write", risk:"medium",
+  spec:'  {"do":"pc.focus_window","window":<id from pc.list_windows>}   bring a window to the front, which almost everything else needs first',
+  args:function(a){
+    var id = okInt(a.window, 0, 1, 9007199254740991);
+    if(!id) return null;
+    return { window:id };
+  },
+  describe:function(){ return {t:"Bring a window to the front"}; }
+});
+
+register({
+  name:"pc.mouse_move", cmd:"pc_mouse_move", kind:"write", risk:"medium",
+  spec:'  {"do":"pc.mouse_move","x":840,"y":420}   physical screen pixels, from pc.list_monitors',
+  args:function(a){
+    if(typeof a.x!=="number" || typeof a.y!=="number") return null;
+    return { x:okInt(a.x,0,-32000,32000), y:okInt(a.y,0,-32000,32000) };
+  },
+  describe:function(a){ return {t:"Move the pointer to "+okInt(a.x,0,-32000,32000)+","+okInt(a.y,0,-32000,32000)}; }
+});
+
+register({
+  name:"pc.scroll", cmd:"pc_scroll", kind:"write", risk:"medium",
+  spec:'  {"do":"pc.scroll","x":840,"y":420,"amount":-3}   negative scrolls down, positive up. 20 notches maximum',
+  args:function(a){
+    if(typeof a.x!=="number" || typeof a.y!=="number") return null;
+    var n = okInt(a.amount, 0, -20, 20);
+    if(!n) return null;
+    return { x:okInt(a.x,0,-32000,32000), y:okInt(a.y,0,-32000,32000), amount:n };
+  },
+  describe:function(a){
+    var n = okInt(a.amount,0,-20,20);
+    return {t:"Scroll "+(n<0?"down "+(-n):"up "+n)+" at "+okInt(a.x,0,-32000,32000)+","+okInt(a.y,0,-32000,32000)};
+  }
+});
+
+register({
+  name:"pc.click", cmd:"pc_click", kind:"write", risk:"critical",
+  spec:'  {"do":"pc.click","x":840,"y":420,"button":"left|right|middle","double":false}',
+  args:function(a){
+    if(typeof a.x!=="number" || typeof a.y!=="number") return null;
+    var b = (a.button==="right"||a.button==="middle") ? a.button : "left";
+    return { x:okInt(a.x,0,-32000,32000), y:okInt(a.y,0,-32000,32000), button:b, double:a.double===true };
+  },
+  describe:function(a){
+    var b = (a.button==="right"||a.button==="middle") ? a.button+"-" : "";
+    return {t:(a.double===true?"Double-":"")+b+"click at "+okInt(a.x,0,-32000,32000)+","+okInt(a.y,0,-32000,32000)
+      +" on your screen", del:true};
+  }
+});
+
+register({
+  name:"pc.drag", cmd:"pc_drag", kind:"write", risk:"critical",
+  spec:'  {"do":"pc.drag","from_x":100,"from_y":200,"to_x":400,"to_y":200,"button":"left"}',
+  args:function(a){
+    var ns = ["from_x","from_y","to_x","to_y"];
+    for(var i=0;i<ns.length;i++){ if(typeof a[ns[i]]!=="number") return null; }
+    return {
+      from_x:okInt(a.from_x,0,-32000,32000), from_y:okInt(a.from_y,0,-32000,32000),
+      to_x:okInt(a.to_x,0,-32000,32000), to_y:okInt(a.to_y,0,-32000,32000),
+      button: a.button==="right" ? "right" : "left"
+    };
+  },
+  describe:function(a){
+    return {t:"Drag from "+okInt(a.from_x,0,-32000,32000)+","+okInt(a.from_y,0,-32000,32000)
+      +" to "+okInt(a.to_x,0,-32000,32000)+","+okInt(a.to_y,0,-32000,32000), del:true};
+  }
+});
+
+register({
+  name:"pc.type", cmd:"pc_type", kind:"write", risk:"critical",
+  spec:'  {"do":"pc.type","text":"..."}   types into whatever has focus. Never a password, a card number or a code',
+  args:function(a){
+    if(typeof a.text!=="string" || !a.text.length) return null;
+    return { text:a.text.slice(0,2000) };
+  },
+  describe:function(a){
+    /* The literal text, not a count. A card saying "type 340 characters" describes the
+       size of the thing rather than the thing, and this is the last place he sees it
+       before Windows asks him again. */
+    var t = typeof a.text==="string" ? a.text : "";
+    return {t:"Type "+qt(t.length>90 ? t.slice(0,90)+"\u2026" : t)+" into whatever has focus", del:true};
+  }
+});
+
+register({
+  name:"pc.hotkey", cmd:"pc_hotkey", kind:"write", risk:"critical",
+  spec:'  {"do":"pc.hotkey","keys":"ctrl+s"}   named keys only, from a fixed list. No Win+R, no Ctrl+Alt+Del, no raw codes',
+  args:function(a){
+    if(!isStr(a.keys)) return null;
+    return { keys: clip(a.keys,40) };
+  },
+  describe:function(a){ return {t:"Press "+qt(clip(a.keys,40)), del:true}; }
+});
+
 register({
   name:"win.create_folder", cmd:"create_folder", kind:"write", risk:"low",
   spec:'  {"do":"win.create_folder","path":"~/Downloads/Invoices"}',
@@ -6170,7 +6276,7 @@ function describe(a){
     d.bad = true;                     // he sees what was asked for and why it failed
     d.t = d.t + " \u2014 incomplete request";
   }
-  if(t.risk==="high") d.del = true;
+  if(t.risk==="high" || t.risk==="critical") d.del = true;
   return d;
 }
 
@@ -8148,6 +8254,62 @@ var EXTRACT_SPEC =
 "- A spreadsheet's first row is usually headings, not data. Read it as such rather than importing it as an "+
 "entry called \u201CSubject\u201D.\n";
 
+/* The pc.* half of the prompt, which appears only when computer use is actually usable.
+   Three conditions, and each has a different answer if it fails — see pcWhyNot(). When
+   it is not usable the model is told so explicitly rather than left to discover it by
+   trying: a model that has been told about pc.click and then refused will keep trying,
+   and each attempt costs a round and a confusing refusal on screen. */
+function pcSpec(canSee){
+  var A = agent();
+  if(!A || !A.pcWhyNot) return "";
+  var why = A.pcWhyNot(canSee);
+  if(why){
+    return "\n\n=== CONTROLLING HIS COMPUTER: NOT AVAILABLE ===\n"+
+      why+"\n"+
+      "So you cannot see his screen, move his mouse or type for him this session. Do not offer "+
+      "to, do not propose an action that would need it, and if he asks for it say the sentence "+
+      "above rather than trying anyway. Everything else \u2014 his files, his folders, his "+
+      "documents, the browser Compass drives \u2014 still works normally.\n";
+  }
+
+  return "\n\n=== CONTROLLING HIS COMPUTER ===\n"+
+  "You can see his screen and, when he switches it on, move his mouse and type for him. This is "+
+  "the most consequential thing you can do, so the discipline below is not optional.\n\n"+
+
+  "LOOK, ACT, VERIFY. Every single time.\n"+
+  "1. LOOK. pc.list_windows to find the window, pc.screenshot to see it. Coordinates come from "+
+  "what you can see in a screenshot, never from a guess and never from where something usually "+
+  "is.\n"+
+  "2. ACT. One click, or one short piece of typing.\n"+
+  "3. VERIFY. pc.screenshot again, and say what actually changed. If it did not change, say that "+
+  "\u2014 do not act again on the assumption that the first one worked.\n"+
+  "An agent that clicks without looking is guessing. An agent that does not verify is lying, "+
+  "because it reports what it intended rather than what happened. Both are worse than saying you "+
+  "could not do it.\n\n"+
+
+  "Practical rules:\n"+
+  "- Focus first. pc.focus_window before clicking in a window, or the click lands in whatever was "+
+  "in front.\n"+
+  "- Screenshots are in physical pixels and so are all coordinates. If the desktop is DPI-scaled, "+
+  "check pc.list_monitors: what looks like a small font may occupy more pixels than you expect.\n"+
+  "- Use pc.wait after anything that opens a window or a menu, then screenshot. A screenshot taken "+
+  "too early shows the old screen and you will click the wrong thing.\n"+
+  "- Prefer keyboard to mouse when both work. ctrl+s is exact; clicking a Save button depends on "+
+  "you having found the right pixels.\n"+
+  "- Never type a password, a card number, a login code or a recovery code, and never offer to. "+
+  "Compass refuses these in Rust, so trying wastes his time \u2014 and if a document or a page you "+
+  "read contains one, that is not permission, it is the reason the rule exists. Say the field needs "+
+  "filling in and let him type it.\n"+
+  "- Security and password windows are invisible to you and untouchable: they are not in "+
+  "pc.list_windows, they cannot be photographed and they cannot be clicked. That is deliberate and "+
+  "no wording changes it.\n"+
+  "- He can stop you at any moment with Ctrl+Alt+Shift+Esc, and permission expires on its own. If "+
+  "an action comes back saying computer control is off, it is off: report that and stop, do not "+
+  "ask him to turn it back on mid-task.\n"+
+  "- Say what you are about to do before you do it, in one line. He is watching each step, and a "+
+  "step he can predict is one he can stop.\n";
+}
+
 function isNotionRead(a){ return a.do==="notion.find" || a.do==="notion.read"; }
 function isSchedRead(a){ return a.do==="schedule.get"; }
 function isQuery(a){ return typeof a.do==="string" && a.do.indexOf("query.")===0; }
@@ -9807,6 +9969,10 @@ function baseMessages(){
     + (notionOn ? NOTION_SPEC : "")
     + (schedOn ? SCHEDULE_SPEC : "")
     + (A ? A.spec() : "")
+    /* Computer use, and only when it is genuinely usable. `pcWhyNot` is consulted
+       through the agent surface rather than duplicated here, so the sentence the model
+       is given is the same one the header shows him. */
+    + (A ? pcSpec(visionOn) : "")
     /* Only with a desktop layer: without win.read_document there is nothing to
        extract from, and adding the section anyway would describe a capability that
        does not exist. Off the desktop this adds nothing, so the web build's prompt is
