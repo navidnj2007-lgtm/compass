@@ -79,6 +79,7 @@ const must = [
   ["if(NATIVE_TOOLS){", "tools are only sent when the probe said yes, so the fenced path is untouched"],
   ["sp = splitActions(slot.content)", "the fenced protocol remains the fallback"],
   ["var visionOn = false", "vision is assumed absent until the worker says otherwise"],
+  ["+ (A ? EXTRACT_SPEC : \"\")", "document extraction is taught only when the desktop layer is present"],
   ["function splitActions(txt)", "fenced compass block parser intact"],
   ["telegram-web-app.js", "Telegram shell still loaded"],
   ["var ACTIONS_SPEC =", "original action spec intact"],

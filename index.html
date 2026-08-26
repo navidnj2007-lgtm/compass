@@ -7872,6 +7872,46 @@ var SCHEDULE_SPEC =
 "- If it comes back empty, say the feed shows nothing for that day rather than assuming he is free — a holiday "+
 "and a broken feed look identical from here.\n";
 
+/* ── TURNING A DOCUMENT INTO COMPASS ENTRIES ──────────────────────────
+   Deliberately a prompt section rather than a tool.
+
+   The tempting design is an `import.syllabus` action that takes a path and produces
+   revision topics. It was rejected: it would mean a second write path into his data
+   that does not go through the approval card, and the card is the only place he sees
+   what is about to change. Extraction is not a new capability — it is reading a
+   document, which he already has, followed by proposing entries, which he already
+   has. What was missing was the discipline connecting them, and discipline belongs in
+   the prompt.
+
+   Only added when the desktop layer is present, since without win.read_document there
+   is nothing to extract from. On the web this contributes nothing, which keeps the
+   web build's prompt byte-identical. */
+var EXTRACT_SPEC =
+"\n\n=== TURNING A DOCUMENT INTO COMPASS ENTRIES ===\n"+
+"When he gives you a syllabus, a timetable, a deadline list or a set of lecture slides and asks you to get it "+
+"into Compass, the job is two steps and they are separate on purpose.\n"+
+"1. READ IT FIRST with win.read_document. Never propose entries from a filename, from what a syllabus usually "+
+"contains, or from what you remember of his course. If you have not read the text, you do not know what is in it.\n"+
+"2. THEN propose the entries in one block, so he approves the whole import once. Use the ordinary actions \u2014 "+
+"revise.add for topics, class.add for lessons, deadline.add for dates, task.add for work. There is no special "+
+"import action, because everything must go through the same list he can read and undo.\n"+
+"How to do it well:\n"+
+"- Long documents: read a page range at a time and propose as you go, rather than trying to hold sixty pages at "+
+"once. Say which pages you worked from.\n"+
+"- Quote the document's own wording for topic and lesson names. A syllabus that says \u201CLe Chatelier\u2019s "+
+"principle\u201D should not become \u201CEquilibrium shifts\u201D \u2014 he will search for the words the syllabus "+
+"used.\n"+
+"- Dates only if the document states them. A syllabus that gives a term but no date gives you no date; say so "+
+"rather than estimating. An invented deadline is worse than a missing one, because he will plan against it.\n"+
+"- If the document is ambiguous about something structural \u2014 which subject a topic belongs to, whether a time "+
+"is a lesson or a deadline \u2014 propose what you are sure of and ask about the rest in one sentence.\n"+
+"- Twenty topics is a normal import. Two hundred is not: propose the first section and say there is more to "+
+"come.\n"+
+"- class.add is for the weekly repeating timetable, and only if the document describes a repeating week. A list "+
+"of dated one-off events is deadlines, not classes.\n"+
+"- A spreadsheet's first row is usually headings, not data. Read it as such rather than importing it as an "+
+"entry called \u201CSubject\u201D.\n";
+
 function isNotionRead(a){ return a.do==="notion.find" || a.do==="notion.read"; }
 function isSchedRead(a){ return a.do==="schedule.get"; }
 function isQuery(a){ return typeof a.do==="string" && a.do.indexOf("query.")===0; }
@@ -9517,6 +9557,11 @@ function baseMessages(){
     + (notionOn ? NOTION_SPEC : "")
     + (schedOn ? SCHEDULE_SPEC : "")
     + (A ? A.spec() : "")
+    /* Only with a desktop layer: without win.read_document there is nothing to
+       extract from, and adding the section anyway would describe a capability that
+       does not exist. Off the desktop this adds nothing, so the web build's prompt is
+       byte-identical to what it was. */
+    + (A ? EXTRACT_SPEC : "")
     + "\n\n=== LIVE COMPASS CONTEXT ===\n" + snapshot(mode);
   var sl=history.slice(0,-1).slice(-12), rich=-1;
   for(var k=sl.length-1;k>=0;k--){ if(sl[k].role==="user" && sl[k].api){ rich=k; break; } }

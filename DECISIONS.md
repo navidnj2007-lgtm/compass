@@ -423,3 +423,78 @@ A zip bomb produces very little text from a great deal of effort; a spreadsheet 
 a million empty rows produces none at all. The zip entries are also read by name
 only — never by iterating whatever the archive contains — which is what stops a
 `.docx` holding a thousand nested archives from being interesting.
+
+---
+
+## D20 — The diff is a read tool the card calls, not a field on the write
+
+**Decided:** `win.diff_file` is a separate read-only command, and the approval card
+fetches it lazily while it renders.
+
+**Options:** have `write_file` return a diff (too late — the card is drawn before the
+write); have the model call `diff_file` and paste the result into its proposal (the
+model becomes the source of truth for what is on disk); make `describe()` async (it is
+called from render paths that cannot await).
+
+**Rule:** 2 (security posture) then 1 (reversible). The second option is the
+tempting one and the wrong one: a diff the model supplies is a diff the model can be
+talked into misrepresenting, and the whole purpose of the card is to show the user
+what Rust is actually about to do. Reading the file from Rust at render time means the
+card cannot be lied to.
+
+Making it a read tool has the side effect that the model can also call it, which is
+useful — it can check its own proposal before making it — but the card does not depend
+on it doing so.
+
+**Revisit if:** the render path ever becomes async, which would allow a simpler
+shape.
+
+---
+
+## D21 — Backups live in app data, and restore takes its destination from the record
+
+**Decided:** previous file contents go in the app's own data directory, and
+`restore_file` reads the destination from what was recorded when the copy was taken
+rather than from its argument.
+
+**Options:** a `.compass-backup` folder beside the original; the app data directory.
+
+**Rule:** 2 (security posture). Beside the original is friendlier and wrong twice
+over. `Policy::hard_denied` already denies app data to every file tool, so backups
+there are unreadable and unwritable by the agent; beside the original they would be
+both. A backup of a file the agent was refused is a copy of that file, and an agent
+that can overwrite the undo history can make a change unrevertable.
+
+Taking the destination from the record rather than the argument means `restore_file`
+cannot be aimed: it can only put back something Compass itself wrote. If the record
+and the argument disagree, nothing is restored.
+
+**Revisit if:** never.
+
+---
+
+## D22 — The local SQLite index (task 19) is deferred, not abandoned
+
+**Decided:** task 19 is left until after WP2 and WP4, and may not land in this run.
+
+**Options:** build it in sequence; defer it.
+
+**Rule:** 4 (smaller scope), applied at the package level, plus 2.
+
+What task 19 buys is speed, not capability. "Which file did I write about X in" is
+answered today by `win.grep_files` (task 17), which searches contents across the
+allowed roots and returns path, line and excerpt. An index makes that faster on a
+large Documents folder; it does not answer a question that is currently unanswerable.
+
+What it costs is a C dependency (`rusqlite` bundles SQLite), an indexer with real
+cache-invalidation complexity, and a second store of the user's document contents on
+disk — which is a new thing to secure, keep out of sync, and keep out of the backup.
+Against that, WP2 is the headline feature and the one with the highest chance of
+needing more attention than planned.
+
+**This is a deviation from the stated order and is logged as such.** The order given
+was WP3 then WP2 then WP4; deferring one task inside WP3 past WP2 is a smaller
+deviation than shipping WP2 rushed.
+
+**Revisit if:** grep proves too slow in practice on his actual Documents folder,
+which is the measurement that would justify the dependency.
