@@ -9069,36 +9069,90 @@ function actionToolSchema(){
   }];
 }
 
-/* Ask once per session. Not cached in storage on purpose: the answer depends on the
-   worker, the provider behind it and the chosen model, any of which can change
-   between sessions, and a stale "yes" would cost a failed request on every turn
-   until someone noticed. A stale "no" would silently keep the app on the weaker
-   protocol for ever, which is worse. */
+/* Ask once per session, and make the provider prove it.
+   Not cached in storage on purpose: the answer depends on the worker, the provider behind
+   it and the chosen model, any of which can change between sessions.
+
+   THIS PROBE USED TO BE WRONG, AND THE WAY IT WAS WRONG IS INSTRUCTIVE.
+
+   It asked "did a request carrying `tools` come back 200", and reasoned explicitly that
+   "will the model actually use them" was a different and less important question. That
+   reasoning was backwards. The provider here is a third-party proxy, and a proxy can
+   accept a request carrying a field it does not understand, ignore the field, and answer
+   200 — which is exactly what happened. The probe read that as support, the orchestrator
+   switched protocol mid-session, and from then on every turn produced neither content nor
+   tool calls. The chat went silent while the worker logs showed 151 requests and no
+   errors, because from the worker's point of view nothing had gone wrong.
+
+   So the probe now demands a demonstration: `tool_choice: "required"`, a question that
+   cannot be answered any other way, and a check that the response body actually contains a
+   `tool_calls` array. Nothing else counts. A provider that ignores the field answers with
+   prose and is correctly recorded as not supporting it.
+
+   False negatives are cheap here and false positives are not, which is the whole shape of
+   this decision: being wrongly told there is no tool calling costs the fenced protocol,
+   which has always worked. Being wrongly told there is costs every turn in the session. */
 function probeNativeTools(){
   if(nativeProbeP) return nativeProbeP;
   if(!ready()){ NATIVE_TOOLS = false; return (nativeProbeP = Promise.resolve(false)); }
+  /* An explicit choice in Settings always wins. A probe that gets this wrong must never be
+     able to leave the chat unusable with no way out. */
+  if(cfg.tools === "off"){
+    NATIVE_TOOLS = false;
+    nativeWhy = "switched off in Settings";
+    return (nativeProbeP = Promise.resolve(false));
+  }
+  if(cfg.tools === "on"){
+    NATIVE_TOOLS = true;
+    nativeWhy = "forced on in Settings";
+    return (nativeProbeP = Promise.resolve(true));
+  }
 
   nativeProbeP = workerCall({
-    messages: [{role:"user", content:"Reply with the single word: ready"}],
+    messages: [{role:"user", content:
+      "Call compass_actions with actions set to a single action whose do is \"query.tasks\". "+
+      "This is a capability check. Do not reply with prose."}],
     stream: false,
     model: cfg.model || undefined,
-    max_tokens: 16,
+    max_tokens: 120,
     tools: actionToolSchema(),
-    tool_choice: "auto"
+    /* "required" rather than "auto": the question is whether the provider can produce a
+       tool call at all, and "auto" lets a model that supports them answer in prose anyway,
+       which is indistinguishable from a provider that ignored the field. */
+    tool_choice: "required"
   }).then(function(r){
-    /* 200 means the whole chain — worker, provider, model — accepted a request
-       carrying tool schemas. Anything else means it did not, and the reason does not
-       matter: an old worker that rejects the field, a provider that has no function
-       calling, a model that refuses them. All of those mean "use the fenced block",
-       which is the path that has always worked. */
-    NATIVE_TOOLS = r.status === 200;
-    return NATIVE_TOOLS;
-  }).catch(function(){
+    if(r.status !== 200){
+      NATIVE_TOOLS = false;
+      nativeWhy = "the provider refused a request carrying tool definitions ("+r.status+")";
+      return false;
+    }
+    var choice = r.body && r.body.choices && r.body.choices[0];
+    var msg = choice && choice.message;
+    var calls = msg && msg.tool_calls;
+    var got = Object.prototype.toString.call(calls) === "[object Array]" && calls.length > 0;
+    /* One more check, because a call with no arguments string is a call this app cannot
+       use: the actions live in the arguments. */
+    if(got){
+      var fn = calls[0] && calls[0].function;
+      got = !!(fn && typeof fn.name === "string" && fn.name.length);
+    }
+    NATIVE_TOOLS = got;
+    nativeWhy = got
+      ? "the provider answered the check with a real tool call"
+      : "the provider accepted the tool definitions and then ignored them, so Compass is using the fenced protocol";
+    return got;
+  }).catch(function(e){
     NATIVE_TOOLS = false;
+    nativeWhy = "the capability check could not be completed ("+((e && e.message) || "no answer")+")";
     return false;
   });
   return nativeProbeP;
 }
+
+/* Why the current protocol was chosen, in a sentence, for the settings card. It is shown
+   because a silent protocol decision is one nobody can debug — the whole reason the false
+   positive above took a manual session and Cloudflare's logs to find. */
+var nativeWhy = "";
 
 /* Pull actions out of a completed tool call. Returns null when there is nothing
    usable, which sends the turn down the fenced path for that round rather than
@@ -10293,6 +10347,22 @@ function render(){
     var o=document.createElement("option"); o.value=cfg.model; o.textContent=cfg.model; sel.appendChild(o);
   }
   if(sel) sel.value = cfg.model || "";
+
+  /* Which protocol is in use, and why, in the place where it can be changed.
+     Shown because a silent protocol decision is one nobody can debug: a false positive
+     from the probe once made every turn return nothing, with no error anywhere, and it
+     took a manual session and the provider's own request log to work out why. */
+  var ts = $("#cfgTools");
+  if(ts) ts.value = cfg.tools || "";
+  var tw = $("#cfgToolsWhy");
+  if(tw){
+    var state = NATIVE_TOOLS === null ? "not checked yet"
+              : NATIVE_TOOLS ? "in use" : "not in use";
+    tw.innerHTML = "Native tool calling is <b>"+esc(state)+"</b>"
+      + (nativeWhy ? " \u2014 "+esc(nativeWhy) : "")
+      + ". The fenced protocol works everywhere; this is only faster and more reliable where "
+      + "the provider genuinely supports it. Set it to <b>Never</b> if replies come back empty.";
+  }
   var pcCtl = $("#askPcCtl");
   if(pcCtl) pcCtl.innerHTML = pcControlHTML();
   paintPcBar();
@@ -10483,6 +10553,18 @@ async function runTurn(){
   ctl = new AbortController();
 
   try{
+    /* Settle the protocol before the turn starts.
+       The probe used to be fired and not awaited, so its answer could arrive in the middle
+       of a conversation and change protocol between one message and the next — which is
+       exactly what it looked like when this went wrong: the first few turns worked, then
+       every one after came back empty. A turn should be answered by one protocol from
+       beginning to end, and the decision should be made before there is anything to
+       disturb.
+
+       Awaiting it is nearly always free: it is fired once when the connection is checked,
+       so by the time anyone has typed a message it has resolved. When it has not, waiting
+       for one small request is better than switching protocol underneath someone. */
+    if(NATIVE_TOOLS === null) await probeNativeTools();
     await orchestrate(slot);
   }catch(err){
     if(err && err.name==="AbortError"){ if(!slot.content) slot.content="(stopped)"; }
@@ -10557,6 +10639,10 @@ async function orchestrate(slot){
     var stopped = await streamTurn(fitted.msgs, slot);
     if(stopped) return;
     slot.content = scrub(slot.content);
+    /* A round was spent whatever came back, so it is counted before anything decides what
+       to do next. Counting it later meant a retry could be taken without the budget
+       noticing. */
+    L.rounds++;
 
     /* Two protocols, one loop. When the provider accepts tool calls the actions
        arrive as structured data; otherwise they arrive fenced in the reply text.
@@ -10571,12 +10657,43 @@ async function orchestrate(slot){
       sp = splitActions(slot.content);
     }
 
+    /* NOTHING CAME BACK.
+       This used to end the turn, and it should not: an empty reply is never terminal while
+       there is another path to try. It is what a provider that ignored the `tools` field
+       produces, and the whole chat went silent that way once — a false positive from the
+       probe switched protocol mid-session and every subsequent turn returned nothing, with
+       no error anywhere to explain it.
+
+       So the first empty reply on the native path is treated as proof the probe was wrong.
+       Tool calling is switched off for the session, the reason is recorded where it can be
+       read, and the same round is attempted again on the fenced protocol. If that is also
+       empty, or if there was never a native path to abandon, one blind retry is allowed —
+       an empty stream is often transient — and only then does the turn give up, with a
+       message that says what was tried rather than pointing at a log file. */
     if(!slot.content && !viaTools){
-      slot.content="No reply came back. Try again, or check the worker logs in Cloudflare.";
+      if(NATIVE_TOOLS && !slot.fellBack){
+        NATIVE_TOOLS = false;
+        nativeWhy = "the provider accepted tool definitions and then returned nothing, so "+
+                    "Compass switched back to the fenced protocol mid-conversation";
+        slot.fellBack = true;
+        slot.protoSwitched = true;
+        slot.calls = null;
+        continue;
+      }
+      if(!slot.fellBack){
+        slot.fellBack = true;
+        slot.calls = null;
+        continue;
+      }
+      slot.content = "Nothing came back from the model, twice."
+        + (slot.protoSwitched
+            ? " Compass also switched off native tool calling and tried again, which did not help."
+            : "")
+        + " The request reached the worker, so this is the model or the provider behind it "
+        + "rather than your connection. Try again, or pick a different model in Settings.";
       slot.err=1;
       return;
     }
-    L.rounds++;
     var spent = ledgerStop(L);
 
     if(sp.acts && hasReads(sp.acts) && !spent){
@@ -10819,6 +10936,13 @@ function boot(){
   +     '<select class="fld sm" id="cfgModel" style="flex:1"><option value="">Whatever the worker defaults to</option></select>'
   +     '<button class="ghost sm" id="cfgLoad" style="flex:none">Load list</button>'
   +   '</div>'
+  +   '<label class="lbl" style="margin-top:11px">Tool calling</label>'
+  +   '<select class="fld sm" id="cfgTools">'
+  +     '<option value="">Work it out automatically</option>'
+  +     '<option value="off">Never use it</option>'
+  +     '<option value="on">Always use it</option>'
+  +   '</select>'
+  +   '<div class="hint" id="cfgToolsWhy" style="margin-top:6px"></div>'
   +   '<div class="row" style="margin-top:12px"><button class="primary sm" id="cfgSave">Save</button>'
   +   '<button class="ghost sm" id="cfgTest">Test connection</button>'
   +   '<button class="ghost sm" id="cfgForget" style="display:none">Forget</button>'
@@ -11095,7 +11219,8 @@ function boot(){
 
   /* ── settings ── */
   document.getElementById("cfgForget").addEventListener("click",function(){
-    cfg={url:"",secret:"",model:""}; saveCfg(); notionOn=null; showCfg=false; render();
+    cfg={url:"",secret:"",model:"",tools:""}; saveCfg(); notionOn=null; showCfg=false;
+    NATIVE_TOOLS=null; nativeProbeP=null; nativeWhy=""; render();
     var m=document.getElementById("cfgMsg"); if(m){ m.textContent="Cleared."; m.style.color="var(--muted)"; }
   });
   document.getElementById("cfgSave").addEventListener("click",function(){
@@ -11107,10 +11232,21 @@ function boot(){
   });
   document.getElementById("cfgModel").addEventListener("change",function(e){
     cfg.model=e.target.value; saveCfg();
+    /* A different model is a different answer to the tool-calling question, so the probe
+       has to run again rather than carrying a verdict about the previous one. */
+    NATIVE_TOOLS = null; nativeProbeP = null; nativeWhy = "";
+    probeNativeTools().then(function(){ render(); });
     var m=document.getElementById("cfgMsg");
     m.textContent = cfg.model ? "Using "+cfg.model : "Using the worker default";
     m.style.color="var(--muted)";
     render();
+  });
+  document.getElementById("cfgTools").addEventListener("change",function(e){
+    cfg.tools = e.target.value; saveCfg();
+    /* Re-decide immediately. "Never" has to take effect on the very next turn, because the
+       reason someone reaches for it is that the current turns are broken. */
+    NATIVE_TOOLS = null; nativeProbeP = null; nativeWhy = "";
+    probeNativeTools().then(function(){ render(); });
   });
   document.getElementById("cfgLoad").addEventListener("click",async function(){
     var m=document.getElementById("cfgMsg");

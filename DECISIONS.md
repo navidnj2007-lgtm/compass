@@ -361,28 +361,21 @@ formatting them badly, which per-tool schemas would help with and this does not.
 
 ---
 
-## D14 — The probe asks whether the request is accepted, not whether the model complies
+## D14 — SUPERSEDED BY D48. The probe asked the wrong question.
 
-**Decided:** `probeNativeTools()` sends one small non-streaming request carrying a
+**Originally decided:** `probeNativeTools()` sends one small non-streaming request carrying a
 tool schema and treats HTTP 200 as yes.
 
-**Options:** check that the model actually returns a `tool_calls` response;
-check that the request is accepted.
+**The reasoning at the time,** preserved because it was wrong in an instructive way: "'Will
+the model choose to call a tool' is a different question from 'can this chain carry tool
+schemas', and only the second decides whether the path is usable."
 
-**Rule:** 4 (smaller scope). "Will the model choose to call a tool" is a different
-question from "can this chain carry tool schemas", and only the second decides
-whether the path is usable. A model that accepts tools and then answers in prose is
-handled anyway: `actsFromToolCalls` returns null and the round falls through to
-`splitActions`, which is the fenced path. Testing for compliance would also need a
-prompt contrived to force a tool call, and a false negative there would disable a
-working feature.
+**Why that was wrong:** it assumed a provider that accepts the field understands it. The
+provider here is a third-party proxy, and a proxy can accept a request carrying a field it
+does not understand, ignore it, and answer 200. See D48 for what that cost and what replaced
+it.
 
-The answer is held in memory for the session and not persisted. A stale "yes" would
-cost a failed request every turn until someone noticed; a stale "no" would silently
-keep the app on the weaker protocol for ever, which is worse.
-
-**Revisit if:** the probe's cost becomes noticeable, which one 16-token request per
-session is unlikely to.
+The one part that held up: the answer is held in memory for the session and not persisted.
 
 ---
 
@@ -1021,3 +1014,87 @@ up to any turn into a new one.
 **Rule:** 1 (reversible). Regenerating turn three of ten would silently discard seven
 turns, and there would be no way back. Branching keeps the original in the conversation
 list and starts a copy, so the same intent — "try that differently" — costs nothing.
+
+---
+
+## D48 — The tool-calling probe was wrong, and how it failed
+
+**Found in the first manual session, not by any test.** Supersedes D14.
+
+**The symptom.** Running the desktop build against the deployed worker, "Test connection"
+passed, Cloudflare showed 151 requests and zero errors, and every chat turn ended with "No
+reply came back". Plain text turns, not only image ones. The first few turns of a session
+worked — a window listing came back correctly — and then it broke.
+
+**The cause, in two parts.**
+
+`probeNativeTools()` set `NATIVE_TOOLS = r.status === 200`. The provider is a third-party
+proxy, and it answers 200 to a request carrying `tools` while ignoring the field entirely.
+The probe read that as support; the orchestrator switched to the native path; the provider
+then streamed neither content nor tool calls. Nothing anywhere reported an error, because
+from the worker's point of view nothing had gone wrong.
+
+And the probe was fired without being awaited, so its answer arrived *mid-session*. That is
+why the early turns worked and everything after them did not — the protocol changed under a
+running conversation.
+
+D14's own words were "'will the model choose to call a tool' is a different question... and
+only the second decides whether the path is usable". That distinction is precisely what bit.
+The error was assuming that a provider which accepts a field understands it.
+
+**Three fixes, all of them applied.**
+
+1. **The probe demands a demonstration.** `tool_choice: "required"`, a prompt that cannot be
+   answered any other way, and a check that the response body contains a `tool_calls` array
+   with a usable function name. A 200 with prose in it is now recorded as *not* support, with
+   a reason saying so. False negatives are cheap — the fenced protocol has always worked —
+   and false positives cost every turn in the session, so the test is deliberately strict.
+
+2. **An empty reply is never terminal while another path exists.** The first empty reply on
+   the native path is treated as proof the probe was wrong: tool calling is switched off for
+   the session, the reason is recorded, and the same round is retried on the fenced protocol.
+   If that is also empty, one blind retry is allowed — an empty stream is often transient —
+   and only then does the turn give up, with a message saying what was tried rather than
+   pointing at a log file. Bounded to one fallback per turn, and the round is counted before
+   the retry decision so the budget still applies.
+
+3. **It is overridable.** Settings has a tool-calling control — automatic, never, always —
+   which wins over the probe, takes effect on the next turn, and shows which protocol is in
+   use and why. A wrong automatic decision can no longer leave the chat unusable with no way
+   out.
+
+**And the protocol is now settled before a turn starts,** not fired and forgotten, so it
+cannot change between one message and the next.
+
+**Tests.** The regression tests were verified against the old code before being trusted: with
+the status-only probe restored, "THE BUG: 200 plus prose is NOT support" fails with
+`NATIVE_TOOLS: true`. That is the exact false positive, reproduced. Orchestrator tests 162 →
+186.
+
+**What this says about the testing approach generally.** Every suite here slices the shipped
+source and runs it against stubs, and none of them could have caught this, because the stub
+answered the way a well-behaved provider would. The bug lived in an assumption about someone
+else's software. Tests that supply their own dependencies cannot find that class of fault —
+only running it against the real thing can, which is what the manual session was for.
+
+**Revisit if:** a provider is found that supports tool calling but not `tool_choice:
+"required"`. That would be a false negative, which costs the fenced protocol and nothing else.
+
+---
+
+## What the first manual session proved
+
+Worth recording separately from the bug, because it is the only evidence any of this works
+against real hardware.
+
+**Confirmed working:** the desktop build compiles and installs. `pc.list_windows` returns
+real windows. The session grant correctly refuses to arm when vision is unavailable, and says
+why. The honest can't-see state reads as designed, and the agent declined to click blind
+rather than guessing — which is the single most important behaviour in WP2.
+
+**Still unproven:** whether the configured model handles images. `VISION_MODEL` is set, but
+the empty replies made the test inconclusive, so vision is recorded as neither working nor
+broken.
+
+**Not tested at all:** mouse movement, clicking, typing, and the panic key. The empty-reply
+bug blocked getting that far.
