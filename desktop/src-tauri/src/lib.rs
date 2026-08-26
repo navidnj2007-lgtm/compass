@@ -129,6 +129,8 @@ pub fn run() {
             tools::files::search_files,
             tools::files::grep_files,
             tools::docs::read_document,
+            tools::files::diff_file,
+            tools::files::restore_file,
             tools::files::read_file,
             tools::files::create_folder,
             tools::files::write_file,

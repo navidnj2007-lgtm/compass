@@ -135,7 +135,7 @@ const names = [
   ...html.matchAll(/name\s*:\s*"([a-z]+\.[a-z0-9_]+)"\s*,\s*cmd\s*:\s*"([a-z0-9_]+)"/g),
 ];
 const expected = [
-  "list_files", "search_files", "grep_files", "read_file", "read_document", "write_file", "create_folder",
+  "list_files", "search_files", "grep_files", "read_file", "read_document", "diff_file", "restore_file", "write_file", "create_folder",
   "move_file", "rename_file", "delete_file", "open_application",
   "clipboard_read", "clipboard_write", "get_system_information", "show_notification",
   // browser control

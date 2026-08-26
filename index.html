@@ -1100,6 +1100,16 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 .acts .af button{flex:1}
 .acts.done{opacity:.9}
 .acts .note{padding:0 12px 10px;font-size:12.5px;color:var(--muted)}
+/* A diff inside an approval card. Added and removed lines are distinguished by a
+   marker as well as by colour, because "the green ones" is not a usable instruction
+   for anyone who cannot see the difference between green and red. */
+.acts .dh{display:block;margin-top:4px;font-size:11.5px;color:var(--muted)}
+.acts pre.dfx{margin:5px 0 2px;padding:7px 9px;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:9px;font-size:11.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word;
+  max-height:220px;overflow:auto}
+.acts .di{display:block}
+.acts .di.add{color:var(--pos)}
+.acts .di.del{color:var(--neg)}
 
 /* ── the step timeline ───────────────────────────────
    Same shell as an action card on purpose: both answer "what is Compass doing to
@@ -5831,6 +5841,30 @@ register({
 });
 
 register({
+  name:"win.diff_file", cmd:"diff_file", kind:"read", risk:"low",
+  spec:'  {"do":"win.diff_file","path":"~/Documents/notes.md","text":"...","mode":"overwrite|append"}   what a write would change, without writing it',
+  args:function(a){
+    var p = okPath(a.path); if(!p) return null;
+    if(typeof a.text!=="string") return null;
+    var mode = (a.mode==="overwrite"||a.mode==="append") ? a.mode : "overwrite";
+    return { path:p, text:a.text, mode:mode };
+  },
+  describe:function(a){ return {t:"Check what would change in "+qt(shortPath(a.path))}; }
+});
+
+register({
+  name:"win.restore_file", cmd:"restore_file", kind:"write", risk:"high",
+  spec:'  {"do":"win.restore_file","path":"~/Documents/notes.md"}   put a file back to what it was before Compass last changed it',
+  args:function(a){
+    var p = okPath(a.path); if(!p) return null;
+    return { path:p };
+  },
+  describe:function(a){
+    return {t:"Put "+qt(shortPath(a.path))+" back to what it was before Compass changed it", del:true};
+  }
+});
+
+register({
   name:"win.move_file", cmd:"move_file", kind:"write", risk:"high",
   spec:'  {"do":"win.move_file","paths":["~/Downloads/a.pdf","~/Downloads/b.pdf"],"to":"~/Downloads/Invoices"}',
   args:function(a){
@@ -6138,6 +6172,23 @@ function runWrite(a){
   }).catch(function(e){ return why(e); });
 }
 
+/* A diff for an approval card, fetched on demand.
+   Read-only and cheap, so the card can ask for it while it renders. This is the whole
+   point of `diff_file` existing as a read tool: showing someone what they are about
+   to lose only works if asking is free. Resolves to null off the desktop, so the web
+   build's cards are unchanged. */
+function previewDiff(a){
+  if(!host.ready) return Promise.resolve(null);
+  var t = TOOLS["win.write_file"];
+  if(!t || !a || typeof a.text !== "string") return Promise.resolve(null);
+  var p = okPath(a.path);
+  if(!p) return Promise.resolve(null);
+  var mode = (a.mode==="overwrite"||a.mode==="append") ? a.mode : "overwrite";
+  return invoke("diff_file", {req:{path:p, text:a.text, mode:mode}})
+    .then(function(r){ return (r && r.text) || null; })
+    .catch(function(){ return null; });
+}
+
 /* ── the desktop panel ───────────────────────────────────────────────
    Lives inside the existing Sync screen rather than a new tab, because that is
    already the "this device" screen and because a tab that only ever appears in
@@ -6264,6 +6315,7 @@ window.CompassAgent = {
   readingLabel:readingLabel,
   runRead:runRead,
   runWrite:runWrite,
+  previewDiff:previewDiff,
   openUrl:openUrl,
   paintPanel:paintPanel
 };
@@ -7140,13 +7192,60 @@ function undoActs(msg){
   toast("Reverted");
 }
 
+/* A real diff on an approval card, rather than a character count.
+   Fetched lazily, because describe() is synchronous and the diff needs to read the
+   file. The card renders immediately with a placeholder, the answer arrives, and the
+   card repaints once. Cached on the message so a repaint mid-stream does not ask
+   again. Off the desktop `agent()` is null and none of this runs. */
+function wantsDiff(a){
+  return a && a.do === "win.write_file" && typeof a.text === "string"
+      && (a.mode === "overwrite" || a.mode === "append");
+}
+
+function diffsFor(m, i){
+  var A = agent();
+  if(!A || !A.previewDiff || !m.acts || m.result) return;   // applied cards need no preview
+  if(m.diffs === undefined) m.diffs = {};
+  m.acts.forEach(function(a, k){
+    if(!wantsDiff(a) || m.diffs[k] !== undefined) return;
+    m.diffs[k] = null;                                      // pending, so it is asked once
+    A.previewDiff(a).then(function(text){
+      m.diffs[k] = text || "";
+      paint();
+    }).catch(function(){ m.diffs[k] = ""; });
+  });
+}
+
+/* One diff, as a block of added and removed lines. The text comes from Rust, which
+   has already bounded and clipped it. */
+function diffHTML(text){
+  if(!text) return "";
+  var lines = String(text).split("\n"), rows = [], head = "";
+  for(var i=0;i<lines.length;i++){
+    var l = lines[i];
+    if(i < 2 && /^(DIFF for|.*lines before)/.test(l)){ head = head || l; continue; }
+    if(l.charAt(0) === "+") rows.push('<span class="di add">'+esc(l)+'</span>');
+    else if(l.charAt(0) === "-") rows.push('<span class="di del">'+esc(l)+'</span>');
+    else if(l.trim()) rows.push('<span class="di">'+esc(l)+'</span>');
+  }
+  if(!rows.length) return '<div class="dh">'+esc(head || "Nothing would change")+'</div>';
+  return '<div class="dh">'+esc(head)+'</div><pre class="dfx">'+rows.join("\n")+'</pre>';
+}
+
 function actsHTML(m,i){
+  diffsFor(m, i);
   var applied=!!m.result, rows=m.acts.map(function(a,k){
     var d=describe(a), fail=applied && m.result[k];
     var cls=(d.del||d.bad?"del ":"")+(fail?"fail":"");
     var tick=!applied ? "·" : (fail ? "×" : "✓");
+    var extra = "";
+    if(!applied && wantsDiff(a)){
+      extra = m.diffs && m.diffs[k] ? diffHTML(m.diffs[k])
+            : (m.diffs && m.diffs[k] === "" ? '<div class="dh">Couldn\u2019t read the current version to compare.</div>'
+                                            : '<div class="dh">Working out what changes\u2026</div>');
+    }
     return '<li class="'+cls+'"><span class="ai-v">'+tick+'</span><span>'+d.t
-      +(fail?' <i style="opacity:.8">— '+esc(fail)+'</i>':'')+'</span></li>';
+      +(fail?' <i style="opacity:.8">— '+esc(fail)+'</i>':'')+extra+'</span></li>';
   }).join("");
   var head, foot;
   if(!applied){

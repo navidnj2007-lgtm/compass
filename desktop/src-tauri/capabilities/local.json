@@ -17,6 +17,8 @@
     "allow-search-files",
     "allow-grep-files",
     "allow-read-document",
+    "allow-diff-file",
+    "allow-restore-file",
     "allow-read-file",
     "allow-get-system-information",
     "allow-clipboard-read",

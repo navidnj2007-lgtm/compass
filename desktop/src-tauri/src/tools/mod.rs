@@ -17,3 +17,4 @@ pub mod clip;
 pub mod docs;
 pub mod files;
 pub mod system;
+pub mod undo;

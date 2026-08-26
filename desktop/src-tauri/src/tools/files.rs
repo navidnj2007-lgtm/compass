@@ -667,6 +667,147 @@ pub async fn create_folder(
     out
 }
 
+#[derive(Debug, Deserialize)]
+pub struct DiffFileReq {
+    pub path: String,
+    pub text: String,
+    #[serde(default)]
+    pub mode: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RestoreFileReq {
+    pub path: String,
+}
+
+/// What a write would change, without writing anything.
+///
+/// A read tool, so it runs without approval — which is the point. The approval card
+/// needs to show what is about to be lost, and it can only do that if asking is free.
+/// Before this, an overwrite was described to the user as a character count, which is
+/// equally true of a small correction and of deleting a term's work.
+#[tauri::command]
+pub async fn diff_file(
+    app: AppHandle,
+    state: State<'_, Agent>,
+    req: DiffFileReq,
+) -> Result<ToolOut, String> {
+    let _ = &app;
+    let out = (|| {
+        let policy = state.policy();
+        if req.text.chars().count() > policy.max_write_chars {
+            return Err(format!(
+                "that is more than the {} characters Compass will write at once",
+                policy.max_write_chars
+            ));
+        }
+        let p = state.guard().resolve(&req.path, Intent::Write)?;
+
+        let before = if p.exists() {
+            let meta = std::fs::metadata(&p).map_err(|e| format!("could not read it: {e}"))?;
+            if meta.is_dir() {
+                return Err(format!("{} is a folder", show(&p)));
+            }
+            if meta.len() > policy.max_file_bytes {
+                return Err(format!(
+                    "{} is too large to compare ({})",
+                    show(&p),
+                    human_size(meta.len())
+                ));
+            }
+            let bytes = std::fs::read(&p).map_err(|e| format!("could not read it: {e}"))?;
+            if bytes.iter().take(8000).filter(|b| **b == 0).count() > 2 {
+                return Err(format!(
+                    "{} is a binary file, so there is no line diff to show",
+                    show(&p)
+                ));
+            }
+            String::from_utf8_lossy(&bytes).to_string()
+        } else {
+            String::new()
+        };
+
+        let after = match req.mode.as_str() {
+            "append" => {
+                let mut s = before.clone();
+                if !s.is_empty() && !s.ends_with('\n') {
+                    s.push('\n');
+                }
+                s.push_str(&req.text);
+                s
+            }
+            _ => req.text.clone(),
+        };
+
+        let d = crate::tools::undo::diff_lines(&before, &after);
+        let mut text = format!(
+            "DIFF for {} ({})\n{} \u{2014} {}\n",
+            show(&p),
+            if p.exists() { "exists" } else { "new file" },
+            d.headline(),
+            format_args!("{} lines before, {} after", d.before_lines, d.after_lines)
+        );
+        text.push_str(&d.as_text());
+        Ok(ToolOut::text(text))
+    })();
+
+    state.audit.record(
+        "win.diff_file",
+        out.is_ok(),
+        format!("Compared a proposed write to {}", req.path),
+        out.as_ref().err().cloned(),
+        false,
+    );
+    out
+}
+
+/// Put a file back to what it was before the last write Compass made to it.
+///
+/// The path is resolved through the guard as a write, and the destination inside the
+/// backup store comes from what was recorded when the copy was taken — never from an
+/// argument. So this cannot be aimed anywhere; it can only undo something Compass
+/// itself did.
+#[tauri::command]
+pub async fn restore_file(
+    app: AppHandle,
+    state: State<'_, Agent>,
+    req: RestoreFileReq,
+) -> Result<ToolOut, String> {
+    let policy = state.policy();
+    let out = async {
+        let p = state.guard().resolve(&req.path, Intent::Write)?;
+        if !crate::tools::undo::has_backup(&app, &p) {
+            return Err(format!(
+                "Compass has no saved copy of {} \u{2014} it either did not write that file or the copy has since been cleared",
+                show(&p)
+            ));
+        }
+        consent::require(
+            &app,
+            &policy,
+            Risk::High,
+            "Undo a file change",
+            &format!(
+                "The assistant wants to put this file back to what it was before Compass last changed it. Anything written since will be lost.\n\n{}",
+                show(&p)
+            ),
+        )
+        .await?;
+        crate::tools::undo::restore(&app, &p)?;
+        Ok(ToolOut::done_with(format!("Put {} back", show(&p))))
+    }
+    .await;
+
+    state.audit.record(
+        "win.restore_file",
+        out.is_ok(),
+        format!("Restore {}", req.path),
+        out.as_ref().err().cloned(),
+        true,
+    );
+    out
+}
+
 #[tauri::command]
 pub async fn write_file(
     app: AppHandle,
@@ -715,13 +856,22 @@ pub async fn write_file(
 
         if overwriting && exists {
             let was = std::fs::metadata(&p).map(|m| human_size(m.len())).unwrap_or_default();
+            /* The dialog now names what changes rather than only how big it is. A
+               Windows dialog that says "4,812 characters" is equally true of a typo
+               fix and of deleting a term's work; one that says "212 lines removed" is
+               the sentence someone can actually decide on. */
+            let summary = std::fs::read(&p)
+                .ok()
+                .map(|b| String::from_utf8_lossy(&b).to_string())
+                .map(|before| crate::tools::undo::diff_lines(&before, &req.text).headline())
+                .unwrap_or_else(|| "the current contents will be lost".to_string());
             consent::require(
                 &app,
                 &policy,
                 Risk::High,
                 "Replace a file",
                 &format!(
-                    "The assistant wants to REPLACE the contents of this file. The current contents ({was}) will be lost.\n\n{}",
+                    "The assistant wants to REPLACE the contents of this file: {summary}.\n\nThe current contents ({was}) will be lost, though Compass keeps a copy so this can be undone.\n\n{}",
                     show(&p)
                 ),
             )
@@ -737,6 +887,46 @@ pub async fn write_file(
             .await?;
         }
 
+        /* A copy of what is there now, taken after approval and before the write, so
+           Undo can put it back. Deliberately not fatal: a backup that could not be
+           taken is worth a sentence in the result, not a refusal to do what was
+           asked. The user is told either way, because "you can undo this" and "you
+           cannot" are different situations and only one of them is safe to assume. */
+        let mut undo_note = String::new();
+        if exists {
+            match crate::tools::undo::save(&app, &p) {
+                Ok(()) => undo_note = " A copy of the previous version was kept, so this can be undone.".into(),
+                Err(why) => undo_note = format!(" NOTE: no undo copy was kept ({why}), so this cannot be reversed."),
+            }
+        }
+
+        /* What actually changed, computed before the write for the same reason the
+           dialog needed it: afterwards there is nothing to compare against. */
+        let change = if exists {
+            std::fs::read(&p)
+                .ok()
+                .map(|b| String::from_utf8_lossy(&b).to_string())
+                .map(|before| {
+                    let after = if req.mode == "append" {
+                        let mut s = before.clone();
+                        if !s.is_empty() && !s.ends_with('\n') {
+                            s.push('\n');
+                        }
+                        s.push_str(&req.text);
+                        s
+                    } else {
+                        req.text.clone()
+                    };
+                    crate::tools::undo::diff_lines(&before, &after).headline()
+                })
+                .unwrap_or_default()
+        } else {
+            format!(
+                "{} line(s) written",
+                req.text.lines().count().max(1)
+            )
+        };
+
         if req.mode == "append" && exists {
             use std::io::Write;
             let mut h = std::fs::OpenOptions::new()
@@ -749,7 +939,12 @@ pub async fn write_file(
             std::fs::write(&p, req.text.as_bytes())
                 .map_err(|e| format!("could not write that file: {e}"))?;
         }
-        Ok(ToolOut::done_with(format!("Wrote {}", show(&p))))
+        Ok(ToolOut::done_with(format!(
+            "Wrote {} \u{2014} {}.{}",
+            show(&p),
+            change,
+            undo_note
+        )))
     }
     .await;
 

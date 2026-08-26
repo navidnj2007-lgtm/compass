@@ -17,6 +17,8 @@ fn main() {
             "search_files",
             "grep_files",
             "read_document",
+            "diff_file",
+            "restore_file",
             "read_file",
             "get_system_information",
             "clipboard_read",
