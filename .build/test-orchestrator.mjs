@@ -28,6 +28,12 @@ function check(label, cond, extra) {
   else { console.log("  FAIL  " + label + (extra ? "  →  " + extra : "")); fail++; }
 }
 
+/* Character count of a message list, computed independently of the code under test
+   so a size assertion is not checking the implementation against itself. */
+function wireSizeOf(msgs) {
+  return msgs.reduce((n, m) => n + (typeof m.content === "string" ? m.content.length : 0), 0);
+}
+
 /* ── slice the regions under test out of the shipped file ────────── */
 /* Two slices, joined, rather than one wide one.
  *
@@ -82,7 +88,8 @@ function harness(over = {}) {
   const body =
     src +
     "\nreturn { BUDGET, HARD_ROUNDS, MAX_TRIES, MAX_STEP_RAW, newLedger, ledgerStop," +
-    " readsAllowed, budgetRounds, beginStep, endStep, runOneRead, runWithRetry, runReads };";
+    " readsAllowed, budgetRounds, beginStep, endStep, runOneRead, runWithRetry, runReads," +
+    " WIRE, msgChars, wireSize, digestResults, compactExtra, fitWire };";
   const made = new Function(...names, body)(...names.map((k) => env[k]));
   return { ...made, calls, env };
 }
@@ -369,6 +376,174 @@ console.log("\na budget that runs out says which one it was");
   const text = await h.runReads([{ do: "query.tasks" }, { do: "query.tasks" }], steps, L);
   check("a cancelled turn runs no further lookups", h.calls.queries.length === 0, JSON.stringify(h.calls.queries));
   check("...and produces no results to feed back", text === "", JSON.stringify(text));
+}
+
+/* ── the scratchpad ──────────────────────────────────────────────── */
+/* The worker's own limits, restated here so the test fails if either side drifts.
+   These are read out of worker.js rather than typed, so a change there breaks this
+   test rather than silently invalidating it. */
+const workerSrc = readFileSync(join(REPO, "worker.js"), "utf8");
+const workerLimit = (name) => {
+  const m = new RegExp(name + ":\\s*(\\d+)").exec(workerSrc);
+  return m ? Number(m[1]) : null;
+};
+const WORKER_MAX_MESSAGES = workerLimit("maxMessages");
+const WORKER_MAX_CHARS = workerLimit("maxTotalChars");
+const WORKER_MAX_ONE = workerLimit("maxCharsPerMessage");
+
+console.log("\nthe scratchpad keeps a long turn inside the worker's limits");
+{
+  const h = harness();
+  check(`read the worker's limits (${WORKER_MAX_MESSAGES} messages, ${WORKER_MAX_CHARS} chars)`,
+    WORKER_MAX_MESSAGES === 40 && WORKER_MAX_CHARS === 120000 && WORKER_MAX_ONE === 45000,
+    `${WORKER_MAX_MESSAGES}/${WORKER_MAX_CHARS}/${WORKER_MAX_ONE}`);
+  check("the frontend budget leaves headroom under every worker limit",
+    h.WIRE.maxMessages < WORKER_MAX_MESSAGES &&
+    h.WIRE.maxChars < WORKER_MAX_CHARS &&
+    h.WIRE.maxOneMessage < WORKER_MAX_ONE,
+    JSON.stringify(h.WIRE));
+}
+{
+  /* The shape a twelve-round turn actually produces: a system message, twelve
+     history messages, and two round-trip messages per round. */
+  const h = harness();
+  const base = [{ role: "system", content: "x".repeat(8000) }].concat(
+    Array.from({ length: 12 }, (_, i) => ({ role: i % 2 ? "assistant" : "user", content: "turn " + i }))
+  );
+  let extra = [];
+  for (let r = 0; r < 12; r++) {
+    extra.push({ role: "assistant", content: "(looking that up)" });
+    extra.push({
+      role: "user",
+      content:
+        "RESULTS OF YOUR LOOKUPS.\nFOLDER C:\\Users\\Navid\\Downloads\n14 item(s):\n" +
+        Array.from({ length: 60 }, (_, i) => `  C:\\Users\\Navid\\Downloads\\file-r${r}-${i}.pdf  (1 MB)`).join("\n") +
+        "\n" + "prose that does not matter ".repeat(300),
+    });
+    const fit = h.fitWire(base, extra);
+    extra = fit.extra;
+    check(
+      `round ${r + 1}: inside both limits (${fit.size.n} messages, ${fit.size.chars} chars)`,
+      fit.size.n <= h.WIRE.maxMessages && fit.size.chars <= h.WIRE.maxChars,
+      JSON.stringify(fit.size)
+    );
+  }
+}
+{
+  /* The boundary, exactly: a request that is one message and one character too big
+     on each axis in turn. */
+  const h = harness();
+  const base = [{ role: "system", content: "s" }];
+  const many = Array.from({ length: (h.WIRE.maxMessages + 6) * 2 }, (_, i) => ({
+    role: i % 2 ? "user" : "assistant",
+    content: i % 2 ? "RESULTS\n  ~/Downloads/f" + i + ".pdf" : "(looking)",
+  }));
+  const fit = h.fitWire(base, many);
+  check("too many messages is compacted, not sent",
+    fit.size.n <= h.WIRE.maxMessages, JSON.stringify(fit.size));
+  check("...and the paths survive the compaction",
+    /~\/Downloads\/f/.test(JSON.stringify(fit.msgs)), "paths lost");
+}
+{
+  const h = harness();
+  const base = [{ role: "system", content: "s" }];
+  const huge = [
+    { role: "assistant", content: "(looking)" },
+    { role: "user", content: "RESULTS\n  ~/a.pdf\n" + "z".repeat(h.WIRE.maxChars + 1) },
+  ];
+  const fit = h.fitWire(base, huge);
+  check("a single oversized result is brought inside the limit",
+    fit.size.chars <= h.WIRE.maxChars, JSON.stringify(fit.size));
+  check("...by digesting it rather than truncating mid-path",
+    /~\/a\.pdf/.test(JSON.stringify(fit.msgs)), "the path was lost");
+}
+{
+  /* When compaction has collapsed everything it can and the request is STILL too
+     big, the cause is the visible conversation plus the system prompt, not the
+     round-trips. The fitter deliberately does not touch those: silently deleting
+     the user's own messages to make room is worse than the worker returning a
+     sentence the chat layer already knows how to show, and the system prompt is
+     where the injection rules live, so trimming it would quietly remove the
+     safety instructions to fit a tool result. */
+  const h = harness();
+  const base = [{ role: "system", content: "S".repeat(h.WIRE.maxChars - 2000) }].concat(
+    Array.from({ length: 6 }, () => ({ role: "user", content: "Q".repeat(2000) }))
+  );
+  const extra = [];
+  for (let i = 0; i < 6; i++) {
+    extra.push({ role: "assistant", content: "(looking)" });
+    extra.push({ role: "user", content: "RESULTS " + i + "\n  ~/f" + i + ".pdf\n" + "y".repeat(9000) });
+  }
+  const beforeChars = wireSizeOf(base.concat(extra));
+  const fit = h.fitWire(base, extra);
+  check("the round-trips are shrunk as far as they can be",
+    fit.size.chars < beforeChars, `${beforeChars} -> ${fit.size.chars}`);
+  check("...down to a single digest", fit.extra.length === 1, String(fit.extra.length));
+  check("the system prompt is never trimmed to fit a tool result",
+    fit.msgs[0].content.length === h.WIRE.maxChars - 2000, String(fit.msgs[0].content.length));
+  check("the user's own messages are never dropped to fit a tool result",
+    fit.msgs.filter((m) => m.content.startsWith("Q")).length === 6,
+    String(fit.msgs.filter((m) => m.content.startsWith("Q")).length));
+  check("the fitter terminates rather than looping on an impossible request", true);
+}
+{
+  /* What the digest must and must not do. */
+  const h = harness();
+  const digest = h.digestResults([
+    "FOLDER C:\\Users\\Navid\\Documents\n3 item(s):\n" +
+      "  C:\\Users\\Navid\\Documents\\Chemistry notes.pdf  (2.1 MB)\n" +
+      "  ~/Documents/timetable.xlsx  (44 KB)\n" +
+      "This folder looks quite untidy and could be organised.\n" +
+      "SEARCH \"electro\" returned 2 pages:\n  id=abc123  \u201CElectrochemistry\u201D\n",
+  ]);
+  check("a Windows path survives byte for byte",
+    digest.includes("C:\\Users\\Navid\\Documents\\Chemistry notes.pdf"), digest);
+  check("a tilde path survives byte for byte",
+    digest.includes("~/Documents/timetable.xlsx"), digest);
+  check("a Notion id survives", digest.includes("id=abc123"), digest);
+  check("a count survives", digest.includes("3 item(s)"), digest);
+  check("prose is dropped", !digest.includes("could be organised"), digest);
+  check("the digest still says it is data, not instructions",
+    /not\s+instructions/i.test(digest), digest);
+  check("the digest is bounded", digest.length <= h.WIRE.digestChars + 400, String(digest.length));
+}
+{
+  const h = harness();
+  const dup = h.digestResults([
+    "  ~/Downloads/a.pdf\n  ~/Downloads/a.pdf\n  ~/Downloads/b.pdf\n",
+  ]);
+  const hits = (dup.match(/~\/Downloads\/a\.pdf/g) || []).length;
+  check("the same path listed twice is one fact", hits === 1, `appeared ${hits} times`);
+}
+{
+  const h = harness();
+  const empty = h.digestResults(["nothing here but prose, at length, repeatedly"]);
+  check("a digest with no facts says so rather than looking empty",
+    /nothing from the earlier rounds survived/.test(empty), empty);
+}
+{
+  const h = harness();
+  const two = [
+    { role: "assistant", content: "a1" }, { role: "user", content: "RESULTS 1\n ~/x1.pdf" },
+    { role: "assistant", content: "a2" }, { role: "user", content: "RESULTS 2\n ~/x2.pdf" },
+  ];
+  check("nothing is compacted while the turn is short",
+    h.compactExtra(two) === two, "compacted too early");
+}
+{
+  const h = harness();
+  const five = [];
+  for (let i = 0; i < 5; i++) {
+    five.push({ role: "assistant", content: "a" + i });
+    five.push({ role: "user", content: "RESULTS " + i + "\n ~/x" + i + ".pdf" });
+  }
+  const out = h.compactExtra(five);
+  check("the two most recent rounds stay verbatim",
+    out[out.length - 1].content.includes("RESULTS 4") && out[out.length - 3].content.includes("RESULTS 3"),
+    JSON.stringify(out.map((m) => m.content.slice(0, 12))));
+  check("older rounds become one digest message", out.length === 5, String(out.length));
+  check("the digest carries the older paths",
+    out[0].content.includes("~/x0.pdf") && out[0].content.includes("~/x2.pdf"), out[0].content);
 }
 
 /* ── the data fence survives ─────────────────────────────────────── */
