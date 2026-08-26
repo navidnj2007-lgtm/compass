@@ -1,0 +1,73 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Compass",
+  "version": "1.0.0",
+  "identifier": "app.compass.desktop",
+
+  "build": {
+    "frontendDist": "../local"
+  },
+
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [],
+    "security": {
+      "capabilities": ["compass-local", "compass-remote"],
+      "csp": {
+        "default-src": "'self'",
+        "script-src": "'self' 'unsafe-inline' https://telegram.org https://cdnjs.cloudflare.com",
+        "style-src": "'self' 'unsafe-inline'",
+        "img-src": "'self' data: blob: https:",
+        "font-src": "'self' data:",
+        "connect-src": "'self' ipc: http://ipc.localhost https: wss:",
+        "frame-src": "'none'",
+        "object-src": "'none'",
+        "worker-src": "'self' blob:",
+        "base-uri": "'self'",
+        "form-action": "'none'"
+      },
+      "dangerousDisableAssetCspModification": false,
+      "freezePrototype": true
+    }
+  },
+
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "Navid NJ",
+    "copyright": "Compass",
+    "category": "Productivity",
+    "createUpdaterArtifacts": true,
+    "shortDescription": "Compass — plan, habits, revision and an assistant that can act.",
+    "longDescription": "The desktop Compass. The same app the browser serves, in a real Windows window, with an assistant that can look inside your own folders and organise them once you approve it.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "webviewInstallMode": { "type": "downloadBootstrapper" },
+      "nsis": {
+        "installMode": "currentUser",
+        "displayLanguageSelector": false,
+        "languages": ["English"],
+        "installerIcon": "icons/icon.ico",
+        "startMenuFolder": "Compass"
+      }
+    }
+  },
+
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDIwMzBBQUU5MzA4MDlCQzAKUldUQW00QXc2YW93SUdRWUkvZWszblZmMGpwVGZIOEEvNk95TUNMeW9mYTdlUlY0d1VOWjZMKzQK",
+      "endpoints": [
+        "https://github.com/navidnj2007-lgtm/compass/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}
