@@ -15,6 +15,48 @@ The standing rules, in the order they are applied:
 
 ---
 
+## WHAT SHIPPED AND WHAT DID NOT
+
+Complete and verified: WP0 (tasks 1–5), the worker passthrough (6–7), WP1 in full
+(8–15), WP3 except the index (16–18, 20), and WP2's safety machinery (21–22, plus the
+exclusion matcher from 23).
+
+Not done: task 19 (the SQLite index — deferred deliberately, see D22), tasks 23–27's
+remaining half (the `pc.*` tools themselves: window and monitor enumeration,
+screenshot, pointer movement, click/drag/type/hotkey, and the header control), and all
+of WP4 (28–33).
+
+**Nothing is half-applied.** Every branch builds, every suite passes, and no partially
+wired feature is left reachable. In particular there is no `pc.*` tool of any kind: the
+grant exists and can be switched on, and nothing yet consults it, so the worst case is
+a switch that does nothing rather than a capability without its restraints.
+
+Branches, all pushed, `main` untouched at `318aacc`:
+
+  * `wp1-orchestrator` — WP0, worker passthrough, WP1
+  * `wp3-data` — tasks 16–18, 20
+  * `wp2-computer-use` — tasks 21–22 and the exclusion matcher
+
+They are stacked in that order and should be reviewed in it.
+
+---
+
+## SUGGESTIONS NOT BUILT
+
+Logged rather than built, per rule 5.
+
+  * **A `pc.*` dry-run mode.** While writing the grant it became obvious that the
+    natural way to trust computer use is to watch it narrate what it *would* click
+    without clicking. That is a real feature and was not asked for.
+  * **A policy field for the grant duration and step budget.** They are constants now.
+    Making them tunable is easy and was not requested; the ceiling would stay compiled
+    in either way.
+  * **Audit thumbnails as a general facility.** Task 26 calls for a screen thumbnail
+    stored beside each click. The same mechanism would be useful for file writes, but
+    that is scope invention.
+
+---
+
 ## D1 — Scratchpad runs before the timeline, not after
 
 **Decided:** implement context compaction (originally Task 14) immediately, ahead
