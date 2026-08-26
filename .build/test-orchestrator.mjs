@@ -74,6 +74,8 @@ function harness(over = {}) {
     okDate: (d) => (/^\d{4}-\d{2}-\d{2}$/.test(String(d || "")) ? String(d) : null),
     fmtEvent: (e) => e.summary || "(untitled)",
     describe: (a) => ({ t: "Described " + a.do }),
+    // the DOM hook the orchestrator calls when a step changes state
+    stepsChanged: () => {},
     B: { get: () => ({ tasks: [], ms: [], rev: [], days: {}, subjects: [], classes: [], anchors: [] }) },
     isRead: (a) => /^(query\.|notion\.(find|read)|schedule\.get|win\.)/.test(a.do),
     isQuery: (a) => a.do.indexOf("query.") === 0,

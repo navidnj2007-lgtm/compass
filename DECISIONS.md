@@ -101,3 +101,83 @@ would be safe.
 
 **Consequence worth knowing:** a turn can still fail on size if the conversation
 alone is enormous. That is the intended failure, not a gap.
+
+---
+
+## D5 — Timeline steps are buttons, and only when they have something to show
+
+**Decided:** a step with a stored result renders as a `<button>` with
+`aria-expanded`; a step with nothing to show renders as a `<div>`.
+
+**Options:** divs with click handlers throughout; buttons throughout; or the split.
+
+**Rule:** 4 (smaller scope) and an explicit requirement that the timeline be
+keyboard-operable. A button gets focus, Enter, Space and a role for free, so there
+is no keydown handler to write and no `tabindex` to get wrong. Making every step a
+button would put Tab stops on rows that do nothing when activated, which is worse
+than not being focusable — the user tabs, nothing happens, and there is no way to
+tell whether it failed or had nothing to say.
+
+**Revisit if:** steps gain a second action, at which point every row has something
+to do and the split stops being useful.
+
+---
+
+## D6 — Nothing in the timeline can reach Apply
+
+**Decided:** the timeline emits no `data-actapply`/`data-actundo`/`data-actskip`
+attributes, and this is asserted by a test rather than left to review.
+
+**Options:** trust that they are separate components; assert it.
+
+**Rule:** 2 (security posture). The requirement was that approval must never be
+reachable by a stray Enter. The timeline sits directly above the approval card and
+is now full of focusable buttons, so "these are different elements" is true today
+and one careless refactor from being false. The worst a stray Enter in the timeline
+can do is show someone a folder listing they already asked for, and there is a test
+that says so.
+
+**Revisit if:** never. If a future step needs to trigger an action, it gets its own
+confirmation rather than borrowing the card's.
+
+---
+
+## D7 — Step progress is announced from a separate live region
+
+**Decided:** a `role="status" aria-live="polite"` element holds one sentence about
+progress, separate from the log.
+
+**Options:** rely on the log's existing `aria-live="polite"`; add a dedicated
+region.
+
+**Rule:** 4 (smaller scope) — this is one element and one function, against the
+alternative of restructuring `paint()` so the log can be updated incrementally.
+`paint()` rebuilds the whole log on every repaint, and a wholesale rebuild inside a
+live region either re-announces everything or announces nothing, depending on the
+screen reader. A separate region that only ever contains "Step 3 of 5: Look in the
+folder Downloads" is predictable.
+
+Announcements are aggregate rather than per-step, because parallel lookups finish
+within milliseconds of each other and five separate announcements arrive as noise
+in an order that does not match the screen.
+
+**Revisit if:** `paint()` is ever replaced by something that updates in place, at
+which point the log could announce for itself.
+
+---
+
+## D8 — Repaints during a tool round are throttled, not immediate
+
+**Decided:** `stepsChanged()` schedules a repaint at most every 120 ms.
+
+**Options:** repaint on every state change; repaint only when the round finishes;
+throttle.
+
+**Rule:** 1 (reversible). Repainting per change is correct and wasteful — four
+parallel lookups finishing together would rebuild the log four times in a
+millisecond, fighting the scrollbar and the caret. Repainting only at the end is
+what the old code effectively did, and it is the behaviour the timeline exists to
+replace: nothing moves for twenty seconds and the agent looks hung.
+
+**Revisit if:** the timeline is ever rendered incrementally rather than through a
+full `paint()`.
