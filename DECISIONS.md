@@ -181,3 +181,85 @@ replace: nothing moves for twenty seconds and the agent looks hung.
 
 **Revisit if:** the timeline is ever rendered incrementally rather than through a
 full `paint()`.
+
+---
+
+## D9 — Cancelling does not kill in-flight native calls
+
+**Decided:** `stop()` prevents anything new from starting and discards results that
+arrive late, but a native call already underway is allowed to finish.
+
+**Options:** try to abort in-flight work; let it finish and discard the result.
+
+**Rule:** 1 (reversible) and honesty about what is possible. A Tauri `invoke` has no
+cancellation channel: once Rust is walking a folder, the frontend cannot stop it.
+Marking such a step "cancelled" while the walk continues would make the timeline
+lie about what the machine is doing, and the walk is a read — it changes nothing.
+So the step is marked failed with "(stopped before this finished)", which is true,
+and the result is thrown away rather than fed to the model, because answering a
+question that has been withdrawn is worse than not answering.
+
+**Revisit if:** the native layer ever grows a cancellation token, which would be
+worth having for a long file walk.
+
+---
+
+## D10 — A dependency cycle is reported, not resolved
+
+**Decided:** when `after` keys form a loop, the remaining actions run in written
+order and the model is told, in the results, that its ordering was incoherent.
+
+**Options:** refuse the whole block; break the cycle at an arbitrary edge and run
+it; run in written order and say so.
+
+**Rule:** 1 (reversible) and 4 (smaller scope). Refusing the block wastes a round on
+a mistake that is usually harmless — the actions are reads. Breaking the cycle
+silently produces a plausible-looking result from an incoherent request, which is
+the failure that is hardest to notice. Saying so costs one sentence and leaves the
+model able to fix its own ordering next round.
+
+**Revisit if:** `after` is ever extended to writes, where running in the wrong order
+would not be recoverable and refusing would become the right answer.
+
+---
+
+## D11 — Provenance is derived from the tool name, not declared by the tool
+
+**Decided:** `provOf()` maps a tool name to a source label, and an unrecognised
+tool is labelled `unknown`.
+
+**Options:** add a `prov` field to each `register()` record; derive it centrally.
+
+**Rule:** 2 (security posture). A field on the record is a field a new tool can
+forget, and the failure mode of forgetting is a result that arrives with no
+provenance and is quietly treated as trustworthy. Deriving it centrally means a new
+tool gets `unknown` — conspicuous, and correct, because a tool nobody has classified
+is a tool whose output nobody has thought about. It also cannot be influenced by the
+model, which chooses the tool but not the mapping.
+
+**Revisit if:** a family ever needs per-call provenance — `win.read_file` on a
+synced folder is arguably `web` — at which point the mapping needs the arguments as
+well as the name.
+
+---
+
+## D12 — Every result is fenced, including his own Compass data
+
+**Decided:** `fenceResult()` wraps every tool result identically, Compass lookups
+included, and names the source and how much to trust it.
+
+**Options:** keep fencing only the results that come from outside; fence everything.
+
+**Rule:** 2 (security posture). The old code fenced file contents, web pages and
+Notion pages but not Compass lookups, on the reasonable-sounding grounds that his
+own data is not hostile. That assumption is the weak one: a task he pasted in from a
+group chat is his data and also somebody else's text, and the model has no way to
+tell which is which unless the boundary is drawn the same way every time. Uniform
+fencing also means the rule in the system prompt can be stated without exceptions,
+and a rule without exceptions is one an attacker cannot argue around.
+
+Fencing happens at the single point where a result becomes something the model will
+read, not in each of the six branches that produce one. A fence applied in six
+places is a fence one of them will forget.
+
+**Revisit if:** never, on the exception front. The wording is worth improving.
