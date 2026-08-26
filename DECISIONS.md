@@ -498,3 +498,66 @@ deviation than shipping WP2 rushed.
 
 **Revisit if:** grep proves too slow in practice on his actual Documents folder,
 which is the measurement that would justify the dependency.
+
+---
+
+> **Note on numbering.** This file has diverged across the work-package branches, because
+> each one appends to it. D23–D45 exist on `wp2-computer-use` and `wp4-chat`; the two below
+> are numbered so they cannot collide, and merging the branches will need a union of the
+> file rather than a textual merge.
+
+---
+
+## D46 — Task 19 built after all, and what it deliberately does not do
+
+**Decided:** the opt-in index shipped. D22 deferred it to protect WP2, and WP2 is done.
+
+What it stores, exactly: per file, the path, name, size, modification time and the first
+4,000 characters of text. Nothing else — no hash, no thumbnail, no record of what was
+searched.
+
+What it deliberately does not do:
+
+  * **No FTS5.** A full-text virtual table would be faster and is a much larger surface:
+    tokenizers, ranking functions, and a second on-disk representation of the same text. A
+    `LIKE` scan over a few thousand short excerpts already feels instant, and it is one line
+    that can be read and understood.
+  * **No background indexing and no filesystem watcher.** Rebuilding happens when he asks.
+    "Why is my disk busy" should never have Compass as the answer, and a watcher would mean
+    a process quietly reading his folders forever. Unchanged files are skipped by comparing
+    size and modification time, so a rebuild after a small change is fast without watching
+    anything.
+  * **No whole-file storage.** An index holding complete documents would be a duplicate of
+    his Documents folder.
+
+Two security details are the reason it is safe to have at all. It lives in the app data
+directory, which `Policy::hard_denied` denies to every file tool — an index the agent could
+`read_file` would be a way to read text the guard had refused, because the excerpt is already
+extracted and sitting outside the sandbox. And the guard is consulted *again* at search time
+on every hit, because the index is a snapshot: a file may have moved somewhere denied, or the
+allowed roots may have been narrowed since the rebuild, and a stale index must not become a
+way around either.
+
+`LIKE` patterns are parameterised with `%` and `_` escaped, so a query of `%` matches a
+literal percent sign rather than everything.
+
+**Revisit if:** rebuild time on his real Documents folder is unacceptable, which is when
+FTS5 or incremental watching would earn their complexity.
+
+---
+
+## D47 — A bug found in already-pushed work: `wp3-data` failed clippy
+
+**Found, not decided.** While branching for task 19 it emerged that `wp3-data` as pushed does
+not pass `cargo clippy -- -D warnings`. Three findings in `tools/docs.rs`: an unnecessary
+`mut`, a manual loop counter, and a `min().max()` that clippy wants as `clamp`.
+
+The cause is a gap in my own process rather than in the code. When tasks 16 and 17 were
+verified I ran `cargo fmt` and `cargo test` but not `clippy`, and the findings surfaced later
+on the WP2 branch — where they were fixed, which is exactly why the problem was invisible
+from there.
+
+Fixed here, and cherry-picked onto `wp3-data` so the branch reviewed first is green on its
+own. The lesson, recorded because it is the sort of thing that recurs: the verification step
+is the whole list or it is not verification, and a "green" that skipped one command is a
+claim rather than a result.

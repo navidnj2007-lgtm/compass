@@ -5811,6 +5811,46 @@ register({
   describe:function(){ return {t:"Read what you last copied"}; }
 });
 
+/* ── the document index ───────────────────────────────────────────────
+   Opt-in, and off until he builds it. `win.grep_files` already answers the same question by
+   reading files; the index answers it faster and is bought with a second copy of the opening
+   text of his documents on disk. So the model can search it and rebuild it, and every one of
+   these says what is stored rather than describing it as "the index". */
+
+register({
+  name:"win.index_status", cmd:"index_status", kind:"read", risk:"low",
+  spec:'  {"do":"win.index_status"}   whether the document index exists, how big it is, and exactly what it holds',
+  args:function(){ return {}; },
+  describe:function(){ return {t:"Check the document index"}; }
+});
+
+register({
+  name:"win.index_search", cmd:"index_search", kind:"read", risk:"low",
+  spec:'  {"do":"win.index_search","query":"electrochemistry","limit":20}   fast, but only the first 4,000 characters of each file and only as current as the last rebuild. win.grep_files reads whole files',
+  args:function(a){
+    var q = isStr(a.query) ? clip(a.query,200) : "";
+    if(!q) return null;
+    return { query:q, limit:okInt(a.limit, 20, 1, 60) };
+  },
+  describe:function(a){ return {t:"Search the document index for "+qt(a.query)}; }
+});
+
+register({
+  name:"win.index_rebuild", cmd:"index_rebuild", kind:"write", risk:"medium",
+  spec:'  {"do":"win.index_rebuild"}   reads every document in the allowed folders and stores name, size, date and first 4,000 characters. Only when he asks for it',
+  args:function(){ return {}; },
+  describe:function(){
+    return {t:"Build the document index \u2014 reads your documents and stores the first part of each one"};
+  }
+});
+
+register({
+  name:"win.index_clear", cmd:"index_clear", kind:"write", risk:"medium",
+  spec:'  {"do":"win.index_clear"}   deletes everything stored about his documents',
+  args:function(){ return {}; },
+  describe:function(){ return {t:"Delete everything stored about your documents", del:true}; }
+});
+
 register({
   name:"win.create_folder", cmd:"create_folder", kind:"write", risk:"low",
   spec:'  {"do":"win.create_folder","path":"~/Downloads/Invoices"}',
