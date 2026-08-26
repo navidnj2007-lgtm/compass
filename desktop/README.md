@@ -85,6 +85,23 @@ npm install
 npm run build          # snapshot + tauri build
 ```
 
+On a fresh clone, generate the snapshot before running any `cargo` command
+directly:
+
+```bash
+node scripts/snapshot.mjs
+cd src-tauri && cargo check
+```
+
+`npm run build` and `npm run dev` already do this, so the ordering only bites if
+you reach for `cargo` first. `tauri.conf.json` points `frontendDist` at
+`../local`, which is gitignored because it is generated — so in a clone that has
+never been built it does not exist yet, and `generate_context!` fails at compile
+time with *"The `frontendDist` configuration is set to `"../local"` but this path
+doesn't exist"*. That message is accurate but sounds like a misconfiguration
+rather than a missing build step, which is the only reason it is written down
+here. CI runs the snapshot step before every cargo step for the same reason.
+
 The installer lands in:
 
 ```
