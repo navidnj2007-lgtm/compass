@@ -17,12 +17,12 @@ The standing rules, in the order they are applied:
 
 ## WHAT SHIPPED AND WHAT DID NOT
 
-Complete and verified: WP0 (tasks 1–5), the worker passthrough (6–7), WP1 in full
-(8–15), WP3 except the index (16–18, 20), and WP2 in full (21–27).
+Complete and verified: WP0 (tasks 1–5), the worker passthrough (6–7), WP1 in full (8–15),
+WP3 except the index (16–18, 20), WP2 in full (21–27), and WP4 in full (28–33).
 
-Not done: task 19 (the SQLite index — deferred deliberately, see D22) and all of WP4
-(28–33). One item inside task 26 was cut rather than deferred: the audit thumbnail store,
-for the reasons in D40.
+Not done: task 19, the opt-in SQLite index — deferred deliberately, see D22. One item
+inside task 26 was cut rather than deferred: the audit thumbnail store, for the reasons in
+D40.
 
 **Nothing is half-applied.** Every branch builds, every suite passes, and no partially
 wired feature is left reachable.
@@ -32,17 +32,21 @@ Branches, all pushed, `main` untouched at `318aacc`:
   * `wp1-orchestrator` — WP0, worker passthrough, WP1
   * `wp3-data` — tasks 16–18, 20
   * `wp2-computer-use` — tasks 21–27
+  * `wp4-chat` — tasks 28–33
 
 They are stacked in that order and should be reviewed in it.
 
-**The one thing to check by hand before merging:** no `pc.*` command has been run
-against a real screen. They compile, the logic around them is tested, and the parts with
-security consequences — the secret filter, the key allow-list, the exclusion matcher, the
-grant's expiry — are tested thoroughly. But `SendInput` moving a real pointer, `xcap`
-capturing a real window and `SetForegroundWindow` raising a real window have not been
-observed working. That is the gap between "verified" and "known to work", and it is worth
-one careful manual session with the grant on and something harmless like Notepad in
-front.
+**The one thing to check by hand before merging:** no `pc.*` command has been run against
+a real screen. They compile, the logic around them is tested, and the parts with security
+consequences — the secret filter, the key allow-list, the exclusion matcher, the grant's
+expiry — are tested thoroughly. But `SendInput` moving a real pointer, `xcap` capturing a
+real window and `SetForegroundWindow` raising a real window have not been observed working.
+That is the gap between "verified" and "known to work", and it is worth one careful manual
+session with the grant on and something harmless like Notepad in front.
+
+The same applies, less dangerously, to IndexedDB: the migration logic is tested by reading
+it and the storage shape is tested directly, but no browser has actually opened the
+database in this session.
 
 ---
 
@@ -920,3 +924,82 @@ decision to make deliberately rather than a default to inherit.
 
 **Revisit if:** an incident makes the textual audit insufficient, which would be the
 evidence that the trade was wrong.
+
+---
+
+## D41 — The localStorage copy is kept after migration
+
+**Decided:** on first run the old chats are copied into IndexedDB and the localStorage
+record is left exactly where it is.
+
+**Options:** delete it after a successful migration; keep it.
+
+**Rule:** 1 (reversible). If anything about IndexedDB misbehaves on his machine — private
+browsing, a corrupt store, a browser that throws on open — the old conversations are still
+sitting there. The cost is a few hundred kilobytes of a quota nothing else now uses, and
+the migration is guarded so it only runs when the new store is empty, so it cannot
+re-import over newer data. There is a CI check asserting no `removeItem` appears in that
+path, because deleting it later would look like tidying up.
+
+---
+
+## D42 — Search is in memory, not an IndexedDB index
+
+**Decided:** searching every conversation iterates the loaded array.
+
+**Options:** a full-text index in the database; iterate.
+
+**Rule:** 4 (smaller scope). Every conversation is already in memory because the drawer
+needs its title and date, so an index would be a second copy of the same text, kept in
+step by hand, to answer a query over a few hundred records that takes single-digit
+milliseconds. If the store grows past the point where that holds, an index is the answer
+then — and by that time the shape of the queries will be known.
+
+Matching is case-insensitive substring, not fuzzy. Someone searching "titration" wants the
+word; a fuzzy match that also returns "iteration" is a worse answer that is harder to
+explain. There is a test asserting exactly that.
+
+---
+
+## D43 — The slash palette offers modes and navigation, never actions
+
+**Decided:** `/advise`, `/explain`, `/new`, `/search`, `/export` — and nothing that
+touches his files or his screen.
+
+**Options:** include the tools, which is what a command palette in a developer tool would
+do; restrict it.
+
+**Rule:** 2 (security posture). A `/click` in the composer would be a way to act on his
+machine from a text box with no approval card in between, and the entire shape of this
+application is that changes are proposed and then approved. The palette navigates; it does
+not act. A CI-adjacent test asserts no palette entry matches click/type/delete/move/write/
+hotkey/drag.
+
+It also closes the moment the text stops looking like one word, so a sentence that happens
+to begin with a slash is a sentence rather than a failed command.
+
+---
+
+## D44 — Deleting a question deletes its answer
+
+**Decided:** `deleteTurn` on a user turn removes the following assistant turn too.
+
+**Options:** delete only the selected turn; delete the pair.
+
+**Rule:** correctness. A question deleted from under its answer leaves the answer talking
+to nobody, and the next turn would be sent a conversation that does not make sense — the
+model would be told it had said something in response to nothing. Deleting an answer alone
+is fine and is left alone, because "ask that again" is a reasonable thing to want.
+
+---
+
+## D45 — Regenerate stays on the last turn; branch is the answer for earlier ones
+
+**Decided:** Regenerate is only offered on the final turn. Branch copies the conversation
+up to any turn into a new one.
+
+**Options:** allow regenerate anywhere, discarding what follows; offer branch.
+
+**Rule:** 1 (reversible). Regenerating turn three of ten would silently discard seven
+turns, and there would be no way back. Branching keeps the original in the conversation
+list and starts a copy, so the same intent — "try that differently" — costs nothing.

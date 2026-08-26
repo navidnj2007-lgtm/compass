@@ -380,6 +380,38 @@ inputRs.includes('format!("Typed {} character(s)", req.text.chars().count())')
   ? ok("the audit log records the length of typed text, never the text")
   : bad("the audit log may be recording typed text verbatim");
 
+/* ── 7. the chat stays operable and honest ───────────────────────── */
+console.log("\nthe chat is operable and its failures explain themselves");
+const a11y = [
+  ['role="status" aria-live="polite"', "progress is announced from a live region"],
+  ['role="group" aria-label="', "the approval card announces what it is"],
+  ['aria-label="Apply ', "Apply says what it applies, not just Apply"],
+  ['aria-expanded="', "expandable steps say whether they are open"],
+  ["prefers-reduced-motion", "animation is optional"],
+  ['id="askFind"', "search across conversations exists"],
+  ["function jumpTo(k)", "a search result can be jumped to"],
+  ["function exportChat(kind)", "a conversation can be exported"],
+  ["function branchFrom(i)", "a conversation can be branched"],
+  ["function usageFooter(m)", "what a turn cost is shown"],
+  ["indexedDB.open(", "chat storage uses IndexedDB"],
+  ["idbBroken=true", "and falls back when it cannot be opened"],
+];
+for (const [needle, label] of a11y) {
+  html.includes(needle) ? ok(label) : bad(label + ` (missing: ${needle})`);
+}
+
+/* Failure states name a cause. A stack trace in a message the user reads is the failure
+   this checks for: the codebase's own standard is that every error says what happened and
+   what to do, and it is easy to lose that when adding a catch. */
+const traceLeaks = [
+  [/toast\(\s*(?:String\()?\s*(?:e|err|error)\b/, "an exception object shown in a toast"],
+  [/textContent\s*=\s*(?:e|err|error)\.stack/, "a stack trace put on screen"],
+  [/innerHTML\s*=\s*(?:e|err|error)\b/, "an exception interpolated into markup"],
+];
+for (const [rx, label] of traceLeaks) {
+  rx.test(html) ? bad(label) : ok(`no ${label}`);
+}
+
 /* no generic command execution anywhere in the frontend */
 const danger = /execute_any_command|run_command|exec_shell|"eval"|\bnew Function\(/;
 danger.test(html) ? bad("a generic command-execution path exists in the frontend") : ok("no generic command-execution tool");

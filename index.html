@@ -1180,6 +1180,48 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
 /* Reduced motion keeps the bar and loses the pulse. The bar is the information; the
    movement is only what draws the eye to it. */
 @media (prefers-reduced-motion: reduce){.pcbar .pcdot{animation:none;opacity:1}}
+
+/* ── the transparency footer and result cards ────────
+   Both are quiet on purpose: --muted, small, and below the answer. What that answer cost
+   is worth being able to see and not worth competing with the answer for attention. */
+.ufoot{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin:6px 0 0;
+  font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ufoot .um{margin-left:auto;opacity:.85}
+.rcard{margin:0;padding:8px 12px;border-top:1px solid var(--border);background:var(--surface)}
+ul.rlist{list-style:none;font-size:12.5px;line-height:1.5;max-height:220px;overflow:auto}
+ul.rlist li{padding:1px 0;color:var(--ink);word-break:break-word}
+ul.rlist li.fold{font-weight:600}
+ul.rlist li i{color:var(--muted);font-style:normal;font-size:11.5px}
+ul.rlist li.rmore{color:var(--muted)}
+.rshot{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.rshot svg{flex:none;width:15px;height:15px}
+
+/* ── the slash palette, search results, and the jump highlight ───── */
+.palette{display:none;margin:0 0 7px;border:1px solid var(--border);border-radius:12px;
+  background:var(--surface);overflow:hidden;max-height:240px;overflow-y:auto}
+.palette.on{display:block}
+.palette .pitem{display:flex;align-items:baseline;gap:9px;width:100%;padding:8px 12px;
+  background:none;border:0;border-top:1px solid var(--border);font:inherit;font-size:13px;
+  color:var(--ink);text-align:left;cursor:pointer}
+.palette .pitem:first-child{border-top:0}
+.palette .pitem.on,.palette .pitem:hover{background:var(--surface-2)}
+.palette .pitem b{font-weight:650;font-variant-numeric:tabular-nums}
+.palette .pitem small{color:var(--muted);font-size:11.5px}
+
+.dsearch{padding:0 12px 8px}
+.shits{display:flex;flex-direction:column}
+.shit{display:flex;flex-direction:column;gap:2px;width:100%;padding:8px 12px;background:none;
+  border:0;border-top:1px solid var(--border);font:inherit;text-align:left;cursor:pointer}
+.shit:hover{background:var(--surface-2)}
+.shit .sh1{font-size:11.5px;color:var(--muted)}
+.shit .sh2{font-size:12.5px;line-height:1.45;color:var(--ink);word-break:break-word}
+.shit mark{background:color-mix(in srgb, var(--pos) 30%, transparent);color:inherit;border-radius:3px}
+
+/* Where the search sent him. Fades rather than persisting: it answers "which one" and
+   then gets out of the way. */
+.turn.found>.tbody{outline:2px solid var(--pos);outline-offset:4px;border-radius:10px;
+  transition:outline-color .9s ease}
+@media (prefers-reduced-motion: reduce){.turn.found>.tbody{transition:none}}
 </style>
 </head>
 <body>
@@ -6699,6 +6741,10 @@ var ICO = {
   copy:   svg('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>'),
   check:  svg('<path d="M4 12.5l5 5L20 6.5"/>'),
   redo:   svg('<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>'),
+  split:  svg('<path d="M6 3v6a3 3 0 0 0 3 3h9"/><path d="M15 9l3 3-3 3"/><path d="M6 21v-6"/>'),
+  eye:    svg('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>'),
+  find:   svg('<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>'),
+  down2:  svg('<path d="M12 3v12"/><path d="M7 12l5 5 5-5"/><path d="M5 21h14"/>'),
   pencil: svg('<path d="M4 20h4L20 8a2.8 2.8 0 0 0-4-4L4 16v4z"/>'),
   trash:  svg('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'),
   down:   svg('<path d="M12 5v14M6 13l6 6 6-6"/>'),
@@ -7575,18 +7621,30 @@ function actsHTML(m,i){
   }).join("");
   var head, foot;
   if(!applied){
-    head = m.busy ? "Applying\u2026" : "Proposed changes · "+m.acts.length;
+    head = m.busy ? "Applying\u2026" : "Proposed changes \u00b7 "+m.acts.length;
+    /* The buttons carry an explicit label as well as their text, because "Apply" on its
+       own does not say what is being applied — and this is the one control in the
+       application where being sure matters most. Enter cannot reach them from the
+       timeline above: those are separate buttons in a separate element, and there is a
+       test that says so. */
     foot = m.busy
       ? '<div class="af"><button class="ghost sm" disabled>Working\u2026</button></div>'
-      : '<div class="af"><button class="primary sm" data-actapply="'+i+'">Apply</button>'
-        + '<button class="ghost sm" data-actskip="'+i+'">Discard</button></div>';
+      : '<div class="af"><button class="primary sm" data-actapply="'+i+'" '
+        + 'aria-label="Apply '+m.acts.length+' proposed change'+(m.acts.length===1?"":"s")+'">Apply</button>'
+        + '<button class="ghost sm" data-actskip="'+i+'" '
+        + 'aria-label="Discard these proposed changes">Discard</button></div>';
   } else {
     var bad=m.result.filter(Boolean).length, good=m.acts.length-bad;
-    head="Applied · "+good+" of "+m.acts.length;
-    foot=(m.undo ? '<div class="af"><button class="ghost sm" data-actundo="'+i+'">Undo</button></div>' : "")
-       + (bad?'<div class="note">The ones marked × didn’t go through. Tell it which item you meant.</div>':'');
+    head="Applied \u00b7 "+good+" of "+m.acts.length;
+    foot=(m.undo ? '<div class="af"><button class="ghost sm" data-actundo="'+i+'" '
+          + 'aria-label="Undo these changes">Undo</button></div>' : "")
+       + (bad?'<div class="note">The ones marked \u00d7 didn\u2019t go through. Tell it which item you meant.</div>':'');
   }
-  return '<div class="acts'+(applied?" done":"")+'"><div class="ah">'+head+'</div><ul>'+rows+'</ul>'+foot+'</div>';
+  /* role=group with a label, so a screen reader announces what this block is when focus
+     enters it rather than reading a bare list of sentences. */
+  return '<div class="acts'+(applied?" done":"")+'" role="group" aria-label="'
+    + (applied ? "Changes Compass applied" : "Changes Compass is proposing")+'">'
+    + '<div class="ah">'+head+'</div><ul>'+rows+'</ul>'+foot+'</div>';
 }
 
 
@@ -7671,7 +7729,7 @@ function stepsHTML(m, i){
       +     '<span class="sm">'+meta.join(" \u00b7 ")+'</span></span>'
       +   '<span class="sd">'+esc(stepMs(st.ms))+'</span>'
       + '</'+(canOpen ? 'button' : 'div')+'>'
-      + (open ? '<pre class="sr">'+esc(st.raw)+'</pre>' : '')
+      + (open ? (cardFor(st) || '') + '<pre class="sr">'+esc(st.raw)+'</pre>' : '')
       + '</li>';
   }).join("");
 
@@ -7739,6 +7797,102 @@ function stepNote(steps){
   return "Tap a step to see exactly what came back.";
 }
 
+
+/* ── THE TRANSPARENCY FOOTER ─────────────────────────────────────────
+   What that answer cost, under the answer.
+
+   Not a debug view. An agent that can spend three minutes and a hundred thousand tokens
+   on one question is one whose costs should be visible while they are still fresh,
+   because "that took a while" and "that took eleven rounds because the first four
+   lookups failed" are different problems. The numbers were already being counted for the
+   budgets; this stops throwing them away.
+
+   Only rendered when there is something worth saying: a two-sentence answer with one
+   round and no tools shows nothing, because a footer under every reply is furniture. */
+function usageFooter(m){
+  var u = m.usage;
+  if(!u) return "";
+  var bits = [];
+  if(u.rounds > 1) bits.push(u.rounds+" rounds");
+  if(u.steps) bits.push(u.steps+" tool step"+(u.steps===1?"":"s"));
+  if(u.ms > 2500) bits.push(stepMs(u.ms));
+  if(u.tokens) bits.push(fmtN(u.tokens)+" tokens");
+  if(!bits.length) return "";
+  var model = u.model || "the worker default";
+  return '<div class="ufoot">'+esc(bits.join(" \u00b7 "))
+    + '<span class="um">'+esc(model)+(u.vision?" + vision":"")+'</span></div>';
+}
+
+/* ── TOOL RESULT CARDS ───────────────────────────────────────────────
+   A folder listing rendered as a list, a screenshot as a thumbnail, a diff as a diff.
+
+   The raw text still exists behind the disclosure — it is what the model actually read,
+   and hiding it would make the timeline less honest, not more polished. What changes is
+   the first thing he sees, and the reason is that the timeline's job is answering "what
+   did it just do to my stuff" at a glance. Twenty lines of `FOLDER C:\...` answers that
+   question badly even though it contains the answer.
+
+   Every renderer here takes the fenced text and returns null when it does not recognise
+   it, so an unrecognised result falls back to the raw block rather than being mangled
+   into a shape that fits. */
+function cardFor(st){
+  if(!st || !st.raw) return null;
+  var body = st.raw;
+  /* Strip the fence, which is for the model rather than for him. */
+  var b = body.indexOf("--- begin");
+  if(b >= 0){
+    var nl = body.indexOf("\n", b);
+    var e = body.indexOf("\n--- end");
+    if(nl >= 0) body = body.slice(nl+1, e > nl ? e : undefined);
+  }
+  return cardListing(st, body) || cardShot(st, body) || cardDiff(st, body) || cardWindows(st, body);
+}
+
+/* A file listing or a search result: the lines that name a file, as a list. */
+function cardListing(st, body){
+  if(!/^win\.(list_files|search_files|grep_files)$/.test(st.tool)) return null;
+  var lines = body.split("\n"), rows = [];
+  for(var i=0;i<lines.length && rows.length<40;i++){
+    var l = lines[i];
+    if(!/^\s{2,}\S/.test(l)) continue;
+    var t = l.trim();
+    if(!t || /^\(/.test(t)) continue;
+    var folder = /^\[folder\]/.test(t);
+    rows.push('<li class="'+(folder?"fold":"")+'">'+esc(t.replace(/^\[folder\]\s*/,""))+'</li>');
+  }
+  if(!rows.length) return null;
+  var more = lines.filter(function(l){ return /^\s{2,}\S/.test(l); }).length - rows.length;
+  return '<ul class="rcard rlist">'+rows.join("")
+    + (more>0 ? '<li class="rmore">\u2026and '+more+' more</li>' : '')+'</ul>';
+}
+
+/* A screenshot: the thumbnail that is already in the attachment queue. The image itself
+   is not duplicated here — it is in the message he can already see. */
+function cardShot(st, body){
+  if(st.tool !== "pc.screenshot") return null;
+  var m = /(\d+)x(\d+) physical pixels/.exec(body);
+  var of = /SCREENSHOT of ([^\u2014\n]+)/.exec(body);
+  return '<div class="rcard rshot">'+ICO.eye
+    + '<span>Captured '+esc(of ? of[1].trim() : "the screen")
+    + (m ? ' \u00b7 '+m[1]+'\u00d7'+m[2] : '')
+    + ' \u2014 attached above</span></div>';
+}
+
+function cardDiff(st, body){
+  if(st.tool !== "win.diff_file") return null;
+  return '<div class="rcard">'+diffHTML(body)+'</div>';
+}
+
+function cardWindows(st, body){
+  if(st.tool !== "pc.list_windows") return null;
+  var rows = [];
+  var re = /id=(\d+)\s+(\*focused\*\s+)?\u201C([^\u201D]*)\u201D\s+\[([^\]]*)\]/g, m2;
+  while((m2 = re.exec(body)) && rows.length < 30){
+    rows.push('<li'+(m2[2]?' class="fold"':'')+'>'+esc(m2[3])
+      + ' <i>'+esc(m2[4])+'</i>'+(m2[2]?' \u00b7 in front':'')+'</li>');
+  }
+  return rows.length ? '<ul class="rcard rlist">'+rows.join("")+'</ul>' : null;
+}
 
 /* ── ATTACHMENTS: files and photos he sends to the model ────────────── */
 
@@ -9364,62 +9518,204 @@ Object.keys(ACT_MODES).forEach(function(k){ if(MODES[k]) MODES[k].sys += ACTIONS
 Object.keys(MODES).forEach(function(k){ MODES[k].sys += QUERY_SPEC; });
 
 /* ── conversation store ─────────────────────────────
-   Chats live in this browser only, in their own key, deliberately outside the
-   Compass backup — the same rule the passphrase follows. Image data is dropped
-   on save: a thread of photos would fill the quota and evict everything. */
+   Chats live in this browser only, in their own store, deliberately outside the
+   Compass backup — the same rule the passphrase follows.
+
+   WHY THIS MOVED TO INDEXEDDB
+
+   It was localStorage, with three compromises forced by a 5 MB quota shared with
+   everything else the app keeps: 24 conversations, 60 messages each, and every image
+   stripped on save. The image stripping is the one that hurt — a thread where he
+   photographed a worksheet and got it worked through lost the worksheet on reload, so
+   the conversation stopped making sense to read back. And when the quota filled anyway
+   the failure was silent: the write threw, was caught, and the thread simply was not
+   there next time.
+
+   IndexedDB has no such quota in practice, stores structured objects rather than one
+   giant string, and writes one record per conversation rather than rewriting all of
+   them on every keystroke.
+
+   HOW THE MIGRATION WORKS, AND WHY IT KEEPS THE OLD DATA
+
+   On first run the localStorage record is read, written into IndexedDB, and then left
+   exactly where it is. It is not deleted. If something about the new store is wrong on
+   his machine, the old conversations are still sitting there to fall back to — and the
+   cost of keeping them is a few hundred kilobytes of a quota nothing else now uses.
+
+   THE FALLBACK IS NOT OPTIONAL
+
+   Private browsing in some browsers, and Safari in some configurations, make IndexedDB
+   throw on open. The app must still work — so if the database cannot be opened, this
+   silently keeps using localStorage exactly as before. Nothing else in the file needs
+   to know which one is in use. */
 var CHATS_KEY="compass_ai_chats", MAX_CHATS=24, MAX_KEEP=60;
+var DB_NAME="compass_ai", DB_STORE="chats", DB_VERSION=1;
+/* Kept far larger than the localStorage limits, because the point of moving was to stop
+   throwing history away. Still bounded: an unbounded store is a slow leak, and a
+   thousand-message conversation is not one anybody reads back. */
+var IDB_MAX_CHATS=300, IDB_MAX_KEEP=400;
+
 var chats=[], cur=null, history=[];
 var mode="advise", busy=false, ctl=null, showCfg=false, drawerOn=false;
+var idb=null, idbReady=null, idbBroken=false;
 
 function newId(){ return "c"+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
 
+/* Open the database, once. Resolves to null when IndexedDB is unusable, which is a
+   supported outcome rather than an error: the caller falls back to localStorage. */
+function openDb(){
+  if(idbReady) return idbReady;
+  idbReady = new Promise(function(res){
+    if(idbBroken || typeof indexedDB === "undefined"){ res(null); return; }
+    var req;
+    try{ req = indexedDB.open(DB_NAME, DB_VERSION); }
+    catch(e){ idbBroken=true; res(null); return; }
+
+    req.onupgradeneeded = function(){
+      var db = req.result;
+      if(!db.objectStoreNames.contains(DB_STORE)){
+        /* Keyed by chat id, with an index on `at` so the drawer can be ordered without
+           reading every conversation. */
+        var store = db.createObjectStore(DB_STORE, {keyPath:"id"});
+        store.createIndex("at", "at");
+      }
+    };
+    req.onsuccess = function(){ idb = req.result; res(idb); };
+    req.onerror = function(){ idbBroken=true; res(null); };
+    req.onblocked = function(){ idbBroken=true; res(null); };
+  });
+  return idbReady;
+}
+
+function idbTx(mode2){
+  if(!idb) return null;
+  try{ return idb.transaction(DB_STORE, mode2).objectStore(DB_STORE); }
+  catch(e){ return null; }
+}
+
+/* What a conversation looks like on disk. Images are kept now — that is the point —
+   but step records still are not: the reasoning in the STEPS comment holds regardless
+   of the quota, since a hundred conversations of bounded raw tool output is a great
+   deal of storage for something only useful in the minute after it happened. The count
+   survives, so a reloaded turn says so. */
 function slimMsg(m){
   var o={role:m.role, at:m.at||0, content:String(m.content||"")};
   if(m.body!=null) o.body=m.body;
   if(m.tag) o.tag=m.tag;
   if(m.err) o.err=1;
-  if(m.chips&&m.chips.length) o.chips=m.chips.map(function(c){ return {name:c.name, thumb:null}; });
+  if(m.chips&&m.chips.length){
+    o.chips=m.chips.map(function(c){ return {name:c.name, thumb:idb ? (c.thumb||null) : null}; });
+  }
   if(m.acts) o.acts=m.acts;
   if(m.result) o.result=m.result;
   if(m.undone) o.undone=1;
-  /* The step records themselves are too big to keep here — see the STEPS comment
-     — but their number is not, and it is the difference between a turn that says
-     "four steps ran, the detail wasn't kept" and one that renders nothing and
-     reads as though the agent never did anything. Dropping evidence silently is
-     the failure worth avoiding; dropping it visibly is just a limitation. */
+  /* The step records themselves are too big to keep — see the STEPS comment — but their
+     number is not, and it is the difference between a turn that says "four steps ran,
+     the detail wasn't kept" and one that renders nothing and reads as though the agent
+     did nothing. Dropping evidence silently is the failure worth avoiding; dropping it
+     visibly is just a limitation. */
   if(m.steps && m.steps.length) o.sdrop=m.steps.length;
   else if(m.sdrop) o.sdrop=m.sdrop;
+  if(m.usage) o.usage=m.usage;
   return o;
 }
+
+function chatRecord(c){
+  var keep = idb ? IDB_MAX_KEEP : MAX_KEEP;
+  return {id:c.id, title:c.title, mode:c.mode, at:c.at,
+          messages:c.messages.slice(-keep).map(slimMsg)};
+}
+
 function saveChats(){
+  /* IndexedDB first, and only the conversation that changed. Rewriting every
+     conversation on every keystroke was a localStorage necessity, not a design. */
+  if(idb){
+    var store = idbTx("readwrite");
+    if(store){
+      try{
+        if(cur) store.put(chatRecord(cur));
+        /* Trim the oldest beyond the cap. Done on the index so it does not read the
+           whole store, and only when there is plausibly something to trim. */
+        if(chats.length > IDB_MAX_CHATS){
+          var extra = chats.slice(IDB_MAX_CHATS);
+          chats = chats.slice(0, IDB_MAX_CHATS);
+          for(var i=0;i<extra.length;i++){ try{ store.delete(extra[i].id); }catch(e){} }
+        }
+        try{ localStorage.setItem(CHATS_KEY+"_cur", (cur&&cur.id)||""); }catch(e){}
+        return;
+      }catch(e){ /* fall through to localStorage */ }
+    }
+  }
   try{
     localStorage.setItem(CHATS_KEY, JSON.stringify({
       v:1, cur:cur&&cur.id,
-      chats:chats.slice(0,MAX_CHATS).map(function(c){
-        return {id:c.id, title:c.title, mode:c.mode, at:c.at,
-                messages:c.messages.slice(-MAX_KEEP).map(slimMsg)};
-      })
+      chats:chats.slice(0,MAX_CHATS).map(chatRecord)
     }));
   }catch(e){ /* quota — the thread simply isn't kept */ }
 }
-function loadChats(){
+
+/* Read whatever is in localStorage, in the old shape. Also the migration source. */
+function loadLegacy(){
   var j=null;
   try{ var raw=localStorage.getItem(CHATS_KEY); if(raw) j=JSON.parse(raw); }catch(e){}
-  chats = (j && Array.isArray(j.chats) ? j.chats : []).filter(function(c){
+  var list = (j && Array.isArray(j.chats) ? j.chats : []).filter(function(c){
     return c && c.id && Array.isArray(c.messages);
-  }).map(function(c){
-    return {id:c.id, title:c.title||"", mode:MODES[c.mode]?c.mode:"advise", at:c.at||0,
-            messages:c.messages.filter(function(m){ return m && (m.role==="user"||m.role==="assistant"); })};
   });
-  var want = j && j.cur;
-  cur = chats.filter(function(c){ return c.id===want; })[0] || chats[0] || null;
+  return {chats:list, cur:(j && j.cur) || ""};
+}
+
+function adoptChats(list, wantCur){
+  chats = list.map(function(c){
+    return {id:c.id, title:c.title||"", mode:MODES[c.mode]?c.mode:"advise", at:c.at||0,
+            messages:(c.messages||[]).filter(function(m){ return m && (m.role==="user"||m.role==="assistant"); })};
+  }).sort(function(a,b){ return (b.at||0)-(a.at||0); });
+  cur = chats.filter(function(c){ return c.id===wantCur; })[0] || chats[0] || null;
   if(!cur) cur = blankChat();
   history = cur.messages; mode = cur.mode;
+}
+
+/* Load, migrating on first run. Async, so `boot` renders an empty log and then repaints
+   — which is what it did before while localStorage was parsed, only now the wait is
+   real rather than notional. */
+function loadChats(){
+  var legacy = loadLegacy();
+  adoptChats(legacy.chats, legacy.cur);      // something on screen immediately
+
+  return openDb().then(function(db){
+    if(!db) return false;                    // localStorage it is, exactly as before
+    return new Promise(function(res){
+      var store = idbTx("readonly");
+      if(!store){ res(false); return; }
+      var req = store.getAll();
+      req.onerror = function(){ res(false); };
+      req.onsuccess = function(){
+        var found = req.result || [];
+        if(!found.length && legacy.chats.length){
+          /* First run with data to bring across. The localStorage copy is deliberately
+             left in place: if anything about this store misbehaves on his machine, the
+             old conversations are still there. */
+          var w = idbTx("readwrite");
+          if(w){ for(var i=0;i<legacy.chats.length;i++){ try{ w.put(legacy.chats[i]); }catch(e){} } }
+          found = legacy.chats;
+        }
+        var wantCur = "";
+        try{ wantCur = localStorage.getItem(CHATS_KEY+"_cur") || legacy.cur; }catch(e){ wantCur = legacy.cur; }
+        adoptChats(found, wantCur);
+        res(true);
+      };
+    });
+  }).catch(function(){ return false; });
+}
+
+function dropChatRecord(id){
+  var store = idb ? idbTx("readwrite") : null;
+  if(store){ try{ store.delete(id); }catch(e){} }
 }
 function blankChat(){
   var c={id:newId(), title:"", mode:mode, at:Date.now(), messages:[]};
   chats.unshift(c);
-  if(chats.length>MAX_CHATS) chats.length=MAX_CHATS;
+  var cap = idb ? IDB_MAX_CHATS : MAX_CHATS;
+  if(chats.length>cap) chats.length=cap;
   return c;
 }
 /* A chat with nothing in it is scratch space — reuse it rather than pile up. */
@@ -9442,6 +9738,9 @@ function pickChat(id){
 function dropChat(id){
   var was = cur && cur.id===id;
   chats = chats.filter(function(c){ return c.id!==id; });
+  /* Deleting from the store as well, not just from memory: a conversation that came
+     back after being deleted would be worse than one that could not be deleted. */
+  dropChatRecord(id);
   if(was){ cur=null; if(chats.length){ cur=chats[0]; history=cur.messages; mode=cur.mode; } else newChat(true); }
   saveChats(); render();
 }
@@ -9609,9 +9908,15 @@ function botTurn(m,i){
 
   var acts="";
   if(!streaming && (body || m.content)){
+    /* Regenerate is offered on the last turn only, because regenerating an earlier one
+       would silently discard everything after it. Branch is the answer for that case: it
+       copies the conversation up to this point into a new one, so the original is still
+       there to come back to. */
     acts = '<div class="tacts">'
       + '<button type="button" data-copy="'+i+'">'+ICO.copy+'Copy</button>'
       + (last && !busy ? '<button type="button" data-regen="1">'+ICO.redo+'Regenerate</button>' : '')
+      + (!busy ? '<button type="button" data-branch="'+i+'" title="Continue from here in a new conversation, keeping this one">'+ICO.split+'Branch</button>' : '')
+      + (!busy ? '<button type="button" data-delturn="'+i+'">'+ICO.trash+'Delete</button>' : '')
       + '</div>';
   }
   return '<div class="turn bot" data-i="'+i+'">'
@@ -9621,7 +9926,7 @@ function botTurn(m,i){
     +     (m.tag ? '<span class="tag">'+esc(m.tag)+'</span>' : '')
     +     (m.at?'<time>'+hhmm(m.at)+'</time>':'')
     +   '</div>'
-    +   parts + acts
+    +   parts + usageFooter(m) + acts
     + '</div></div>';
 }
 
@@ -9660,12 +9965,202 @@ function paintTail(){
   });
 }
 
+/* ── THE SLASH PALETTE ───────────────────────────────────────────────
+   `/` at the start of the composer offers the modes and a few actions.
+
+   Modes only, plus things that are one step away — not the tool list. Offering `/click`
+   would be offering to do something on his machine from a text box with no approval card
+   in between, and the whole shape of this application is that changes are proposed and
+   then approved. So the palette switches modes, starts a new conversation, searches, and
+   exports; it does not act.
+
+   Filtered as he types after the slash, and it closes the moment the text stops looking
+   like a command, so it never sits between him and typing a sentence that happens to
+   begin with a slash. */
+function paletteItems(){
+  var out = Object.keys(MODES).map(function(k){
+    return {id:"mode:"+k, label:"/"+k, hint:MODES[k].hint, run:function(){
+      mode = k; if(cur){ cur.mode = k; saveChats(); } render();
+    }};
+  });
+  out.push({id:"new", label:"/new", hint:"Start a new conversation", run:function(){
+    stop(); newChat(true); render();
+  }});
+  out.push({id:"find", label:"/search", hint:"Search every conversation", run:function(){
+    drawerOn = true; render();
+    setTimeout(function(){ var f=$("#askFind"); if(f) f.focus(); }, 40);
+  }});
+  out.push({id:"export", label:"/export", hint:"Save this conversation as Markdown", run:function(){
+    exportChat("md");
+  }});
+  return out;
+}
+
+var palIx = 0;
+
+function paletteQuery(){
+  var input = $("#askInput");
+  var v = input ? input.value : "";
+  if(v.charAt(0) !== "/") return null;
+  /* Only while it still looks like one word. "/explain the thing" is a sentence he is
+     writing, not a command he is choosing. */
+  if(/\s/.test(v)) return null;
+  return v.slice(1).toLowerCase();
+}
+
+function paletteMatches(){
+  var q = paletteQuery();
+  if(q === null) return [];
+  var all = paletteItems();
+  if(!q) return all;
+  return all.filter(function(it){ return it.label.slice(1).indexOf(q) === 0; });
+}
+
+function paletteOpen(){
+  var el = $("#askPalette");
+  return !!(el && el.classList.contains("on"));
+}
+
+function paintPalette(){
+  var el = $("#askPalette");
+  if(!el) return;
+  var hits = paletteMatches();
+  if(!hits.length){ closePalette(); return; }
+  if(palIx >= hits.length) palIx = 0;
+  el.classList.add("on");
+  el.innerHTML = hits.map(function(it, k){
+    return '<button type="button" class="pitem'+(k===palIx?" on":"")+'" data-pal="'+k+'">'
+      + '<b>'+esc(it.label)+'</b><small>'+esc(it.hint)+'</small></button>';
+  }).join("");
+}
+
+function closePalette(){
+  var el = $("#askPalette");
+  if(el){ el.classList.remove("on"); el.innerHTML = ""; }
+  palIx = 0;
+}
+
+function movePalette(d){
+  var n = paletteMatches().length;
+  if(!n) return;
+  palIx = (palIx + d + n) % n;
+  paintPalette();
+}
+
+function choosePalette(k){
+  var hits = paletteMatches();
+  var it = hits[typeof k === "number" ? k : palIx];
+  if(!it) return;
+  var input = $("#askInput");
+  if(input){ input.value = ""; grow(input); }
+  closePalette();
+  setSend();
+  it.run();
+  if(input) input.focus();
+}
+
+/* ── SEARCHING ACROSS CONVERSATIONS ──────────────────────────────────
+   Twenty-four conversations were browsable from a list. Three hundred are not, and the
+   thing anybody actually wants is "where did I ask about titration".
+
+   Searched in memory rather than through an IndexedDB index, deliberately. Every
+   conversation is already loaded — the drawer needs their titles and dates — so an index
+   would be a second copy of the same text, kept in step by hand, to answer a query over
+   a few hundred records that takes single-digit milliseconds anyway. If the store grows
+   to the point where that stops being true, an index is the answer then.
+
+   Matching is case-insensitive substring across the message text. Not fuzzy: someone
+   searching "titration" wants the word, and a fuzzy match that also returns "iteration"
+   is a worse answer that is harder to explain. */
+var searchQ = "", searchHits = [];
+
+function runSearch(q){
+  searchQ = String(q||"");
+  var needle = searchQ.trim().toLowerCase();
+  searchHits = [];
+  if(needle.length < 2) return searchHits;
+
+  for(var c=0;c<chats.length && searchHits.length<80;c++){
+    var chat = chats[c];
+    for(var i=0;i<chat.messages.length && searchHits.length<80;i++){
+      var m = chat.messages[i];
+      var text = String(rawOf(m) || "");
+      var at = text.toLowerCase().indexOf(needle);
+      if(at < 0) continue;
+      /* A window around the hit, so the result reads as a sentence rather than as the
+         start of the message. */
+      var from = Math.max(0, at - 40);
+      searchHits.push({
+        chat: chat.id, index: i,
+        title: titleFor(chat),
+        who: m.role === "user" ? "You" : "Compass",
+        at: m.at || chat.at,
+        before: (from > 0 ? "\u2026" : "") + text.slice(from, at),
+        hit: text.slice(at, at + needle.length),
+        after: text.slice(at + needle.length, at + needle.length + 60)
+          + (text.length > at + needle.length + 60 ? "\u2026" : "")
+      });
+    }
+  }
+  return searchHits;
+}
+
+function searchHTML(){
+  if(searchQ.trim().length < 2){
+    return '<div class="dempty">Type at least two characters to search every conversation.</div>';
+  }
+  if(!searchHits.length){
+    return '<div class="dempty">Nothing matches \u201C'+esc(clip(searchQ,40))+'\u201D.</div>';
+  }
+  return '<div class="shits">'
+    + '<div class="dempty">'+searchHits.length+(searchHits.length===80?"+":"")
+    + ' result'+(searchHits.length===1?"":"s")+'</div>'
+    + searchHits.map(function(h, k){
+        return '<button class="shit" type="button" data-jump="'+k+'">'
+          + '<span class="sh1">'+esc(h.who)+' \u00b7 '+esc(clip(h.title,40))+'</span>'
+          + '<span class="sh2">'+esc(h.before)+'<mark>'+esc(h.hit)+'</mark>'+esc(h.after)+'</span>'
+          + '</button>';
+      }).join("")
+    + '</div>';
+}
+
+/* Go to a result: switch conversation if needed, then scroll the turn into view and mark
+   it briefly. The mark matters — after switching conversations and scrolling, "which one
+   was it" is a real question, and a highlight answers it without needing a second look at
+   the search results. */
+function jumpTo(k){
+  var h = searchHits[k];
+  if(!h) return;
+  if(!cur || cur.id !== h.chat){
+    var c = chats.filter(function(x){ return x.id === h.chat; })[0];
+    if(!c) return;
+    stop(); cur = c; history = c.messages; mode = c.mode; atts = [];
+  }
+  drawerOn = false; searchQ = ""; searchHits = [];
+  render();
+  setTimeout(function(){
+    var el = logEl() && logEl().querySelector('.turn[data-i="'+h.index+'"]');
+    if(!el) return;
+    stick = false;
+    el.scrollIntoView({block:"center", behavior:"smooth"});
+    el.classList.add("found");
+    setTimeout(function(){ el.classList.remove("found"); }, 2200);
+  }, 60);
+}
+
 /* ── chat list drawer ───────────────────────────── */
 function renderDrawer(){
   var d=$("#askDrawer"); if(!d) return;
   d.classList.toggle("on", drawerOn);
   if(!drawerOn) return;
   var list=$("#askChatList");
+
+  /* Searching replaces the conversation list rather than sitting beside it: the drawer is
+     narrow, and two scrolling regions in it would both be too short to use. */
+  if(searchQ.trim().length >= 2){
+    list.innerHTML = searchHTML();
+    return;
+  }
   var real=chats.filter(function(c){ return c.messages.length || c===cur; });
   list.innerHTML = real.length ? real.map(function(c){
     var meta=(MODES[c.mode]?MODES[c.mode].label:"Advise")+(c.at?" \u00b7 "+relTime(c.at):"");
@@ -9880,6 +10375,88 @@ function regen(){
 }
 
 function startEdit(i){ if(!busy){ editIx=i; paint(); } }
+
+/* Continue from an earlier point without losing what came after.
+   Copies the conversation up to and including turn `i` into a new one and switches to
+   it, leaving the original untouched. This is the answer to "regenerate an earlier
+   turn", which would otherwise have to silently discard everything below it. */
+function branchFrom(i){
+  if(busy || !cur || i < 0 || i >= history.length) return;
+  var copy = history.slice(0, i+1).map(function(m){ return JSON.parse(JSON.stringify(slimMsg(m))); });
+  var c = {id:newId(), title:(cur.title||titleFor(cur))+" \u2014 branch", mode:cur.mode,
+           at:Date.now(), messages:copy};
+  chats.unshift(c);
+  cur = c; history = c.messages; mode = c.mode;
+  atts = []; drawerOn = false;
+  saveChats(); render();
+  toast("Branched \u2014 the original is still in your conversations");
+}
+
+/* Remove one turn, and the reply that belongs to it.
+   A user turn takes its answer with it, because a question deleted from under an answer
+   leaves the answer talking to nobody — and the next turn would be sent a conversation
+   that does not make sense. */
+function deleteTurn(i){
+  if(busy || i < 0 || i >= history.length) return;
+  var n = 1;
+  if(history[i].role === "user" && history[i+1] && history[i+1].role === "assistant") n = 2;
+  history.splice(i, n);
+  saveChats(); paint();
+  toast(n === 2 ? "Deleted the question and its answer" : "Deleted");
+}
+
+/* The conversation as a file. Markdown for reading, JSON for keeping.
+   Downloaded rather than copied, because a long conversation is past what a clipboard is
+   comfortable with, and a file is what someone wants when they are keeping it. */
+function exportChat(kind){
+  if(!cur) return;
+  var name = (titleFor(cur) || "compass-chat").replace(/[^\w\- ]+/g, "").trim().slice(0,60) || "compass-chat";
+  var text, mime;
+  if(kind === "json"){
+    text = JSON.stringify({
+      exported: new Date().toISOString(),
+      title: titleFor(cur), mode: cur.mode,
+      messages: cur.messages.map(slimMsg)
+    }, null, 2);
+    mime = "application/json";
+    name += ".json";
+  } else {
+    var out = ["# "+titleFor(cur), "", "_"+(MODES[cur.mode]?MODES[cur.mode].label:cur.mode)
+      + " \u00b7 exported "+new Date().toLocaleString()+"_", ""];
+    cur.messages.forEach(function(m){
+      var who = m.role === "user" ? "Navid" : "Compass";
+      out.push("## "+who+(m.at ? " \u00b7 "+hhmm(m.at) : ""));
+      out.push("");
+      out.push(rawOf(m) || "_(nothing)_");
+      if(m.chips && m.chips.length){
+        out.push("");
+        out.push("_Attached: "+m.chips.map(function(c){ return c.name; }).join(", ")+"_");
+      }
+      if(m.acts){
+        out.push("");
+        out.push("_Proposed "+m.acts.length+" change"+(m.acts.length===1?"":"s")
+          + (m.result ? ", applied" : m.undone ? ", discarded" : ", not applied")+"._");
+      }
+      if(m.sdrop) out.push("", "_"+m.sdrop+" tool step"+(m.sdrop===1?"":"s")+" ran._");
+      out.push("");
+    });
+    text = out.join("\n");
+    mime = "text/markdown";
+    name += ".md";
+  }
+  try{
+    var blob = new Blob([text], {type:mime+";charset=utf-8"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    toast("Saved "+name);
+  }catch(e){
+    toast("Couldn\u2019t save the file");
+  }
+}
 function saveEdit(i){
   var t=$("#askEdit"); if(!t) return;
   var v=t.value.trim();
@@ -9928,6 +10505,20 @@ async function runTurn(){
     slot.body = (slot.body || streamBody(slot.content || "") || "").replace(/\s+$/,"");
     slot.body = (slot.body ? slot.body + "\n\n" : "") + "_"+where+"_";
     slot.acts = null;
+  }
+  /* What the turn cost, kept on the message so it survives a repaint and a reload.
+     Assembled from the ledger, which has been counting all along — before this it was
+     counted and thrown away. */
+  if(slot.ledger){
+    slot.usage = {
+      rounds: slot.ledger.rounds,
+      steps: slot.ledger.steps,
+      tokens: slot.ledger.tokens,
+      ms: Date.now() - slot.ledger.at,
+      model: cfg.model || "",
+      vision: !!(visionOn && slot.usedVision),
+      proto: NATIVE_TOOLS ? "tools" : "block"
+    };
   }
   slot.reading=false;
   busy=false; ctl=null;
@@ -10208,7 +10799,11 @@ async function streamTurn(msgs, slot){
 function boot(){
   var sec = document.getElementById("s-ask");
   if(!sec) return;
-  loadChats();
+  /* Synchronous first pass off localStorage so something is on screen at once, then a
+     repaint when IndexedDB has answered. Before this the parse was synchronous and the
+     wait was notional; now it is real, so it is done in that order rather than leaving
+     the section blank while a database opens. */
+  loadChats().then(function(){ render(); });
 
   sec.innerHTML = ''
   + '<div class="card" id="askSetup" style="display:none">'
@@ -10249,6 +10844,7 @@ function boot(){
   +   '<div class="askfoot" id="askFoot">'
   +     '<div class="atts" id="askAtts" style="display:none"></div>'
   +     '<div class="hint" id="askAttNote" style="display:none;margin:0 0 8px"></div>'
+  +     '<div class="palette" id="askPalette" role="listbox" aria-label="Commands"></div>'
   +     '<div class="composer">'
   +       '<button class="plus" id="askPlus" aria-label="Attach a file or photo" aria-expanded="false">'+ICO.clip+'</button>'
   +       '<div class="plusmenu" id="askPlusMenu">'
@@ -10272,8 +10868,14 @@ function boot(){
   +     '<div class="panel">'
   +       '<div class="dh"><b>Conversations</b>'
   +         '<button class="iconbtn" data-closedrawer="1" aria-label="Close">'+ICO.close+'</button></div>'
+  +       '<div class="dsearch"><input class="fld sm" id="askFind" type="search" '
+  +         'placeholder="Search every conversation\u2026" autocomplete="off" spellcheck="false" '
+  +         'aria-label="Search every conversation"></div>'
   +       '<div class="dl" id="askChatList"></div>'
-  +       '<div class="df"><button class="ghost sm" id="askNewFromDrawer" style="width:100%;text-align:center">New chat</button></div>'
+  +       '<div class="df"><button class="ghost sm" id="askNewFromDrawer" style="width:100%;text-align:center">New chat</button>'
+  +         '<div class="row" style="gap:7px;margin-top:7px">'
+  +         '<button class="ghost sm" id="askExpMd" style="flex:1">Export .md</button>'
+  +         '<button class="ghost sm" id="askExpJson" style="flex:1">Export .json</button></div></div>'
   +     '</div>'
   +   '</div>'
   + '</div>';
@@ -10344,12 +10946,37 @@ function boot(){
     stop(); drawerOn=false; newChat(true); render(); input.focus();
   });
   document.getElementById("askDrawer").addEventListener("click",function(e){
-    var t=e.target.closest && e.target.closest("[data-closedrawer],[data-chat],[data-dropchat]");
+    var t=e.target.closest && e.target.closest("[data-closedrawer],[data-chat],[data-dropchat],[data-jump]");
     if(!t) return;
+    if(t.dataset.jump!=null){ jumpTo(+t.dataset.jump); return; }
     if(t.dataset.closedrawer){ drawerOn=false; renderDrawer(); return; }
     if(t.dataset.dropchat){ dropChat(t.dataset.dropchat); drawerOn=true; renderDrawer(); return; }
     if(t.dataset.chat){ pickChat(t.dataset.chat); }
   });
+  /* Search as he types, with a short delay: searching every conversation on every
+     keystroke is affordable, but repainting the list on every keystroke fights the
+     caret. */
+  var findT = null;
+  document.getElementById("askDrawer").addEventListener("input",function(e){
+    if(!e.target || e.target.id !== "askFind") return;
+    var v = e.target.value;
+    clearTimeout(findT);
+    findT = setTimeout(function(){ runSearch(v); renderDrawer(); }, 140);
+  });
+  document.getElementById("askExpMd").addEventListener("click",function(){ exportChat("md"); });
+  document.getElementById("askExpJson").addEventListener("click",function(){ exportChat("json"); });
+
+  /* The palette: click to choose, and it closes when the composer loses focus so it never
+     hangs over the log after he has moved on. mousedown rather than click on the items,
+     because blur would otherwise close it before the click landed. */
+  var pal = document.getElementById("askPalette");
+  pal.addEventListener("mousedown", function(e){
+    var b = e.target.closest && e.target.closest("[data-pal]");
+    if(!b) return;
+    e.preventDefault();
+    choosePalette(+b.dataset.pal);
+  });
+  input.addEventListener("blur", function(){ setTimeout(closePalette, 120); });
 
   /* ── modes: keep the thread, change the brief ── */
   document.getElementById("askModes").addEventListener("click",function(e){
@@ -10371,7 +10998,7 @@ function boot(){
   log.addEventListener("click",function(e){
     var t=e.target.closest && e.target.closest(
       "[data-sugg],[data-copy],[data-copycode],[data-edit],[data-regen],[data-savedit],[data-canceledit],"+
-      "[data-actapply],[data-actskip],[data-actundo],[data-step]");
+      "[data-actapply],[data-actskip],[data-actundo],[data-step],[data-branch],[data-delturn]");
     if(!t) return;
 
     /* Expanding a step. A button, so Enter and Space arrive here as clicks and
@@ -10410,6 +11037,8 @@ function boot(){
     if(t.dataset.savedit!=null){ saveEdit(+t.dataset.savedit); return; }
     if(t.dataset.canceledit!=null){ editIx=null; paint(); return; }
     if(t.dataset.regen!=null){ regen(); return; }
+    if(t.dataset.branch!=null){ branchFrom(+t.dataset.branch); return; }
+    if(t.dataset.delturn!=null){ deleteTurn(+t.dataset.delturn); return; }
 
     var i=+(t.dataset.actapply||t.dataset.actskip||t.dataset.actundo), m=history[i];
     if(!m) return;
@@ -10536,10 +11165,33 @@ function boot(){
     if(busy){ stop(); return; }
     send(input.value);
   });
-  input.addEventListener("input",function(){ grow(input); setSend(); });
+  input.addEventListener("input",function(){ grow(input); setSend(); paintPalette(); });
   input.addEventListener("keydown",function(e){
+    /* The palette owns the arrows and Enter while it is open, or choosing a mode would
+       send a message called "/explain". */
+    if(paletteOpen()){
+      if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+        e.preventDefault(); movePalette(e.key==="ArrowDown" ? 1 : -1); return;
+      }
+      if(e.key==="Enter" || e.key==="Tab"){ e.preventDefault(); choosePalette(); return; }
+      if(e.key==="Escape"){ e.preventDefault(); closePalette(); return; }
+    }
+
+    /* Ctrl/Cmd+Enter sends as well as plain Enter. Asked for, and the reason is that
+       people who type in other chat applications have the habit in their fingers. */
+    if(e.key==="Enter" && (e.ctrlKey||e.metaKey) && !e.shiftKey){
+      e.preventDefault(); send(input.value); return;
+    }
     if(e.key==="Enter" && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey){
-      e.preventDefault(); send(input.value);
+      e.preventDefault(); send(input.value); return;
+    }
+    /* Up-arrow on an empty composer edits the last thing he said. Only when empty and
+       only with the caret at the start, so it never eats a cursor movement in text he is
+       part-way through writing. */
+    if(e.key==="ArrowUp" && !e.shiftKey && !input.value.length && !busy){
+      for(var i=history.length-1;i>=0;i--){
+        if(history[i].role==="user"){ e.preventDefault(); startEdit(i); return; }
+      }
     }
   });
   sec.addEventListener("keydown",function(e){
