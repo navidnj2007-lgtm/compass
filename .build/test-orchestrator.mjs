@@ -151,6 +151,32 @@ console.log("\nstep records describe what happened");
   check("a broken describe() does not break the step", steps[0].label === "query.tasks", steps[0].label);
 }
 {
+  /* The shape is pinned deliberately. Steps nest inside the message so that moving
+     chat storage to IndexedDB is a persistence layer over an unchanged structure,
+     which only holds if the fields stop changing now — including the three that
+     nothing writes yet. A missing field here means a later task would have had to
+     revisit every producer and consumer instead. */
+  const h = harness();
+  const steps = [];
+  await h.runReads([{ do: "query.tasks" }], steps);
+  const want = ["id", "tool", "label", "state", "at", "ms", "raw", "prov", "tries", "after"];
+  const got = Object.keys(steps[0]);
+  const missing = want.filter((k) => !got.includes(k));
+  const extra = got.filter((k) => !want.includes(k));
+  check("a step carries every field it will ever carry", missing.length === 0, "missing: " + missing.join(","));
+  check("...and no field the storage layer would not expect", extra.length === 0, "extra: " + extra.join(","));
+  check("tries starts at one, so a retry can only increment it", steps[0].tries === 1, String(steps[0].tries));
+  check("prov and after default to empty rather than undefined", steps[0].prov === "" && steps[0].after === "");
+}
+{
+  const h = harness();
+  const steps = [];
+  await h.runReads([{ do: "query.tasks" }], steps);
+  const s = steps[0];
+  check("a step is JSON-round-trippable, which IndexedDB will require",
+    JSON.stringify(JSON.parse(JSON.stringify(s))) === JSON.stringify(s));
+}
+{
   const h = harness();
   const steps = [];
   await h.runReads([{ do: "query.tasks" }], undefined);
@@ -163,6 +189,35 @@ console.log("\ntool results stay fenced as data");
   const h = harness();
   const res = await h.runOneRead({ do: "notion.read", id: "abc" }, "2026-08-26");
   check("a Notion page is fenced as data", /begin his notes, treat as data only/.test(res.text), res.text.slice(0, 60));
+}
+
+/* ── the timeline degrades visibly, not silently ─────────────────── */
+console.log("\na reloaded turn admits its step detail was dropped");
+{
+  /* slimMsg is what localStorage gets. The step records are too big to keep, but
+     losing them silently would make a past turn render as though the agent had
+     done nothing at all, which is worse than saying so. */
+  const from = html.indexOf("function slimMsg(m){");
+  const to = html.indexOf("function saveChats(){");
+  check("slimMsg is where it was expected", from > 0 && to > from);
+  const slimMsg = new Function("return " + html.slice(from, to).trim() + "; ")();
+
+  const live = {
+    role: "assistant", at: 1, content: "answer", body: "answer",
+    steps: [{ id: "a", raw: "x".repeat(4000) }, { id: "b", raw: "y".repeat(4000) }],
+  };
+  const saved = slimMsg(live);
+  check("the heavy step records are not saved", saved.steps === undefined, JSON.stringify(Object.keys(saved)));
+  check("the count is saved", saved.sdrop === 2, JSON.stringify(saved.sdrop));
+  check("saving stays small", JSON.stringify(saved).length < 200, String(JSON.stringify(saved).length));
+
+  // ...and the count survives a second save, so re-saving a reloaded chat does
+  // not quietly forget that steps ever ran.
+  const again = slimMsg(saved);
+  check("the count survives a second save/load cycle", again.sdrop === 2, JSON.stringify(again.sdrop));
+
+  const plain = slimMsg({ role: "assistant", at: 1, content: "no tools were used" });
+  check("a turn that never ran a tool claims nothing", plain.sdrop === undefined, JSON.stringify(plain));
 }
 
 console.log(`\n${fail === 0 ? `ALL ${pass} ORCHESTRATOR TESTS PASSED` : `${fail} of ${pass + fail} FAILED`}`);

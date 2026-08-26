@@ -7628,15 +7628,28 @@ function runQuery(S,a,today){
    it is doing while it does it, instead of the single "reading…" string that used
    to be the whole of the agent's visible state.
 
+   THE SHAPE IS FINAL EVEN THOUGH THE FIELDS ARE NOT ALL USED YET.
+
+   Steps nest inside the message rather than living in a table of their own, so
+   when chat storage moves to IndexedDB a turn is still one object and there are no
+   keys to join on. Every field a step will ever carry is therefore declared here
+   now, with a neutral default, including the three that arrive later: `prov` (where
+   the data came from), `tries` (how many attempts this call has had) and `after`
+   (the step this one waits for). Writing them in now costs a line each and means
+   the persistence layer is added over an unchanged structure instead of every
+   producer and consumer being revisited.
+
    `raw` is bounded. A folder listing can be thousands of lines, and a thread that
    keeps every byte of every result would grow without limit in storage that is
    already tight. The head of the result is what makes a step legible after the
    fact; the model got the whole thing at the time.
 
-   Steps live in memory only and are not written by `slimMsg`, deliberately. Chat
-   storage is localStorage until it moves to IndexedDB, images are already stripped
-   on save to stay inside the quota, and twenty steps of bounded raw text per turn
-   is exactly the kind of growth that would start evicting whole conversations. */
+   Steps are not written to localStorage. Chat storage strips images already to
+   survive the quota, and twenty steps of bounded raw text per turn is exactly the
+   growth that would start evicting whole conversations — losing real chats to keep
+   debug records is the wrong trade. What IS saved is the count, in `slimMsg`, so a
+   reloaded turn can say the detail was not kept rather than rendering an empty
+   timeline that reads as though nothing ever happened. */
 var MAX_STEP_RAW = 4000;
 
 function beginStep(steps, a){
@@ -7649,7 +7662,10 @@ function beginStep(steps, a){
     state: "running",
     at: Date.now(),
     ms: 0,
-    raw: ""
+    raw: "",
+    prov: "",          // set in the provenance pass: file | web | clipboard | screen | compass
+    tries: 1,          // incremented by the retry policy, never reset
+    after: ""          // id of the step this one waited for, when ordering is asked for
   };
   if(steps) steps.push(st);
   return st;
@@ -7933,6 +7949,13 @@ function slimMsg(m){
   if(m.acts) o.acts=m.acts;
   if(m.result) o.result=m.result;
   if(m.undone) o.undone=1;
+  /* The step records themselves are too big to keep here — see the STEPS comment
+     — but their number is not, and it is the difference between a turn that says
+     "four steps ran, the detail wasn't kept" and one that renders nothing and
+     reads as though the agent never did anything. Dropping evidence silently is
+     the failure worth avoiding; dropping it visibly is just a limitation. */
+  if(m.steps && m.steps.length) o.sdrop=m.steps.length;
+  else if(m.sdrop) o.sdrop=m.sdrop;
   return o;
 }
 function saveChats(){
