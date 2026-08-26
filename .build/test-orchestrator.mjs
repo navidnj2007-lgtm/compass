@@ -92,6 +92,7 @@ function harness(over = {}) {
     "\nreturn { BUDGET, HARD_ROUNDS, MAX_TRIES, MAX_STEP_RAW, newLedger, ledgerStop," +
     " readsAllowed, budgetRounds, beginStep, endStep, runOneRead, runWithRetry, runReads," +
     " planWaves, resolveAfter, afterKey, provOf, fenceResult, PROV_TRUST," +
+    " actionToolSchema, actsFromToolCalls, roundStarts," +
     " WIRE, msgChars, wireSize, digestResults, compactExtra, fitWire };";
   const made = new Function(...names, body)(...names.map((k) => env[k]));
   return { ...made, calls, env };
@@ -766,6 +767,101 @@ console.log("\nevery result names where it came from");
   check("each step carries its own provenance",
     steps[0].prov === "compass" && steps[1].prov === "notion",
     steps.map((s) => s.prov).join(","));
+}
+
+/* ── native tool calling ─────────────────────────────────────────── */
+console.log("\ntool calls are parsed when offered and ignored when not");
+{
+  const h = harness();
+  const schema = h.actionToolSchema();
+  check("exactly one function is exposed, not one per tool", schema.length === 1, String(schema.length));
+  check("it is named compass_actions", schema[0].function.name === "compass_actions", schema[0].function.name);
+  check("it takes an array of actions",
+    schema[0].function.parameters.properties.actions.type === "array", JSON.stringify(schema[0].function.parameters));
+  check("an action requires a do name",
+    schema[0].function.parameters.properties.actions.items.required.includes("do"), "no required do");
+  check("extra action fields are allowed, since each tool has its own",
+    schema[0].function.parameters.properties.actions.items.additionalProperties === true, "additionalProperties");
+  check("the schema is small enough for the worker's cap",
+    JSON.stringify(schema).length < 24000, String(JSON.stringify(schema).length));
+}
+{
+  const h = harness();
+  const acts = h.actsFromToolCalls([
+    { id: "c1", type: "function", function: { name: "compass_actions", arguments: '{"actions":[{"do":"query.tasks","bucket":"today"}]}' } },
+  ]);
+  check("a well-formed call yields the actions", acts && acts.length === 1 && acts[0].do === "query.tasks", JSON.stringify(acts));
+}
+{
+  const h = harness();
+  check("a bare array wrapper is accepted, since providers differ",
+    (h.actsFromToolCalls([{ function: { arguments: '[{"do":"query.tasks"}]' } }]) || []).length === 1,
+    "bare array rejected");
+  check("a bare single action is accepted too",
+    (h.actsFromToolCalls([{ function: { arguments: '{"do":"query.tasks"}' } }]) || []).length === 1,
+    "bare object rejected");
+}
+{
+  const h = harness();
+  check("malformed JSON yields nothing rather than throwing",
+    h.actsFromToolCalls([{ function: { arguments: '{"actions":[{"do":' } }]) === null, "should be null");
+  check("an empty call list yields nothing", h.actsFromToolCalls([]) === null, "should be null");
+  check("no calls at all yields nothing", h.actsFromToolCalls(null) === null, "should be null");
+  check("an action with no do name is dropped",
+    h.actsFromToolCalls([{ function: { arguments: '{"actions":[{"path":"~"}]}' } }]) === null, "should be null");
+}
+{
+  const h = harness();
+  const many = Array.from({ length: 40 }, () => ({ do: "query.tasks" }));
+  const acts = h.actsFromToolCalls([{ function: { arguments: JSON.stringify({ actions: many }) } }]);
+  check("a huge action list is capped, as the fenced path caps it", acts.length === 20, String(acts.length));
+}
+{
+  /* Compaction must not orphan a tool_calls turn from its answers: a provider will
+     reject an assistant tool_calls message whose tool responses are missing. */
+  const h = harness();
+  const extra = [];
+  for (let r = 0; r < 5; r++) {
+    extra.push({ role: "assistant", content: null, tool_calls: [{ id: "c" + r, type: "function", function: { name: "compass_actions", arguments: "{}" } }] });
+    extra.push({ role: "tool", tool_call_id: "c" + r, content: "RESULTS " + r + "\n  ~/f" + r + ".pdf" });
+  }
+  const out = h.compactExtra(extra);
+  const orphans = out.filter(
+    (m, i) => m.role === "assistant" && m.tool_calls && !(out[i + 1] && out[i + 1].role === "tool")
+  );
+  check("no tool_calls turn is left without its answer", orphans.length === 0, JSON.stringify(orphans));
+  check("the digest carries paths out of tool messages",
+    out[0].content.includes("~/f0.pdf"), out[0].content.slice(0, 120));
+  check("the recent rounds survive whole", out.length === 5, String(out.length));
+}
+{
+  /* And a round with several calls stays intact as a group. */
+  const h = harness();
+  const extra = [];
+  for (let r = 0; r < 4; r++) {
+    extra.push({ role: "assistant", content: null, tool_calls: [{ id: "a" + r }, { id: "b" + r }] });
+    extra.push({ role: "tool", tool_call_id: "a" + r, content: "R" + r + "a\n ~/x" + r + ".pdf" });
+    extra.push({ role: "tool", tool_call_id: "b" + r, content: "R" + r + "b" });
+  }
+  const out = h.compactExtra(extra);
+  const tools = out.filter((m) => m.role === "tool").length;
+  const asst = out.filter((m) => m.role === "assistant").length;
+  check("both answers of a kept round survive", tools === asst * 2, `${tools} tool vs ${asst} assistant`);
+}
+{
+  const h = harness();
+  const extra = [];
+  for (let r = 0; r < 8; r++) {
+    extra.push({ role: "assistant", content: null, tool_calls: [{ id: "c" + r }] });
+    extra.push({ role: "tool", tool_call_id: "c" + r, content: "R\n ~/y" + r + ".pdf\n" + "q".repeat(20000) });
+  }
+  const fit = h.fitWire([{ role: "system", content: "s" }], extra);
+  check("a tool-calling turn is brought inside the limits too",
+    fit.size.chars <= h.WIRE.maxChars && fit.size.n <= h.WIRE.maxMessages, JSON.stringify(fit.size));
+  const orphans = fit.extra.filter(
+    (m, i) => m.role === "assistant" && m.tool_calls && !(fit.extra[i + 1] && fit.extra[i + 1].role === "tool")
+  );
+  check("...without orphaning a call", orphans.length === 0, JSON.stringify(orphans.length));
 }
 
 /* ── the data fence survives ─────────────────────────────────────── */

@@ -263,3 +263,76 @@ read, not in each of the six branches that produce one. A fence applied in six
 places is a fence one of them will forget.
 
 **Revisit if:** never, on the exception front. The wording is worth improving.
+
+---
+
+## D13 — One generic tool function, not one per tool
+
+**Decided:** native tool calling exposes a single function, `compass_actions`,
+taking the array of action objects the fenced block already carries.
+
+**Options:** a function per tool with a JSON Schema each; one generic function.
+
+**Rule:** 4 (smaller scope) and 1 (reversible). A function per tool means adding a
+schema to eighteen `register()` records plus every Compass, Notion and timetable
+lookup, and keeping each schema in step with the `args()` validator that already
+sits beside it. Any drift between the two is a tool the model can call with
+arguments Compass then rejects — a new failure mode introduced by a change made to
+remove one.
+
+The failure being fixed is narrower than it first appears. The problem with the
+fenced block is not that the model chooses bad arguments; it is that the JSON
+sometimes does not parse — a smart quote, a trailing comma, a block that ends one
+brace early. A single function whose parameter is an array of actions fixes exactly
+that, because the provider guarantees its own arguments parse, while the existing
+per-tool validators keep doing the checking they already do.
+
+**Revisit if:** the model turns out to choose actions badly rather than merely
+formatting them badly, which per-tool schemas would help with and this does not.
+
+---
+
+## D14 — The probe asks whether the request is accepted, not whether the model complies
+
+**Decided:** `probeNativeTools()` sends one small non-streaming request carrying a
+tool schema and treats HTTP 200 as yes.
+
+**Options:** check that the model actually returns a `tool_calls` response;
+check that the request is accepted.
+
+**Rule:** 4 (smaller scope). "Will the model choose to call a tool" is a different
+question from "can this chain carry tool schemas", and only the second decides
+whether the path is usable. A model that accepts tools and then answers in prose is
+handled anyway: `actsFromToolCalls` returns null and the round falls through to
+`splitActions`, which is the fenced path. Testing for compliance would also need a
+prompt contrived to force a tool call, and a false negative there would disable a
+working feature.
+
+The answer is held in memory for the session and not persisted. A stale "yes" would
+cost a failed request every turn until someone noticed; a stale "no" would silently
+keep the app on the weaker protocol for ever, which is worse.
+
+**Revisit if:** the probe's cost becomes noticeable, which one 16-token request per
+session is unlikely to.
+
+---
+
+## D15 — Compaction finds rounds by scanning, not by a fixed stride
+
+**Decided:** `roundStarts()` locates each round by its assistant message rather than
+assuming two messages per round.
+
+**Options:** keep the fixed stride and special-case tool conversations; scan.
+
+**Rule:** 2 (security posture, in the sense of not producing malformed requests). On
+the fenced path a round is two messages. With tool calling it is an assistant message
+carrying `tool_calls` plus one `tool` message per call — three or more. A fixed
+stride would eventually cut between a `tool_calls` turn and its answers, and an
+assistant `tool_calls` message whose responses are missing is a conversation the
+provider rejects outright. Scanning for assistant messages means a round is never
+split, whatever shape it has.
+
+There is a test that looks for orphaned calls after compaction, because this is the
+kind of bug that appears only on long turns and only on one of the two protocols.
+
+**Revisit if:** a round ever starts with something other than an assistant message.
