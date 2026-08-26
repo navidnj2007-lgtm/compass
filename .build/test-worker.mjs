@@ -395,6 +395,43 @@ console.log("\nthe optional vision model");
   unstub();
 }
 
+console.log("\na captured screenshot travels the same path a photo does");
+{
+  /* The point of routing pc.screenshot through the ordinary attachment pipeline is
+     that these limits apply to it unchanged. A second image path would be a second
+     place for an oversized or wrongly-typed image to get through. */
+  const shot = "data:image/jpeg;base64," + "A".repeat(400);
+  stubUpstream(JSON.stringify({ choices: [] }));
+  const r = await call(
+    chat({
+      vision: true,
+      messages: [
+        { role: "user", content: [{ type: "text", text: "what is on my screen" },
+                                  { type: "image_url", image_url: { url: shot } }] },
+      ],
+    })
+  );
+  check("an agent-captured screenshot is accepted like any image", r.status === 200, `got ${r.status}`);
+  check("...and reaches the provider intact",
+    JSON.stringify(sent?.payload?.messages?.[0]?.content).includes("data:image/jpeg"), "image lost");
+  unstub();
+}
+{
+  const huge = "data:image/jpeg;base64," + "A".repeat(2_500_000);
+  const r = await call(
+    chat({ messages: [{ role: "user", content: [{ type: "image_url", image_url: { url: huge } }] }] })
+  );
+  check("an oversized screenshot is refused by the same limit as a photo", r.status === 400, `got ${r.status}`);
+}
+{
+  const five = Array.from({ length: 5 }, () => ({
+    type: "image_url",
+    image_url: { url: "data:image/png;base64,AAAA" },
+  }));
+  const r = await call(chat({ messages: [{ role: "user", content: five }] }));
+  check("more images than the limit is refused however they were obtained", r.status === 413, `got ${r.status}`);
+}
+
 /* The gate still comes first: none of the above is reachable without the
    passphrase, and a tool schema is not a way around it. */
 console.log("\nthe passphrase still gates the new fields");

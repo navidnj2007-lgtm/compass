@@ -18,6 +18,7 @@
 mod agent;
 mod audit;
 mod consent;
+mod grant;
 mod guard;
 mod policy;
 mod rules;
@@ -28,7 +29,7 @@ use agent::Agent;
 use audit::{Audit, Entry};
 use policy::Policy;
 use serde::Serialize;
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 
 /// What the frontend is told at startup.
 ///
@@ -83,6 +84,62 @@ async fn agent_audit(state: State<'_, Agent>, limit: Option<usize>) -> Result<Ve
     Ok(state.audit.recent(limit.unwrap_or(40)))
 }
 
+/* ── computer control ────────────────────────────────────────────────
+Three commands, and the shape of them is the design. Granting is something only a
+person does, from a control in the chat header — there is deliberately no tool the
+model can call to grant itself anything, which is why these are not in the tool
+registry and why the model is never told they exist.
+
+Revoking, by contrast, is something everything can do: the countdown, the panic key,
+losing focus, ending the conversation. That asymmetry is the whole safety property. */
+
+/// Turn on computer control for a stretch of minutes.
+#[tauri::command]
+async fn pc_grant(
+    state: State<'_, Agent>,
+    seconds: Option<u64>,
+) -> Result<grant::GrantState, String> {
+    let s = state.grants.grant(seconds.unwrap_or(grant::GRANT_SECS));
+    state.audit.record(
+        "pc.grant",
+        true,
+        format!(
+            "Computer control switched on for {} seconds",
+            s.seconds_left
+        ),
+        None,
+        false,
+    );
+    Ok(s)
+}
+
+/// Turn it off. Called by the header control, by the panic key, and when a
+/// conversation ends.
+#[tauri::command]
+async fn pc_revoke(
+    state: State<'_, Agent>,
+    why: Option<String>,
+) -> Result<grant::GrantState, String> {
+    let why = why.unwrap_or_else(|| "you switched it off".into());
+    state.grants.revoke(&why);
+    state.audit.record(
+        "pc.revoke",
+        true,
+        format!("Computer control off: {why}"),
+        None,
+        false,
+    );
+    Ok(state.grants.state())
+}
+
+/// How much is left. Polled by the header so the countdown is Rust's answer rather
+/// than a timer the page runs for itself — a page-side timer would keep counting
+/// after the grant had actually expired.
+#[tauri::command]
+async fn pc_grant_state(state: State<'_, Agent>) -> Result<grant::GrantState, String> {
+    Ok(state.grants.state())
+}
+
 /// Open the policy file so the user can widen or narrow what the agent may do.
 ///
 /// A text file rather than a settings screen, on purpose: the set of folders the
@@ -104,6 +161,75 @@ async fn agent_open_settings(app: AppHandle) -> Result<(), String> {
         .map_err(|e| format!("could not open the settings file: {e}"))
 }
 
+/// The panic key.
+///
+/// Ctrl+Alt+Shift+Esc revokes any computer-control grant, aborts what the agent is
+/// doing, and says so with a native notification. Registered globally so it works
+/// while another application has focus, which is the situation it exists for — if
+/// Compass is driving Word, the keyboard is pointed at Word.
+///
+/// TWO HONEST LIMITS, both worth stating where the code is rather than only in the UI.
+///
+/// A global hotkey can fail to register, because another process may already own the
+/// combination. If it does, this returns an error and the frontend refuses to hand out
+/// a grant at all: an escape hatch nobody has tested is worse than no escape hatch,
+/// because it changes how carefully people behave.
+///
+/// And a `RegisterHotKey`-style shortcut does not fire while a secure desktop has
+/// focus — a UAC prompt, the Ctrl+Alt+Del screen. Synthetic input cannot reach those
+/// either, so there is nothing to stop in that moment, but it means this is an escape
+/// hatch for the ordinary desktop and not a universal kill switch.
+const PANIC_KEY: &str = "ctrl+alt+shift+Escape";
+
+fn arm_panic_key(app: &AppHandle) -> Result<(), String> {
+    use tauri_plugin_global_shortcut::{
+        Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState,
+    };
+
+    let shortcut = Shortcut::new(
+        Some(Modifiers::CONTROL | Modifiers::ALT | Modifiers::SHIFT),
+        Code::Escape,
+    );
+
+    app.global_shortcut()
+        .on_shortcut(shortcut, move |app, _sc, event| {
+            // Only on press. Firing on release as well would revoke twice and log
+            // twice for one keystroke.
+            if event.state() != ShortcutState::Pressed {
+                return;
+            }
+            if let Some(agent) = app.try_state::<Agent>() {
+                let was_active = agent.grants.state().active;
+                agent.grants.revoke("the panic key stopped it");
+                agent.audit.record(
+                    "pc.panic",
+                    true,
+                    "Panic key pressed — computer control revoked".into(),
+                    None,
+                    false,
+                );
+                // Tell the frontend, so the loop stops and the indicator goes away
+                // without waiting for the next poll.
+                let _ = app.emit("compass://panic", was_active);
+            }
+            use tauri_plugin_notification::NotificationExt;
+            let _ = app
+                .notification()
+                .builder()
+                .title("Compass stopped")
+                .body("Computer control is off. Nothing else will be clicked or typed.")
+                .show();
+        })
+        .map_err(|e| format!("could not register {PANIC_KEY}: {e}"))
+}
+
+/// Is the panic key armed? The frontend asks before offering a grant.
+#[tauri::command]
+async fn pc_panic_armed(app: AppHandle) -> Result<bool, String> {
+    use tauri_plugin_global_shortcut::GlobalShortcutExt;
+    Ok(app.global_shortcut().is_registered(PANIC_KEY))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -121,10 +247,27 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             agent_handshake,
             agent_audit,
             agent_open_settings,
+            pc_grant,
+            pc_revoke,
+            pc_grant_state,
+            pc_panic_armed,
+            tools::screen::pc_list_windows,
+            tools::screen::pc_list_monitors,
+            tools::screen::pc_cursor_position,
+            tools::screen::pc_wait,
+            tools::screen::pc_screenshot,
+            tools::input::pc_focus_window,
+            tools::input::pc_mouse_move,
+            tools::input::pc_scroll,
+            tools::input::pc_click,
+            tools::input::pc_drag,
+            tools::input::pc_type,
+            tools::input::pc_hotkey,
             tools::files::list_files,
             tools::files::search_files,
             tools::files::grep_files,
@@ -163,6 +306,28 @@ pub fn run() {
             let log_dir = handle.path().app_config_dir().ok();
 
             app.manage(Agent::new(pol, denied, home, Audit::new(log_dir)));
+
+            // The escape hatch is armed before anything can need it. A failure is
+            // recorded rather than fatal; the frontend refuses to hand out a grant
+            // when it is not armed.
+            if let Err(e) = arm_panic_key(&handle) {
+                eprintln!("panic key not registered: {e}");
+            }
+
+            // Track whether anyone is looking. A grant survives a brief loss of focus
+            // — a click Compass performs moves focus to the target window — but not a
+            // sustained one, because the visible indicator only protects someone who
+            // is there to see it.
+            if let Some(win) = app.get_webview_window("main") {
+                let h2 = handle.clone();
+                win.on_window_event(move |ev| {
+                    if let tauri::WindowEvent::Focused(focused) = ev {
+                        if let Some(agent) = h2.try_state::<Agent>() {
+                            agent.grants.set_focus(*focused);
+                        }
+                    }
+                });
+            }
 
             // Decide live-or-bundled before the window exists, so the user never
             // sees a flash of the wrong one. The probe is off the main thread

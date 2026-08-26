@@ -864,6 +864,133 @@ console.log("\ntool calls are parsed when offered and ignored when not");
   check("...without orphaning a call", orphans.length === 0, JSON.stringify(orphans.length));
 }
 
+/* ── the probe, against the behaviour that broke it ─────────────── */
+/* These are regression tests for a real failure, so they are written around the shape of
+   what actually happened: a proxy that answers 200 to a request carrying `tools`, ignores
+   the field, and replies with prose. The old probe read that as support, switched protocol
+   mid-session, and every subsequent turn came back empty with nothing in any log to explain
+   it. */
+console.log("\nthe tool-calling probe demands a demonstration");
+{
+  const src = region("function probeNativeTools(){", "/* Why the current protocol");
+
+  function probeWith(response, over = {}) {
+    const state = { NATIVE_TOOLS: null, nativeProbeP: null, nativeWhy: "" };
+    const env = {
+      cfg: { model: "m", tools: "", ...(over.cfg || {}) },
+      ready: () => (over.ready === undefined ? true : over.ready),
+      workerCall: async () => response,
+      actionToolSchema: () => [{ type: "function", function: { name: "compass_actions" } }],
+      Object,
+    };
+    const names = Object.keys(env);
+    /* The function assigns to NATIVE_TOOLS / nativeProbeP / nativeWhy, which live outside
+       it, so they are declared in the evaluated scope and read back afterwards. */
+    const body =
+      "var NATIVE_TOOLS = null, nativeProbeP = null, nativeWhy = '';\n" +
+      src +
+      "\nreturn { run: probeNativeTools, peek: function(){ return {NATIVE_TOOLS:NATIVE_TOOLS, nativeWhy:nativeWhy}; } };";
+    const made = new Function(...names, body)(...names.map((k) => env[k]));
+    return made.run().then(() => ({ ...made.peek(), state }));
+  }
+
+  const withCall = {
+    status: 200,
+    body: { choices: [{ message: { tool_calls: [{ id: "c1", type: "function", function: { name: "compass_actions", arguments: '{"actions":[]}' } }] } }] },
+  };
+  const proseOnly = { status: 200, body: { choices: [{ message: { content: "ready" } }] } };
+  const emptyBody = { status: 200, body: {} };
+  const noChoices = { status: 200, body: { choices: [] } };
+  const refused = { status: 400, body: { error: "tools not supported" } };
+
+  let r = await probeWith(withCall);
+  check("a provider that answers with a real tool call is supported", r.NATIVE_TOOLS === true, JSON.stringify(r));
+  check("...and says so", /real tool call/.test(r.nativeWhy), r.nativeWhy);
+
+  r = await probeWith(proseOnly);
+  check("THE BUG: 200 plus prose is NOT support", r.NATIVE_TOOLS === false, JSON.stringify(r));
+  check("...and the reason names what the provider did",
+    /accepted the tool definitions and then ignored them/.test(r.nativeWhy), r.nativeWhy);
+
+  r = await probeWith(emptyBody);
+  check("a 200 with no choices is not support", r.NATIVE_TOOLS === false, JSON.stringify(r));
+
+  r = await probeWith(noChoices);
+  check("a 200 with an empty choices array is not support", r.NATIVE_TOOLS === false, JSON.stringify(r));
+
+  r = await probeWith(refused);
+  check("an outright refusal is not support", r.NATIVE_TOOLS === false, JSON.stringify(r));
+  check("...and reports the status", /400/.test(r.nativeWhy), r.nativeWhy);
+
+  r = await probeWith({
+    status: 200,
+    body: { choices: [{ message: { tool_calls: [{ id: "c", type: "function" }] } }] },
+  });
+  check("a tool call with no function name is not usable, so not support",
+    r.NATIVE_TOOLS === false, JSON.stringify(r));
+
+  r = await probeWith(withCall, { cfg: { tools: "off" } });
+  check("Settings off wins over a provider that does support it", r.NATIVE_TOOLS === false, JSON.stringify(r));
+  check("...and says it was a setting", /Settings/.test(r.nativeWhy), r.nativeWhy);
+
+  r = await probeWith(proseOnly, { cfg: { tools: "on" } });
+  check("Settings on wins over a provider that does not", r.NATIVE_TOOLS === true, JSON.stringify(r));
+
+  r = await probeWith(withCall, { ready: false });
+  check("with no connection configured, nothing is assumed", r.NATIVE_TOOLS === false, JSON.stringify(r));
+}
+{
+  /* The probe has to ask in a way that forces the answer. "auto" lets a model that does
+     support tools reply in prose anyway, which is indistinguishable from a provider that
+     ignored the field — the precise ambiguity that caused the outage. */
+  const src = region("function probeNativeTools(){", "/* Why the current protocol");
+  check("the probe asks with tool_choice required, not auto",
+    /tool_choice:\s*"required"/.test(src) && !/tool_choice:\s*"auto"/.test(src), "wrong tool_choice");
+  check("the probe reads the response body rather than only the status",
+    /choices/.test(src) && /tool_calls/.test(src), "the body is not inspected");
+  check("the probe no longer decides on status alone",
+    !/NATIVE_TOOLS = r\.status === 200/.test(src), "the old status-only test is still there");
+}
+
+/* ── the runtime fallback ────────────────────────────────────────── */
+console.log("\nan empty reply is never terminal while another path exists");
+{
+  /* Asserted against the orchestrator's source rather than by driving a whole turn, which
+     would need the DOM, the worker and the streaming reader. What matters is that the
+     branch exists, that it turns tool calling off rather than merely retrying, and that it
+     cannot loop. */
+  const src = region("async function orchestrate(slot){", "/* Writes need an action mode");
+  check("an empty reply on the native path switches protocol",
+    /if\(NATIVE_TOOLS && !slot\.fellBack\)\{[\s\S]{0,200}NATIVE_TOOLS = false/.test(src),
+    "no protocol fallback on an empty reply");
+  check("...and retries the round rather than giving up",
+    /slot\.fellBack = true;[\s\S]{0,120}continue;/.test(src), "no retry after the switch");
+  check("the fallback is once only, so it cannot loop",
+    (src.match(/slot\.fellBack = true/g) || []).length === 2 &&
+      /if\(!slot\.fellBack\)\{/.test(src),
+    "the guard is missing or wrong");
+  check("a round is counted before any retry decision, so the budget still bounds it",
+    src.indexOf("L.rounds++") < src.indexOf("if(!slot.content && !viaTools)"),
+    "rounds are counted after the retry branch");
+  check("the final message says what was tried instead of naming a log file",
+    /Nothing came back from the model, twice/.test(src) && !/worker logs in Cloudflare/.test(src),
+    "the give-up message is unchanged");
+  check("...and distinguishes a protocol switch from a plain retry",
+    /slot\.protoSwitched/.test(src), "the message cannot tell the two apart");
+}
+{
+  /* The other half of the same bug: the probe was fired and not awaited, so its answer
+     could arrive mid-conversation and change protocol between one message and the next.
+     That is why the first few turns worked and everything after them came back empty. */
+  const turn = region("async function runTurn(){", "/* The look-then-think loop.");
+  check("the protocol is settled before a turn starts",
+    /if\(NATIVE_TOOLS === null\) await probeNativeTools\(\);/.test(turn),
+    "the probe is not awaited before the turn");
+  check("...and before orchestrate runs, not after",
+    turn.indexOf("await probeNativeTools()") < turn.indexOf("await orchestrate(slot)"),
+    "the probe is awaited too late");
+}
+
 /* ── the data fence survives ─────────────────────────────────────── */
 console.log("\ntool results stay fenced as data");
 {

@@ -113,7 +113,6 @@ fn xml_text(xml: &str, breaks: &[&str], cap: usize) -> String {
     let mut reader = Reader::from_str(xml);
     reader.config_mut().trim_text(false);
     let mut out = String::new();
-    let mut buf_depth = 0usize;
 
     loop {
         if out.len() >= cap {
@@ -133,10 +132,6 @@ fn xml_text(xml: &str, breaks: &[&str], cap: usize) -> String {
                 if local == "br" {
                     out.push('\n');
                 }
-                buf_depth += 1;
-            }
-            Ok(Event::End(_)) => {
-                buf_depth = buf_depth.saturating_sub(1);
             }
             Ok(Event::Text(t)) => {
                 if let Ok(s) = t.decode() {

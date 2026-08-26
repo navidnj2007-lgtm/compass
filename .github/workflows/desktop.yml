@@ -41,6 +41,7 @@ jobs:
           node .build/test-worker.mjs
           node .build/test-orchestrator.mjs
           node .build/test-timeline.mjs
+          node .build/test-chat.mjs
 
       - uses: dtolnay/rust-toolchain@stable
         with:

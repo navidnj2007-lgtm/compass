@@ -17,5 +17,7 @@ pub mod clip;
 pub mod docs;
 pub mod files;
 pub mod index;
+pub mod input;
+pub mod screen;
 pub mod system;
 pub mod undo;

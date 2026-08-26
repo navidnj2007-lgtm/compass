@@ -133,6 +133,21 @@ pub struct Policy {
     /// on every small edit trains people to click through prompts.
     #[serde(default)]
     pub confirm_medium: bool,
+
+    /// Extra window titles or classes that computer control must never touch —
+    /// never captured, never clicked, never typed into.
+    ///
+    /// Additive only. The compiled-in list in `grant.rs` covers Windows' own
+    /// credential surfaces and the common password managers, and this cannot narrow
+    /// it: a list that can be shortened at runtime is a list an injected prompt can
+    /// ask to have shortened, which is the same reasoning that took `confirm_high`
+    /// out of the tunables. Matching is a case-insensitive substring on both the
+    /// window title and its class, so "my bank" catches "My Bank — Online Banking".
+    /// Patterns shorter than two characters are ignored, because a one-character
+    /// pattern matches almost every window and would read as the feature being
+    /// broken rather than strict.
+    #[serde(default)]
+    pub blocked_windows: Vec<String>,
 }
 
 impl Default for Policy {
@@ -147,6 +162,7 @@ impl Default for Policy {
             max_walk_entries: default_max_walk_entries(),
             confirm_high: default_true(),
             confirm_medium: false,
+            blocked_windows: Vec::new(),
         }
     }
 }
