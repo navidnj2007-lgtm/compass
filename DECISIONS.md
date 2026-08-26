@@ -498,3 +498,107 @@ deviation than shipping WP2 rushed.
 
 **Revisit if:** grep proves too slow in practice on his actual Documents folder,
 which is the measurement that would justify the dependency.
+
+---
+
+## D23 — The grant lives in Rust and the model is never told it exists
+
+**Decided:** `pc_grant` / `pc_revoke` / `pc_grant_state` / `pc_panic_armed` are
+invoked directly by the frontend and are deliberately *not* registry tools.
+
+**Options:** register them like every other native command; keep them out of the
+registry.
+
+**Rule:** 2 (security posture). A registry tool is one the prompt describes and the
+model can name. A grant the model can request is a grant an injected prompt can
+request, and the entire value of a session grant is that it is a decision a person
+makes. Keeping them out of the registry means the model has never been told they
+exist, and even if it guessed the name, `runRead`/`runWrite` only dispatch through the
+registry — there is no path from a model action to a grant.
+
+This required a change to the CI ritual check, which correctly flagged four
+ACL-exposed commands with no registry record. They are now named exemptions with the
+reason recorded, and the check still insists each is genuinely invoked from
+`index.html`.
+
+The asymmetry is the property: only a person can grant, and the countdown, the panic
+key, losing focus and ending the chat can all revoke.
+
+---
+
+## D24 — The countdown is Rust's answer, not a page timer
+
+**Decided:** the header polls `pc_grant_state`; expiry, blur and step exhaustion are
+evaluated inside `active()` on every call rather than on a timer.
+
+**Options:** run a `setInterval` in the page and count down locally; poll Rust.
+
+**Rule:** 2 (security posture). A page-side timer keeps counting after the grant has
+actually expired — it would show an active indicator over a dead grant, or worse, a
+dead indicator over a live one. Evaluating the conditions on every read means there is
+no window in which a stale grant is still usable because a timer had not fired.
+
+---
+
+## D25 — Losing focus does not revoke immediately
+
+**Decided:** the grant survives a brief loss of focus and is revoked after 60 seconds
+of it.
+
+**Options:** revoke the instant focus is lost; revoke after a delay; ignore focus.
+
+**Rule:** this one is a correctness constraint rather than a preference, and it is
+worth recording because the obvious design does not work. A click Compass performs
+moves focus to the window it clicked — so an instant revoke would make the feature
+revoke itself on its first action. Ignoring focus entirely loses the property the
+visible indicator depends on, which is that someone is watching. Sixty seconds is long
+enough to click into another application and back, short enough that walking away ends
+it.
+
+**Revisit if:** the delay proves either too twitchy or too generous in real use.
+
+---
+
+## D26 — No grant unless the panic key registered
+
+**Decided:** `pcGrant()` asks `pc_panic_armed` first and refuses if the global
+shortcut could not be registered.
+
+**Options:** grant anyway and warn; refuse.
+
+**Rule:** 2 (security posture). An untested escape hatch is worse than a missing one,
+because it changes how carefully someone behaves — the whole reason to be comfortable
+letting an agent drive the mouse is knowing it can be stopped from another window. If
+another program owns Ctrl+Alt+Shift+Esc, the honest answer is that computer control
+stays off, and the message says which key and why.
+
+Two limits are documented in the code rather than only in the UI: a global shortcut
+can fail to register at all, and a `RegisterHotKey`-style shortcut does not fire while
+a secure desktop has focus. Synthetic input cannot reach a secure desktop either, so
+there is nothing to stop in that moment — but it means this is an escape hatch for the
+ordinary desktop and not a universal kill switch, and saying so is better than
+implying otherwise.
+
+---
+
+## D27 — The exclusion list can be added to but never narrowed
+
+**Decided:** `BLOCKED_WINDOWS` is compiled in; the policy file may only append.
+
+**Options:** make the whole list configurable; compile it in with an additive policy
+field.
+
+**Rule:** 2 (security posture), and the same reasoning as `confirm_high` in D-nothing
+above: a list that can be narrowed at runtime is a list an injected prompt can ask to
+have narrowed. Appending is safe in the only direction that matters.
+
+The matcher checks title *and* class, because neither alone is reliable — a password
+manager may have a generic title on a distinctive class, and a credential dialog the
+reverse. Patterns shorter than two characters in the policy are ignored, since "a"
+would match nearly every window and would read as the feature being broken rather than
+strict.
+
+**Accepted false positive, tested deliberately:** a document called "How Windows
+security works.pdf" trips the filter, because the phrase is in the title. That is the
+intended trade — a false refusal costs a sentence, a false allow costs a password —
+and there is a test asserting it rather than a comment hoping nobody notices.

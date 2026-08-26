@@ -48,6 +48,10 @@ pub struct Agent {
     denied: Vec<PathBuf>,
     home: Option<PathBuf>,
     pub audit: Audit,
+    /// Permission to drive the mouse and keyboard. Lives here rather than in the
+    /// frontend because a grant the page owns is a grant a compromised page can
+    /// award itself; here the page can only ask, and only a person can start one.
+    pub grants: crate::grant::Grants,
 }
 
 impl Agent {
@@ -57,6 +61,7 @@ impl Agent {
             denied,
             home,
             audit,
+            grants: crate::grant::Grants::new(),
         }
     }
 

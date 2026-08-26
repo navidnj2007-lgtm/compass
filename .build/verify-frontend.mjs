@@ -205,6 +205,15 @@ const NON_TOOL_COMMANDS = [
   "agent_audit",
   "agent_open_settings",
   "open_url",
+  /* Computer control. Exempt for a stronger reason than the others: these must NOT be
+     registry tools, because a registry tool is one the model is told about and can
+     name. Granting permission to drive the mouse is something only a person does, from
+     a control in the chat header, so the grant commands are invoked directly and the
+     prompt never mentions them. */
+  "pc_grant",
+  "pc_revoke",
+  "pc_grant_state",
+  "pc_panic_armed",
 ];
 for (const c of NON_TOOL_COMMANDS) {
   html.includes(`invoke("${c}"`)

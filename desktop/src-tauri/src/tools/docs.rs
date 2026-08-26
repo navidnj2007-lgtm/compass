@@ -113,7 +113,6 @@ fn xml_text(xml: &str, breaks: &[&str], cap: usize) -> String {
     let mut reader = Reader::from_str(xml);
     reader.config_mut().trim_text(false);
     let mut out = String::new();
-    let mut buf_depth = 0usize;
 
     loop {
         if out.len() >= cap {
@@ -133,10 +132,6 @@ fn xml_text(xml: &str, breaks: &[&str], cap: usize) -> String {
                 if local == "br" {
                     out.push('\n');
                 }
-                buf_depth += 1;
-            }
-            Ok(Event::End(_)) => {
-                buf_depth = buf_depth.saturating_sub(1);
             }
             Ok(Event::Text(t)) => {
                 if let Ok(s) = t.decode() {
@@ -157,7 +152,7 @@ fn zip_entry<R: Read + std::io::Seek>(
     zip: &mut zip::ZipArchive<R>,
     name: &str,
 ) -> Result<String, String> {
-    let mut f = zip
+    let f = zip
         .by_name(name)
         .map_err(|_| format!("that file has no {name} inside it, so it looks damaged"))?;
     if f.size() > MAX_ENTRY_BYTES {
@@ -397,13 +392,11 @@ fn sheet_rows(xml: &str, shared: &[String], cap: usize) -> String {
 fn read_csv(bytes: &[u8], cap: usize) -> Result<String, String> {
     let text = String::from_utf8_lossy(bytes);
     let mut out = String::new();
-    let mut rows = 0usize;
-    for line in text.lines() {
-        if rows >= MAX_ROWS || out.len() >= cap {
+    for (n, line) in text.lines().enumerate() {
+        if n >= MAX_ROWS || out.len() >= cap {
             out.push_str("[\u{2026}more rows follow]\n");
             break;
         }
-        rows += 1;
         out.push_str(line.trim_end());
         out.push('\n');
     }
@@ -440,7 +433,7 @@ fn read_pdf(bytes: &[u8], from: usize, to: usize, cap: usize) -> Result<String, 
     // possible without a second parse.
     let pages: Vec<&str> = text.split('\u{c}').collect();
     let total = pages.len();
-    let (first, last) = range(from, to, total.min(MAX_UNITS).max(1));
+    let (first, last) = range(from, to, total.clamp(1, MAX_UNITS));
 
     let mut out = String::new();
     for n in first..=last.min(total) {

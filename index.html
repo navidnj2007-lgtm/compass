@@ -6189,6 +6189,102 @@ function previewDiff(a){
     .catch(function(){ return null; });
 }
 
+/* ── COMPUTER CONTROL ────────────────────────────────────────────────
+   Permission to drive the mouse and keyboard, held by Rust and only ever asked for
+   from here.
+
+   Note what is absent: any way for the model to grant itself anything. These are not
+   registered as tools, they carry no `spec` text, and the prompt is never told they
+   exist — the model cannot name a tool it has not been told about, and even if it
+   guessed, `runRead`/`runWrite` only dispatch through the registry. Granting is a
+   thing a person does with a control in the chat header. Revoking is a thing
+   everything can do.
+
+   The countdown comes from Rust on every poll rather than being run as a timer here.
+   A page-side timer keeps counting after the grant has actually expired, which would
+   show an active indicator over a dead grant — the exact opposite of what the
+   indicator is for. */
+var pcState = {active:false, seconds_left:0, steps_used:0, steps_left:0, reason:""};
+var pcArmed = null;      // null = not asked yet
+
+function pcPanicArmed(){
+  if(!HAS_BRIDGE) return Promise.resolve(false);
+  if(pcArmed !== null) return Promise.resolve(pcArmed);
+  return invoke("pc_panic_armed").then(function(ok){
+    pcArmed = !!ok;
+    return pcArmed;
+  }).catch(function(){ pcArmed = false; return false; });
+}
+
+function pcGrant(seconds){
+  if(!HAS_BRIDGE) return Promise.reject(new Error("this build of Compass has no native layer"));
+  /* The escape hatch has to work before the thing it stops is switched on. An
+     untested kill switch is worse than none, because it changes how carefully
+     someone behaves. */
+  return pcPanicArmed().then(function(armed){
+    if(!armed){
+      return Promise.reject(new Error(
+        "Compass could not register the emergency stop (Ctrl+Alt+Shift+Esc) \u2014 another program "+
+        "is probably using it. Computer control stays off until that key works, because it is the "+
+        "only way to stop it from another window."));
+    }
+    return invoke("pc_grant", {seconds: okInt(seconds, 900, 60, 1800)});
+  }).then(function(s){ pcState = s || pcState; return pcState; });
+}
+
+function pcRevoke(why){
+  if(!HAS_BRIDGE) return Promise.resolve(pcState);
+  return invoke("pc_revoke", {why: isStr(why) ? clip(why,120) : "you switched it off"})
+    .then(function(s){ pcState = s || pcState; return pcState; })
+    .catch(function(){ return pcState; });
+}
+
+function pcPoll(){
+  if(!HAS_BRIDGE) return Promise.resolve(pcState);
+  return invoke("pc_grant_state").then(function(s){
+    pcState = s || pcState;
+    return pcState;
+  }).catch(function(){ return pcState; });
+}
+
+function pcNow(){ return pcState; }
+
+/* The panic key fires in Rust, which emits an event. Subscribed rather than polled,
+   because the whole point of the key is that it takes effect now rather than at the
+   next poll. Rust has already revoked the grant by the time this arrives; the
+   listeners exist so the chat can stop what it is doing and the indicator can go. */
+var panicHandlers = [];
+if(HAS_BRIDGE){
+  var T = window.__TAURI__;
+  if(T && T.event && typeof T.event.listen === "function"){
+    T.event.listen("compass://panic", function(){
+      pcState = {active:false, seconds_left:0, steps_used:0, steps_left:0,
+                 reason:"the panic key stopped it"};
+      for(var i=0;i<panicHandlers.length;i++){
+        try{ panicHandlers[i](); }catch(e){}
+      }
+    }).catch(function(){});
+  }
+}
+
+/* Whether computer use is available at all, and if not, why in one sentence.
+   Three separate reasons, kept separate because they need different answers: no
+   desktop build at all, a model that cannot see, and an emergency stop that could not
+   be registered. Telling someone "computer control is unavailable" without saying
+   which of those it is leaves them with nothing to do about it. */
+function pcWhyNot(canSee){
+  if(!HAS_BRIDGE || !host.ready) return "Computer control only exists in the Windows desktop app.";
+  if(pcArmed === false){
+    return "The emergency stop key (Ctrl+Alt+Shift+Esc) could not be registered, probably because "+
+           "another program has it. Computer control stays off until it works.";
+  }
+  if(canSee === false){
+    return "The model this worker is configured with cannot see images, so it would be clicking "+
+           "blind. Set VISION_MODEL in the worker to turn this on.";
+  }
+  return "";
+}
+
 /* ── the desktop panel ───────────────────────────────────────────────
    Lives inside the existing Sync screen rather than a new tab, because that is
    already the "this device" screen and because a tab that only ever appears in
@@ -6316,6 +6412,15 @@ window.CompassAgent = {
   runRead:runRead,
   runWrite:runWrite,
   previewDiff:previewDiff,
+  /* Computer control. Not tools — see the section comment: there is deliberately no
+     path from a model action to any of these. */
+  pcGrant:pcGrant,
+  pcRevoke:pcRevoke,
+  pcPoll:pcPoll,
+  pcNow:pcNow,
+  pcPanicArmed:pcPanicArmed,
+  pcWhyNot:pcWhyNot,
+  onPanic:function(fn){ panicHandlers.push(fn); },
   openUrl:openUrl,
   paintPanel:paintPanel
 };
