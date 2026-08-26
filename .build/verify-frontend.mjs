@@ -141,6 +141,8 @@ const expected = [
   "clipboard_read", "clipboard_write", "get_system_information", "show_notification",
   // browser control
   "browser_tabs", "browser_open", "browser_read", "browser_click", "browser_type",
+  // computer use: the read half
+  "pc_list_windows", "pc_list_monitors", "pc_cursor_position", "pc_wait", "pc_screenshot",
 ];
 ok(`${names.length} tools registered`);
 for (const e of expected) {

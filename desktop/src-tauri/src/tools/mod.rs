@@ -16,5 +16,6 @@ pub mod browser;
 pub mod clip;
 pub mod docs;
 pub mod files;
+pub mod screen;
 pub mod system;
 pub mod undo;

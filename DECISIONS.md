@@ -644,3 +644,104 @@ strict.
 security works.pdf" trips the filter, because the phrase is in the title. That is the
 intended trade — a false refusal costs a sentence, a false allow costs a password —
 and there is a test asserting it rather than a comment hoping nobody notices.
+
+---
+
+## D28 — Looking at the screen needs no grant
+
+**Decided:** `pc.list_windows`, `pc.list_monitors`, `pc.cursor_position`, `pc.wait`
+and `pc.screenshot` are reads and do not consult the session grant.
+
+**Options:** gate everything `pc.*` on the grant; gate only the acting half.
+
+**Rule:** 4 (smaller scope), and a correctness argument. Requiring a grant to look
+would mean the agent had to be given permission to click before it could work out
+whether clicking was necessary — which is backwards, and would push people into
+granting speculatively. The discipline the whole feature depends on is look, act,
+verify, and the looking has to be free or it gets skipped.
+
+The exclusion list still applies to the reads, and that is the part that matters: a
+screenshot of an open password vault is a leak, and it travels to the model and the
+provider. A window that may not be clicked may not be photographed.
+
+**Revisit if:** never for the geometry reads. If screenshots ever become expensive
+enough to be a concern, they could be metered without being granted.
+
+---
+
+## D29 — Excluded windows are omitted from listings, not marked as hidden
+
+**Decided:** `pc.list_windows` filters excluded windows out entirely.
+
+**Options:** list them with a "(blocked)" marker so the model knows they exist; omit
+them.
+
+**Rule:** 2 (security posture). A listing containing "1Password (blocked)" has already
+told the model that he uses 1Password and that it is open right now. That is
+information it does not need, cannot act on, and which reaches the provider. Omission
+costs nothing: there is no useful thing the model could do with the knowledge that a
+window it may not touch exists.
+
+A window named by id rather than listed is checked separately, so a stale or invented
+id cannot be used to reach one.
+
+---
+
+## D30 — A black capture is an error, not a result
+
+**Decided:** `pc.screenshot` refuses when the captured frame is uniformly black, with
+an explanation.
+
+**Options:** return it and let the model describe it; refuse.
+
+**Rule:** 2 (security posture). A black frame is what a capture of a protected surface
+looks like — a secure desktop, DRM-protected video. Handing a model a black rectangle
+invites it to describe what it expects to be there rather than report that it saw
+nothing, and a computer-use agent that describes a screen it did not read is the exact
+failure this feature must not have. The threshold is deliberately low (any channel
+above 8) so a dark theme is not mistaken for a protected surface, and sampling is on a
+grid because a 4K frame is eight million pixels and a protected one is uniformly black.
+
+---
+
+## D31 — The screenshot goes through the existing attachment pipeline, in the result text
+
+**Decided:** the image is appended to the tool result after a `COMPASS_IMAGE:` marker,
+split out in `runRead`, and pushed into `atts` exactly as a photo is.
+
+**Options:** add an image variant to `ToolOut`; a separate IPC channel for images; the
+marker.
+
+**Rule:** 3 (keep one path) and 4 (smaller scope). `ToolOut` is the one shape every
+tool returns and the frontend has one code path for it; an image variant would mean
+every caller learning about a case one tool produces. More importantly the brief's
+requirement was that screenshots use the existing pipeline so the worker's image
+validation and the vision route are unchanged — and there are now worker tests proving
+an agent-captured image is refused by the same size and count limits as a photo.
+
+The marker is uglier than a typed field and was chosen anyway. The ugliness is local to
+two functions; a second image path would be a second place for an oversized image to
+get through.
+
+Thumbnails are derived in the browser rather than sent from Rust, because Rust would
+have to encode a second JPEG and double the IPC payload when the page already has the
+image and can scale it in a canvas for nothing.
+
+An agent-taken shot counts against the per-message image limit, and when the limit is
+reached the *oldest agent-taken* shot is evicted — never one of his own photos, and
+never the most recent evidence in a look-act-verify sequence.
+
+---
+
+## D32 — Vision routing is detected from the request, not flagged by the caller
+
+**Decided:** `streamTurn` sets `vision: true` when the assembled messages contain an
+image.
+
+**Options:** have the screenshot path set a flag; detect it.
+
+**Rule:** 1 (reversible) and correctness. A flag has to be set by whoever adds the
+image, and there are now three ways an image gets into a turn — the file picker, the
+browser's screen capture, and `pc.screenshot`. The one thing always true is that the
+image is in the message, so that is what gets asked. With no `VISION_MODEL` binding the
+worker ignores the field entirely.

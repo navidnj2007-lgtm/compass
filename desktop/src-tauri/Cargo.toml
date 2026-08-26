@@ -79,6 +79,9 @@ pdf-extract = "0.12.0"
 zip = { version = "4.6.1", default-features = false, features = ["deflate"] }
 quick-xml = "0.38"
 tauri-plugin-global-shortcut = "2"
+xcap = "0.7"
+windows = { version = "0.62", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_UI_Input_KeyboardAndMouse", "Win32_Graphics_Gdi", "Win32_System_Threading", "Win32_System_ProcessStatus"] }
+image = { version = "0.25", default-features = false, features = ["jpeg"] }
 
 [profile.release]
 codegen-units = 1
