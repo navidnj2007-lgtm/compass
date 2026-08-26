@@ -17,24 +17,42 @@ The standing rules, in the order they are applied:
 
 ## WHAT SHIPPED AND WHAT DID NOT
 
-Complete and verified: WP0 (tasks 1–5), the worker passthrough (6–7), WP1 in full (8–15),
-WP3 except the index (16–18, 20), WP2 in full (21–27), and WP4 in full (28–33).
+Complete and verified: all 33 tasks. WP0 (1–5), the worker passthrough (6–7), WP1 (8–15),
+WP3 (16–20, with 19 on its own branch), WP2 (21–27) and WP4 (28–33).
 
-Not done: task 19, the opt-in SQLite index — deferred deliberately, see D22. One item
-inside task 26 was cut rather than deferred: the audit thumbnail store, for the reasons in
-D40.
+One item inside task 26 was cut rather than deferred: the audit thumbnail store, for the
+reasons in D40. Task 19 was deferred by D22 and then built once WP2 was done; D46 records
+what it does and what it deliberately does not.
 
-**Nothing is half-applied.** Every branch builds, every suite passes, and no partially
-wired feature is left reachable.
+**Nothing is half-applied.** Every branch builds, every suite passes on its own declared CI,
+and no partially wired feature is left reachable.
 
-Branches, all pushed, `main` untouched at `318aacc`:
+### The branches, and how they actually relate
 
-  * `wp1-orchestrator` — WP0, worker passthrough, WP1
-  * `wp3-data` — tasks 16–18, 20
-  * `wp2-computer-use` — tasks 21–27
-  * `wp4-chat` — tasks 28–33
+They are one line of development with a single side branch, not four independent branches —
+worth stating precisely, because "review them in order" is only useful if the order is real.
 
-They are stacked in that order and should be reviewed in it.
+```
+main (318aacc)
+ └── wp1-orchestrator ......... WP0, worker passthrough, WP1 (tasks 1–15)
+      └── wp3-data ............ tasks 16–18, 20
+           ├── wp2-computer-use  tasks 21–27
+           │    └── wp4-chat ... tasks 28–33   ← contains everything except task 19
+           └── wp3-index ....... task 19       ← side branch, contains WP3 but not WP2 or WP4
+```
+
+So `wp4-chat` is the whole stack bar one task, and `wp3-index` is the one task on its own.
+Merging `wp4-chat` and then `wp3-index` brings in all 33. `wp3-data` and `wp2-computer-use`
+are points along the same line — useful to read in sequence, not separately mergeable.
+
+One wrinkle: `wp3-data` has one commit the others do not, the clippy fix in D47, made after
+`wp2-computer-use` had already branched from it. The same fix is present in `wp2-computer-use`
+and `wp4-chat` as different commits, which is why all of them pass. Expect a trivial conflict
+in `tools/docs.rs` if `wp3-data` is merged separately.
+
+`DECISIONS.md` has also diverged: each branch appends to it. D23–D45 are on
+`wp2-computer-use` and `wp4-chat`; D46–D47 are on `wp3-index`. Merging needs a union of the
+file rather than a textual merge.
 
 **The one thing to check by hand before merging:** no `pc.*` command has been run against
 a real screen. They compile, the logic around them is tested, and the parts with security
