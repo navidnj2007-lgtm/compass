@@ -1151,6 +1151,35 @@ body.tg .modal .mb{padding-bottom:calc(20px + max(var(--tgsafe), env(safe-area-i
    state — a rebuilt region either says everything again or says nothing. This is a
    separate, tiny region that only ever holds one sentence about progress. */
 .sronly{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ── the computer-control indicator ──────────────────
+   Every other control in this feature limits what the agent may do. This one limits
+   what can happen without him knowing, and it is the difference between "I let it do
+   that" and "why did my mouse just move". So it is a full-width bar with a live
+   countdown and a stop button rather than a dot in a corner: the requirement is that he
+   is never unsure whether the agent can move his mouse, and a subtle indicator fails
+   that requirement by being subtle.
+
+   --neg for the background, which is the colour this file already uses for destructive
+   things, so it reads as "something consequential is switched on" without inventing a
+   token. */
+.pcbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 8px;padding:9px 12px;
+  border:1px solid var(--neg);border-radius:12px;background:color-mix(in srgb, var(--neg) 12%, var(--surface));
+  font-size:12.5px;color:var(--ink)}
+.pcbar b{font-weight:650}
+.pcbar .pcdot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--neg);
+  animation:pcPulse 1.4s ease-in-out infinite}
+.pcbar .pcleft{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:650}
+.pcbar .pcsteps{color:var(--muted)}
+.pcbar .pchint{color:var(--muted);font-size:11.5px;width:100%}
+.pcbar .pcstop{flex:none;padding:5px 11px;border-radius:9px;border:1px solid var(--neg);
+  background:var(--neg);color:var(--surface);font:inherit;font-size:12px;font-weight:650;cursor:pointer}
+.pcbar .pcstop:hover{filter:brightness(1.08)}
+.pcbar .pcstop:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+@keyframes pcPulse{0%,100%{opacity:.45}50%{opacity:1}}
+/* Reduced motion keeps the bar and loses the pulse. The bar is the information; the
+   movement is only what draws the eye to it. */
+@media (prefers-reduced-motion: reduce){.pcbar .pcdot{animation:none;opacity:1}}
 </style>
 </head>
 <body>
@@ -9650,6 +9679,98 @@ function renderDrawer(){
   }).join("") : '<div class="dempty">No conversations yet.</div>';
 }
 
+/* ── COMPUTER CONTROL, IN THE HEADER ─────────────────────────────────
+   A switch and a countdown, and while it is on, something impossible to miss.
+
+   The indicator is the part that carries the safety property. Everything else in this
+   feature is a control on what the agent may do; the indicator is the control on his
+   understanding of it, and it is the difference between "I let it do that" and "why did
+   my mouse just move". So it is a full-width bar with a live countdown and a stop
+   button, not a dot in a corner — the requirement was that he must never be unsure
+   whether the agent can move his mouse, and a subtle indicator fails that requirement
+   by being subtle.
+
+   State comes from Rust on a poll rather than from a local timer. See DECISIONS.md D24:
+   a page-side countdown keeps running after the grant has actually expired, which would
+   show an active bar over a dead grant, or worse the reverse. */
+var pcTimer = null;
+
+function pcCanOffer(){
+  var A = agent();
+  return !!(A && A.pcWhyNot && !A.pcWhyNot(visionOn));
+}
+
+function pcBarHTML(){
+  var A = agent();
+  if(!A) return "";
+  var s = A.pcNow();
+  if(!s || !s.active) return "";
+  var mins = Math.floor(s.seconds_left/60), secs = s.seconds_left%60;
+  return '<div class="pcbar" role="status">'
+    + '<span class="pcdot" aria-hidden="true"></span>'
+    + '<b>Compass can move your mouse and type</b>'
+    + '<span class="pcleft mono">'+mins+':'+(secs<10?"0":"")+secs+'</span>'
+    + '<span class="pcsteps">'+s.steps_used+' action'+(s.steps_used===1?"":"s")+'</span>'
+    + '<button type="button" class="pcstop" id="pcStop">Stop now</button>'
+    + '<span class="pchint">or press Ctrl+Alt+Shift+Esc</span>'
+    + '</div>';
+}
+
+function paintPcBar(){
+  var host = $("#askPcBar");
+  if(!host) return;
+  var html = pcBarHTML();
+  if(host.innerHTML !== html) host.innerHTML = html;
+
+  var A = agent();
+  var live = !!(A && A.pcNow() && A.pcNow().active);
+  /* Poll only while it matters. A timer running all day to discover that a switch is
+     still off is a battery cost for nothing. */
+  if(live && !pcTimer){
+    pcTimer = setInterval(function(){
+      var A2 = agent();
+      if(!A2){ clearInterval(pcTimer); pcTimer=null; return; }
+      A2.pcPoll().then(function(){
+        paintPcBar();
+        if(!A2.pcNow().active){ clearInterval(pcTimer); pcTimer=null; render(); }
+      });
+    }, 1000);
+  }
+  if(!live && pcTimer){ clearInterval(pcTimer); pcTimer=null; }
+}
+
+/* The switch itself, in the settings card rather than the header row: turning it on is a
+   deliberate act and should take a moment's navigation, whereas turning it off is one
+   tap on the bar that is already on screen. Asymmetric on purpose. */
+function pcControlHTML(){
+  var A = agent();
+  if(!A) return "";
+  var why = A.pcWhyNot(visionOn);
+  var s = A.pcNow();
+
+  var head = '<h2 style="margin-top:18px">Letting Compass use your computer</h2>';
+  if(why){
+    return head + '<div class="hint">'+esc(why)+'</div>';
+  }
+  if(s && s.active){
+    return head
+      + '<div class="hint">On for another '+Math.ceil(s.seconds_left/60)+' minute'
+      + (Math.ceil(s.seconds_left/60)===1?"":"s")+'. '+s.steps_used+' action'
+      + (s.steps_used===1?"":"s")+' used of '+(s.steps_used+s.steps_left)+'.</div>'
+      + '<div class="row" style="margin-top:10px"><button class="ghost sm" id="pcOff">Switch it off</button></div>';
+  }
+  return head
+    + '<div class="hint">Compass can see your screen already. This also lets it move the pointer, '
+    + 'click and type \u2014 for 15 minutes, and it asks Windows before every click and every piece '
+    + 'of typing. It switches itself off when the time runs out, when Compass has been in the '
+    + 'background for a minute, or when you press <b>Ctrl+Alt+Shift+Esc</b>. It is never remembered '
+    + 'between sessions.<br><br>Security and password windows are invisible to it and cannot be '
+    + 'clicked, and it will refuse to type anything that looks like a password, a card number or a '
+    + 'login code.</div>'
+    + '<div class="row" style="margin-top:10px"><button class="primary sm" id="pcOn">Switch it on for 15 minutes</button>'
+    + '<span id="pcMsg" style="font-size:12px;color:var(--muted)"></span></div>';
+}
+
 /* ── UI ────────────────────────────────────────────── */
 function render(){
   var conn = ready();
@@ -9677,6 +9798,9 @@ function render(){
     var o=document.createElement("option"); o.value=cfg.model; o.textContent=cfg.model; sel.appendChild(o);
   }
   if(sel) sel.value = cfg.model || "";
+  var pcCtl = $("#askPcCtl");
+  if(pcCtl) pcCtl.innerHTML = pcControlHTML();
+  paintPcBar();
   renderDrawer();
   setSend();
   paint();
@@ -10104,6 +10228,7 @@ function boot(){
   +   '<button class="ghost sm" id="cfgTest">Test connection</button>'
   +   '<button class="ghost sm" id="cfgForget" style="display:none">Forget</button>'
   +   '<span id="cfgMsg" style="font-size:12px;color:var(--muted)"></span></div>'
+  +   '<div id="askPcCtl"></div>'
   + '</div>'
 
   + '<div class="askshell">'
@@ -10114,6 +10239,7 @@ function boot(){
   +     '<button class="iconbtn" id="askCfg" aria-label="Connection settings" title="Settings" aria-pressed="false">'+ICO.cog+'</button>'
   +   '</div>'
   +   '<div class="askmodes" id="askModes" role="group" aria-label="What kind of help"></div>'
+  +   '<div id="askPcBar"></div>'
   +   '<div class="logwrap">'
   +     '<div id="askLog" class="asklog" role="log" aria-live="polite" aria-atomic="false"></div>'
   +     '<button class="tobot" id="askToBot" type="button">'+ICO.down+'Jump to latest</button>'
@@ -10172,7 +10298,38 @@ function boot(){
        conversation records it. */
     if(busy) stop();
     toast("Stopped \u2014 computer control off");
-    paint();
+    paintPcBar();
+    render();
+  });
+
+  /* The grant switch. Delegated from the section rather than bound to the buttons,
+     because both are rendered from a template and rebound on every repaint. */
+  sec.addEventListener("click", function(e){
+    var b = e.target.closest && e.target.closest("#pcOn,#pcOff,#pcStop");
+    if(!b) return;
+    var A = agent();
+    if(!A) return;
+
+    if(b.id === "pcOn"){
+      var msg = $("#pcMsg");
+      if(msg) msg.textContent = "Checking the emergency stop\u2026";
+      A.pcGrant(900).then(function(){
+        if(msg) msg.textContent = "";
+        render();
+      }).catch(function(err){
+        /* The commonest failure is that the panic key could not be registered, and the
+           message says which key and why. Shown here rather than in a toast because it
+           needs reading, not glancing at. */
+        if(msg){ msg.textContent = (err && err.message) || "Could not switch it on."; msg.style.color = "var(--crit)"; }
+      });
+      return;
+    }
+    /* Off, from either place. No confirmation: making someone confirm that they want to
+       stop is how a stop button becomes useless. */
+    A.pcRevoke(b.id === "pcStop" ? "you pressed Stop now" : "you switched it off").then(function(){
+      if(busy) stop();
+      render();
+    });
   });
 
   /* ── header ── */

@@ -18,26 +18,31 @@ The standing rules, in the order they are applied:
 ## WHAT SHIPPED AND WHAT DID NOT
 
 Complete and verified: WP0 (tasks 1–5), the worker passthrough (6–7), WP1 in full
-(8–15), WP3 except the index (16–18, 20), and WP2's safety machinery (21–22, plus the
-exclusion matcher from 23).
+(8–15), WP3 except the index (16–18, 20), and WP2 in full (21–27).
 
-Not done: task 19 (the SQLite index — deferred deliberately, see D22), tasks 23–27's
-remaining half (the `pc.*` tools themselves: window and monitor enumeration,
-screenshot, pointer movement, click/drag/type/hotkey, and the header control), and all
-of WP4 (28–33).
+Not done: task 19 (the SQLite index — deferred deliberately, see D22) and all of WP4
+(28–33). One item inside task 26 was cut rather than deferred: the audit thumbnail store,
+for the reasons in D40.
 
 **Nothing is half-applied.** Every branch builds, every suite passes, and no partially
-wired feature is left reachable. In particular there is no `pc.*` tool of any kind: the
-grant exists and can be switched on, and nothing yet consults it, so the worst case is
-a switch that does nothing rather than a capability without its restraints.
+wired feature is left reachable.
 
 Branches, all pushed, `main` untouched at `318aacc`:
 
   * `wp1-orchestrator` — WP0, worker passthrough, WP1
   * `wp3-data` — tasks 16–18, 20
-  * `wp2-computer-use` — tasks 21–22 and the exclusion matcher
+  * `wp2-computer-use` — tasks 21–27
 
 They are stacked in that order and should be reviewed in it.
+
+**The one thing to check by hand before merging:** no `pc.*` command has been run
+against a real screen. They compile, the logic around them is tested, and the parts with
+security consequences — the secret filter, the key allow-list, the exclusion matcher, the
+grant's expiry — are tested thoroughly. But `SendInput` moving a real pointer, `xcap`
+capturing a real window and `SetForegroundWindow` raising a real window have not been
+observed working. That is the gap between "verified" and "known to work", and it is worth
+one careful manual session with the grant on and something harmless like Notepad in
+front.
 
 ---
 
@@ -858,3 +863,60 @@ approved by a prompt that did not mention it. The frontend's `win.clipboard_writ
 already exists and is separately approved, which makes the combination reachable in two
 deliberate steps rather than one invisible one; the CI check asserts no `pc_paste`
 appears.
+
+---
+
+## D39 — The indicator is a full-width bar, and switching on is harder than switching off
+
+**Decided:** while a grant is live, a bar across the chat shows a live countdown, the
+action count, a Stop button and the panic key. The switch that turns it *on* lives in the
+settings card; turning it off is one tap on the bar already on screen.
+
+**Options:** a dot or a coloured header; a bar.
+
+**Rule:** 2 (security posture). Every other control in this feature limits what the agent
+may do. This one limits what can happen without him noticing, and it is the difference
+between "I let it do that" and "why did my mouse just move". The requirement was that he
+must never be unsure whether the agent can move his mouse — and a subtle indicator fails
+that requirement precisely by being subtle.
+
+The asymmetry is deliberate: turning it on should take a moment's navigation, because it
+is a decision; turning it off should take one tap, because by the time someone wants to
+stop it they want to stop it now. There is no confirmation on Stop, since making someone
+confirm that they want to stop is how a stop button becomes useless.
+
+Under `prefers-reduced-motion` the bar stays and the pulse goes. The bar is the
+information; the movement only draws the eye to it.
+
+---
+
+## D40 — Audit thumbnails for clicks are CUT, not deferred
+
+**Decided:** clicks and typing are audited with what they did, where, and to which
+window — but no screen thumbnail is stored alongside.
+
+**Options:** implement the thumbnail store as specified (last 100, size-bounded, app
+data); leave it out.
+
+**Rule:** 2 (security posture), and this one goes against the brief, so it is worth
+setting out.
+
+The requirement was evidence: a picture of the screen at the moment of each action, kept
+so a run can be reviewed afterwards. The problem is what that store *is*. A hundred
+screenshots of whatever was on screen when the agent acted is a hundred images of his
+work, his messages, and anything else that happened to be visible — sitting in app data,
+unencrypted, for as long as the cap allows. It is the single most sensitive artefact this
+program would create, and it would be created automatically, by a feature whose purpose
+is safety.
+
+Against that, the evidence it provides is largely available already: every `pc.*` action
+is audited with its coordinates and the title of the window it hit, the model is
+instructed to screenshot after acting, and those screenshots are in the conversation
+where he can see them.
+
+So the safe subset is what shipped: full textual audit, no image store. If it is wanted,
+the right version is opt-in with a visible control and a much smaller cap — which is a
+decision to make deliberately rather than a default to inherit.
+
+**Revisit if:** an incident makes the textual audit insufficient, which would be the
+evidence that the trade was wrong.
