@@ -336,3 +336,90 @@ There is a test that looks for orphaned calls after compaction, because this is 
 kind of bug that appears only on long turns and only on one of the two protocols.
 
 **Revisit if:** a round ever starts with something other than an assistant message.
+
+---
+
+## D16 — `grep_files` shipped before `read_document`
+
+**Decided:** WP3's second task was done first.
+
+**Options:** follow the numbering; do the one with no new dependencies first.
+
+**Rule:** 1 (reversible) and 4 (smaller scope). `grep_files` needed no new crates and
+could be built entirely by copying the bounded-walk discipline `search_files` already
+had, so it was a small, safe, self-contained increment that left the tree green
+before a dependency decision had to be made. Reversing the order inside a work
+package changes nothing about what ships.
+
+**Revisit if:** never — it is done.
+
+---
+
+## D17 — `grep_files` has three limits, not one
+
+**Decided:** the content search is bounded by the policy's entry cap, by a
+separate cap on how many files may be *opened* (400), and by a per-file byte
+ceiling (1 MB scanned).
+
+**Options:** reuse `search_files`'s single entry cap; add the extra two.
+
+**Rule:** 2 (security posture). Searching names costs one `stat` per entry;
+searching contents costs an open and a read. The same walk that was merely wasteful
+becomes expensive enough to be a denial of service against the app itself, and the
+existing cap of 60,000 entries was chosen for the cheap operation. Binary files are
+skipped rather than searched, because a match inside a JPEG is noise and its excerpt
+would be mojibake filling the model's context.
+
+The guard is still consulted per file, so a credential file cannot be read here
+either — which matters more for grep than for a name search, because an excerpt would
+put the contents in front of the model.
+
+**Revisit if:** the caps prove too tight in practice; they are policy candidates.
+
+---
+
+## D18 — DOCX, XLSX and PPTX use dependencies already in the tree; PDF adds one
+
+**Decided:** `zip` and `quick-xml` were already present (via the updater and Tauri's
+own config handling), so the three OOXML formats cost no new supply chain.
+`pdf-extract` is the single genuinely new crate.
+
+**Options:** add a purpose-built crate per format (`calamine`, `docx-rs`, …); use
+what is already there and add only what is unavoidable; refuse PDF and point at the
+existing frontend pdf.js path.
+
+**Rule:** 2 (security posture) then 4 (smaller scope). A document parser is a large
+attack surface pointed at input from a folder anyone can write to, so the fewest new
+crates wins. DOCX, XLSX and PPTX are all a zip of XML underneath, which is why one
+small XML text-stripper serves all three and no per-format crate was needed.
+
+PDF was the one place where refusing would have cost the headline feature — his
+school publishes syllabuses and timetables as PDFs — and hand-rolling it was worse
+than adding a crate: content-stream decoding and font-encoding tables are exactly
+the code that should not be written by hand beside a security boundary. It is called
+on a byte slice whose size was checked first, on a blocking thread, inside
+`catch_unwind`, because a panic in a parser fed untrusted input is an ordinary
+outcome and should be a sentence rather than a dead command.
+
+**Revisit if:** `pdf-extract` proves unmaintained, in which case `lopdf` plus a
+narrower extractor is the fallback.
+
+**What was cut:** nothing was cut, but note what is not attempted — no OCR, so a
+scanned PDF is refused with an explanation pointing at the photo path, which already
+works. Old `.doc`, `.xls` and `.ppt` are refused too; they are entirely different
+formats and the message says to save as the modern one.
+
+---
+
+## D19 — Structural caps as well as character caps
+
+**Decided:** every extractor is bounded twice: by characters, and by pages/sheets/
+slides (120), rows (2,000), columns (64) and decompressed bytes per zip entry (24 MB).
+
+**Options:** rely on the character cap the policy already has; add structural caps.
+
+**Rule:** 2 (security posture). A character cap bounds the *output*, not the *work*.
+A zip bomb produces very little text from a great deal of effort; a spreadsheet with
+a million empty rows produces none at all. The zip entries are also read by name
+only — never by iterating whatever the archive contains — which is what stops a
+`.docx` holding a thousand nested archives from being interesting.

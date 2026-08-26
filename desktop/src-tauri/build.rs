@@ -15,6 +15,8 @@ fn main() {
             "agent_open_settings",
             "list_files",
             "search_files",
+            "grep_files",
+            "read_document",
             "read_file",
             "get_system_information",
             "clipboard_read",

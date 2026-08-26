@@ -127,6 +127,8 @@ pub fn run() {
             agent_open_settings,
             tools::files::list_files,
             tools::files::search_files,
+            tools::files::grep_files,
+            tools::docs::read_document,
             tools::files::read_file,
             tools::files::create_folder,
             tools::files::write_file,

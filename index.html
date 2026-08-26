@@ -5736,6 +5736,26 @@ register({
 });
 
 register({
+  name:"win.grep_files", cmd:"grep_files", kind:"read", risk:"medium",
+  spec:'  {"do":"win.grep_files","path":"~/Documents","query":"electrochemistry","ext":"md","limit":60}   search INSIDE files, returns path:line and the line',
+  args:function(a){
+    var p = okPath(a.path); if(!p) return null;
+    var q = isStr(a.query) ? clip(a.query,200) : "";
+    if(!q) return null;                      // searching every file for nothing is
+    var e = isStr(a.ext) ? clip(a.ext,12).replace(/^\./,"").toLowerCase() : "";
+    return {                                 // a denial of service, not a search
+      path:p, query:q, ext:e,
+      limit:okInt(a.limit, 60, 1, host.maxResults||200),
+      match_case: a.match_case === true
+    };
+  },
+  describe:function(a){
+    return {t:"Search inside the files in "+qt(shortPath(a.path))+" for "+qt(a.query)
+      +(isStr(a.ext)?" (."+clip(a.ext,10)+" only)":"")};
+  }
+});
+
+register({
   name:"win.read_file", cmd:"read_file", kind:"read", risk:"medium",
   spec:'  {"do":"win.read_file","path":"~/Documents/notes.txt"}   read a text file',
   args:function(a){
@@ -5743,6 +5763,28 @@ register({
     return { path:p, max_chars:okInt(a.max_chars, host.maxReadChars||20000, 200, host.maxReadChars||20000) };
   },
   describe:function(a){ return {t:"Read the file "+qt(shortPath(a.path))}; }
+});
+
+register({
+  name:"win.read_document", cmd:"read_document", kind:"read", risk:"medium",
+  spec:'  {"do":"win.read_document","path":"~/Documents/syllabus.pdf","from":3,"to":5}   PDF, Word, Excel, PowerPoint, CSV. from/to are pages, sheets or slides; {"sheet":"Timetable"} picks one sheet by name',
+  args:function(a){
+    var p = okPath(a.path); if(!p) return null;
+    return {
+      path:p,
+      from: okInt(a.from, 0, 0, 5000),
+      to: okInt(a.to, 0, 0, 5000),
+      sheet: isStr(a.sheet) ? clip(a.sheet,80) : "",
+      max_chars: okInt(a.max_chars, host.maxReadChars||20000, 200, host.maxReadChars||20000)
+    };
+  },
+  describe:function(a){
+    var where = "";
+    if(isStr(a.sheet)) where = " (sheet "+qt(a.sheet)+")";
+    else if(okInt(a.from,0,0,5000)) where = " (from "+okInt(a.from,0,0,5000)
+      + (okInt(a.to,0,0,5000) ? " to "+okInt(a.to,0,0,5000) : " onwards")+")";
+    return {t:"Read the document "+qt(shortPath(a.path))+where};
+  }
 });
 
 register({

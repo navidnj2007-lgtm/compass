@@ -42,6 +42,20 @@ pub struct SearchFilesReq {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct GrepFilesReq {
+    pub path: String,
+    pub query: String,
+    #[serde(default)]
+    pub ext: String,
+    #[serde(default)]
+    pub limit: usize,
+    /// Case-sensitive matching. Off by default, because someone looking for
+    /// "electrochemistry" does not mean to miss "Electrochemistry".
+    #[serde(default)]
+    pub match_case: bool,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct ReadFileReq {
     pub path: String,
     #[serde(default)]
@@ -328,6 +342,189 @@ fn search_files_inner(
     text.push_str(
         "\nThe full paths above are the ones to use in a later move, rename or delete — do not \
          retype them from memory.\n",
+    );
+    Ok(ToolOut::text(text))
+}
+
+#[tauri::command]
+pub async fn grep_files(
+    app: AppHandle,
+    state: State<'_, Agent>,
+    req: GrepFilesReq,
+) -> Result<ToolOut, String> {
+    let out = grep_files_inner(&app, &state, &req);
+    state.audit.record(
+        "win.grep_files",
+        out.is_ok(),
+        format!("Searched inside files under {} for {}", req.path, req.query),
+        out.as_ref().err().cloned(),
+        false,
+    );
+    out
+}
+
+/// Search *inside* files, as opposed to `search_files` which searches their names.
+///
+/// The difference matters for the budget. Searching names means one `stat` per
+/// entry; searching contents means opening and reading every candidate, so the same
+/// walk that was merely wasteful becomes genuinely expensive. Three limits therefore
+/// apply rather than one: the entry cap the policy already sets, a per-file byte
+/// ceiling, and a cap on how many files are opened at all. A search that would read
+/// a synced Documents folder end to end stops early and says so, which is the same
+/// contract `search_files` has.
+///
+/// Binary files are skipped rather than searched. A match inside a JPEG is noise,
+/// and the excerpt around it would be mojibake filling the model's context.
+fn grep_files_inner(
+    _app: &AppHandle,
+    state: &Agent,
+    req: &GrepFilesReq,
+) -> Result<ToolOut, String> {
+    /// How many files may be opened in one search. Independent of the entry cap:
+    /// walking 60,000 directory entries is cheap, opening 60,000 files is not.
+    const MAX_FILES_READ: usize = 400;
+    /// Bytes read from any one file. Enough for a document, small enough that a
+    /// stray 200 MB log does not stall the app.
+    const MAX_FILE_SCAN: usize = 1_000_000;
+    /// Characters of context shown around a hit.
+    const EXCERPT: usize = 160;
+
+    let policy = state.policy();
+    let root = state.guard().resolve_dir(&req.path, Intent::Read)?;
+
+    let needle_raw = req.query.trim();
+    if needle_raw.is_empty() {
+        return Err("a content search needs something to look for".into());
+    }
+    if needle_raw.len() > 200 {
+        return Err("that search text is too long".into());
+    }
+    let needle = if req.match_case {
+        needle_raw.to_string()
+    } else {
+        needle_raw.to_ascii_lowercase()
+    };
+
+    let ext = req.ext.trim().trim_start_matches('.').to_ascii_lowercase();
+    let limit = if req.limit == 0 {
+        policy.max_results
+    } else {
+        req.limit.min(policy.max_results)
+    };
+
+    let mut hits: Vec<String> = Vec::new();
+    let mut visited = 0usize;
+    let mut opened = 0usize;
+    let mut files_with_hits = 0usize;
+    let mut skipped_binary = 0usize;
+    let mut capped = false;
+
+    for entry in WalkDir::new(&root)
+        .max_depth(8)
+        .follow_links(false)
+        .into_iter()
+        .filter_entry(|e| {
+            !e.file_type().is_dir() || state.guard().resolve(&show(e.path()), Intent::Read).is_ok()
+        })
+    {
+        visited += 1;
+        if visited > policy.max_walk_entries || opened >= MAX_FILES_READ || hits.len() >= limit {
+            capped = true;
+            break;
+        }
+        let Ok(entry) = entry else { continue };
+        if !entry.file_type().is_file() {
+            continue;
+        }
+        let p = entry.path();
+
+        if !ext.is_empty() {
+            let matches_ext = p
+                .extension()
+                .map(|e| e.to_string_lossy().to_ascii_lowercase() == ext)
+                .unwrap_or(false);
+            if !matches_ext {
+                continue;
+            }
+        }
+        // The guard decides, per file, exactly as the name search does — so a
+        // credential file cannot be read here either, and its contents cannot leak
+        // through an excerpt.
+        if state.guard().resolve(&show(p), Intent::Read).is_err() {
+            continue;
+        }
+        let Ok(meta) = std::fs::metadata(p) else {
+            continue;
+        };
+        if meta.len() > policy.max_file_bytes {
+            continue;
+        }
+
+        opened += 1;
+        let Ok(bytes) = std::fs::read(p) else {
+            continue;
+        };
+        let scan = &bytes[..bytes.len().min(MAX_FILE_SCAN)];
+
+        // Same binary test as read_file, for the same reason.
+        if scan.iter().take(8000).filter(|b| **b == 0).count() > 2 {
+            skipped_binary += 1;
+            continue;
+        }
+
+        let text = String::from_utf8_lossy(scan);
+        let mut hit_here = false;
+        for (n, line) in text.lines().enumerate() {
+            if hits.len() >= limit {
+                capped = true;
+                break;
+            }
+            let hay = if req.match_case {
+                line.to_string()
+            } else {
+                line.to_ascii_lowercase()
+            };
+            if !hay.contains(&needle) {
+                continue;
+            }
+            hit_here = true;
+            let trimmed: String = line.trim().chars().take(EXCERPT).collect();
+            let ell = if line.trim().chars().count() > EXCERPT {
+                "\u{2026}"
+            } else {
+                ""
+            };
+            hits.push(format!("  {}:{}  {}{}", show(p), n + 1, trimmed, ell));
+        }
+        if hit_here {
+            files_with_hits += 1;
+        }
+    }
+
+    let mut text = format!(
+        "GREP under {} for \"{}\" — {} line(s) in {} file(s)",
+        show(&root),
+        needle_raw,
+        hits.len(),
+        files_with_hits
+    );
+    if capped {
+        text.push_str(", and the search stopped early");
+    }
+    text.push_str(":\n");
+    if hits.is_empty() {
+        text.push_str("  (nothing matched)\n");
+    }
+    for h in &hits {
+        text.push_str(h);
+        text.push('\n');
+    }
+    if skipped_binary > 0 {
+        text.push_str(&format!("  ({skipped_binary} file(s) skipped as binary)\n"));
+    }
+    text.push_str(
+        "\nEach line above is path:line. The paths are the ones to use in a later read, move or \
+         rename — do not retype them from memory.\n",
     );
     Ok(ToolOut::text(text))
 }
