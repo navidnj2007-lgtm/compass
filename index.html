@@ -1678,6 +1678,329 @@ body.workspace .card{padding:24px;margin-bottom:20px}.card>h2,#todoCard h2{font-
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.tab,.ghost,.primary,.today-metric,.week-day i{transition:none!important}}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style id="compass-editorial">
+/* Compass — editorial theme (matches Navid's IB Plan): paper, ink, burgundy; Spectral + Inter.
+   Loaded last, so it re-maps every design token the older stylesheets use. */
+:root{
+  color-scheme:light;
+  --plane:#fbfaf7;--surface:#ffffff;--surface-2:#f3f1eb;--surface-3:#ece8df;
+  --ink:#1c1a18;--ink-2:#4a4640;--muted:#6a655d;--grid:#ece8df;--axis:#cfc7b6;--border:#e2ded4;
+  --d1:#a3202e;--d2:#c0512b;--d3:#1f7a5a;--d4:#a8741a;--d5:#6b3fa0;--d6:#2f4f9e;
+  --good:#166534;--warn:#9a5b0c;--serious:#c0512b;--crit:#b91c1c;--ok-text:#15803d;
+  --track:#f8f3e8;--pos:#1f7a5a;--neg:#b91c1c;
+  --s0:#f3eee4;--s1:#eed8d6;--s2:#e0b1b4;--s3:#c9797f;--s4:#a8434d;--s5:#7d1a25;
+  --shadow:none;--shadow-lg:0 24px 60px rgba(40,24,20,.18);--accent:#a3202e;--accent-ink:#fff;--sidebar:244px;
+  --pl-accent-soft:#e2a9af;--pl-sum-bg:#f8f3e8;--pl-sum-line:#e9dec6;--pl-sum-lbl:#8a5a12;
+  --pl-cover-bg:#3a1317;--pl-cover-fg:#fbf4f1;--pl-cover-eyebrow:#f2b5ba;
+  --pl-tip:#15803d;--pl-tip-line:#8ec79f;--pl-bad-bg:#fbeceb;--pl-good-bg:#e6f3ea;--pl-warn-bg:#fbf0dc;
+  --ma:#2f4f9e;--ke:#1f7a5a;--fy:#6b3fa0;--da:#c0512b;--eo:#a8741a;--fa:#0e7490;--th:#7a746a;--gen:#4a4640;
+  --st-d:#2f8a57;--st-i:#3b6fd1;--st-r:#8b5cd6;--st-t:#e6e1d6;--st-l:#f1ede4;
+  --serif:"Spectral",Georgia,"Iowan Old Style","Times New Roman",serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+:root[data-theme=dark]{
+  color-scheme:dark;
+  --plane:#15140f;--surface:#1b1a14;--surface-2:#1e1d17;--surface-3:#27261f;
+  --ink:#ebe6dc;--ink-2:#c9c2b5;--muted:#a19b8f;--grid:#27261f;--axis:#4a473c;--border:#34332b;
+  --d1:#f08b93;--d2:#ee8a64;--d3:#5cc99c;--d4:#e0ae55;--d5:#b793ec;--d6:#8aa6ee;
+  --good:#8fd6a4;--warn:#e8b25e;--serious:#ee8a64;--crit:#ef9a9a;--ok-text:#7cc98f;
+  --track:#221e13;--pos:#5cc99c;--neg:#ef9a9a;
+  --s0:#221f19;--s1:#3a2226;--s2:#5a2a31;--s3:#8a3a44;--s4:#c25c67;--s5:#f08b93;
+  --shadow:none;--shadow-lg:0 24px 60px rgba(0,0,0,.5);--accent:#f08b93;--accent-ink:#1a0d0f;
+  --pl-accent-soft:#6b2a31;--pl-sum-bg:#221e13;--pl-sum-line:#46391e;--pl-sum-lbl:#e0b45e;
+  --pl-cover-bg:#240b0e;--pl-cover-fg:#f6ece8;--pl-cover-eyebrow:#f2a2a9;
+  --pl-tip:#7cc98f;--pl-tip-line:#2f6b41;--pl-bad-bg:#2c1817;--pl-good-bg:#16291c;--pl-warn-bg:#2b2213;
+  --ma:#8aa6ee;--ke:#5cc99c;--fy:#b793ec;--da:#ee8a64;--eo:#e0ae55;--fa:#4fc0d6;--th:#b1aa9d;--gen:#cfc8bb;
+  --st-d:#4fbf82;--st-i:#6f9cf0;--st-r:#a987ee;--st-t:#34322a;--st-l:#26251e;
+}
+
+/* ── base ── */
+body.workspace,:root[data-theme=dark] body.workspace{background:var(--plane)!important;color:var(--ink);font-family:var(--serif);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+body.workspace button,body.workspace input,body.workspace select,body.workspace textarea,body.workspace kbd,body.workspace label,
+.tab,.ghost,.primary,.pills,.badge,.chip,.tag,.lbl,.eyebrow,.today-kicker,.metric-label,.nav-group,.workspace-location,.workspace-search,
+.today-date,table,.tbl,.hint,small,.syncbar,.savebar,.tgsync,.tgnav,.tgmore,.asktoast{font-family:var(--sans)}
+body.workspace :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+::selection{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--ink)}
+h1,h2,h3,h4,.card>h2,#todoCard h2{font-family:var(--serif);font-weight:600;letter-spacing:-.008em;text-wrap:balance}
+
+/* ── sidebar: the planner's table of contents ── */
+.workspace-sidebar{background:var(--surface-2)!important;border-right:1px solid var(--surface-3)!important;box-shadow:none!important;padding:28px 16px 16px}
+.workspace-brand{color:var(--ink)!important;font-family:var(--serif);font-size:24px;font-weight:600;letter-spacing:-.01em;padding:2px 8px 22px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.workspace-brand small{color:var(--muted)!important;font-family:var(--sans);font-size:9.5px;font-weight:600;letter-spacing:.16em}
+.brand-symbol{background:var(--pl-cover-bg)!important;color:var(--pl-cover-fg)!important;border-radius:4px!important;box-shadow:none!important;width:36px;height:36px;font-size:20px}
+.workspace-search{background:var(--surface)!important;border:1px solid var(--border)!important;color:var(--muted)!important;border-radius:3px!important}
+.workspace-search:hover{color:var(--ink)!important;border-color:var(--muted)!important}
+.workspace-search kbd{background:var(--surface-2)!important;border-color:var(--border)!important;color:var(--muted)!important}
+.nav-group{color:var(--muted)!important;font-size:9.5px!important;letter-spacing:.14em!important;font-weight:600!important;padding:18px 12px 6px!important;opacity:.85}
+.tab{border-radius:0!important;background:transparent!important;box-shadow:none!important;color:var(--muted)!important;font-weight:500!important;border-left:2px solid transparent;min-height:36px;padding:7px 10px 7px 12px!important;transform:none!important}
+.tab:hover{color:var(--ink)!important;border-left-color:var(--pl-accent-soft)}
+.tab[aria-selected=true]{color:var(--accent)!important;border-left-color:var(--accent);font-weight:600!important}
+.tab[aria-selected=true]:before{display:none!important}
+.nav-icon{color:inherit!important;opacity:.7}
+.tab .badge{background:var(--accent)!important;color:var(--accent-ink)!important}
+.sidebar-tip{background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:4px!important}
+.sidebar-tip b,.workspace-account{color:var(--ink)!important;font-family:var(--serif)}
+.sidebar-tip p,.workspace-account small{color:var(--muted)!important}
+.sidebar-tip button,.tip-icon{color:var(--accent)!important;font-weight:600}
+.account-avatar{background:var(--pl-cover-bg)!important;color:var(--pl-cover-fg)!important;box-shadow:none!important;border-radius:4px!important}
+
+/* ── header & buttons ── */
+body.workspace .workspace-header,:root[data-theme=dark] body.workspace .workspace-header{background:color-mix(in srgb,var(--plane) 88%,transparent)!important;border-bottom:1px solid var(--surface-3)!important;backdrop-filter:blur(10px)}
+.workspace-location{color:var(--muted)}.workspace-location strong{color:var(--ink)}
+.ghost,:root[data-theme=dark] .ghost{background:var(--surface)!important;border:1px solid var(--border)!important;color:var(--ink)!important;border-radius:3px!important;box-shadow:none!important;transform:none!important;font-weight:600;font-size:12.5px}
+.ghost:hover,:root[data-theme=dark] .ghost:hover{border-color:var(--muted)!important;background:var(--surface)!important}
+.ghost.on,.primary,.today-primary,body.workspace #saveBtn{background:var(--accent)!important;border:1px solid var(--accent)!important;color:var(--accent-ink)!important;box-shadow:none!important;border-radius:3px!important;font-weight:600}
+.ghost.on:hover,.primary:hover,.today-primary:hover{filter:brightness(1.06);transform:none!important;box-shadow:none!important}
+@media(max-width:1000px){.workspace-location:before{background:var(--pl-cover-bg)!important;color:var(--pl-cover-fg)!important;border-radius:4px!important}}
+
+/* ── page headings: ink rule + accent eyebrow ── */
+.workspace-page-heading{padding:30px 0 22px!important;border-top:1px solid var(--ink);margin-top:26px}
+.workspace-page-heading h1{font-family:var(--serif)!important;font-size:clamp(30px,3vw,42px)!important;font-weight:600!important;letter-spacing:-.012em!important;line-height:1.12!important}
+.workspace-page-heading p{color:var(--muted);font-size:17px}
+.today-kicker,.eyebrow{color:var(--accent)!important;font-family:var(--sans)!important;font-size:10.5px!important;font-weight:600!important;letter-spacing:.14em!important;text-transform:uppercase}
+
+/* ── Overview welcome becomes the burgundy cover ── */
+.today-welcome{background:var(--pl-cover-bg);color:var(--pl-cover-fg);border-radius:4px;padding:clamp(26px,4vw,44px) clamp(20px,4vw,40px)!important;margin:26px 0 22px}
+.today-welcome .today-kicker{color:var(--pl-cover-eyebrow)!important}
+.today-welcome h1{color:var(--pl-cover-fg)!important;font-family:var(--serif)!important;font-weight:600!important;letter-spacing:-.015em!important;line-height:1.06!important}
+.today-welcome p,.today-welcome .today-date{color:var(--pl-cover-fg)!important;opacity:.85}
+.today-welcome .today-primary{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.3)!important;color:var(--pl-cover-fg)!important;border-radius:999px!important}
+
+/* ── cards ── */
+body.workspace .card,.week-card,.today-metric,
+:root[data-theme=dark] body.workspace .card,:root[data-theme=dark] .week-card,:root[data-theme=dark] .today-metric{
+  background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:4px!important;box-shadow:none!important;backdrop-filter:none!important}
+body.workspace .card>h2,#todoCard h2,.week-card h3{font-size:1.3rem!important;font-weight:600}
+.card>.hint{color:var(--muted)!important}
+.today-metric:before,:root[data-theme=dark] .today-metric:before{background:var(--accent)!important;height:3px;opacity:1}
+.today-metric:hover,:root[data-theme=dark] .today-metric:hover{transform:none!important;border-color:var(--muted)!important;box-shadow:none!important;background:var(--surface)!important}
+.today-metric strong{font-family:var(--serif)!important;font-weight:600!important;letter-spacing:0}
+.metric-icon{background:var(--surface-2)!important;color:var(--accent)!important;border-radius:3px!important}
+.next-main,:root[data-theme=dark] .next-main{background:var(--pl-sum-bg)!important;border:1px solid var(--pl-sum-line)!important;box-shadow:none!important;border-radius:4px!important;color:var(--ink)}
+.next-main:before,.next-main:after{display:none!important}
+.next-main .today-kicker{color:var(--pl-sum-lbl)!important}
+.next-main h3{color:var(--ink)!important;font-family:var(--serif)!important;font-weight:600!important;letter-spacing:-.01em!important}
+.next-main p{color:var(--muted)!important}
+.next-actions button{border:1px solid var(--border)!important;background:var(--surface)!important;color:var(--ink)!important;border-radius:3px!important;box-shadow:none!important}
+.next-actions button:first-child{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--accent-ink)!important}
+.week-day.current i{background:var(--accent)!important}
+.week-day i{background:var(--surface-3)!important}
+
+/* ── fields, bars, tiles, modals ── */
+.fld,.composer,body.workspace .fld,.tdadd,:root[data-theme=dark] .fld,:root[data-theme=dark] .composer,:root[data-theme=dark] body.workspace .fld,:root[data-theme=dark] .tdadd,:root[data-theme=dark] .gatechk,:root[data-theme=dark] .anchor,:root[data-theme=dark] .nt{background:var(--plane)!important;border-color:var(--border)!important;border-radius:3px!important;color:var(--ink)}
+.fld:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 14%,transparent)!important}
+.tdprog i,.cap i{background:var(--good)!important}
+.barfill,.minibar i,.strength .sbar i{background:var(--accent)!important}
+.tdprog,.cap,.bartrack,.minibar,.strength .sbar{background:var(--surface-3)!important}
+.tiles,:root[data-theme=dark] .tiles{border-radius:4px!important;border-color:var(--border)!important}
+.tile,:root[data-theme=dark] .tile,:root[data-theme=dark] .dom{background:var(--surface)!important}
+.tile .vl{font-family:var(--serif);font-weight:600}
+.callout{border-radius:4px!important}
+.pills button{border-radius:999px!important}
+.pills button[aria-pressed=true]{background:var(--ink)!important;color:var(--plane)!important;box-shadow:none!important}
+.box{border-radius:3px!important}
+.box[aria-pressed=true]{background:var(--good)!important;border-color:var(--good)!important;box-shadow:none!important}
+.gauge{filter:none!important}
+.modal{backdrop-filter:blur(3px)}
+body.workspace .modal .mb,.workspace-dialog{background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:4px!important}
+.askshell,:root[data-theme=dark] .askshell{border-radius:4px!important;border-color:var(--border)!important;box-shadow:none!important}
+.nt,.dom,.anchor{border-radius:4px!important}
+</style>
+<style id="compass-planner-css">
+/* Planner page — same design as Navid's IB Plan. Every class is prefixed pl- so nothing collides with the app. */
+#pl-progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--accent);z-index:60;pointer-events:none}
+body[data-page=plan] #workspacePageHeading{display:none}
+#s-plan{font-family:var(--serif);color:var(--ink)}
+#s-plan .pl-sans{font-family:var(--sans)}
+#s-plan .pl-muted{color:var(--muted)}
+#s-plan h2.pl-h2{font-family:var(--serif);font-size:1.65rem;font-weight:600;margin:3.2rem 0 1rem;padding-top:1.15rem;border-top:1px solid var(--ink);letter-spacing:-.008em;line-height:1.2}
+#s-plan h2.pl-h2 .pl-no{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.14em;color:var(--accent);display:block;margin-bottom:.35rem;text-transform:uppercase}
+#s-plan h3{font-family:var(--serif);font-weight:600;margin:0}
+#s-plan p{margin:.6rem 0}
+#s-plan .pl-lede{color:var(--muted);max-width:46rem;margin-top:0}
+#s-plan .pl-lbl{font-family:var(--sans);font-size:.64rem;font-weight:600;text-transform:uppercase;letter-spacing:.13em;color:var(--muted)}
+#s-plan button{font-family:var(--sans)}
+
+/* cover */
+.pl-cover{position:relative;border-radius:4px;background:var(--pl-cover-bg);color:var(--pl-cover-fg);padding:clamp(1.5rem,4vw,2.6rem) clamp(1.2rem,4vw,2.3rem);display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:2rem;align-items:center;overflow:hidden;margin-top:26px}
+@media(max-width:820px){.pl-cover{grid-template-columns:1fr}}
+.pl-cover .pl-eyebrow{font-family:var(--sans);text-transform:uppercase;letter-spacing:.18em;font-size:.66rem;font-weight:600;color:var(--pl-cover-eyebrow)}
+.pl-cover h1{color:var(--pl-cover-fg);font-family:var(--serif);font-size:clamp(2rem,4.4vw,3rem);margin:.55rem 0 .75rem;line-height:1.05;letter-spacing:-.015em;font-weight:600}
+.pl-cover h1 i{font-weight:400}
+.pl-cover p{font-size:1rem;opacity:.88;margin:0 0 1rem;max-width:30rem}
+.pl-tags{display:flex;gap:.45rem;flex-wrap:wrap;font-family:var(--sans)}
+.pl-tags span{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.28);padding:.22rem .7rem;border-radius:999px;font-size:.7rem;font-weight:500}
+.pl-cstats{display:flex;gap:1.6rem;flex-wrap:wrap;margin-top:1.2rem;font-family:var(--sans)}
+.pl-cstats b{display:block;font-family:var(--serif);font-size:1.7rem;line-height:1;font-variant-numeric:tabular-nums;font-weight:600}
+.pl-cstats span{font-size:.7rem;opacity:.75}
+.pl-clip{color-scheme:light;background:#f6f1e6;color:#1c1a18;border-radius:2px;padding:1.05rem 1.15rem 1rem;transform:rotate(1.4deg);box-shadow:0 12px 30px rgba(0,0,0,.35);font-size:.86rem;line-height:1.45}
+.pl-clip .pl-sec{font-family:var(--sans);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;border-bottom:2px solid #1c1a18;padding-bottom:.35rem;display:flex;justify-content:space-between;gap:.5rem}
+.pl-clip .pl-hd{font-family:var(--serif);font-weight:700;font-size:1.2rem;line-height:1.15;margin:.6rem 0 .5rem}
+.pl-clip ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.45rem}
+.pl-clip li label{display:grid;grid-template-columns:18px 1fr;gap:.55rem;cursor:pointer;align-items:start;font-family:var(--serif);font-size:.9rem;color:#1c1a18}
+.pl-clip li input{margin:.2rem 0 0;accent-color:#a3202e;width:15px;height:15px}
+.pl-clip li .pl-when{display:block;font-family:var(--sans);font-size:.62rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#7a7266}
+.pl-clip .pl-lines{height:.42rem;background:repeating-linear-gradient(#cfc7b6 0 1px,transparent 1px 7px);margin:.6rem 0 .4rem;opacity:.8}
+.pl-clip .pl-sig{font-family:var(--sans);font-size:.68rem;font-weight:600;color:#1c1a18}
+
+/* controls */
+.pl-row{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;justify-content:space-between;margin:1rem 0 .8rem}
+.pl-seg{display:inline-flex;border:1px solid var(--border);border-radius:999px;padding:3px;gap:2px;background:var(--surface);flex-wrap:wrap}
+.pl-seg button{border:0;background:transparent;color:var(--muted);font-size:.78rem;font-weight:600;padding:.38rem .8rem;border-radius:999px;cursor:pointer;white-space:nowrap}
+.pl-seg button[aria-pressed="true"]{background:var(--ink);color:var(--plane)}
+@media(max-width:600px){.pl-seg{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none}}
+.pl-seg .pl-pct{font-weight:500;opacity:.7;margin-left:.3rem;font-variant-numeric:tabular-nums}
+.pl-chips{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center}
+.pl-chip{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.26rem .6rem;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer}
+.pl-chip i{width:.6rem;height:.6rem;border-radius:50%;background:var(--c);display:inline-block}
+.pl-chip[aria-pressed="false"]{opacity:.45}
+.pl-btn{font-size:.8rem;font-weight:600;padding:.55rem .9rem;border-radius:3px;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer;text-align:center}
+.pl-btn.pl-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pl-btn.pl-danger{color:var(--crit);border-color:color-mix(in srgb,var(--crit) 45%,var(--border))}
+.pl-btn.pl-pill{border-radius:999px;padding:.42rem .9rem;font-size:.76rem}
+.pl-legend{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;font-family:var(--sans);font-size:.72rem;color:var(--muted);margin:.2rem 0 .8rem}
+.pl-legend span{display:inline-flex;align-items:center;gap:.4rem}
+.pl-legend .pl-sw{width:1.4rem;height:.8rem;border-radius:2px;display:inline-block}
+
+/* week grid */
+.pl-banner{background:var(--pl-sum-bg);box-shadow:inset 0 0 0 1px var(--pl-sum-line);border-radius:4px;padding:.7rem 1rem;margin-bottom:.8rem;font-size:.95rem}
+.pl-banner b{color:var(--pl-sum-lbl);font-family:var(--sans);font-size:.8rem;display:block;margin-bottom:.15rem}
+.pl-weekwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:4px;background:var(--surface)}
+.pl-week{min-width:820px;display:grid;grid-template-columns:46px repeat(7,minmax(0,1fr));font-family:var(--sans);position:relative}
+.pl-wh{position:sticky;top:0;z-index:3;background:var(--surface);border-bottom:1px solid var(--border);padding:.55rem .5rem .45rem;font-size:.72rem;line-height:1.25}
+.pl-wh b{display:block;font-size:.8rem;color:var(--ink)}
+.pl-wh span{color:var(--muted)}
+.pl-wh.pl-today{box-shadow:inset 0 -2px 0 var(--accent)}.pl-wh.pl-today b{color:var(--accent)}
+.pl-axis{position:relative;border-right:1px solid var(--surface-3)}
+.pl-axis span{position:absolute;right:6px;font-size:.62rem;color:var(--muted);transform:translateY(-50%);font-variant-numeric:tabular-nums}
+.pl-col{position:relative;border-right:1px solid var(--surface-3);cursor:cell;background-image:repeating-linear-gradient(to bottom,var(--surface-3) 0 1px,transparent 1px 46.8px)}
+.pl-col:last-child{border-right:0}
+.pl-col.pl-past{background-color:color-mix(in srgb,var(--surface-2) 70%,transparent)}
+.pl-col.pl-tcol{background-color:color-mix(in srgb,var(--pl-sum-bg) 70%,transparent)}
+.pl-col.pl-hol{background-color:color-mix(in srgb,var(--pl-tip-line) 12%,transparent)}
+.pl-now{position:absolute;left:0;right:0;height:0;border-top:2px solid var(--accent);z-index:2;pointer-events:none}
+.pl-now::before{content:"";position:absolute;left:-4px;top:-5px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.pl-b{position:absolute;left:3px;right:3px;border-radius:3px;padding:3px 6px;font-size:.68rem;line-height:1.25;overflow:hidden;cursor:pointer;text-align:left;border:0;color:var(--ink);font-family:var(--sans);transition:opacity .15s}
+.pl-b .pl-bt{display:block;font-weight:600}
+.pl-b .pl-bm{display:block;color:var(--muted);font-size:.62rem;font-variant-numeric:tabular-nums}
+.pl-b.pl-school{background:var(--surface-2);border-left:3px solid var(--c);color:var(--muted);cursor:default}
+.pl-b.pl-school .pl-bt{font-weight:500;color:var(--ink)}
+.pl-b.pl-study{background:color-mix(in srgb,var(--c) 15%,var(--surface));border-left:3px solid var(--c)}
+.pl-b.pl-proj{background:color-mix(in srgb,var(--c) 26%,var(--surface));box-shadow:inset 0 0 0 1.5px var(--c)}
+.pl-b.pl-hw{background:var(--surface);border:1px dashed var(--c)}
+.pl-b.pl-done{opacity:.45}.pl-b.pl-done .pl-bt{text-decoration:line-through}
+.pl-b.pl-done .pl-bt::before{content:"✓ ";color:var(--good)}
+.pl-week.pl-filtered .pl-b:not(.pl-on){opacity:.12}
+.pl-b .pl-rz{position:absolute;left:0;right:0;bottom:0;height:6px;cursor:ns-resize}
+.pl-b.pl-drag{opacity:.92;box-shadow:0 10px 24px rgba(0,0,0,.2);z-index:6;transition:none}
+body.pl-dragging{user-select:none;cursor:grabbing}
+.pl-foot{display:flex;flex-wrap:wrap;gap:.6rem 1.4rem;align-items:center;margin-top:.7rem;font-family:var(--sans);font-size:.78rem;color:var(--muted)}
+.pl-pbar{flex:1;min-width:140px;height:6px;border-radius:99px;background:var(--surface-3);overflow:hidden}
+.pl-pbar i{display:block;height:100%;width:0;background:var(--good);transition:width .3s}
+
+/* balance */
+.pl-two{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem}
+@media(max-width:820px){.pl-two{grid-template-columns:1fr}}
+.pl-panel{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1.1rem 1.2rem}
+.pl-panel h3{font-size:1.05rem;margin-bottom:.2rem}
+.pl-stack{display:flex;height:22px;border-radius:3px;overflow:hidden;margin:.8rem 0 .7rem;background:var(--surface-3)}
+.pl-stack i{display:block;height:100%;background:var(--c)}
+.pl-rows{display:flex;flex-direction:column;gap:.3rem;font-family:var(--sans);font-size:.78rem}
+.pl-rows div{display:grid;grid-template-columns:.7rem 1fr auto;gap:.5rem;align-items:center}
+.pl-rows i{width:.6rem;height:.6rem;border-radius:50%;background:var(--c)}
+.pl-rows b{font-weight:600;font-variant-numeric:tabular-nums}
+.pl-kinds{display:flex;gap:1.3rem;flex-wrap:wrap;font-family:var(--sans);font-size:.76rem;color:var(--muted);margin-top:.6rem}
+.pl-kinds b{color:var(--ink);font-variant-numeric:tabular-nums}
+#s-plan svg{width:100%;height:auto;display:block}
+#s-plan svg text{font-family:var(--sans)}
+.pl-tm{fill:var(--muted)}.pl-ti{fill:var(--ink)}.pl-ta{fill:var(--accent)}
+.pl-gl{stroke:var(--surface-3)}.pl-ga{stroke:var(--border)}
+.pl-box{border-left:2px solid var(--border);padding:.1rem 0 .1rem 1.2rem;margin:1.4rem 0;font-size:.96rem}
+.pl-box .pl-lbl{display:block;margin-bottom:.35rem}
+.pl-box.pl-summary{border-left:0;border-radius:4px;padding:1rem 1.3rem;background:var(--pl-sum-bg);box-shadow:inset 0 0 0 1px var(--pl-sum-line)}
+.pl-box.pl-summary .pl-lbl{color:var(--pl-sum-lbl)}
+.pl-box.pl-tip{border-left-color:var(--pl-tip-line)}.pl-box.pl-tip .pl-lbl{color:var(--pl-tip)}
+.pl-box p:first-of-type{margin-top:0}.pl-box>:last-child{margin-bottom:0}
+
+/* syllabus */
+.pl-sylsum{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin:1rem 0}
+@media(max-width:560px){.pl-sylsum{grid-template-columns:repeat(2,1fr)}}
+.pl-sylsum div{border-top:3px solid var(--c);padding-top:.4rem;font-family:var(--sans);font-size:.72rem;color:var(--muted)}
+.pl-sylsum b{display:block;font-family:var(--serif);font-size:1.6rem;color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.pl-topics{display:flex;flex-direction:column;border-top:1px solid var(--ink)}
+.pl-topic{display:grid;grid-template-columns:minmax(9rem,15rem) 1fr auto;gap:.8rem;align-items:center;padding:.45rem .2rem;border-bottom:1px solid var(--border);font-family:var(--sans);font-size:.8rem}
+@media(max-width:560px){.pl-topic{grid-template-columns:1fr auto}.pl-topic .pl-sq{grid-column:1/-1}}
+.pl-topic.pl-cls{background:color-mix(in srgb,var(--pl-sum-bg) 80%,transparent)}
+.pl-topic .pl-nm{color:var(--ink);font-weight:500;line-height:1.3}
+.pl-sq{display:flex;flex-wrap:wrap;gap:3px}
+.pl-sq i{width:13px;height:13px;border-radius:2px;background:var(--st-t)}
+.pl-sq i.d{background:var(--st-d)}.pl-sq i.i{background:var(--st-i)}.pl-sq i.r{background:var(--st-r)}.pl-sq i.l{background:var(--st-l);box-shadow:inset 0 0 0 1px var(--border)}
+.pl-flag{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.14rem .45rem;border-radius:3px;white-space:nowrap}
+.pl-flag.now{background:var(--accent);color:var(--accent-ink)}
+.pl-flag.next{background:var(--pl-sum-bg);color:var(--pl-sum-lbl);box-shadow:inset 0 0 0 1px var(--pl-sum-line)}
+.pl-flag.pct{color:var(--muted);font-weight:600;letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums}
+
+/* deadlines */
+.pl-tablewrap{overflow-x:auto}
+.pl-dl{width:100%;border-collapse:collapse;font-family:var(--sans);font-size:.82rem;margin-top:1rem}
+.pl-dl th{color:var(--muted);font-weight:600;font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;text-align:left;padding:.5rem .6rem;border-bottom:1.5px solid var(--ink)}
+.pl-dl td{padding:.55rem .6rem;border-bottom:1px solid var(--border);vertical-align:top}
+.pl-dl td.s{width:.8rem;padding-right:0}.pl-dl td.s i{display:inline-block;width:.6rem;height:.6rem;border-radius:50%;background:var(--c)}
+.pl-dl .when{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted)}
+.pl-pill{display:inline-block;font-size:.68rem;font-weight:700;padding:.14rem .5rem;border-radius:999px;white-space:nowrap;background:var(--surface-2);color:var(--muted)}
+.pl-pill.crit{background:var(--pl-bad-bg);color:var(--crit)}.pl-pill.warn{background:var(--pl-warn-bg);color:var(--warn)}.pl-pill.ok{background:var(--pl-good-bg);color:var(--good)}
+.pl-src{font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.pl-src.est{color:var(--pl-sum-lbl)}
+
+/* cards, done, notes */
+.pl-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
+.pl-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1rem 1.1rem;border-top:3px solid var(--c)}
+.pl-card h3{font-size:1.05rem;margin-bottom:.4rem}
+.pl-card dl{margin:0;display:grid;grid-template-columns:3.2rem 1fr;gap:.25rem .7rem;font-size:.92rem;line-height:1.45}
+.pl-card dt{font-family:var(--sans);font-size:.6rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-top:.3rem}
+.pl-card dd{margin:0}.pl-card dd.mv{font-weight:600}
+.pl-donelist{list-style:none;margin:0;padding:0;columns:2;column-gap:2rem}
+@media(max-width:700px){.pl-donelist{columns:1}}
+.pl-donelist li{break-inside:avoid;display:grid;grid-template-columns:1rem 1fr auto;gap:.5rem;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.95rem}
+.pl-donelist li::before{content:"✓";color:var(--good);font-weight:700;font-family:var(--sans)}
+.pl-donelist .d{font-family:var(--sans);font-size:.72rem;color:var(--muted);white-space:nowrap}
+.pl-notes{padding-left:1.2rem;font-size:.97rem}.pl-notes li{margin:.35rem 0}
+.pl-tools{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+.pl-footer{margin-top:2.4rem;padding-top:1rem;border-top:1px solid var(--border);font-family:var(--sans);font-size:.74rem;color:var(--muted)}
+
+/* drawer, toast, focus */
+.pl-scrim{position:fixed;inset:0;background:rgba(20,15,10,.28);z-index:88}
+.pl-drawer{position:fixed;top:0;right:0;height:100%;width:min(390px,100vw);background:var(--surface);border-left:1px solid var(--border);box-shadow:-10px 0 40px rgba(0,0,0,.14);z-index:89;padding:calc(1.5rem + env(safe-area-inset-top,0px)) 1.4rem calc(1.4rem + env(safe-area-inset-bottom,0px));overflow:auto;overflow-x:hidden;transform:translateX(105%);transition:transform .22s ease;font-family:var(--serif);color:var(--ink)}
+.pl-drawer.pl-open{transform:none}
+.pl-drawer .pl-x{position:absolute;top:calc(.8rem + env(safe-area-inset-top,0px));right:.8rem;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:999px;width:2rem;height:2rem;cursor:pointer;font-size:1rem}
+.pl-drawer h3{font-family:var(--serif);font-weight:600;font-size:1.4rem;margin:.4rem 0 .3rem;padding-right:2rem}
+.pl-drawer .pl-lbl{font-family:var(--sans);font-size:.64rem;font-weight:600;text-transform:uppercase;letter-spacing:.13em;color:var(--muted)}
+.pl-meta{font-family:var(--sans);font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:.4rem .8rem;align-items:center}
+.pl-kind{font-family:var(--sans);font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.14rem .45rem;border-radius:3px;background:var(--surface-2);color:var(--muted)}
+.pl-kind.proj{background:var(--pl-sum-bg);color:var(--pl-sum-lbl)}.pl-kind.study{background:var(--pl-good-bg);color:var(--good)}.pl-kind.hw{background:var(--pl-warn-bg);color:var(--warn)}
+.pl-form{display:flex;flex-direction:column;gap:.75rem;margin-top:1.1rem}
+.pl-form label.f{display:flex;flex-direction:column;gap:.3rem;font-family:var(--sans);font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pl-form input,.pl-form select,.pl-form textarea{font:400 .9rem/1.4 var(--sans);letter-spacing:0;text-transform:none;color:var(--ink);background:var(--plane);border:1px solid var(--border);border-radius:3px;padding:.5rem .6rem;width:100%;min-width:0}
+.pl-form textarea{resize:vertical;font-family:var(--serif);font-size:.95rem}
+.pl-r2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.pl-r2 .full{grid-column:1/-1}
+.pl-err{color:var(--crit);font-family:var(--sans);font-size:.8rem;font-weight:600}
+.pl-acts{display:flex;flex-direction:column;gap:.55rem;margin-top:1.3rem}
+.pl-check{display:flex;gap:.6rem;align-items:center;font-family:var(--sans);font-size:.86rem;font-weight:600;padding:.6rem .9rem;border:1px solid var(--border);border-radius:3px;cursor:pointer}
+.pl-check input{width:17px;height:17px;accent-color:var(--good)}
+.pl-toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--plane);font-family:var(--sans);font-size:.82rem;font-weight:600;padding:.55rem 1rem;border-radius:999px;z-index:95;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:calc(100vw - 32px)}
+.pl-toast.bad{background:var(--crit);color:#fff}
+.pl-focus{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:94;background:var(--pl-cover-bg);color:var(--pl-cover-fg);border-radius:999px;padding:.55rem .7rem .55rem 1.1rem;display:flex;align-items:center;gap:.8rem;font-family:var(--sans);font-size:.8rem;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:calc(100vw - 32px)}
+.pl-focus b{font-family:var(--serif);font-size:1.25rem;font-variant-numeric:tabular-nums;min-width:3.4rem}
+.pl-focus .ft{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:14rem;opacity:.85}
+.pl-focus button{border:1px solid rgba(255,255,255,.35);background:transparent;color:inherit;border-radius:999px;padding:.3rem .7rem;cursor:pointer;font-size:.72rem;font-weight:600}
+.pl-imp textarea{width:100%;min-height:180px;font:400 .8rem/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--plane);color:var(--ink);border:1px solid var(--border);border-radius:3px;padding:.6rem}
+.pl-scrim[hidden],.pl-toast[hidden],.pl-focus[hidden],.pl-drawer [hidden],#s-plan [hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){.pl-drawer,.pl-b,.pl-pbar i{transition:none}}
+</style>
+
 </head>
 <body class="workspace">
 
@@ -2152,6 +2475,108 @@ body.workspace .card{padding:24px;margin-bottom:20px}.card>h2,#todoCard h2{font-
 <section id="s-cal"></section>
 <section id="s-sync"></section>
 
+
+<!-- ═══════════════ PLANNER (Navid's IB Plan) ═══════════════ -->
+<section id="s-plan">
+  <div class="pl-cover">
+    <div>
+      <div class="pl-eyebrow" id="pl-eyebrow">Nørre Gymnasium 3i</div>
+      <h1>Navid's <i>IB</i> Plan</h1>
+      <p>School, hand-ins and real study time in one week view. Built from your Lectio timetable and your Notion subject databases. Every block is yours to edit.</p>
+      <div class="pl-tags"><span>DP2 · May 2027</span><span>Target 40+</span><span>Danish every day</span></div>
+      <div class="pl-cstats">
+        <div><b id="pl-cv-next">–</b><span id="pl-cv-next-l">until next hand-in</span></div>
+        <div><b>10</b><span>handed in, 0 missing</span></div>
+        <div><b id="pl-cv-study">–</b><span>study hours this week</span></div>
+      </div>
+    </div>
+    <aside class="pl-clip" aria-label="Today's slip">
+      <div class="pl-sec"><span>Today's slip</span><span id="pl-clip-date">–</span></div>
+      <div class="pl-hd">Just this</div>
+      <ul id="pl-clip-list"></ul>
+      <div class="pl-lines"></div>
+      <div class="pl-sig">Then stop. The rest is already planned.</div>
+    </aside>
+  </div>
+
+  <div id="pl-week-sec">
+    <h2 class="pl-h2"><span class="pl-no">01 · The week</span>Your week, hour by hour</h2>
+    <p class="pl-lede">Grey blocks are your lessons from Lectio. Coloured blocks are your plan, and <b>all of it is editable</b>: tap a block to change or delete it, tap an empty slot to add one. With a mouse, drag a block to move it, or drag its bottom edge to change its length.</p>
+    <div class="pl-row">
+      <div class="pl-seg" id="pl-tabs" role="group" aria-label="Choose week"></div>
+      <div class="pl-chips"><span id="pl-chips" class="pl-chips" role="group" aria-label="Filter by subject"></span><button class="pl-btn pl-primary pl-pill" id="pl-add">+ Add block</button></div>
+    </div>
+    <div class="pl-legend">
+      <span><i class="pl-sw" style="background:var(--surface-2);border-left:3px solid var(--gen)"></i>Lesson</span>
+      <span><i class="pl-sw" style="background:color-mix(in srgb,var(--ma) 15%,var(--surface));border-left:3px solid var(--ma)"></i>Study (Notion section)</span>
+      <span><i class="pl-sw" style="background:color-mix(in srgb,var(--ma) 26%,var(--surface));box-shadow:inset 0 0 0 1.5px var(--ma)"></i>Hand-in / IA</span>
+      <span><i class="pl-sw" style="border:1px dashed var(--ma)"></i>Homework</span>
+    </div>
+    <div class="pl-banner" id="pl-banner" hidden></div>
+    <div class="pl-weekwrap"><div class="pl-week" id="pl-grid"></div></div>
+    <div class="pl-foot"><span id="pl-range"></span><div class="pl-pbar" aria-hidden="true"><i id="pl-bar"></i></div><span id="pl-count"></span></div>
+  </div>
+
+  <div>
+    <h2 class="pl-h2"><span class="pl-no">02 · Balance</span>Where the week's time goes</h2>
+    <div class="pl-two">
+      <div class="pl-panel"><h3>By subject</h3><div class="pl-lbl" id="pl-bal-total">–</div><div class="pl-stack" id="pl-bal-stack"></div><div class="pl-rows" id="pl-bal-rows"></div><div class="pl-kinds" id="pl-bal-kinds"></div></div>
+      <div class="pl-panel"><h3>By day</h3><div class="pl-lbl">Planned after-school minutes · ticked part is darker</div><svg id="pl-bal-days" viewBox="0 0 420 210" role="img" aria-label="Planned study minutes per day"></svg></div>
+    </div>
+    <div class="pl-box pl-tip"><span class="pl-lbl">How the plan is balanced</span>
+      <p>Every day is a full working day, including Sundays (about 4 hours: Danish, two catch-up blocks, Persian or Maths, and a 30-minute weekly review). Danish shows up almost every day: timed Paper 1 texts, Paper 2 reading, oral recordings and daily vocabulary. Every hand-in is planned to finish a day or more early. <b>Keep-up</b> blocks cover this week's class topic, and <b>catch-up</b> blocks cover older Notion sections.</p></div>
+  </div>
+
+  <div>
+    <h2 class="pl-h2"><span class="pl-no">03 · Syllabus progress</span>Your notes vs. your classes</h2>
+    <p class="pl-lede">Each square is one section in your Notion database. Highlighted rows are what your class is doing right now according to Lectio.</p>
+    <div class="pl-row">
+      <div class="pl-seg" id="pl-syl-tabs" role="group" aria-label="Choose subject"></div>
+      <div class="pl-legend" style="margin:0">
+        <span><i class="pl-sw" style="background:var(--st-d)"></i>Done</span><span><i class="pl-sw" style="background:var(--st-i)"></i>In progress</span>
+        <span><i class="pl-sw" style="background:var(--st-r)"></i>DP1 revision</span><span><i class="pl-sw" style="background:var(--st-t)"></i>To do</span>
+        <span><i class="pl-sw" style="background:var(--st-l);box-shadow:inset 0 0 0 1px var(--border)"></i>Later</span>
+      </div>
+    </div>
+    <div class="pl-sylsum" id="pl-syl-sum"></div>
+    <div class="pl-box pl-summary" id="pl-syl-insight"></div>
+    <div class="pl-topics" id="pl-syl-topics"></div>
+  </div>
+
+  <div>
+    <h2 class="pl-h2"><span class="pl-no">04 · Deadlines</span>From now to May 2027</h2>
+    <p class="pl-lede">Filled markers come from Lectio and are confirmed. Hollow markers are estimates from your Notion “Deadlines &amp; Milestones” table, so check them with your DP coordinator.</p>
+    <div class="pl-panel" style="padding:.8rem"><svg id="pl-tl" viewBox="0 0 1000 250" role="img" aria-label="Deadline timeline September 2026 to July 2027"></svg></div>
+    <div class="pl-tablewrap"><table class="pl-dl" id="pl-dl"><thead><tr><th></th><th>What</th><th>When</th><th>Countdown</th><th>Source</th></tr></thead><tbody></tbody></table></div>
+  </div>
+
+  <div>
+    <h2 class="pl-h2"><span class="pl-no">05 · Other subjects</span>The ones without a Notion database</h2>
+    <div class="pl-cards" id="pl-cards"></div>
+  </div>
+
+  <div>
+    <h2 class="pl-h2"><span class="pl-no">06 · Already done</span>Handed in since August</h2>
+    <p class="pl-lede">Read this list when it feels like you're behind.</p>
+    <ul class="pl-donelist" id="pl-done"></ul>
+  </div>
+
+  <div>
+    <h2 class="pl-h2"><span class="pl-no">07 · Notes</span>Assumptions and tools</h2>
+    <ul class="pl-notes">
+      <li>Study blocks start after school. Move any block around your gym, volleyball or family time.</li>
+      <li>Every day is a full working day, as you asked. Some things are not optional: 8 hours of sleep, real meal breaks, and the short gaps between blocks. If the tired, flat feeling comes back, cut a day short. That's part of the plan, not a failure of it.</li>
+      <li>Your plan and ticks are saved with the rest of Compass, so they back up and sync the same way. Lessons, deadlines and syllabus progress come from Lectio and Notion, and they update when Claude refreshes the plan.</li>
+      <li>A late hand-in that isn't agreed in advance is normally recorded as absence. That's why every hand-in here is planned early.</li>
+    </ul>
+    <div class="pl-tools">
+      <button class="pl-btn" id="pl-export">Copy my plan for Claude</button>
+      <button class="pl-btn" id="pl-import">Import a plan from Claude</button>
+    </div>
+    <div class="pl-footer">Planner · Lectio (Nørre Gymnasium 3i) + Notion (Maths HL, Physics SL, Chemistry HL, Compass) · lessons checked 24 Sep 2026</div>
+  </div>
+</section>
+
 </main></div>
 
 <!-- ═══════════════ OVERLAYS ═══════════════ -->
@@ -2509,9 +2934,9 @@ function execScore(){
 /* Tasks, Gym and "Why it works" are no longer reachable: the task list now lives
    in the To-do card on Today, and the other two are retired. Their sections stay
    in the document, unlinked, so nothing that still renders them has to change. */
-var TABS=[["today", "Overview"], ["focus", "Focus"], ["cal", "Calendar"], ["week", "Weekly review"], ["goals", "Goals"], ["school", "Subjects"], ["classes", "Timetable"], ["revise", "Revision"], ["notes", "Notes"], ["checkin", "Check-in"], ["rituals", "Rituals"], ["reset", "Reset"], ["ask", "Assistant"], ["sync", "Data & sync"]];
+var TABS=[["today", "Overview"], ["plan", "Planner"], ["focus", "Focus"], ["cal", "Calendar"], ["week", "Weekly review"], ["goals", "Goals"], ["school", "Subjects"], ["classes", "Timetable"], ["revise", "Revision"], ["notes", "Notes"], ["checkin", "Check-in"], ["rituals", "Rituals"], ["reset", "Reset"], ["ask", "Assistant"], ["sync", "Data & sync"]];
 var GONE_TABS={tasks:1, gym:1, why:1};
-var PAGE_META={today:['Workspace','Your day, at a glance.','Plan with intention. Make progress on what matters.','▦'],focus:['Workspace','Find your focus.','Protect a block of time for one meaningful task.','◷'],cal:['Workspace','Your calendar.','See your commitments and make room for the work.','▣'],week:['Workspace','Reflect. Then reset.','Review your week and shape the next one.','▤'],goals:['Workspace','A direction worth taking.','Connect your daily actions to your longer-term goals.','◎'],school:['Learning','Your learning, organized.','Keep subjects, workload, and deadlines in view.','◇'],classes:['Learning','Your timetable.','A clear rhythm for your school week.','▦'],revise:['Learning','Build lasting understanding.','Revisit the right topics at the right time.','▥'],notes:['Learning','Make room for ideas.','Capture questions, connect ideas, and revisit what you learn.','▧'],checkin:['Wellbeing','Start where you are.','Check in with your energy, mood, and daily anchors.','♡'],rituals:['Wellbeing','Small actions. Steady rhythm.','Create routines that support the way you want to live.','≋'],reset:['Wellbeing','Begin again, gently.','Find a manageable next step when things feel difficult.','↻'],ask:['Tools','A little help thinking.','Explore a question, work through a problem, or make a plan.','✧'],sync:['Tools','Your data, your control.','Manage saving, device sync, and backups.','⇄']};
+var PAGE_META={today:['Workspace','Your day, at a glance.','Plan with intention. Make progress on what matters.','▦'],plan:['Workspace','Your week, hour by hour.','School, hand-ins and real study time, all editable.','▤'],focus:['Workspace','Find your focus.','Protect a block of time for one meaningful task.','◷'],cal:['Workspace','Your calendar.','See your commitments and make room for the work.','▣'],week:['Workspace','Reflect. Then reset.','Review your week and shape the next one.','▤'],goals:['Workspace','A direction worth taking.','Connect your daily actions to your longer-term goals.','◎'],school:['Learning','Your learning, organized.','Keep subjects, workload, and deadlines in view.','◇'],classes:['Learning','Your timetable.','A clear rhythm for your school week.','▦'],revise:['Learning','Build lasting understanding.','Revisit the right topics at the right time.','▥'],notes:['Learning','Make room for ideas.','Capture questions, connect ideas, and revisit what you learn.','▧'],checkin:['Wellbeing','Start where you are.','Check in with your energy, mood, and daily anchors.','♡'],rituals:['Wellbeing','Small actions. Steady rhythm.','Create routines that support the way you want to live.','≋'],reset:['Wellbeing','Begin again, gently.','Find a manageable next step when things feel difficult.','↻'],ask:['Tools','A little help thinking.','Explore a question, work through a problem, or make a plan.','✧'],sync:['Tools','Your data, your control.','Manage saving, device sync, and backups.','⇄']};
 function buildTabs(){
   var group='';
   $('#tabs').innerHTML=TABS.map(function(t){
@@ -6663,7 +7088,7 @@ function doSave(){
 }
 
 /* ── bottom nav ────────────────────────────────────── */
-var PRIMARY=[["today","Today",I.today],["ask","Ask",I.ask],["school","School",I.school],["revise","Revise",I.revise]];
+var PRIMARY=[["today","Today",I.today],["plan","Plan",I.week],["ask","Ask",I.ask],["school","School",I.school],["revise","Revise",I.revise]];
 var MORE=[
   ["notes","Questions \u0026 notes",I.notes,"What to revise, saved per subject"],
   ["checkin","Check-in \u0026 anchors",I.checkin,"Mood, sleep, energy and the five fixed points"],
@@ -12701,4 +13126,359 @@ document.addEventListener("DOMContentLoaded", function(){
 
 }, {once:true});
 </script>
+<script id="compass-planner">
+document.addEventListener("DOMContentLoaded", function(){
+/* ═══════════════ PLANNER — Navid's IB Plan inside Compass ═══════════════
+   Plan blocks live in S.plan.blocks, so they save, back up and sync with the
+   rest of Compass (B.touch()). Lessons, syllabus counts and deadlines are
+   read-only data refreshed by Claude from Lectio and Notion.            */
+(function(){
+"use strict";
+var B=window.CompassBridge; if(!B) return;
+var ROOT=document.getElementById("s-plan"); if(!ROOT) return;
+
+var SUB={ma:"Maths AA HL",ke:"Chemistry HL",fy:"Physics SL",da:"Danish B HL",eo:"Economics SL",fa:"Persian A Lit",th:"TOK",gen:"General"};
+var KIND={study:"Study",proj:"Hand-in / IA",hw:"Homework",school:"Lesson"};
+// Lessons: [date, start, end, subject, topic]
+var LESSONS=[
+ ["2026-09-23","08:00","09:35","da",""],["2026-09-23","09:50","11:25","th",""],["2026-09-23","11:25","12:30","ma",""],["2026-09-23","13:40","15:15","ke","Experiment"],
+ ["2026-09-24","09:50","11:25","da","Danmarks besættelse"],["2026-09-24","11:55","13:30","fy","D.3 cont."],["2026-09-24","13:40","15:15","ma","Practice kinematics"],
+ ["2026-09-25","08:00","09:35","ma","IA – last class"],["2026-09-25","11:55","13:30","ke","R2.1 exercise"],["2026-09-25","13:40","15:15","fa","Antigone pp. 1–20"],
+ ["2026-09-28","09:50","11:25","ke","Reactivity 2.2"],["2026-09-28","11:55","13:30","fy",""],["2026-09-28","15:20","16:10","ma","Math Study Hall"],
+ ["2026-09-29","09:50","11:25","ma","Revision of integration"],["2026-09-29","13:40","15:15","fy",""],
+ ["2026-09-30","08:00","09:35","da","Hvidstengruppen"],["2026-09-30","09:50","11:25","ke","Reactivity 2.2"],["2026-09-30","11:55","13:30","eo",""],
+ ["2026-10-01","08:00","09:35","ma","Probability distributions"],["2026-10-01","09:50","11:25","th",""],["2026-10-01","11:55","13:30","fy",""],
+ ["2026-10-02","09:50","11:25","da","Hvidstengruppen"],["2026-10-02","11:55","13:30","eo",""],["2026-10-02","13:40","15:15","ke","Reactivity 2.2"],
+ ["2026-10-05","08:00","09:35","ma",""],["2026-10-05","09:50","11:25","da",""],["2026-10-05","11:55","13:30","fy",""],
+ ["2026-10-06","09:50","11:25","ke","Reactivity 2.2"],["2026-10-06","13:40","15:15","eo",""],
+ ["2026-10-07","08:00","09:35","da",""],["2026-10-07","09:50","11:25","th",""],["2026-10-07","11:55","13:30","eo",""],
+ ["2026-10-08","09:50","11:25","da",""],["2026-10-08","11:55","13:30","fy",""],["2026-10-08","13:40","15:15","ma",""],
+ ["2026-10-09","08:00","09:35","ma",""],["2026-10-09","11:55","13:30","ke","Reactivity 2.2"],["2026-10-09","13:40","15:15","fa",""]
+];
+
+
+var FIXED=["2026-09-21","2026-09-28","2026-10-05","2026-10-12","2026-10-19"];
+var WEEKNOTE={
+ "2026-10-12":{hol:1,title:"Autumn holiday · 12–18 October",text:"Nothing is planned yet. You'll decide in the weekly review on 11 Oct. Tap any empty slot to add a block. Good options: a Danish intensive week (2 oral recordings, 2 timed Paper 1s, daily Paper 2), Physics C.3 and C.5 catch-up, and Chemistry R1.3 and R2.2.12–13 Arrhenius."},
+ "2026-10-19":{title:"Mon 19 Oct, 09:00: individual hand-in due. It's already in.",text:"Lectio hasn't published lessons for this week yet. Chemistry and Physics IAs start around now. Say “plan for me” then, or add blocks yourself."}
+};
+// Notion syllabus: [topic, done, inProgress, dp1Revision, toDo, later, flag]
+var SYL={
+ ma:{name:"Mathematics HL",topics:[
+  ["1. Algebra & function basics",3,0,2,2,0],["2. Functions",0,0,5,2,0],["3. Sequences & series",0,0,0,0,7],["4. Exponentials & logs",6,1,0,0,0],
+  ["6. Trig functions & equations",0,0,0,0,8],["7. Geometry & trigonometry",0,0,0,0,6],["8. Complex numbers",0,0,0,0,5],["9. Vectors, lines & planes",0,0,0,0,6],
+  ["12. Differential calculus 1",5,1,0,0,0],["13. Differential calculus 2",2,1,0,5,0],["14. Integral calculus 1",2,6,0,0,0,"now"],["15. Probability distributions",0,0,0,0,6,"next"],["16. Integral calculus 2",0,0,0,4,0]],
+  insight:"<b>Integral calculus is finished in class, but 6 of its 8 Notion sections are still “in progress”.</b> The two integration hand-ins are the perfect reason to close them: 14.8 this Saturday, 14.5–14.6 next Saturday. Probability distributions start in class on 1 Oct, and the preview block on Wednesday puts you a step ahead."},
+ ke:{name:"Chemistry HL",topics:[
+  ["S1.1 Particulate nature",1,1,1,0,0],["S1.2 Nuclear atom",0,0,2,1,0],["S1.3 Electron configuration",0,0,3,1,0],["S1.4 The mole",0,0,3,1,0],["S1.5 Ideal gases",0,0,2,1,0],
+  ["S2.1 Ionic model",0,0,2,1,0],["S2.2 Covalent model",0,0,8,1,0],["S2.3 Metallic model",0,0,1,1,0],["S2.4 Models to materials",0,0,4,1,0],["S3.1 Periodic table",0,0,4,1,0],["S3.2 Functional groups",0,0,4,1,0],
+  ["R1.1 Measuring enthalpy",3,0,0,0,0],["R1.2 Energy cycles",5,0,0,0,0],["R1.3 Energy from fuels",1,3,0,1,0],["R1.4 Entropy & spontaneity",0,4,0,0,0],
+  ["R2.1 How much?",0,0,0,5,0,"now"],["R2.2 How fast?",0,0,0,9,0,"next"],["R2.3 How far?",0,0,0,7,0],["R3.1 Proton transfer",0,0,0,17,0],["R3.2 Electron transfer",0,0,0,15,0],["R3.3 Electron sharing",0,0,0,4,0],["R3.4 Electron-pair sharing",0,0,0,13,0]],
+  insight:"<b>You're level with your class in Chemistry.</b> R1.1 and R1.2 are done, and R2.1 starts now. The plan covers all of R2.1 and most of R2.2 over the next three weeks, in step with the lessons. R1.3 and R1.4 (“in progress”) are optional holiday catch-up."},
+ fy:{name:"Physics SL",topics:[
+  ["A.1 Kinematics",2,1,0,1,0],["A.2 Forces & momentum",1,2,5,1,0],["A.3 Work, energy & power",0,0,2,1,0],["B.1 Thermal energy",0,0,5,1,0],["B.2 Greenhouse effect",0,0,3,1,0],["B.3 Gas laws",0,0,2,1,0],["B.5 Current & circuits",0,0,2,1,0],
+  ["C.1 Simple harmonic motion",4,0,0,1,0],["C.2 Wave model",0,4,0,1,0],["C.3 Wave phenomena",0,0,0,7,0],["C.4 Standing waves",0,5,0,1,0],["C.5 Doppler effect",0,0,0,3,0],
+  ["D.1 Gravitational fields",0,0,0,4,0],["D.2 Electric & magnetic fields",0,0,0,6,0,"now"],["D.3 Motion in EM fields",0,0,0,5,0,"now"],["E.1 Structure of the atom",0,0,0,5,0],["E.3 Radioactive decay",0,0,0,11,0],["E.4 Fission",0,0,0,6,0],["E.5 Fusion & stars",0,0,0,7,0]],
+  insight:"<b>Physics is where your notes are furthest behind.</b> Class is on D.3, but your Notion notes stop at C.2–C.4. Don't try to catch up on everything at once. Keep up with D.2 and D.3 first (4 blocks planned), then do one catch-up topic a week: C.4, then C.5, then C.3."}
+};
+
+var DEADLINES=[
+ {d:"2026-09-24T09:50",t:"Danish: “jerngreb” sentence",s:"da",src:"Lectio"},
+ {d:"2026-09-25T11:55",t:"Chemistry: R2.1 lab-manual questions",s:"ke",src:"Lectio"},
+ {d:"2026-09-28T09:00",t:"Maths IA: final version",s:"ma",src:"Lectio",big:1},
+ {d:"2026-09-30T08:00",t:"Danish: podcast + Hvidstengruppen text",s:"da",src:"Lectio"},
+ {d:"2026-10-05T09:00",t:"Integration hand-in (group)",s:"ma",src:"Lectio",big:1},
+ {d:"2026-10-19T09:00",t:"Integration hand-in (individual)",s:"ma",src:"Lectio",big:1},
+ {d:null,t:"Economics Commentary 2: final version",s:"eo",src:"Lectio",note:"no date. Aim for Sat 26 Sep"},
+ {d:"2026-11-25T12:00",t:"Physics IA: final",s:"fy",src:"Notion",est:1,big:1},
+ {d:"2027-02-01T12:00",t:"Danish B: individual oral",s:"da",src:"Notion",est:1,big:1},
+ {d:"2027-02-28T12:00",t:"TOK essay: final",s:"th",src:"Notion",est:1,big:1},
+ {d:"2027-03-07T12:00",t:"Chemistry IA: final",s:"ke",src:"Notion",est:1,big:1},
+ {d:"2027-04-23T09:00",t:"IB exams begin",s:"gen",src:"Notion",est:1,big:1},
+ {d:"2027-07-05T12:00",t:"Results",s:"gen",src:"Notion",est:1,big:1}
+];
+var BANDS=[{a:"2026-10-12",b:"2026-10-18",t:"Autumn"},{a:"2026-12-18",b:"2027-01-03",t:"Christmas"},{a:"2027-02-15",b:"2027-02-21",t:"Winter"},{a:"2027-04-23",b:"2027-05-19",t:"IB exams (est.)",ex:1}];
+
+var CARDS=[
+ {s:"da",now:"Krig og flugt: Danmarks besættelse, Hvidstengruppen",next:"Sundhed & livsstil, then SoMe og koncentration. Individual oral est. 1 Feb.",mv:"One timed Paper 1 text a week"},
+ {s:"eo",now:"Benefits of international trade",next:"Commentary 2 final, then Commentary 3",mv:"Upload Commentary 2 this Saturday"},
+ {s:"fa",now:"Antigone (pp. 1–20 on Fri 25 Sep)",next:"More Antigone, Learner's Portfolio",mv:"One Paper 1 analysis a week"},
+ {s:"th",now:"Weekly lesson",next:"Essay work starts Feb 2027 (300 words so far)",mv:"Nothing extra until February"}
+];
+var DONE=[
+ ["Physics Extended Essay, final version (3,998 words)","Sep"],["Final EE reflection","11 Sep"],["Maths IA first draft","14 Sep"],
+ ["Gruppeoplæg: produktion og forbrug","16 Sep"],["Economics Commentary 2 draft","12 Sep"],["Oplæg: Plastic Change projekt","9 Sep"],
+ ["Economics Commentary 2 outline","6 Sep"],["Danish Paper 1: bæredygtig skole","4 Sep"],["Article for Commentary 2 (approved)","31 Aug"],["Learner's Portfolio #5","31 Aug"]
+];
+
+
+
+
+var SEED=[{"id": "t39a", "d": "2026-09-23", "s": "20:50", "e": "21:00", "sub": "da", "k": "hw", "t": "“Jerngreb” sentence", "info": "Write what “at have nogen i et jerngreb” means in Elevfeedback before tomorrow's 2nd module. Pack headphones. Then stop for tonight.", "src": "Lectio · Lektier · due Thu 24 Sep 09:50", "done": false}, {"id": "t39b", "d": "2026-09-24", "s": "16:00", "e": "17:00", "sub": "ma", "k": "proj", "t": "Maths IA: read-through + fix list", "info": "Library session, block 1. Read the whole IA once without editing and put every fix on one list: notation, figure labels, captions, bibliography, page numbers, main-body length (about 20 pages or fewer). Tomorrow's 08:00 IA class is where you ask about the list.", "src": "Lectio · final version due Mon 28 Sep 09:00", "done": false}, {"id": "t39c", "d": "2026-09-24", "s": "17:10", "e": "17:55", "sub": "ke", "k": "hw", "t": "Lab manual: R2.1 questions", "info": "Answer the questions in the lab manual and pack it for tomorrow's 11:55 R2.1 exercise lesson. Take a proper dinner break afterwards (17:55–18:40), because a 6-hour library session only works with real breaks.", "src": "Lectio · Lektier · due Fri 25 Sep 11:55", "done": false}, {"id": "t39i", "d": "2026-09-24", "s": "18:40", "e": "19:30", "sub": "da", "k": "study", "t": "Paper 1: læserbrev, timed", "info": "Pick a prompt, plan for 10 minutes, then write for 40. Use the structure and phrases from your læserbrev guide (Læsebrev om bæredygtighed). Don't polish yet. Saturday is for rewriting it.", "src": "Weak subject · Danish B HL Paper 1 (HL: 450–600 words)", "done": false}, {"id": "t39j", "d": "2026-09-24", "s": "19:40", "e": "20:30", "sub": "ma", "k": "study", "t": "14.8 Kinematics", "info": "Keep-up with today's “Practice kinematics” lesson: displacement, velocity and acceleration with integrals. Worked examples first, then 4 exam-style questions.", "src": "Notion · Mathematics HL · 14.8 · pp. 748–756", "done": false}, {"id": "t39k", "d": "2026-09-24", "s": "20:40", "e": "21:30", "sub": "ma", "k": "study", "t": "14.5–14.6 Partial fractions & areas", "info": "Continue integration: integration by partial fractions, then areas between curves. Both are useful for the two integration hand-ins.", "src": "Notion · Mathematics HL · pp. 730–739", "done": false}, {"id": "t39l", "d": "2026-09-24", "s": "21:35", "e": "21:55", "sub": "da", "k": "study", "t": "Danish vocabulary (Anki)", "info": "A low-energy finish: 20 minutes on your Danish tekstype Anki deck. Then tick off the day and pack up.", "src": "Danish B HL · Anki (one subdeck per tekstype)", "done": false}, {"id": "t39d", "d": "2026-09-25", "s": "15:30", "e": "16:30", "sub": "ma", "k": "proj", "t": "Maths IA: fix & submit", "info": "In the 08:00 IA class, take your fix list and ask your last questions. After school, make the fixes and upload the final version, three days early. (Musikcafé is at 16:00 if you want it.)", "src": "Lectio · IA – final version", "done": false}, {"id": "t39m", "d": "2026-09-25", "s": "16:45", "e": "17:30", "sub": "da", "k": "study", "t": "Paper 2: one reading text", "info": "One Paper 2 reading text with questions, timed. Mark it and write down every word you didn't know for Anki.", "src": "Weak subject · Danish B HL Paper 2", "done": false}, {"id": "t39e", "d": "2026-09-26", "s": "10:00", "e": "11:30", "sub": "eo", "k": "proj", "t": "Commentary 2: feedback, part 1", "info": "Work through the first half of your supervisor's comments. Keep to the 800-word limit.", "src": "Lectio · Draft, 2. Commentary · waiting on you", "done": false}, {"id": "t39f", "d": "2026-09-26", "s": "11:45", "e": "12:45", "sub": "eo", "k": "proj", "t": "Commentary 2: finish & upload", "info": "Second half of the comments, one read-through, then upload the final version.", "src": "Lectio · no final date set", "done": false}, {"id": "t39g", "d": "2026-09-26", "s": "14:00", "e": "14:50", "sub": "ke", "k": "study", "t": "R2.1.1–3 Stoichiometry & limiting reactants", "info": "Keep-up: this is what class is doing now. Make notes, then do 3 worked examples from the textbook before any questions.", "src": "Notion · Chemistry HL · R2.1 · pp. 461–469", "done": false}, {"id": "t39h", "d": "2026-09-26", "s": "15:00", "e": "15:50", "sub": "fy", "k": "study", "t": "D.2 Coulomb's law & field strength", "info": "Catch-up with a purpose: class is on D.3, but your D.2 notes are empty. Cover “Electric charge and Coulomb's law” and “Electric field lines and field strength”.", "src": "Notion · Physics SL · D.2 Electric and magnetic fields", "done": false}, {"id": "t39n", "d": "2026-09-26", "s": "16:00", "e": "16:50", "sub": "da", "k": "study", "t": "Læserbrev: rewrite", "info": "Rewrite Thursday's læserbrev. Check it against the three Paper 1 criteria (language, message, conceptual understanding: audience, purpose, text-type conventions) and fix one weakness at a time.", "src": "Weak subject · Danish B HL Paper 1", "done": false}, {"id": "t39o", "d": "2026-09-27", "s": "10:00", "e": "10:50", "sub": "da", "k": "study", "t": "Individual oral practice", "info": "Take a short extract (about 300 words) from a literary text you've read in class. Prepare for 20 minutes, record a 3–4 minute presentation on your phone, then listen back and note 3 things to improve. The oral is worth 25% (est. 1 Feb).", "src": "Danish B HL · individual oral", "done": false}, {"id": "t39p", "d": "2026-09-27", "s": "11:00", "e": "11:50", "sub": "ma", "k": "study", "t": "13.4 Related rates", "info": "Catch-up from topic 13, which your Notion marks as to do. Worked examples first.", "src": "Notion · Mathematics HL · 13.4", "done": false}, {"id": "t39q", "d": "2026-09-27", "s": "14:00", "e": "14:30", "sub": "gen", "k": "proj", "t": "Weekly review", "info": "Tick off the week, update the statuses in your Notion databases, then say “plan for me” so next week reflects what actually happened.", "src": "Every Sunday", "done": false}, {"id": "t39r", "d": "2026-09-27", "s": "14:45", "e": "15:35", "sub": "ke", "k": "study", "t": "R1.3 Energy from fuels: finish", "info": "Catch-up: fossil fuels, biofuels and fuel cells, plus the end-of-topic questions. 3 of these sections are still “in progress”.", "src": "Notion · Chemistry HL · R1.3 · pp. 429–438", "done": false}, {"id": "t39s", "d": "2026-09-27", "s": "15:45", "e": "16:45", "sub": "fa", "k": "study", "t": "Paper 1 practice analysis", "info": "One guided literary analysis in Persian.", "src": "Persian A · weekly", "done": false}, {"id": "t40a", "d": "2026-09-28", "s": "14:00", "e": "14:15", "sub": "ma", "k": "proj", "t": "Group hand-in: split the work", "info": "Message your group and agree who writes which part of the Integration hand-in. You can use Math Study Hall at 15:20 for questions.", "src": "Lectio · Integration Hand in – Group · due Mon 5 Oct 09:00", "done": false}, {"id": "t40b", "d": "2026-09-28", "s": "14:30", "e": "15:20", "sub": "ke", "k": "study", "t": "R2.1.4–5 Yield & atom economy", "info": "Finish R2.1 now that class starts R2.2 today. Do the end-of-topic questions too.", "src": "Notion · Chemistry HL · R2.1 · pp. 470–479", "done": false}, {"id": "t40c", "d": "2026-09-28", "s": "19:30", "e": "20:00", "sub": "da", "k": "hw", "t": "Podcast (part 1)", "info": "Start listening to the rest of “Den sidste modstandsmand”.", "src": "Lectio · Lektier · due Wed 30 Sep", "done": false}, {"id": "t40d", "d": "2026-09-29", "s": "16:30", "e": "17:30", "sub": "ma", "k": "proj", "t": "Group hand-in: your part", "info": "Draft your share of the Integration hand-in. Today's lesson is integration revision, which helps.", "src": "Lectio · due Mon 5 Oct 09:00", "done": false}, {"id": "t40e", "d": "2026-09-29", "s": "17:45", "e": "18:25", "sub": "da", "k": "hw", "t": "Podcast + Hvidsten text", "info": "Finish the podcast and read the Hvidstengruppen text on danmarkshistorien.lex.dk before Wednesday's 08:00 lesson.", "src": "Lectio · Lektier · due Wed 30 Sep 08:00", "done": false}, {"id": "t40f", "d": "2026-09-30", "s": "14:30", "e": "15:20", "sub": "fy", "k": "study", "t": "D.2 Charging & magnetic fields", "info": "Finish D.2: charging by friction, induction and conduction; conservation of charge and Millikan; magnetic fields and field lines.", "src": "Notion · Physics SL · D.2 Electric and magnetic fields", "done": false}, {"id": "t40g", "d": "2026-09-30", "s": "15:30", "e": "16:10", "sub": "ma", "k": "study", "t": "Preview: probability distributions", "info": "Read the first section of topic 15 before Thursday's lesson, so the lesson is your second time seeing it.", "src": "Notion · Mathematics HL · 15 Probability distributions", "done": false}, {"id": "t40h", "d": "2026-09-30", "s": "17:00", "e": "17:45", "sub": "da", "k": "study", "t": "Paper 1: one timed text", "info": "Weak-subject slot. One Paper 1 text under timed conditions, then compare it with the model structure.", "src": "Weak subject · weekly", "done": false}, {"id": "t40i", "d": "2026-10-01", "s": "14:30", "e": "15:30", "sub": "ma", "k": "proj", "t": "Group hand-in: finish & send", "info": "Finish your part and send it to the group so there's time to merge.", "src": "Lectio · due Mon 5 Oct 09:00", "done": false}, {"id": "t40j", "d": "2026-10-01", "s": "15:45", "e": "16:35", "sub": "ke", "k": "study", "t": "R2.2.1–3 Rates & collision theory", "info": "Keep-up with this week's R2.2 lessons: rate of reaction, collision theory, and factors affecting rate.", "src": "Notion · Chemistry HL · R2.2 · pp. 480–491", "done": false}, {"id": "t40k", "d": "2026-10-01", "s": "17:00", "e": "17:50", "sub": "fy", "k": "study", "t": "D.3 Moving charge in a B-field", "info": "Keep-up: “Force on a moving charge in a magnetic field”. Draw every force diagram yourself.", "src": "Notion · Physics SL · D.3", "done": false}, {"id": "t40q", "d": "2026-10-01", "s": "18:00", "e": "18:30", "sub": "da", "k": "study", "t": "Danish vocabulary + grammar", "info": "20 minutes of Anki plus one grammar point from your Danish B HL grammar book.", "src": "Danish B HL · daily", "done": false}, {"id": "t40l", "d": "2026-10-02", "s": "16:00", "e": "16:50", "sub": "fa", "k": "study", "t": "Antigone: notes on pp. 1–20", "info": "Make character and theme notes on what you read in class. Start a quote bank.", "src": "STLan · Antigone", "done": false}, {"id": "t40r", "d": "2026-10-02", "s": "17:00", "e": "17:45", "sub": "da", "k": "study", "t": "Paper 2: one reading text", "info": "One reading text, timed. Put new words into Anki.", "src": "Weak subject · Danish B HL Paper 2", "done": false}, {"id": "t40m", "d": "2026-10-03", "s": "10:00", "e": "10:45", "sub": "ma", "k": "proj", "t": "Group hand-in: check & submit", "info": "Final check with the group, then submit two days early.", "src": "Lectio · due Mon 5 Oct 09:00", "done": false}, {"id": "t40n", "d": "2026-10-03", "s": "11:00", "e": "12:00", "sub": "ma", "k": "study", "t": "14.7 Volumes with integrals", "info": "The last open section of topic 14 in Notion. After this, integral calculus 1 is done.", "src": "Notion · Mathematics HL · pp. 739–747", "done": false}, {"id": "t40o", "d": "2026-10-03", "s": "14:00", "e": "14:45", "sub": "eo", "k": "study", "t": "International trade: notes", "info": "Turn this week's lessons into one page of notes with the key diagram (gains from trade), and label it yourself.", "src": "Class topic · Economics", "done": false}, {"id": "t40p", "d": "2026-10-03", "s": "15:00", "e": "16:00", "sub": "fa", "k": "study", "t": "Paper 1 practice analysis", "info": "One guided literary analysis in Persian.", "src": "Persian A · weekly", "done": false}, {"id": "t40s", "d": "2026-10-03", "s": "16:15", "e": "17:00", "sub": "da", "k": "study", "t": "Individual oral practice", "info": "A new extract, 20 minutes' preparation, and a recorded 3–4 minute presentation. Compare it with last week's recording.", "src": "Danish B HL · individual oral", "done": false}, {"id": "t40t", "d": "2026-10-04", "s": "10:00", "e": "11:00", "sub": "da", "k": "study", "t": "Paper 1: new text type, timed", "info": "A different tekstype from last week (e.g. debatindlæg, blogindlæg or tale). Plan for 10 minutes, write for 50.", "src": "Weak subject · Danish B HL Paper 1", "done": false}, {"id": "t40u", "d": "2026-10-04", "s": "11:15", "e": "12:05", "sub": "fy", "k": "study", "t": "C.4 Standing waves: finish", "info": "Catch-up: finish the 5 “in progress” C.4 sections and do the exam-style questions.", "src": "Notion · Physics SL · C.4", "done": false}, {"id": "t40v", "d": "2026-10-04", "s": "14:00", "e": "14:30", "sub": "gen", "k": "proj", "t": "Weekly review", "info": "Tick off the week, update Notion, then say “plan for me”.", "src": "Every Sunday", "done": false}, {"id": "t40w", "d": "2026-10-04", "s": "14:45", "e": "15:35", "sub": "ma", "k": "study", "t": "13.5 Optimisation", "info": "Catch-up from topic 13. Optimisation shows up a lot in Paper 1 and Paper 2. Worked examples first.", "src": "Notion · Mathematics HL · 13.5", "done": false}, {"id": "t40x", "d": "2026-10-04", "s": "15:45", "e": "16:35", "sub": "fy", "k": "study", "t": "C.5 Doppler effect", "info": "Catch-up: sound and light Doppler, plus the exam-style questions.", "src": "Notion · Physics SL · C.5", "done": false}, {"id": "t41a", "d": "2026-10-05", "s": "14:30", "e": "15:30", "sub": "ma", "k": "proj", "t": "Individual hand-in: part 1", "info": "Read the task and do the first third. The group hand-in was due this morning, and yours is already in.", "src": "Lectio · Integration hand in – Individual · due Mon 19 Oct 09:00", "done": false}, {"id": "t41b", "d": "2026-10-05", "s": "15:45", "e": "16:35", "sub": "ke", "k": "study", "t": "R2.2.4–8 Activation energy & catalysts", "info": "Activation energy, catalysts and multistep reactions.", "src": "Notion · Chemistry HL · pp. 492–499", "done": false}, {"id": "t41o", "d": "2026-10-05", "s": "16:45", "e": "17:15", "sub": "da", "k": "study", "t": "Danish vocabulary + grammar", "info": "Anki plus one grammar point.", "src": "Danish B HL · daily", "done": false}, {"id": "t41c", "d": "2026-10-06", "s": "16:30", "e": "17:30", "sub": "ma", "k": "proj", "t": "Individual hand-in: part 2", "info": "The second third.", "src": "Lectio · due Mon 19 Oct", "done": false}, {"id": "t41d", "d": "2026-10-06", "s": "17:45", "e": "18:15", "sub": "fy", "k": "proj", "t": "Physics IA: choose the topic", "info": "Decide before the IAs start in mid-October. Main question: does a Lagrangian pendulum overlap too much with your Maths IA?", "src": "Physics IA · final est. 25 Nov (Notion)", "done": false}, {"id": "t41p", "d": "2026-10-06", "s": "18:30", "e": "19:15", "sub": "da", "k": "study", "t": "Paper 2: one reading text", "info": "One reading text, timed. Put new words into Anki.", "src": "Weak subject · Danish B HL Paper 2", "done": false}, {"id": "t41e", "d": "2026-10-07", "s": "14:30", "e": "15:20", "sub": "fy", "k": "study", "t": "D.3 Particles in fields & conductors", "info": "“Motion of a charged particle in uniform fields” + “Force on a current-carrying conductor”.", "src": "Notion · Physics SL · D.3", "done": false}, {"id": "t41f", "d": "2026-10-07", "s": "15:30", "e": "16:20", "sub": "ma", "k": "study", "t": "15 Probability distributions: practice", "info": "A practice set on this week's class content. Start from a worked example.", "src": "Notion · Mathematics HL · 15", "done": false}, {"id": "t41g", "d": "2026-10-07", "s": "17:00", "e": "17:30", "sub": "eo", "k": "proj", "t": "Commentary 3: pick an article", "info": "Find a recent article that fits a key concept you haven't used yet. Commentary 1 used equity.", "src": "Economics IA portfolio", "done": false}, {"id": "t41h", "d": "2026-10-08", "s": "16:30", "e": "17:30", "sub": "ma", "k": "proj", "t": "Individual hand-in: part 3", "info": "The last third, then a full check.", "src": "Lectio · due Mon 19 Oct", "done": false}, {"id": "t41i", "d": "2026-10-08", "s": "17:45", "e": "18:30", "sub": "da", "k": "study", "t": "Paper 1: one timed text", "info": "Weak-subject slot.", "src": "Weak subject · weekly", "done": false}, {"id": "t41j", "d": "2026-10-09", "s": "15:40", "e": "16:00", "sub": "ma", "k": "proj", "t": "Submit the individual hand-in", "info": "Ten days early, so the autumn holiday is completely free.", "src": "Lectio · due Mon 19 Oct 09:00", "done": false}, {"id": "t41k", "d": "2026-10-09", "s": "16:15", "e": "17:05", "sub": "ke", "k": "study", "t": "R2.2.9–11 Rate equations", "info": "Rate equations and orders of reaction. HL content, so give it full attention.", "src": "Notion · Chemistry HL · pp. 500–505", "done": false}, {"id": "t41l", "d": "2026-10-10", "s": "10:00", "e": "10:50", "sub": "ma", "k": "study", "t": "13.6 L'Hôpital's rule", "info": "The last to-do section of topic 13.", "src": "Notion · Mathematics HL · 13.6", "done": false}, {"id": "t41m", "d": "2026-10-10", "s": "11:00", "e": "11:50", "sub": "fy", "k": "study", "t": "D.2 + D.3 exam-style questions", "info": "Close out topic D in Notion with the exam-style question sets.", "src": "Notion · Physics SL · D.2/D.3 exam-style questions", "done": false}, {"id": "t41n", "d": "2026-10-10", "s": "14:00", "e": "15:00", "sub": "fa", "k": "study", "t": "Paper 1 practice analysis", "info": "One guided literary analysis in Persian.", "src": "Persian A · weekly", "done": false}, {"id": "t41q", "d": "2026-10-10", "s": "15:15", "e": "16:00", "sub": "da", "k": "study", "t": "Paper 1: rewrite with feedback", "info": "Rewrite last Sunday's text against the Paper 1 criteria.", "src": "Weak subject · Danish B HL Paper 1", "done": false}, {"id": "t41r", "d": "2026-10-11", "s": "10:00", "e": "10:50", "sub": "da", "k": "study", "t": "Individual oral practice", "info": "Third recording. Track your improvement across the three recordings.", "src": "Danish B HL · individual oral", "done": false}, {"id": "t41s", "d": "2026-10-11", "s": "11:00", "e": "11:50", "sub": "ke", "k": "study", "t": "R1.4 Entropy & Gibbs: finish", "info": "Catch-up: your 4 R1.4 sections are still “in progress”.", "src": "Notion · Chemistry HL · R1.4 · pp. 439–460", "done": false}, {"id": "t41t", "d": "2026-10-11", "s": "14:00", "e": "14:30", "sub": "gen", "k": "proj", "t": "Weekly review", "info": "Before the holiday: tick off the week and decide how you want to use the autumn holiday.", "src": "Every Sunday", "done": false}, {"id": "t41u", "d": "2026-10-11", "s": "14:45", "e": "15:35", "sub": "fy", "k": "study", "t": "C.2 Wave model: finish", "info": "Catch-up: the 4 “in progress” C.2 sections and their exam-style questions.", "src": "Notion · Physics SL · C.2", "done": false}, {"id": "t41v", "d": "2026-10-11", "s": "15:45", "e": "16:35", "sub": "ma", "k": "study", "t": "DP1 revision: 2. Functions", "info": "A mixed practice set on rational functions, inequalities and partial fractions (5 of these sections are marked DP1 revision).", "src": "Notion · Mathematics HL · topic 2", "done": false}, {"id": "t43a", "d": "2026-10-19", "s": "15:30", "e": "15:50", "sub": "ke", "k": "proj", "t": "Ask about the Chemistry IA", "info": "Ask for the start date and requirements. Re-read your Ca(OH)₂ Van't Hoff plan.", "src": "Chemistry IA · final est. 7 Mar 2027 (Notion)", "done": false}, {"id": "t43b", "d": "2026-10-19", "s": "16:00", "e": "16:15", "sub": "fy", "k": "proj", "t": "Ask about the Physics IA", "info": "Ask for the start date and requirements.", "src": "Physics IA · final est. 25 Nov 2026 (Notion)", "done": false}];
+
+/* ── helpers ── */
+function $(s){return document.querySelector(s);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function col(s){return "var(--"+(SUB[s]?s:"gen")+")";}
+function mins(t){var p=String(t).split(":");return (+p[0])*60+(+p[1]);}
+function pad(n){return String(n).padStart(2,"0");}
+function hm(m){return pad(Math.floor(m/60))+":"+pad(m%60);}
+function ymd(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function addDays(s,n){var d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return ymd(d);}
+function mondayOf(k){var d=new Date(k+"T12:00");d.setDate(d.getDate()-((d.getDay()+6)%7));return ymd(d);}
+function now(){return new Date();}
+function fmtDay(s){return new Date(s+"T12:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});}
+function fmtH(m){var h=Math.floor(m/60),r=m%60;return h?(r?h+" h "+r:h+" h"):r+" min";}
+function dur(t){return mins(t.e)-mins(t.s);}
+function until(at){var ms=new Date(at)-now();if(ms<=0)return null;var h=ms/36e5,d=Math.floor(h/24);
+  return {txt:d>=1?d+" d "+Math.floor(h%24)+" h":Math.floor(h)+" h "+Math.floor(ms/6e4%60)+" m",short:d>=1?d+" days":Math.floor(h)+" h",cls:h<48?"crit":h<168?"warn":"ok"};}
+function isoWeek(d){var t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var n=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-n);var y=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y)/864e5+1)/7);}
+
+/* ── state (inside Compass's own S) ── */
+function P(){var S=B.get();if(!S.plan||!Array.isArray(S.plan.blocks)){S.plan={v:1,blocks:SEED.map(function(b){var o={};for(var k in b)o[k]=b[k];o.done=!!o.done;return o;})};/* no touch() here: the saved state may not have loaded yet, and saving now could overwrite it */}return S.plan;}
+function blocks(){return P().blocks;}
+function byId(id){return blocks().filter(function(b){return b.id===id;})[0];}
+function weekBlocks(mon){var e=addDays(mon,7);return blocks().filter(function(t){return t.d>=mon&&t.d<e;});}
+function weeks(){var s={};FIXED.forEach(function(m){s[m]=1;});blocks().forEach(function(b){if(b.d)s[mondayOf(b.d)]=1;});var a=Object.keys(s).sort();a.push(addDays(a[a.length-1],7));return a;}
+function commit(msg){B.touch();renderAll();if(msg)toast(msg);}
+
+var toastT=null;
+function toast(msg,bad){var t=$("#pl-toast");t.textContent=msg;t.classList.toggle("bad",!!bad);t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},bad?5000:1800);}
+
+/* ── week grid ── */
+var G0=8*60,G1=22*60+15,PM=.78;
+var curMon=mondayOf(ymd(now())); if(curMon<FIXED[0]) curMon=FIXED[0];
+var filter={};Object.keys(SUB).forEach(function(k){filter[k]=1;});
+function fcount(){return Object.keys(filter).length;}
+function renderTabs(){
+  $("#pl-tabs").innerHTML=weeks().map(function(m){var ts=weekBlocks(m),n=ts.filter(function(t){return t.done;}).length;
+    var lbl="Uge "+isoWeek(new Date(m+"T12:00"))+(WEEKNOTE[m]&&WEEKNOTE[m].hol?" · Holiday":"");
+    return '<button data-plw="'+m+'" aria-pressed="'+(m===curMon)+'">'+esc(lbl)+(ts.length?'<span class="pl-pct">'+Math.round(n/ts.length*100)+'%</span>':'')+'</button>';}).join("");
+}
+function renderChips(){
+  $("#pl-chips").innerHTML=["ma","ke","fy","da","eo","fa"].map(function(s){return '<button class="pl-chip" data-pls="'+s+'" style="--c:'+col(s)+'" aria-pressed="'+(!!filter[s])+'"><i></i>'+esc(SUB[s].replace(/ (AA HL|HL|SL|Lit)$/,""))+'</button>';}).join("");
+}
+function renderGrid(){
+  var g=$("#pl-grid"),H=(G1-G0)*PM,today=ymd(now()),days=[0,1,2,3,4,5,6].map(function(i){return addDays(curMon,i);});
+  var note=WEEKNOTE[curMon],bn=$("#pl-banner");
+  if(note){bn.hidden=false;bn.innerHTML="<b>"+esc(note.title)+"</b> "+esc(note.text);}else bn.hidden=true;
+  var html='<div class="pl-wh"></div>';
+  days.forEach(function(d){var dd=new Date(d+"T12:00");html+='<div class="pl-wh'+(d===today?" pl-today":"")+'"><b>'+dd.toLocaleDateString("en-GB",{weekday:"short"})+'</b><span>'+dd.toLocaleDateString("en-GB",{day:"numeric",month:"short"})+'</span></div>';});
+  var ax='<div class="pl-axis" style="height:'+H+'px">';for(var h=9;h<=22;h++)ax+='<span style="top:'+((h*60-G0)*PM)+'px">'+pad(h)+'</span>';html+=ax+'</div>';
+  days.forEach(function(d){
+    var cls=["pl-col"];if(d<today)cls.push("pl-past");if(d===today)cls.push("pl-tcol");if(note&&note.hol)cls.push("pl-hol");
+    var c='<div class="'+cls.join(" ")+'" data-date="'+d+'" style="height:'+H+'px">';
+    LESSONS.filter(function(l){return l[0]===d;}).forEach(function(l){var top=(mins(l[1])-G0)*PM,hh=Math.max((mins(l[2])-mins(l[1]))*PM,20);
+      c+='<div class="pl-b pl-school'+(filter[l[3]]?" pl-on":"")+'" style="top:'+top+'px;height:'+hh+'px;--c:'+col(l[3])+'"><span class="pl-bt">'+esc(SUB[l[3]])+'</span><span class="pl-bm">'+l[1]+(l[4]?" · "+esc(l[4]):"")+'</span></div>';});
+    blocks().filter(function(t){return t.d===d;}).forEach(function(t){var top=(Math.max(mins(t.s),G0)-G0)*PM,hh=Math.max(dur(t)*PM,22);
+      c+='<button class="pl-b pl-'+esc(t.k)+(t.done?" pl-done":"")+(filter[t.sub]?" pl-on":"")+'" data-plid="'+esc(t.id)+'" style="top:'+top+'px;height:'+hh+'px;--c:'+col(t.sub)+'"><span class="pl-bt">'+esc(t.t)+'</span>'+(hh>34?'<span class="pl-bm">'+esc(t.s)+'–'+esc(t.e)+'</span>':'')+'<span class="pl-rz" aria-hidden="true"></span></button>';});
+    if(d===today){var n=now(),m=n.getHours()*60+n.getMinutes();if(m>G0&&m<G1)c+='<div class="pl-now" style="top:'+((m-G0)*PM)+'px"></div>';}
+    html+=c+'</div>';
+  });
+  g.innerHTML=html;g.classList.toggle("pl-filtered",fcount()<Object.keys(SUB).length);
+  var ts=weekBlocks(curMon),n=ts.filter(function(t){return t.done;}).length;
+  $("#pl-range").textContent=fmtDay(curMon)+" – "+fmtDay(addDays(curMon,6));
+  $("#pl-bar").style.width=ts.length?(n/ts.length*100)+"%":"0";
+  $("#pl-count").textContent=ts.length?n+" of "+ts.length+" blocks done":"nothing planned yet";
+  renderBalance();
+}
+
+/* ── balance ── */
+function renderBalance(){
+  var ts=weekBlocks(curMon),total=ts.reduce(function(a,t){return a+dur(t);},0),by={};
+  ts.forEach(function(t){by[t.sub]=(by[t.sub]||0)+dur(t);});
+  var order=Object.keys(by).sort(function(a,b){return by[b]-by[a];}),lbl="Uge "+isoWeek(new Date(curMon+"T12:00"));
+  $("#pl-bal-total").textContent=total?fmtH(total)+" planned · "+lbl:"Nothing planned · "+lbl;
+  $("#pl-bal-stack").innerHTML=order.map(function(s){return '<i style="--c:'+col(s)+';width:'+(by[s]/total*100)+'%" title="'+esc(SUB[s]||s)+'"></i>';}).join("");
+  $("#pl-bal-rows").innerHTML=order.map(function(s){return '<div style="--c:'+col(s)+'"><i></i><span>'+esc(SUB[s]||s)+'</span><b>'+fmtH(by[s])+'</b></div>';}).join("")||'<div><i></i><span class="pl-muted">Nothing planned yet.</span><b></b></div>';
+  var k={study:0,proj:0,hw:0};ts.forEach(function(t){k[t.k]=(k[t.k]||0)+dur(t);});
+  $("#pl-bal-kinds").innerHTML="<span>Study <b>"+fmtH(k.study)+"</b></span><span>Hand-ins &amp; IA <b>"+fmtH(k.proj)+"</b></span><span>Homework <b>"+fmtH(k.hw)+"</b></span>";
+  var W=420,L=34,Bt=180,top=14,max=360,bw=34,gap=(W-L-10-7*bw)/6,s="";
+  [0,120,240,360].forEach(function(v){var y=Bt-(v/max)*(Bt-top);s+='<line class="pl-gl" x1="'+L+'" x2="'+(W-6)+'" y1="'+y+'" y2="'+y+'"/><text class="pl-tm" x="'+(L-6)+'" y="'+(y+3)+'" font-size="10" text-anchor="end">'+(v?v/60+" h":"0")+'</text>';});
+  for(var i=0;i<7;i++){var d=addDays(curMon,i),dt=ts.filter(function(t){return t.d===d;}),m=dt.reduce(function(a,t){return a+dur(t);},0),md=dt.filter(function(t){return t.done;}).reduce(function(a,t){return a+dur(t);},0);
+    var x=L+6+i*(bw+gap),hh=Math.min(m,max)/max*(Bt-top),hd=Math.min(md,max)/max*(Bt-top);
+    s+='<rect x="'+x+'" y="'+(Bt-hh)+'" width="'+bw+'" height="'+hh+'" rx="2" fill="color-mix(in srgb, var(--accent) 30%, var(--surface))"/>';
+    if(hd)s+='<rect x="'+x+'" y="'+(Bt-hd)+'" width="'+bw+'" height="'+hd+'" rx="2" fill="var(--accent)"/>';
+    s+='<text class="pl-ti" x="'+(x+bw/2)+'" y="'+(Bt-hh-5)+'" font-size="10" text-anchor="middle" font-weight="600">'+(m?fmtH(m).replace(" h ","h").replace(" min","m"):"–")+'</text>';
+    s+='<text class="pl-tm" x="'+(x+bw/2)+'" y="'+(Bt+16)+'" font-size="10.5" text-anchor="middle">'+new Date(d+"T12:00").toLocaleDateString("en-GB",{weekday:"short"})+'</text>';}
+  $("#pl-bal-days").innerHTML=s+'<line class="pl-ga" x1="'+L+'" x2="'+(W-6)+'" y1="'+Bt+'" y2="'+Bt+'"/>';
+}
+
+/* ── syllabus ── */
+var curSyl="fy";
+function renderSyl(){
+  $("#pl-syl-tabs").innerHTML=Object.keys(SYL).map(function(k){var v=SYL[k],tot=0,dn=0;v.topics.forEach(function(t){tot+=t[1]+t[2]+t[3]+t[4]+t[5];dn+=t[1];});
+    return '<button data-ply="'+k+'" aria-pressed="'+(k===curSyl)+'">'+esc(v.name)+'<span class="pl-pct">'+Math.round(dn/tot*100)+'%</span></button>';}).join("");
+  var v=SYL[curSyl],sum=[0,0,0,0,0];v.topics.forEach(function(t){for(var i=0;i<5;i++)sum[i]+=t[i+1];});var tot=sum.reduce(function(a,b){return a+b;},0);
+  $("#pl-syl-sum").innerHTML=[["Done",sum[0],"st-d"],["In progress",sum[1],"st-i"],["DP1 revision",sum[2],"st-r"],["To do / later",sum[3]+sum[4],"border"]].map(function(r){return '<div style="--c:var(--'+r[2]+')"><b>'+r[1]+'</b>'+r[0]+' · '+Math.round(r[1]/tot*100)+'%</div>';}).join("");
+  $("#pl-syl-insight").innerHTML='<span class="pl-lbl">What this means for the plan</span><p>'+v.insight+'</p>';
+  $("#pl-syl-topics").innerHTML=v.topics.map(function(t){var sq="",cl=["d","i","r","t","l"];for(var i=0;i<5;i++)for(var j=0;j<t[i+1];j++)sq+='<i class="'+cl[i]+'"></i>';var n=t[1]+t[2]+t[3]+t[4]+t[5];
+    var flag=t[6]==="now"?'<span class="pl-flag now">In class now</span>':t[6]==="next"?'<span class="pl-flag next">Next in class</span>':'<span class="pl-flag pct">'+t[1]+'/'+n+'</span>';
+    return '<div class="pl-topic'+(t[6]?" pl-cls":"")+'"><span class="pl-nm">'+esc(t[0])+'</span><span class="pl-sq" aria-label="'+t[1]+' done, '+t[2]+' in progress, '+t[3]+' DP1 revision, '+(t[4]+t[5])+' to do">'+sq+'</span>'+flag+'</div>';}).join("");
+}
+
+/* ── deadlines ── */
+function renderDeadlines(){
+  var a=new Date("2026-09-01T00:00"),b=new Date("2027-07-15T00:00"),X0=20,X1=980,Y=128,s="";
+  function x(d){return X0+(new Date(d)-a)/(b-a)*(X1-X0);}
+  BANDS.forEach(function(bd){var x1=x(bd.a+"T00:00"),x2=x(bd.b+"T23:59");s+='<rect x="'+x1+'" y="'+(Y-16)+'" width="'+Math.max(x2-x1,4)+'" height="32" fill="'+(bd.ex?"color-mix(in srgb, var(--accent) 16%, transparent)":"color-mix(in srgb, var(--pl-tip-line) 30%, transparent)")+'" rx="2"/><text x="'+((x1+x2)/2)+'" y="'+(Y+30)+'" font-size="10" text-anchor="middle" class="'+(bd.ex?"pl-ta":"pl-tm")+'">'+bd.t+'</text>';});
+  s+='<line x1="'+X0+'" x2="'+X1+'" y1="'+Y+'" y2="'+Y+'" stroke="var(--ink)" stroke-width="1.2"/>';
+  ["Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul"].forEach(function(m,i){var xx=x(new Date(2026,8+i,1));s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(Y-4)+'" y2="'+(Y+4)+'" stroke="var(--ink)"/><text x="'+(xx+3)+'" y="'+(Y+48)+'" font-size="10.5" class="pl-tm">'+m+(i===4?" ’27":"")+'</text>';});
+  var tx=x(now());s+='<line x1="'+tx+'" x2="'+tx+'" y1="'+(Y-60)+'" y2="'+(Y+20)+'" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 2"/><text x="'+(tx+4)+'" y="'+(Y-52)+'" font-size="10" class="pl-ta" font-weight="700">today</text>';
+  var last=-999,lev=0;
+  DEADLINES.filter(function(d){return d.big&&d.d;}).forEach(function(d,i){var xx=x(d.d);lev=(xx-last<130)?(lev+1)%3:0;last=xx;var up=i%2===0,ly=up?Y-24-lev*26:Y+64+lev*20,anchor=xx>880?"end":xx<60?"start":"middle";
+    s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+Y+'" y2="'+(up?ly+4:ly-11)+'" stroke="var(--border)"/><circle cx="'+xx+'" cy="'+Y+'" r="5.5" fill="'+(d.est?"var(--surface)":col(d.s))+'" stroke="'+col(d.s)+'" stroke-width="2"/>';
+    s+='<text x="'+xx+'" y="'+ly+'" font-size="10.5" text-anchor="'+anchor+'" class="pl-ti" font-weight="600">'+esc(d.t.replace(" (group)"," · group").replace(" (individual)"," · indiv."))+'</text><text x="'+xx+'" y="'+(ly+12)+'" font-size="9.5" text-anchor="'+anchor+'" class="pl-tm">'+new Date(d.d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+(d.est?" · est.":"")+'</text>';});
+  $("#pl-tl").innerHTML=s;
+  $("#pl-dl tbody").innerHTML=DEADLINES.filter(function(d){return !d.d||new Date(d.d)>now();}).map(function(d){var u=d.d?until(d.d):null;
+    var when=d.d?new Date(d.d).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:d.d>"2027"?"numeric":undefined})+(d.est?"":" · "+new Date(d.d).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})):"—";
+    return '<tr style="--c:'+col(d.s)+'"><td class="s"><i></i></td><td>'+esc(d.t)+'</td><td class="when">'+when+'</td><td>'+(u?'<span class="pl-pill '+(d.est?"":u.cls)+'">'+u.txt+'</span>':'<span class="pl-pill">'+esc(d.note)+'</span>')+'</td><td><span class="pl-src'+(d.est?" est":"")+'">'+(d.est?"Notion · estimated":d.src)+'</span></td></tr>';}).join("");
+  var nx=DEADLINES.filter(function(d){return d.big&&d.d&&new Date(d.d)>now();})[0];
+  if(nx){var u=until(nx.d);$("#pl-cv-next").textContent=u.short;$("#pl-cv-next-l").textContent="until "+nx.t.split(":")[0];}
+}
+
+/* ── cover & today's slip ── */
+function renderClip(){
+  var k=ymd(now()),up=blocks().filter(function(t){return t.d>=k;}).sort(function(a,b){return (a.d+a.s).localeCompare(b.d+b.s);}),first=up.filter(function(t){return !t.done;})[0];
+  var list=first?up.filter(function(t){return t.d===first.d&&!t.done;}).slice(0,6):[];
+  $("#pl-clip-date").textContent=first?(first.d===k?"Today":fmtDay(first.d)):"—";
+  $("#pl-clip-list").innerHTML=list.length?list.map(function(t){return '<li><label for="plc-'+esc(t.id)+'"><input type="checkbox" id="plc-'+esc(t.id)+'" data-pldone="'+esc(t.id)+'"><span><span class="pl-when">'+esc(t.s)+' · '+esc(SUB[t.sub]||"")+'</span>'+esc(t.t)+'</span></label></li>';}).join(""):"<li>Nothing open. Add a block in the week view.</li>";
+  var ts=weekBlocks(mondayOf(k));
+  $("#pl-cv-study").textContent=fmtH(ts.filter(function(t){return t.k==="study";}).reduce(function(a,t){return a+dur(t);},0)).replace(" min","m");
+  $("#pl-eyebrow").textContent="Uge "+isoWeek(now())+" · "+now().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})+" · Nørre Gymnasium 3i";
+}
+function renderStatic(){
+  $("#pl-cards").innerHTML=CARDS.map(function(c){return '<div class="pl-card" style="--c:'+col(c.s)+'"><h3>'+esc(SUB[c.s])+'</h3><dl><dt>Now</dt><dd>'+esc(c.now)+'</dd><dt>Next</dt><dd>'+esc(c.next)+'</dd><dt>You</dt><dd class="mv">'+esc(c.mv)+'</dd></dl></div>';}).join("");
+  $("#pl-done").innerHTML=DONE.map(function(r){return '<li><span>'+esc(r[0])+'</span><span class="d">'+r[1]+'</span></li>';}).join("");
+}
+
+/* ── editor drawer ── */
+var extra=document.createElement("div");
+extra.innerHTML='<div id="pl-progress"></div><div class="pl-scrim" id="pl-scrim" hidden></div>'
+ +'<aside class="pl-drawer" id="pl-drawer" aria-hidden="true" aria-labelledby="pl-dr-title">'
+ +'<button class="pl-x" id="pl-dr-x" aria-label="Close">×</button><div class="pl-lbl" id="pl-dr-sub">–</div><h3 id="pl-dr-title">Edit block</h3><div class="pl-meta" id="pl-dr-meta"></div>'
+ +'<div class="pl-form">'
+ +'<label class="f" for="pl-f-title">Title<input id="pl-f-title" type="text" maxlength="100" autocomplete="off"></label>'
+ +'<div class="pl-r2"><label class="f" for="pl-f-sub">Subject<select id="pl-f-sub">'+Object.keys(SUB).map(function(k){return '<option value="'+k+'">'+esc(SUB[k])+'</option>';}).join("")+'</select></label>'
+ +'<label class="f" for="pl-f-kind">Type<select id="pl-f-kind"><option value="study">Study</option><option value="proj">Hand-in / IA</option><option value="hw">Homework</option></select></label></div>'
+ +'<div class="pl-r2"><label class="f full" for="pl-f-date">Date<input id="pl-f-date" type="date"></label><label class="f" for="pl-f-start">Start<input id="pl-f-start" type="time" step="300"></label><label class="f" for="pl-f-end">End<input id="pl-f-end" type="time" step="300"></label></div>'
+ +'<label class="f" for="pl-f-info">What to do<textarea id="pl-f-info" rows="4"></textarea></label>'
+ +'<label class="f" for="pl-f-src">Source / pages<input id="pl-f-src" type="text" autocomplete="off"></label>'
+ +'<div class="pl-err" id="pl-f-err" hidden></div></div>'
+ +'<div class="pl-acts"><label class="pl-check" id="pl-dr-checkline" for="pl-dr-check"><input type="checkbox" id="pl-dr-check"> Mark as done</label>'
+ +'<button class="pl-btn pl-primary" id="pl-dr-save">Save changes</button><button class="pl-btn" id="pl-dr-focus">Start a 50-minute focus</button><button class="pl-btn pl-danger" id="pl-dr-del">Delete block</button></div></aside>'
+ +'<div class="pl-toast" id="pl-toast" role="status" aria-live="polite" hidden></div>'
+ +'<div class="pl-focus" id="pl-focus" hidden><b id="pl-fc-time">50:00</b><span class="ft" id="pl-fc-title"></span><button id="pl-fc-stop">Stop</button></div>';
+while(extra.firstChild) document.body.appendChild(extra.firstChild);
+
+var openId=null,isNew=false,delArm=false,impMode=false;
+function fillForm(t){$("#pl-f-title").value=t.t||"";$("#pl-f-sub").value=t.sub||"da";$("#pl-f-kind").value=t.k||"study";$("#pl-f-date").value=t.d||"";$("#pl-f-start").value=t.s||"16:00";$("#pl-f-end").value=t.e||"16:50";$("#pl-f-info").value=t.info||"";$("#pl-f-src").value=t.src||"";$("#pl-f-err").hidden=true;}
+function showDrawer(){$("#pl-drawer").classList.add("pl-open");$("#pl-drawer").setAttribute("aria-hidden","false");$("#pl-scrim").hidden=false;setTimeout(function(){var f=$("#pl-f-title");if(f)f.focus();},60);}
+function openEdit(id){var t=byId(id);if(!t)return;openId=id;isNew=false;delArm=false;
+  $("#pl-dr-sub").textContent=SUB[t.sub]||"";$("#pl-dr-sub").style.color=col(t.sub);$("#pl-dr-title").textContent="Edit block";
+  $("#pl-dr-meta").innerHTML='<span class="pl-kind '+esc(t.k)+'">'+esc(KIND[t.k]||t.k)+'</span><span>'+fmtDay(t.d)+' · '+esc(t.s)+'–'+esc(t.e)+'</span><span>'+fmtH(dur(t))+'</span>';
+  fillForm(t);$("#pl-dr-check").checked=!!t.done;$("#pl-dr-checkline").hidden=false;$("#pl-dr-focus").hidden=false;$("#pl-dr-del").hidden=false;$("#pl-dr-del").textContent="Delete block";$("#pl-dr-save").textContent="Save changes";showDrawer();}
+function openNew(d,s){openId=null;isNew=true;delArm=false;var e=hm(Math.min(mins(s)+50,G1));
+  $("#pl-dr-sub").textContent="New block";$("#pl-dr-sub").style.color="var(--accent)";$("#pl-dr-title").textContent="Add to your plan";$("#pl-dr-meta").innerHTML="<span>"+fmtDay(d)+"</span>";
+  fillForm({d:d,s:s,e:e,sub:"da",k:"study"});$("#pl-dr-checkline").hidden=true;$("#pl-dr-focus").hidden=true;$("#pl-dr-del").hidden=true;$("#pl-dr-save").textContent="Add block";showDrawer();}
+function closeDrawer(){$("#pl-drawer").classList.remove("pl-open");$("#pl-drawer").setAttribute("aria-hidden","true");$("#pl-scrim").hidden=true;openId=null;isNew=false;}
+function readForm(){var o={t:$("#pl-f-title").value.trim(),sub:$("#pl-f-sub").value,k:$("#pl-f-kind").value,d:$("#pl-f-date").value,s:$("#pl-f-start").value,e:$("#pl-f-end").value,info:$("#pl-f-info").value.trim(),src:$("#pl-f-src").value.trim()};
+  var err="";if(!o.t)err="Give the block a title.";else if(!o.d)err="Pick a date.";else if(!o.s||!o.e)err="Set a start and end time.";else if(mins(o.e)<=mins(o.s))err="The end time has to be after the start time.";
+  return {o:o,err:err};}
+function saveForm(){var r=readForm();if(r.err){$("#pl-f-err").textContent=r.err;$("#pl-f-err").hidden=false;return;}
+  if(isNew){var nb=r.o;nb.id="b"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);nb.done=false;nb.edited=true;blocks().push(nb);curMon=mondayOf(nb.d);closeDrawer();commit("Added");}
+  else{var t=byId(openId);if(!t)return closeDrawer();for(var k in r.o)t[k]=r.o[k];t.edited=true;closeDrawer();commit("Saved");}}
+function delBlock(){if(!openId)return;if(!delArm){delArm=true;$("#pl-dr-del").textContent="Tap again to delete for good";return;}
+  var id=openId,p=P();p.blocks=p.blocks.filter(function(b){return b.id!==id;});closeDrawer();commit("Deleted");}
+function setDone(id,v){var t=byId(id);if(!t)return;t.done=!!v;commit(v?"Ticked off ✓":"Unticked");}
+
+var timer=null,endAt=0;
+function startFocus(t){clearInterval(timer);endAt=Date.now()+50*60*1000;$("#pl-fc-title").textContent=t.t;$("#pl-focus").hidden=false;tick();timer=setInterval(tick,1000);
+  function tick(){var ms=endAt-Date.now();if(ms<=0){clearInterval(timer);$("#pl-fc-time").textContent="Done";$("#pl-fc-title").textContent="Nice. Tick it off?";return;}
+    $("#pl-fc-time").textContent=pad(Math.floor(ms/6e4))+":"+pad(Math.floor(ms/1e3)%60);}}
+
+/* ── import / export with Claude ── */
+function exportPlan(){var txt=JSON.stringify({compassPlan:1,exported:new Date().toISOString(),blocks:blocks()});
+  var done=function(){toast("Copied. Paste it to Claude with “plan for me”.");};
+  try{navigator.clipboard.writeText(txt).then(done,function(){showText(txt);});}catch(e){showText(txt);}}
+function showText(txt){openImport(txt,true);}
+function openImport(prefill,ro){impMode=true;openId=null;isNew=false;
+  $("#pl-dr-sub").textContent=ro?"Your plan":"From Claude";$("#pl-dr-sub").style.color="var(--accent)";$("#pl-dr-title").textContent=ro?"Copy this text":"Import a plan";
+  $("#pl-dr-meta").innerHTML=ro?"<span>Select all and copy it into your chat with Claude.</span>":"<span>Paste the plan Claude gave you. Blocks you edited or ticked are kept as they are.</span>";
+  var f=$("#pl-drawer .pl-form");f.dataset.saved=f.innerHTML;f.innerHTML='<div class="pl-imp"><textarea id="pl-imp-text" spellcheck="false"'+(ro?" readonly":"")+'></textarea></div><div class="pl-err" id="pl-f-err" hidden></div>';
+  $("#pl-imp-text").value=prefill||"";$("#pl-dr-checkline").hidden=true;$("#pl-dr-focus").hidden=true;$("#pl-dr-del").hidden=true;$("#pl-dr-save").textContent=ro?"Done":"Import plan";
+  $("#pl-dr-save").dataset.ro=ro?"1":"";showDrawer();}
+function endImport(){var f=$("#pl-drawer .pl-form");if(f.dataset.saved){f.innerHTML=f.dataset.saved;delete f.dataset.saved;}impMode=false;}
+function doImport(){var raw=$("#pl-imp-text").value.trim(),data;
+  try{data=JSON.parse(raw);}catch(e){$("#pl-f-err").textContent="That isn't a plan Compass can read. Copy the whole block Claude gave you.";$("#pl-f-err").hidden=false;return;}
+  var inc=Array.isArray(data)?data:(data&&data.blocks);if(!Array.isArray(inc)){$("#pl-f-err").textContent="No blocks found in that text.";$("#pl-f-err").hidden=false;return;}
+  var p=P(),added=0,changed=0,removed=0,kept=0;
+  inc.forEach(function(b){if(!b||!b.id)return;var cur=byId(b.id);
+    if(b.remove){if(cur&&!cur.edited&&!cur.done){p.blocks=p.blocks.filter(function(x){return x.id!==b.id;});removed++;}else if(cur)kept++;return;}
+    if(!b.d||!b.s||!b.e||!b.t)return;
+    if(!cur){var o={id:String(b.id),t:b.t,sub:SUB[b.sub]?b.sub:"gen",k:KIND[b.k]?b.k:"study",d:b.d,s:b.s,e:b.e,info:b.info||"",src:b.src||"",done:!!b.done};p.blocks.push(o);added++;}
+    else if(cur.edited||cur.done){kept++;}
+    else{["t","sub","k","d","s","e","info","src"].forEach(function(k){if(b[k]!=null)cur[k]=b[k];});changed++;}});
+  endImport();closeDrawer();commit("Imported: "+added+" new, "+changed+" updated, "+removed+" removed"+(kept?", "+kept+" of yours kept":""));}
+
+/* ── drag to move / resize (mouse) ── */
+var drag=null,suppress=false;
+function minuteAt(c,y){return G0+(y-c.getBoundingClientRect().top)/PM;}
+function snap(m,st){return Math.round(m/st)*st;}
+document.addEventListener("pointerdown",function(e){var el=e.target.closest&&e.target.closest("#s-plan button.pl-b[data-plid]");if(!el||e.pointerType!=="mouse"||e.button!==0)return;
+  var t=byId(el.dataset.plid);if(!t)return;var c=el.parentElement;
+  drag={el:el,t:t,x:e.clientX,y:e.clientY,resize:!!e.target.closest(".pl-rz"),off:minuteAt(c,e.clientY)-mins(t.s),moved:false,d:t.d,s:mins(t.s),e:mins(t.e),col:c};});
+document.addEventListener("pointermove",function(e){if(!drag)return;if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<5)return;
+  if(!drag.moved){drag.moved=true;drag.el.classList.add("pl-drag");document.body.classList.add("pl-dragging");}
+  if(drag.resize){var m=Math.max(snap(minuteAt(drag.col,e.clientY),5),drag.s+10);drag.e=Math.min(m,G1);drag.el.style.height=((drag.e-drag.s)*PM)+"px";return;}
+  var tg=document.elementsFromPoint(e.clientX,e.clientY).filter(function(n){return n.classList&&n.classList.contains("pl-col");})[0]||drag.col;
+  if(tg!==drag.col){tg.appendChild(drag.el);drag.col=tg;}
+  var len=mins(drag.t.e)-mins(drag.t.s),s=snap(minuteAt(tg,e.clientY)-drag.off,5);s=Math.max(G0,Math.min(s,G1-len));
+  drag.s=s;drag.e=s+len;drag.d=tg.dataset.date;drag.el.style.top=((s-G0)*PM)+"px";});
+document.addEventListener("pointerup",function(){if(!drag)return;var d=drag;drag=null;document.body.classList.remove("pl-dragging");if(!d.moved)return;
+  suppress=true;setTimeout(function(){suppress=false;},0);
+  var ns=hm(d.s),ne=hm(d.e);if(d.d===d.t.d&&ns===d.t.s&&ne===d.t.e){renderGrid();return;}
+  d.t.d=d.d;d.t.s=ns;d.t.e=ne;d.t.edited=true;commit("Moved to "+fmtDay(d.d)+" "+ns+"–"+ne);});
+
+/* ── events ── */
+document.addEventListener("click",function(e){
+  if(suppress){suppress=false;return;}
+  var t=e.target;
+  if(t.closest("#pl-drawer")||t.id==="pl-scrim"){
+    if(t.id==="pl-scrim"||t.id==="pl-dr-x"){if(impMode)endImport();closeDrawer();return;}
+    if(t.id==="pl-dr-save"){if(impMode){if(t.dataset.ro){endImport();closeDrawer();}else doImport();}else saveForm();return;}
+    if(t.id==="pl-dr-del"){delBlock();return;}
+    if(t.id==="pl-dr-focus"&&openId){startFocus(byId(openId));closeDrawer();return;}
+    return;}
+  if(t.id==="pl-fc-stop"){clearInterval(timer);$("#pl-focus").hidden=true;return;}
+  if(!t.closest("#s-plan"))return;
+  var w=t.closest("[data-plw]");if(w){curMon=w.dataset.plw;renderTabs();renderGrid();return;}
+  var c=t.closest("[data-pls]");if(c){var s=c.dataset.pls,all=Object.keys(SUB).length;
+    if(fcount()===all){filter={};filter[s]=1;}else if(filter[s]){delete filter[s];if(!fcount())Object.keys(SUB).forEach(function(k){filter[k]=1;});}else filter[s]=1;renderChips();renderGrid();return;}
+  var y=t.closest("[data-ply]");if(y){curSyl=y.dataset.ply;renderSyl();return;}
+  var b=t.closest("button.pl-b[data-plid]");if(b){openEdit(b.dataset.plid);return;}
+  if(t.classList.contains("pl-col")){var m=Math.max(G0,Math.min(snap(minuteAt(t,e.clientY),15),G1-15));openNew(t.dataset.date,hm(m));return;}
+  if(t.id==="pl-add"){var k=ymd(now());openNew(k>=curMon&&k<addDays(curMon,7)?k:curMon,"16:00");return;}
+  if(t.id==="pl-export"){exportPlan();return;}
+  if(t.id==="pl-import"){openImport("",false);return;}
+});
+document.addEventListener("change",function(e){var t=e.target;
+  if(t.id==="pl-dr-check"&&openId)setDone(openId,t.checked);
+  else if(t.dataset&&t.dataset.pldone)setDone(t.dataset.pldone,t.checked);});
+document.addEventListener("keydown",function(e){if(!$("#pl-drawer").classList.contains("pl-open"))return;
+  if(e.key==="Escape"){e.stopPropagation();if(impMode)endImport();closeDrawer();}
+  if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){if(impMode)doImport();else saveForm();}},true);
+window.addEventListener("scroll",function(){var h=document.documentElement,p=$("#pl-progress");if(p)p.style.width=(document.body.dataset.page==="plan"?h.scrollTop/Math.max(1,h.scrollHeight-h.clientHeight)*100:0)+"%";},{passive:true});
+
+/* ── render wiring ── */
+function renderAll(){if(drag)return;renderTabs();renderChips();renderGrid();renderClip();if(openId&&!impMode){var t=byId(openId);if(t)$("#pl-dr-check").checked=!!t.done;else closeDrawer();}}
+var _render=B.render;B.render=function(){var r=_render.apply(this,arguments);try{renderAll();}catch(e){}return r;};
+new MutationObserver(function(){if(ROOT.classList.contains("on")){renderAll();renderDeadlines();}}).observe(ROOT,{attributes:true,attributeFilter:["class"]});
+renderStatic();renderSyl();renderDeadlines();renderAll();
+setInterval(function(){if(ROOT.classList.contains("on")){renderDeadlines();if(!drag&&!$("#pl-drawer").classList.contains("pl-open"))renderGrid();}},60000);
+window.CompassPlanner={render:renderAll,blocks:function(){return blocks();}};
+})();
+}, {once:true});
+</script>
+
 </body></html>
