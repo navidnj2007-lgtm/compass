@@ -1888,7 +1888,6 @@ body[data-page=plan] #workspacePageHeading{display:none}
 .pl-b .pl-bm{display:block;color:var(--muted);font-size:.62rem;font-variant-numeric:tabular-nums}
 .pl-b.pl-school{background:var(--surface-2);border-left:3px solid var(--c);color:var(--muted);cursor:default}
 .pl-b.pl-school .pl-bt{font-weight:500;color:var(--ink)}
-.pl-b.pl-school.pl-cancel{background:transparent;border-left-style:dashed;opacity:.7}.pl-b.pl-school.pl-cancel .pl-bt{text-decoration:line-through;color:var(--muted)}.pl-b.pl-school.pl-cancel .pl-bm b{color:var(--warn);font-weight:600;text-decoration:none}
 .pl-b.pl-study{background:color-mix(in srgb,var(--c) 15%,var(--surface));border-left:3px solid var(--c)}
 .pl-b.pl-proj{background:color-mix(in srgb,var(--c) 26%,var(--surface));box-shadow:inset 0 0 0 1.5px var(--c)}
 .pl-b.pl-hw{background:var(--surface);border:1px dashed var(--c)}
@@ -1998,6 +1997,9 @@ body.pl-dragging{user-select:none;cursor:grabbing}
 .pl-focus{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:94;background:var(--pl-cover-bg);color:var(--pl-cover-fg);border-radius:999px;padding:.55rem .7rem .55rem 1.1rem;display:flex;align-items:center;gap:.8rem;font-family:var(--sans);font-size:.8rem;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:calc(100vw - 32px)}
 .pl-focus b{font-family:var(--serif);font-size:1.25rem;font-variant-numeric:tabular-nums;min-width:3.4rem}
 .pl-focus .ft{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:14rem;opacity:.85}
+.pl-focus.pl-fc-done{background:var(--good);color:var(--plane);animation:plPulse 1.2s ease-in-out 3}
+@keyframes plPulse{50%{transform:scale(1.04)}}
+.pl-focus.pl-fc-done button{border-color:color-mix(in srgb,currentColor 45%,transparent)}
 .pl-focus button{border:1px solid rgba(255,255,255,.35);background:transparent;color:inherit;border-radius:999px;padding:.3rem .7rem;cursor:pointer;font-size:.72rem;font-weight:600}
 .pl-imp textarea{width:100%;min-height:180px;font:400 .8rem/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--plane);color:var(--ink);border:1px solid var(--border);border-radius:3px;padding:.6rem}
 .pl-scrim[hidden],.pl-toast[hidden],.pl-focus[hidden],.pl-drawer [hidden],#s-plan [hidden]{display:none!important}
@@ -3235,7 +3237,9 @@ function fAnnounce(kind, quiet){
   try{ if(window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback)
     Telegram.WebApp.HapticFeedback.notificationOccurred("success"); }catch(e){}
   if(F.notify){
-    try{ if(window.Notification && Notification.permission==="granted")
+    var TA=window.__TAURI__;
+    if(TA && TA.core && typeof TA.core.invoke==="function"){ TA.core.invoke("show_notification",{title:a.t, body:a.b}).catch(function(){}); }
+    else try{ if(window.Notification && Notification.permission==="granted")
       new Notification(a.t, {body:a.b, tag:"compass-focus", renotify:true}); }catch(e){}
   }
   /* If the sound could not be scheduled ahead — no gesture yet this load — at
@@ -13240,8 +13244,6 @@ function isoWeek(d){var t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDa
 /* ── state (inside Compass's own S) ── */
 function P(){var S=B.get();if(!S.plan||!Array.isArray(S.plan.blocks)){S.plan={v:1,blocks:SEED.map(function(b){var o={};for(var k in b)o[k]=b[k];o.done=!!o.done;return o;})};/* no touch() here: the saved state may not have loaded yet, and saving now could overwrite it */}return S.plan;}
 function blocks(){return P().blocks;}
-/* Cancelled lessons live in synced state: S.plan.cancelled = ["YYYY-MM-DD|HH:MM|sub", ...] */
-function isCancelled(l){var c=P().cancelled;return Array.isArray(c)&&c.indexOf(l[0]+"|"+l[1]+"|"+l[3])>=0;}
 function byId(id){return blocks().filter(function(b){return b.id===id;})[0];}
 function weekBlocks(mon){var e=addDays(mon,7);return blocks().filter(function(t){return t.d>=mon&&t.d<e;});}
 function weeks(){var s={};FIXED.forEach(function(m){s[m]=1;});blocks().forEach(function(b){if(b.d)s[mondayOf(b.d)]=1;});var a=Object.keys(s).sort();a.push(addDays(a[a.length-1],7));return a;}
@@ -13290,8 +13292,8 @@ function renderGrid(){
     flush();
     items.forEach(function(it){
       var top=(it.s-G0)*PM,hh=Math.max((it.e-it.s)*PM,it.school?20:22),pos="left:calc("+(it.lane*100/it.cols)+"% + 2px);width:calc("+(100/it.cols)+"% - 4px);";
-      if(it.school){var l=it.l,cx=isCancelled(l);
-        c+='<div class="pl-b pl-school'+(cx?" pl-cancel":"")+(filter[l[3]]?" pl-on":"")+(it.cols>1?" pl-narrow":"")+'" title="'+esc(SUB[l[3]]+" · "+l[1]+"–"+l[2]+(cx?" · cancelled":""))+'" style="'+pos+'top:'+top+'px;height:'+hh+'px;--c:'+col(l[3])+'"><span class="pl-bt">'+esc(SUB[l[3]])+'</span><span class="pl-bm">'+(cx?'<b>Cancelled</b> · ':'')+l[1]+(l[4]?" · "+esc(l[4]):"")+'</span></div>';}
+      if(it.school){var l=it.l;
+        c+='<div class="pl-b pl-school'+(filter[l[3]]?" pl-on":"")+(it.cols>1?" pl-narrow":"")+'" style="'+pos+'top:'+top+'px;height:'+hh+'px;--c:'+col(l[3])+'"><span class="pl-bt">'+esc(SUB[l[3]])+'</span><span class="pl-bm">'+l[1]+(l[4]?" · "+esc(l[4]):"")+'</span></div>';}
       else{var t=it.t;
         c+='<button class="pl-b pl-'+esc(t.k)+(t.done?" pl-done":"")+(filter[t.sub]?" pl-on":"")+(it.cols>1?" pl-narrow":"")+'" data-plid="'+esc(t.id)+'" title="'+esc(t.t+" · "+t.s+"–"+t.e)+'" style="'+pos+'top:'+top+'px;height:'+hh+'px;--c:'+col(t.sub)+'"><span class="pl-bt">'+esc(t.t)+'</span>'+(hh>34?'<span class="pl-bm">'+esc(t.s)+'–'+esc(t.e)+'</span>':'')+'<span class="pl-rz" aria-hidden="true"></span></button>';}
     });
@@ -13391,7 +13393,7 @@ extra.innerHTML='<div id="pl-progress"></div><div class="pl-scrim" id="pl-scrim"
  +'<div class="pl-acts"><label class="pl-check" id="pl-dr-checkline" for="pl-dr-check"><input type="checkbox" id="pl-dr-check"> Mark as done</label>'
  +'<button class="pl-btn pl-primary" id="pl-dr-save">Save changes</button><button class="pl-btn" id="pl-dr-focus">Start a 50-minute focus</button><button class="pl-btn pl-danger" id="pl-dr-del">Delete block</button></div></aside>'
  +'<div class="pl-toast" id="pl-toast" role="status" aria-live="polite" hidden></div>'
- +'<div class="pl-focus" id="pl-focus" hidden><b id="pl-fc-time">50:00</b><span class="ft" id="pl-fc-title"></span><button id="pl-fc-stop">Stop</button></div>';
+ +'<div class="pl-focus" id="pl-focus" hidden><b id="pl-fc-time">50:00</b><span class="ft" id="pl-fc-title"></span><button id="pl-fc-tick" hidden>Tick it off</button><button id="pl-fc-stop">Stop</button></div>';
 while(extra.firstChild) document.body.appendChild(extra.firstChild);
 
 var openId=null,isNew=false,delArm=false,impMode=false;
@@ -13415,10 +13417,56 @@ function delBlock(){if(!openId)return;if(!delArm){delArm=true;$("#pl-dr-del").te
   var id=openId,p=P();p.blocks=p.blocks.filter(function(b){return b.id!==id;});closeDrawer();commit("Deleted");}
 function setDone(id,v){var t=byId(id);if(!t)return;t.done=!!v;commit(v?"Ticked off ✓":"Unticked");}
 
-var timer=null,endAt=0;
-function startFocus(t){clearInterval(timer);endAt=Date.now()+50*60*1000;$("#pl-fc-title").textContent=t.t;$("#pl-focus").hidden=false;tick();timer=setInterval(tick,1000);
-  function tick(){var ms=endAt-Date.now();if(ms<=0){clearInterval(timer);$("#pl-fc-time").textContent="Done";$("#pl-fc-title").textContent="Nice. Tick it off?";return;}
-    $("#pl-fc-time").textContent=pad(Math.floor(ms/6e4))+":"+pad(Math.floor(ms/1e3)%60);}}
+/* ── focus timer: sound + notification when it ends ──
+   The chime is scheduled on the AudioContext clock the moment the timer starts, so it
+   lands on time even when the tab is in the background and ordinary timers are
+   throttled. The chime's own "ended" event then fires the notification promptly;
+   the one-second tick is only the fallback. On the desktop app the notification goes
+   through the native Windows layer (show_notification); elsewhere it is a web
+   notification, which needs his permission once. */
+var FKEY="compass_pl_focus",timer=null,endAt=0,fc=null,ac=null,cued=[],fired=false,baseTitle=document.title;
+function actx(){try{if(!ac){var A=window.AudioContext||window.webkitAudioContext;if(A)ac=new A();}if(ac&&ac.state==="suspended")ac.resume();}catch(e){}return ac;}
+function chime(at){var c=actx();if(!c)return [];var out=[],t=at;
+  [[523,.26],[659,.26],[784,.26],[1047,.9],[784,.26],[1047,.9]].forEach(function(n,i){if(i===4)t+=.5;
+    var g=c.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.26,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+n[1]);g.connect(c.destination);
+    [[1,1],[2,.22]].forEach(function(p){var o=c.createOscillator(),og=c.createGain();o.type="sine";o.frequency.value=n[0]*p[0];og.gain.value=p[1];o.connect(og);og.connect(g);o.start(t);o.stop(t+n[1]+.05);out.push(o);});
+    t+=Math.min(n[1],.3);});
+  return out;}
+function cancelCue(){cued.forEach(function(o){o.onended=null;try{o.stop(0);}catch(e){}try{o.disconnect();}catch(e){}});cued=[];}
+function askNotify(){try{if(!(window.__TAURI__&&window.__TAURI__.core)&&window.Notification&&Notification.permission==="default")Notification.requestPermission();}catch(e){}}
+function notify(title,body){
+  var T=window.__TAURI__;
+  if(T&&T.core&&typeof T.core.invoke==="function"){T.core.invoke("show_notification",{title:title,body:body}).catch(function(){webNotify(title,body);});return;}
+  webNotify(title,body);}
+function webNotify(title,body){try{if(window.Notification&&Notification.permission==="granted")new Notification(title,{body:body,tag:"compass-planner-focus",renotify:true,requireInteraction:true});}catch(e){}}
+function saveF(){try{fc?localStorage.setItem(FKEY,JSON.stringify({endAt:endAt,t:fc.t,id:fc.id,mins:fc.mins})):localStorage.removeItem(FKEY);}catch(e){}}
+function paintPill(){var p=$("#pl-focus");if(!fc){p.hidden=true;document.title=baseTitle;return;}p.hidden=false;
+  var ms=endAt-Date.now();
+  if(ms>0){$("#pl-fc-time").textContent=pad(Math.floor(ms/6e4))+":"+pad(Math.floor(ms/1e3)%60);$("#pl-fc-title").textContent=fc.t;
+    $("#pl-fc-stop").textContent="Stop";$("#pl-fc-tick").hidden=true;p.classList.remove("pl-fc-done");}
+  else{$("#pl-fc-time").textContent="Done";$("#pl-fc-title").textContent=fc.t;$("#pl-fc-stop").textContent="Close";$("#pl-fc-tick").hidden=!(fc.id&&byId(fc.id)&&!byId(fc.id).done);p.classList.add("pl-fc-done");}}
+function tick(){if(!fc)return;var ms=endAt-Date.now();if(ms<=0){finish(false);return;}paintPill();
+  if(document.hidden)document.title=$("#pl-fc-time").textContent+" · "+fc.t;else document.title=baseTitle;}
+function finish(quiet){if(!fc||fired)return;fired=true;clearInterval(timer);
+  var played=cued.length&&ac&&ac.state==="running";cued=[];
+  if(!played&&!quiet){var c=actx();if(c)chime(c.currentTime+.03);}
+  if(!quiet){notify("Focus block done ✓",fc.t+" — tick it off, then take a 10-minute break away from screens.");
+    try{if(navigator.vibrate)navigator.vibrate([200,100,200,100,400]);}catch(e){}
+    document.title="✓ Done · "+fc.t;setTimeout(function(){if(!document.hidden)document.title=baseTitle;},8000);}
+  saveF();paintPill();}
+function startFocus(t,mins){if(!t)return;mins=mins||50;clearInterval(timer);cancelCue();fired=false;
+  fc={t:t.t,id:t.id,mins:mins};endAt=Date.now()+mins*60000;
+  var c=actx();if(c){cued=chime(c.currentTime+mins*60);if(cued[0])cued[0].onended=function(){finish(false);};}
+  askNotify();saveF();paintPill();timer=setInterval(tick,1000);
+  toast("Focus started · you'll hear a chime and get a notification at the end");}
+function stopFocus(){clearInterval(timer);cancelCue();fc=null;fired=false;saveF();paintPill();}
+/* a timer that was running before a reload keeps going (sound re-arms on the next tap) */
+(function(){var o=null;try{o=JSON.parse(localStorage.getItem(FKEY)||"null");}catch(e){}if(!o||!o.endAt)return;
+  fc={t:o.t,id:o.id,mins:o.mins};endAt=o.endAt;
+  if(endAt<=Date.now()){fired=true;paintPill();return;}
+  paintPill();timer=setInterval(tick,1000);
+  document.addEventListener("pointerdown",function re(){document.removeEventListener("pointerdown",re,true);if(!fc||fired)return;var c=actx();if(c&&!cued.length){cued=chime(c.currentTime+Math.max(0,(endAt-Date.now())/1000));if(cued[0])cued[0].onended=function(){finish(false);};}},true);})();
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&fc){if(endAt<=Date.now())finish(false);else document.title=baseTitle;}});
 
 /* ── import / export with Claude ── */
 function exportPlan(){var txt=JSON.stringify({compassPlan:1,exported:new Date().toISOString(),blocks:blocks()});
@@ -13473,7 +13521,8 @@ document.addEventListener("click",function(e){
     if(t.id==="pl-dr-del"){delBlock();return;}
     if(t.id==="pl-dr-focus"&&openId){startFocus(byId(openId));closeDrawer();return;}
     return;}
-  if(t.id==="pl-fc-stop"){clearInterval(timer);$("#pl-focus").hidden=true;return;}
+  if(t.id==="pl-fc-stop"){stopFocus();return;}
+  if(t.id==="pl-fc-tick"){if(fc&&fc.id)setDone(fc.id,true);stopFocus();return;}
   if(!t.closest("#s-plan"))return;
   var w=t.closest("[data-plw]");if(w){curMon=w.dataset.plw;renderTabs();renderGrid();return;}
   var c=t.closest("[data-pls]");if(c){var s=c.dataset.pls,all=Object.keys(SUB).length;
@@ -13499,7 +13548,7 @@ var _render=B.render;B.render=function(){var r=_render.apply(this,arguments);try
 new MutationObserver(function(){if(ROOT.classList.contains("on")){renderAll();renderDeadlines();}}).observe(ROOT,{attributes:true,attributeFilter:["class"]});
 renderStatic();renderSyl();renderDeadlines();renderAll();
 setInterval(function(){if(ROOT.classList.contains("on")){renderDeadlines();if(!drag&&!$("#pl-drawer").classList.contains("pl-open"))renderGrid();}},60000);
-window.CompassPlanner={render:renderAll,blocks:function(){return blocks();}};
+window.CompassPlanner={render:renderAll,blocks:function(){return blocks();},focus:function(id,mins){startFocus(byId(id),mins);}};
 })();
 }, {once:true});
 </script>
