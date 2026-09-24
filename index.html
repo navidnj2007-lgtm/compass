@@ -1888,6 +1888,7 @@ body[data-page=plan] #workspacePageHeading{display:none}
 .pl-b .pl-bm{display:block;color:var(--muted);font-size:.62rem;font-variant-numeric:tabular-nums}
 .pl-b.pl-school{background:var(--surface-2);border-left:3px solid var(--c);color:var(--muted);cursor:default}
 .pl-b.pl-school .pl-bt{font-weight:500;color:var(--ink)}
+.pl-b.pl-school.pl-cancel{background:transparent;border-left-style:dashed;opacity:.7}.pl-b.pl-school.pl-cancel .pl-bt{text-decoration:line-through;color:var(--muted)}.pl-b.pl-school.pl-cancel .pl-bm b{color:var(--warn);font-weight:600;text-decoration:none}
 .pl-b.pl-study{background:color-mix(in srgb,var(--c) 15%,var(--surface));border-left:3px solid var(--c)}
 .pl-b.pl-proj{background:color-mix(in srgb,var(--c) 26%,var(--surface));box-shadow:inset 0 0 0 1.5px var(--c)}
 .pl-b.pl-hw{background:var(--surface);border:1px dashed var(--c)}
@@ -13239,6 +13240,8 @@ function isoWeek(d){var t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDa
 /* ── state (inside Compass's own S) ── */
 function P(){var S=B.get();if(!S.plan||!Array.isArray(S.plan.blocks)){S.plan={v:1,blocks:SEED.map(function(b){var o={};for(var k in b)o[k]=b[k];o.done=!!o.done;return o;})};/* no touch() here: the saved state may not have loaded yet, and saving now could overwrite it */}return S.plan;}
 function blocks(){return P().blocks;}
+/* Cancelled lessons live in synced state: S.plan.cancelled = ["YYYY-MM-DD|HH:MM|sub", ...] */
+function isCancelled(l){var c=P().cancelled;return Array.isArray(c)&&c.indexOf(l[0]+"|"+l[1]+"|"+l[3])>=0;}
 function byId(id){return blocks().filter(function(b){return b.id===id;})[0];}
 function weekBlocks(mon){var e=addDays(mon,7);return blocks().filter(function(t){return t.d>=mon&&t.d<e;});}
 function weeks(){var s={};FIXED.forEach(function(m){s[m]=1;});blocks().forEach(function(b){if(b.d)s[mondayOf(b.d)]=1;});var a=Object.keys(s).sort();a.push(addDays(a[a.length-1],7));return a;}
@@ -13287,8 +13290,8 @@ function renderGrid(){
     flush();
     items.forEach(function(it){
       var top=(it.s-G0)*PM,hh=Math.max((it.e-it.s)*PM,it.school?20:22),pos="left:calc("+(it.lane*100/it.cols)+"% + 2px);width:calc("+(100/it.cols)+"% - 4px);";
-      if(it.school){var l=it.l;
-        c+='<div class="pl-b pl-school'+(filter[l[3]]?" pl-on":"")+(it.cols>1?" pl-narrow":"")+'" style="'+pos+'top:'+top+'px;height:'+hh+'px;--c:'+col(l[3])+'"><span class="pl-bt">'+esc(SUB[l[3]])+'</span><span class="pl-bm">'+l[1]+(l[4]?" · "+esc(l[4]):"")+'</span></div>';}
+      if(it.school){var l=it.l,cx=isCancelled(l);
+        c+='<div class="pl-b pl-school'+(cx?" pl-cancel":"")+(filter[l[3]]?" pl-on":"")+(it.cols>1?" pl-narrow":"")+'" title="'+esc(SUB[l[3]]+" · "+l[1]+"–"+l[2]+(cx?" · cancelled":""))+'" style="'+pos+'top:'+top+'px;height:'+hh+'px;--c:'+col(l[3])+'"><span class="pl-bt">'+esc(SUB[l[3]])+'</span><span class="pl-bm">'+(cx?'<b>Cancelled</b> · ':'')+l[1]+(l[4]?" · "+esc(l[4]):"")+'</span></div>';}
       else{var t=it.t;
         c+='<button class="pl-b pl-'+esc(t.k)+(t.done?" pl-done":"")+(filter[t.sub]?" pl-on":"")+(it.cols>1?" pl-narrow":"")+'" data-plid="'+esc(t.id)+'" title="'+esc(t.t+" · "+t.s+"–"+t.e)+'" style="'+pos+'top:'+top+'px;height:'+hh+'px;--c:'+col(t.sub)+'"><span class="pl-bt">'+esc(t.t)+'</span>'+(hh>34?'<span class="pl-bm">'+esc(t.s)+'–'+esc(t.e)+'</span>':'')+'<span class="pl-rz" aria-hidden="true"></span></button>';}
     });
