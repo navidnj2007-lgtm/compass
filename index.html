@@ -2,15 +2,15 @@
 <html lang="en" data-theme="dark"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Compass — Your personal command center</title>
+<title>Compass</title>
 <meta name="description" content="A private personal workspace for focus, planning, learning, habits, goals, and wellbeing.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Compass">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#f3f6fb" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#080d19" media="(prefers-color-scheme: dark)">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%235b5bd6'/%3E%3Cpath d='M32 12 44 32 32 52 20 32Z' fill='none' stroke='white' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%236ee7f9'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#f2f3f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#08090b" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2308090b'/%3E%3Cpath d='M32 12 44 32 32 52 20 32Z' fill='none' stroke='%23c5f24a' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23c5f24a'/%3E%3C/svg%3E">
 <style>
 /* Design tokens — shared by every feature and both color themes. */
 :root{color-scheme:light;--plane:#f6f7f9;--surface:#fff;--surface-2:#f4f6f7;--surface-3:#e9edef;--ink:#202d2a;--ink-2:#5f6d69;--muted:#697873;--grid:#e8edeb;--axis:#b9c7c1;--border:#e2e8e5;--d1:#267761;--d2:#cb784c;--d3:#378f73;--d4:#b98a2e;--d5:#b16590;--d6:#4b8761;--good:#278258;--warn:#c49228;--serious:#c97745;--crit:#c44949;--ok-text:#247047;--track:#deeee7;--pos:#267761;--neg:#c44949;--s0:#edf1ef;--s1:#dcebe3;--s2:#b6d5c4;--s3:#8abb9f;--s4:#4b9374;--s5:#276349;--shadow:0 2px 4px #203c2d03;--shadow-lg:0 24px 70px #16291f26;--sidebar:232px;--accent:var(--d1);--accent-ink:#fff}
@@ -1502,313 +1502,11 @@ body.workspace .modal{padding:24px;align-items:center}body.workspace .modal .mb{
 @media print{.workspace-sidebar,.workspace-header,.tgnav,.tgsync,.today-footer{display:none!important}body.workspace .wrap{margin:0;padding:0}.card{break-inside:avoid;box-shadow:none!important}body{background:white!important;color:black!important}}
 
 </style>
-<style id="compass-visual-refresh">
-/* Compass visual refresh — an energetic, calm command center. */
-:root{
-  --plane:#f3f6fb;--surface:#ffffff;--surface-2:#f6f8fc;--surface-3:#e9eef8;
-  --ink:#172033;--ink-2:#46516a;--muted:#6f7b93;--grid:#e7ebf3;--axis:#b5bfd2;
-  --border:#dfe5ef;--d1:#5b5bd6;--d2:#f28a68;--d3:#0ea5a8;--d4:#d59a23;
-  --d5:#b65fa3;--d6:#2f8c68;--good:#16865f;--warn:#bd7a12;--serious:#df704f;
-  --crit:#d34e59;--ok-text:#147253;--track:#e4e5ff;--pos:#5b5bd6;--neg:#d34e59;
-  --s0:#eef0fa;--s1:#dfe1f7;--s2:#c6c8f0;--s3:#a6a8e5;--s4:#7c7fd9;--s5:#5558bd;
-  --shadow:0 1px 2px rgba(24,32,52,.04),0 10px 28px rgba(48,57,86,.06);
-  --shadow-lg:0 28px 80px rgba(14,22,42,.24);--sidebar:252px;--accent:var(--d1);--accent-ink:#fff;
-}
-:root[data-theme=dark]{
-  --plane:#050609;--surface:#090b10;--surface-2:#0f1219;--surface-3:#181c26;
-  --ink:#f5f6fb;--ink-2:#c7ccda;--muted:#8e96a9;--grid:#1a1e28;--axis:#454c5d;
-  --border:#252a36;--d1:#9b9dff;--d2:#ff9d7e;--d3:#4bd5d2;--d4:#f0bd52;
-  --d5:#e190cc;--d6:#70c99c;--good:#56ca93;--warn:#e5ad45;--serious:#ff9d7e;
-  --crit:#ff7d8b;--ok-text:#68d5a1;--track:#292b66;--pos:#999bff;--neg:#ff7d8b;
-  --s0:#19233a;--s1:#222d50;--s2:#323d71;--s3:#4e58a0;--s4:#737bce;--s5:#a6aaff;
-  --shadow:0 1px 2px rgba(0,0,0,.18),0 18px 42px rgba(0,0,0,.16);
-  --shadow-lg:0 30px 90px rgba(0,0,0,.55);--accent-ink:#11142b;
-}
-html{scroll-behavior:smooth}
-body.workspace{
-  min-height:100vh;font-size:15px;line-height:1.6;
-  font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:
-    radial-gradient(circle at 78% -10%,color-mix(in srgb,var(--d1) 13%,transparent),transparent 30rem),
-    radial-gradient(circle at 105% 40%,color-mix(in srgb,var(--d3) 8%,transparent),transparent 26rem),
-    var(--plane);
-}
-:root[data-theme=dark] body.workspace{
-  background:
-    linear-gradient(180deg,rgba(3,4,8,.58) 0%,rgba(3,4,8,.78) 46rem,rgba(3,4,8,.94) 82rem),
-    url("assets/compass-nightscape.png") center top / cover fixed no-repeat,
-    #050609;
-}
-body.workspace :focus-visible{outline:3px solid color-mix(in srgb,var(--d1) 70%,white);outline-offset:3px}
-::selection{background:color-mix(in srgb,var(--d1) 28%,transparent);color:var(--ink)}
 
-/* Dark navigation rail creates a stable product frame in both themes. */
-.workspace-sidebar{
-  width:var(--sidebar);padding:24px 18px 16px;border-right:1px solid rgba(255,255,255,.08);
-  background:
-    radial-gradient(circle at 12% 0%,rgba(115,123,255,.30),transparent 16rem),
-    linear-gradient(180deg,#090b12 0%,#05060a 58%,#020306 100%);
-  box-shadow:18px 0 50px rgba(12,18,37,.10);scrollbar-color:#3d4863 transparent;
-}
-.workspace-brand{color:#f7f8ff!important;font-size:24px;font-weight:720;letter-spacing:-.9px;padding:2px 10px 24px}
-.workspace-brand small{color:#929dbc;font-size:9px;letter-spacing:1.6px;margin-top:5px}
-.brand-symbol{
-  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:23px;color:white;
-  background:linear-gradient(145deg,#7779ff,#4f51c9);box-shadow:0 10px 28px rgba(91,91,214,.42);
-}
-.workspace-search{margin-bottom:12px;padding:10px 11px;border-color:rgba(255,255,255,.09);background:rgba(255,255,255,.06);color:#aab4cd;border-radius:10px;transition:.18s ease}
-.workspace-search:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.16);color:#fff}
-.workspace-search kbd{border-color:rgba(255,255,255,.14);background:rgba(0,0,0,.14);color:#cbd2e4}
-.nav-group{color:#77839f;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:17px 12px 7px}
-.tab{position:relative;min-height:40px;padding:9px 12px;color:#aab5ce;font-size:13px;font-weight:540;border-radius:10px;transition:background .16s,color .16s,transform .16s}
-.tab:hover{background:rgba(255,255,255,.065);color:#f7f8ff;transform:translateX(2px)}
-.tab[aria-selected=true]{background:linear-gradient(90deg,rgba(120,122,255,.28),rgba(120,122,255,.10));color:#fff;font-weight:650;box-shadow:inset 0 0 0 1px rgba(161,164,255,.16)}
-.tab[aria-selected=true]:before{content:"";position:absolute;left:-6px;top:10px;bottom:10px;width:3px;border-radius:5px;background:#a7a9ff;box-shadow:0 0 16px rgba(167,169,255,.8)}
-.nav-icon{width:21px;font-size:18px;color:#8c98b6}.tab[aria-selected=true] .nav-icon{color:#bec0ff}
-.tab .badge{background:rgba(255,255,255,.10);color:#dce1ee;border-radius:999px;font-size:10px;padding:1px 6px}
-.sidebar-tip{padding:16px;border-color:rgba(255,255,255,.09);background:rgba(255,255,255,.055);border-radius:14px}
-.sidebar-tip b,.workspace-account{color:#eef1fa}.sidebar-tip p,.workspace-account small{color:#8d98b2}.sidebar-tip button,.tip-icon{color:#b6b8ff}
-.account-avatar{background:linear-gradient(145deg,#7779ff,#4c4ebd);color:#fff;box-shadow:0 6px 18px rgba(91,91,214,.35)}
-
-body.workspace .wrap{max-width:1580px;margin-left:var(--sidebar);padding:0 42px 56px}
-body.workspace .workspace-header{
-  position:sticky;top:0;z-index:30;height:74px;margin:0 -42px;padding-inline:42px;
-  background:color-mix(in srgb,var(--plane) 82%,transparent);border-bottom:1px solid color-mix(in srgb,var(--border) 82%,transparent);
-  backdrop-filter:blur(18px) saturate(1.3);
-}
-.workspace-location{font-size:12px}.workspace-location strong{font-weight:680}.breadcrumb-slash{opacity:.5}
-.hbtns{gap:8px}
-.ghost,.primary{border-radius:10px;transition:background .16s,border-color .16s,color .16s,box-shadow .16s,transform .16s}
-.ghost{padding:9px 13px;border:1px solid var(--border);background:color-mix(in srgb,var(--surface) 78%,transparent);font-size:13px;color:var(--ink-2)}
-.ghost:hover{background:var(--surface);border-color:color-mix(in srgb,var(--d1) 40%,var(--border));color:var(--ink);box-shadow:0 8px 22px color-mix(in srgb,var(--d1) 10%,transparent);transform:translateY(-1px)}
-.ghost.on,.primary,.today-primary{background:linear-gradient(135deg,#6668e8,#4e50c2);color:#fff;border-color:transparent;box-shadow:0 10px 24px rgba(70,72,190,.24)}
-.ghost.on:hover,.primary:hover,.today-primary:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(70,72,190,.32)}
-body.workspace #saveBtn{background:var(--ink);color:var(--surface);border-color:var(--ink);font-weight:650}
-
-.workspace-page-heading{padding:38px 0 27px}.workspace-page-heading h1{font-size:clamp(32px,3.2vw,48px);line-height:1.06;letter-spacing:-1.8px;font-weight:720}
-.workspace-page-heading p{font-size:15px;max-width:60ch;margin-top:12px}.today-kicker,.eyebrow{font-size:10px;letter-spacing:1.55px;font-weight:750;color:var(--d1)}
-.today-welcome{padding:42px 0 29px}.today-welcome h1{font-size:clamp(36px,4vw,58px);max-width:780px;letter-spacing:-2.5px;line-height:1.02;font-weight:740}
-.today-welcome p{font-size:15px;color:var(--ink-2);margin-top:15px}.today-date{font-size:12px}.today-primary{padding:12px 17px;font-size:13px}
-
-body.workspace .card,.week-card,.today-metric{
-  border:1px solid color-mix(in srgb,var(--border) 92%,transparent);background:color-mix(in srgb,var(--surface) 95%,transparent);
-  box-shadow:var(--shadow);border-radius:16px;
-}
-body.workspace .card{padding:24px;margin-bottom:20px}.card>h2,#todoCard h2{font-size:18px;letter-spacing:-.25px}.card>.hint{font-size:13px;color:var(--muted);line-height:1.7}
-.today-overview{gap:14px;margin-bottom:22px}
-.today-metric{overflow:hidden;padding:20px;min-height:146px;text-align:left;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
-.today-metric:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--d1),var(--d3));opacity:.9}
-.today-metric:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--d1) 34%,var(--border));box-shadow:0 18px 42px color-mix(in srgb,var(--d1) 12%,transparent)}
-.metric-label{font-size:13px;color:var(--ink-2)}.today-metric strong{font-size:32px;font-weight:720;margin:21px 0 8px}.today-metric small{font-size:12px}
-.metric-icon{right:16px;top:15px;width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:var(--track);font-size:16px}
-
-.today-next{gap:16px;margin-bottom:22px}.next-main{
-  min-height:220px;padding:31px 32px;border-radius:18px;background:
-    linear-gradient(100deg,rgba(17,18,48,.95) 0%,rgba(28,29,78,.87) 48%,rgba(9,14,29,.48) 100%),
-    url("assets/focus-glass.png") center / cover no-repeat;
-  box-shadow:0 24px 64px rgba(0,0,0,.34)
-}
-.next-main:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.2;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(90deg,transparent,black)}
-.next-main:after{right:-54px;top:-84px;width:300px;height:300px;border-color:rgba(255,255,255,.14);box-shadow:0 0 0 34px rgba(255,255,255,.035),0 0 0 68px rgba(255,255,255,.02)}
-.next-main .today-kicker,.next-main p{color:#cfd5f5}.next-main h3{font-size:30px;line-height:1.17;letter-spacing:-1.1px;font-weight:650}.next-main p{font-size:13px}
-.next-actions button{padding:10px 14px;border-radius:9px;font-size:12px;border-color:rgba(255,255,255,.28)}.next-actions button:first-child{background:#fff;color:#353995;border-color:#fff;box-shadow:0 10px 25px rgba(10,15,45,.18)}
-.week-card{padding:26px}.week-card h3{font-size:16px}.week-card p{font-size:12px}.week-day{font-size:10px}.week-day i{max-width:34px;border-radius:7px 7px 3px 3px;background:var(--surface-3);transition:height .35s ease,filter .16s}.week-day:hover i{filter:brightness(.94)}.week-day.current i{background:linear-gradient(180deg,var(--d3),var(--d1))}
-
-.tgrid{gap:18px;grid-template-columns:minmax(0,1.72fr) minmax(320px,.9fr)}.trail{gap:18px}
-#todoCard{box-shadow:0 18px 45px rgba(32,43,75,.08)}
-.tdadd{padding:7px;border-radius:12px;background:var(--surface-2);border-color:var(--border)}
-.fld,.composer,body.workspace .fld{border-radius:10px;background:var(--surface-2);border-color:var(--border);font-size:14px;min-height:42px}
-.fld:focus{background:var(--surface);border-color:var(--d1);box-shadow:0 0 0 3px color-mix(in srgb,var(--d1) 13%,transparent)}
-.tdprog{height:30px;border-radius:9px;background:var(--surface-2)}.tdprog i{background:linear-gradient(90deg,var(--d1),var(--d3))}.tdprog b{font-size:11px}
-.line{padding-block:11px}.box{width:23px;height:23px;border-radius:7px}.box[aria-pressed=true]{box-shadow:0 5px 14px color-mix(in srgb,var(--d1) 26%,transparent)}
-.pills button{border-radius:9px}.pills button[aria-pressed=true]{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--d1) 25%,transparent)}
-.cap{height:9px;background:var(--surface-3)}.cap i{background:linear-gradient(90deg,var(--d1),var(--d3))}
-.tile{background:var(--surface);padding:17px}.tile .vl{font-size:27px}.tiles{gap:0;border-radius:14px}
-.bartrack,.minibar,.strength .sbar{background:var(--surface-3)}.barfill,.minibar i,.strength .sbar i{background:linear-gradient(90deg,var(--d1),var(--d3))!important}
-.gauge{filter:drop-shadow(0 10px 18px color-mix(in srgb,var(--d1) 17%,transparent))}
-.callout{border-radius:12px}.nt,.dom,.anchor{border-radius:12px}.cell{border-radius:7px}
-.modal{backdrop-filter:blur(9px)}body.workspace .modal .mb,.workspace-dialog{border-radius:18px;box-shadow:var(--shadow-lg)}
-.askshell{border-radius:18px;box-shadow:var(--shadow)}
-
-/* Obsidian panels: black surfaces with enough separation for dense information. */
-:root[data-theme=dark] body.workspace .card,
-:root[data-theme=dark] .week-card,
-:root[data-theme=dark] .today-metric{
-  background:rgba(7,8,12,.92);border-color:rgba(137,145,170,.20);
-  box-shadow:0 1px 0 rgba(255,255,255,.025) inset,0 20px 55px rgba(0,0,0,.28);
-  backdrop-filter:blur(18px) saturate(1.1);
-}
-:root[data-theme=dark] body.workspace .workspace-header{background:rgba(4,5,8,.78);border-bottom-color:rgba(139,147,173,.16)}
-:root[data-theme=dark] .today-metric:before{background:linear-gradient(90deg,#8f91ff,#48d2d0)}
-:root[data-theme=dark] .today-metric:hover{background:rgba(11,13,19,.96);border-color:rgba(155,157,255,.42)}
-:root[data-theme=dark] .fld,
-:root[data-theme=dark] .composer,
-:root[data-theme=dark] body.workspace .fld,
-:root[data-theme=dark] .tdadd,
-:root[data-theme=dark] .gatechk,
-:root[data-theme=dark] .anchor,
-:root[data-theme=dark] .nt{background:rgba(16,18,25,.94);border-color:rgba(128,137,161,.20)}
-:root[data-theme=dark] .tiles,
-:root[data-theme=dark] .dom,
-:root[data-theme=dark] .askshell{border-color:rgba(128,137,161,.20)}
-:root[data-theme=dark] .tile,
-:root[data-theme=dark] .dom{background:#090b10}
-:root[data-theme=dark] .ghost{background:rgba(10,12,18,.75);border-color:rgba(137,145,170,.22)}
-:root[data-theme=dark] .ghost:hover{background:#11141c;border-color:rgba(155,157,255,.42)}
-:root[data-theme=dark] .next-main{border:1px solid rgba(159,162,255,.22)}
-
-@media(max-width:1200px) and (min-width:1001px){:root{--sidebar:224px}body.workspace .wrap{padding-inline:28px}body.workspace .workspace-header{padding-inline:28px;margin-inline:-28px}.tgrid{grid-template-columns:minmax(0,1.25fr) minmax(290px,.85fr)}}
-@media(max-width:1000px){
-  body.workspace .wrap{margin:0;padding:0 22px 104px}body.workspace .workspace-header{margin-inline:-22px;padding-inline:22px}
-  .workspace-location:before{content:'◈';width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(145deg,#7779ff,#4f51c9);color:#fff;font-size:19px}
-}
-@media(max-width:760px){
-  body.workspace{font-size:15px}body.workspace .wrap{padding-inline:15px}body.workspace .workspace-header{margin-inline:-15px;padding-inline:15px;height:66px}
-  .hbtns{flex-wrap:nowrap;overflow-x:auto;padding-block:4px}.hbtns .ghost{min-height:40px}
-  .today-welcome{padding-top:32px}.today-welcome h1{font-size:38px;max-width:340px;letter-spacing:-1.8px}.today-welcome p{font-size:14px}
-  .today-overview{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.today-metric{min-height:130px;padding:16px}.today-metric strong{font-size:27px;margin-top:18px}.metric-label{font-size:12px}.metric-icon{width:29px;height:29px}
-  .next-main{min-height:210px;padding:26px 23px}.next-main h3{font-size:27px}.week-card{padding:22px}
-  body.workspace .card{padding:19px;border-radius:14px}.tgrid,.today-next{gap:14px}.fld,.composer,body.workspace .fld{font-size:16px}
-}
-@media(max-width:760px){:root[data-theme=dark] body.workspace{background-attachment:scroll;background-position:62% top}}
-@media(max-width:430px){
-  .today-overview{grid-template-columns:1fr 1fr}.today-metric{min-height:120px;padding:14px}.today-metric strong{font-size:24px}.today-metric small{font-size:11px}
-  .metric-label{padding-right:0;max-width:85px}.metric-icon{right:12px;top:12px}.today-welcome h1{font-size:34px}
-  .next-actions{flex-direction:column;align-items:stretch}.next-actions button{text-align:center}.gform{grid-template-columns:1fr}
-}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.tab,.ghost,.primary,.today-metric,.week-day i{transition:none!important}}
-</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style id="compass-editorial">
-/* Compass — editorial theme (matches Navid's IB Plan): paper, ink, burgundy; Spectral + Inter.
-   Loaded last, so it re-maps every design token the older stylesheets use. */
-:root{
-  color-scheme:light;
-  --plane:#fbfaf7;--surface:#ffffff;--surface-2:#f3f1eb;--surface-3:#ece8df;
-  --ink:#1c1a18;--ink-2:#4a4640;--muted:#6a655d;--grid:#ece8df;--axis:#cfc7b6;--border:#e2ded4;
-  --d1:#a3202e;--d2:#c0512b;--d3:#1f7a5a;--d4:#a8741a;--d5:#6b3fa0;--d6:#2f4f9e;
-  --good:#166534;--warn:#9a5b0c;--serious:#c0512b;--crit:#b91c1c;--ok-text:#15803d;
-  --track:#f8f3e8;--pos:#1f7a5a;--neg:#b91c1c;
-  --s0:#f3eee4;--s1:#eed8d6;--s2:#e0b1b4;--s3:#c9797f;--s4:#a8434d;--s5:#7d1a25;
-  --shadow:none;--shadow-lg:0 24px 60px rgba(40,24,20,.18);--accent:#a3202e;--accent-ink:#fff;--sidebar:244px;
-  --pl-accent-soft:#e2a9af;--pl-sum-bg:#f8f3e8;--pl-sum-line:#e9dec6;--pl-sum-lbl:#8a5a12;
-  --pl-cover-bg:#3a1317;--pl-cover-fg:#fbf4f1;--pl-cover-eyebrow:#f2b5ba;
-  --pl-tip:#15803d;--pl-tip-line:#8ec79f;--pl-bad-bg:#fbeceb;--pl-good-bg:#e6f3ea;--pl-warn-bg:#fbf0dc;
-  --ma:#2f4f9e;--ke:#1f7a5a;--fy:#6b3fa0;--da:#c0512b;--eo:#a8741a;--fa:#0e7490;--th:#7a746a;--gen:#4a4640;
-  --st-d:#2f8a57;--st-i:#3b6fd1;--st-r:#8b5cd6;--st-t:#e6e1d6;--st-l:#f1ede4;
-  --serif:"Spectral",Georgia,"Iowan Old Style","Times New Roman",serif;
-  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-}
-:root[data-theme=dark]{
-  color-scheme:dark;
-  --plane:#15140f;--surface:#1b1a14;--surface-2:#1e1d17;--surface-3:#27261f;
-  --ink:#ebe6dc;--ink-2:#c9c2b5;--muted:#a19b8f;--grid:#27261f;--axis:#4a473c;--border:#34332b;
-  --d1:#f08b93;--d2:#ee8a64;--d3:#5cc99c;--d4:#e0ae55;--d5:#b793ec;--d6:#8aa6ee;
-  --good:#8fd6a4;--warn:#e8b25e;--serious:#ee8a64;--crit:#ef9a9a;--ok-text:#7cc98f;
-  --track:#221e13;--pos:#5cc99c;--neg:#ef9a9a;
-  --s0:#221f19;--s1:#3a2226;--s2:#5a2a31;--s3:#8a3a44;--s4:#c25c67;--s5:#f08b93;
-  --shadow:none;--shadow-lg:0 24px 60px rgba(0,0,0,.5);--accent:#f08b93;--accent-ink:#1a0d0f;
-  --pl-accent-soft:#6b2a31;--pl-sum-bg:#221e13;--pl-sum-line:#46391e;--pl-sum-lbl:#e0b45e;
-  --pl-cover-bg:#240b0e;--pl-cover-fg:#f6ece8;--pl-cover-eyebrow:#f2a2a9;
-  --pl-tip:#7cc98f;--pl-tip-line:#2f6b41;--pl-bad-bg:#2c1817;--pl-good-bg:#16291c;--pl-warn-bg:#2b2213;
-  --ma:#8aa6ee;--ke:#5cc99c;--fy:#b793ec;--da:#ee8a64;--eo:#e0ae55;--fa:#4fc0d6;--th:#b1aa9d;--gen:#cfc8bb;
-  --st-d:#4fbf82;--st-i:#6f9cf0;--st-r:#a987ee;--st-t:#34322a;--st-l:#26251e;
-}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-/* ── base ── */
-body.workspace,:root[data-theme=dark] body.workspace{background:var(--plane)!important;color:var(--ink);font-family:var(--serif);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
-body.workspace button,body.workspace input,body.workspace select,body.workspace textarea,body.workspace kbd,body.workspace label,
-.tab,.ghost,.primary,.pills,.badge,.chip,.tag,.lbl,.eyebrow,.today-kicker,.metric-label,.nav-group,.workspace-location,.workspace-search,
-.today-date,table,.tbl,.hint,small,.syncbar,.savebar,.tgsync,.tgnav,.tgmore,.asktoast{font-family:var(--sans)}
-body.workspace :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-::selection{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--ink)}
-h1,h2,h3,h4,.card>h2,#todoCard h2{font-family:var(--serif);font-weight:600;letter-spacing:-.008em;text-wrap:balance}
-
-/* ── sidebar: the planner's table of contents ── */
-.workspace-sidebar{background:var(--surface-2)!important;border-right:1px solid var(--surface-3)!important;box-shadow:none!important;padding:28px 16px 16px}
-.workspace-brand{color:var(--ink)!important;font-family:var(--serif);font-size:24px;font-weight:600;letter-spacing:-.01em;padding:2px 8px 22px;border-bottom:1px solid var(--border);margin-bottom:14px}
-.workspace-brand small{color:var(--muted)!important;font-family:var(--sans);font-size:9.5px;font-weight:600;letter-spacing:.16em}
-.brand-symbol{background:var(--pl-cover-bg)!important;color:var(--pl-cover-fg)!important;border-radius:4px!important;box-shadow:none!important;width:36px;height:36px;font-size:20px}
-.workspace-search{background:var(--surface)!important;border:1px solid var(--border)!important;color:var(--muted)!important;border-radius:3px!important}
-.workspace-search:hover{color:var(--ink)!important;border-color:var(--muted)!important}
-.workspace-search kbd{background:var(--surface-2)!important;border-color:var(--border)!important;color:var(--muted)!important}
-.nav-group{color:var(--muted)!important;font-size:9.5px!important;letter-spacing:.14em!important;font-weight:600!important;padding:18px 12px 6px!important;opacity:.85}
-.tab{border-radius:0!important;background:transparent!important;box-shadow:none!important;color:var(--muted)!important;font-weight:500!important;border-left:2px solid transparent;min-height:36px;padding:7px 10px 7px 12px!important;transform:none!important}
-.tab:hover{color:var(--ink)!important;border-left-color:var(--pl-accent-soft)}
-.tab[aria-selected=true]{color:var(--accent)!important;border-left-color:var(--accent);font-weight:600!important}
-.tab[aria-selected=true]:before{display:none!important}
-.nav-icon{color:inherit!important;opacity:.7}
-.tab .badge{background:var(--accent)!important;color:var(--accent-ink)!important}
-.sidebar-tip{background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:4px!important}
-.sidebar-tip b,.workspace-account{color:var(--ink)!important;font-family:var(--serif)}
-.sidebar-tip p,.workspace-account small{color:var(--muted)!important}
-.sidebar-tip button,.tip-icon{color:var(--accent)!important;font-weight:600}
-.account-avatar{background:var(--pl-cover-bg)!important;color:var(--pl-cover-fg)!important;box-shadow:none!important;border-radius:4px!important}
-
-/* ── header & buttons ── */
-body.workspace .workspace-header,:root[data-theme=dark] body.workspace .workspace-header{background:color-mix(in srgb,var(--plane) 88%,transparent)!important;border-bottom:1px solid var(--surface-3)!important;backdrop-filter:blur(10px)}
-.workspace-location{color:var(--muted)}.workspace-location strong{color:var(--ink)}
-.ghost,:root[data-theme=dark] .ghost{background:var(--surface)!important;border:1px solid var(--border)!important;color:var(--ink)!important;border-radius:3px!important;box-shadow:none!important;transform:none!important;font-weight:600;font-size:12.5px}
-.ghost:hover,:root[data-theme=dark] .ghost:hover{border-color:var(--muted)!important;background:var(--surface)!important}
-.ghost.on,.primary,.today-primary,body.workspace #saveBtn{background:var(--accent)!important;border:1px solid var(--accent)!important;color:var(--accent-ink)!important;box-shadow:none!important;border-radius:3px!important;font-weight:600}
-.ghost.on:hover,.primary:hover,.today-primary:hover{filter:brightness(1.06);transform:none!important;box-shadow:none!important}
-@media(max-width:1000px){.workspace-location:before{background:var(--pl-cover-bg)!important;color:var(--pl-cover-fg)!important;border-radius:4px!important}}
-
-/* ── page headings: ink rule + accent eyebrow ── */
-.workspace-page-heading{padding:30px 0 22px!important;border-top:1px solid var(--ink);margin-top:26px}
-.workspace-page-heading h1{font-family:var(--serif)!important;font-size:clamp(30px,3vw,42px)!important;font-weight:600!important;letter-spacing:-.012em!important;line-height:1.12!important}
-.workspace-page-heading p{color:var(--muted);font-size:17px}
-.today-kicker,.eyebrow{color:var(--accent)!important;font-family:var(--sans)!important;font-size:10.5px!important;font-weight:600!important;letter-spacing:.14em!important;text-transform:uppercase}
-
-/* ── Overview welcome becomes the burgundy cover ── */
-.today-welcome{background:var(--pl-cover-bg);color:var(--pl-cover-fg);border-radius:4px;padding:clamp(26px,4vw,44px) clamp(20px,4vw,40px)!important;margin:26px 0 22px}
-.today-welcome .today-kicker{color:var(--pl-cover-eyebrow)!important}
-.today-welcome h1{color:var(--pl-cover-fg)!important;font-family:var(--serif)!important;font-weight:600!important;letter-spacing:-.015em!important;line-height:1.06!important}
-.today-welcome p,.today-welcome .today-date{color:var(--pl-cover-fg)!important;opacity:.85}
-.today-welcome .today-primary{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.3)!important;color:var(--pl-cover-fg)!important;border-radius:999px!important}
-
-/* ── cards ── */
-body.workspace .card,.week-card,.today-metric,
-:root[data-theme=dark] body.workspace .card,:root[data-theme=dark] .week-card,:root[data-theme=dark] .today-metric{
-  background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:4px!important;box-shadow:none!important;backdrop-filter:none!important}
-body.workspace .card>h2,#todoCard h2,.week-card h3{font-size:1.3rem!important;font-weight:600}
-.card>.hint{color:var(--muted)!important}
-.today-metric:before,:root[data-theme=dark] .today-metric:before{background:var(--accent)!important;height:3px;opacity:1}
-.today-metric:hover,:root[data-theme=dark] .today-metric:hover{transform:none!important;border-color:var(--muted)!important;box-shadow:none!important;background:var(--surface)!important}
-.today-metric strong{font-family:var(--serif)!important;font-weight:600!important;letter-spacing:0}
-.metric-icon{background:var(--surface-2)!important;color:var(--accent)!important;border-radius:3px!important}
-.next-main,:root[data-theme=dark] .next-main{background:var(--pl-sum-bg)!important;border:1px solid var(--pl-sum-line)!important;box-shadow:none!important;border-radius:4px!important;color:var(--ink)}
-.next-main:before,.next-main:after{display:none!important}
-.next-main .today-kicker{color:var(--pl-sum-lbl)!important}
-.next-main h3{color:var(--ink)!important;font-family:var(--serif)!important;font-weight:600!important;letter-spacing:-.01em!important}
-.next-main p{color:var(--muted)!important}
-.next-actions button{border:1px solid var(--border)!important;background:var(--surface)!important;color:var(--ink)!important;border-radius:3px!important;box-shadow:none!important}
-.next-actions button:first-child{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--accent-ink)!important}
-.week-day.current i{background:var(--accent)!important}
-.week-day i{background:var(--surface-3)!important}
-
-/* ── fields, bars, tiles, modals ── */
-.fld,.composer,body.workspace .fld,.tdadd,:root[data-theme=dark] .fld,:root[data-theme=dark] .composer,:root[data-theme=dark] body.workspace .fld,:root[data-theme=dark] .tdadd,:root[data-theme=dark] .gatechk,:root[data-theme=dark] .anchor,:root[data-theme=dark] .nt{background:var(--plane)!important;border-color:var(--border)!important;border-radius:3px!important;color:var(--ink)}
-.fld:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 14%,transparent)!important}
-.tdprog i,.cap i{background:var(--good)!important}
-.barfill,.minibar i,.strength .sbar i{background:var(--accent)!important}
-.tdprog,.cap,.bartrack,.minibar,.strength .sbar{background:var(--surface-3)!important}
-.tiles,:root[data-theme=dark] .tiles{border-radius:4px!important;border-color:var(--border)!important}
-.tile,:root[data-theme=dark] .tile,:root[data-theme=dark] .dom{background:var(--surface)!important}
-.tile .vl{font-family:var(--serif);font-weight:600}
-.callout{border-radius:4px!important}
-.pills button{border-radius:999px!important}
-.pills button[aria-pressed=true]{background:var(--ink)!important;color:var(--plane)!important;box-shadow:none!important}
-.box{border-radius:3px!important}
-.box[aria-pressed=true]{background:var(--good)!important;border-color:var(--good)!important;box-shadow:none!important}
-.gauge{filter:none!important}
-.modal{backdrop-filter:blur(3px)}
-body.workspace .modal .mb,.workspace-dialog{background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:4px!important}
-.askshell,:root[data-theme=dark] .askshell{border-radius:4px!important;border-color:var(--border)!important;box-shadow:none!important}
-.nt,.dom,.anchor{border-radius:4px!important}
-</style>
 <style id="compass-planner-css">
 /* Planner page — same design as Navid's IB Plan. Every class is prefixed pl- so nothing collides with the app. */
 #pl-progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--accent);z-index:60;pointer-events:none}
@@ -2014,6 +1712,354 @@ body.pl-dragging{user-select:none;cursor:grabbing}
 .pl-scrim[hidden],.pl-toast[hidden],.pl-focus[hidden],.pl-drawer [hidden],#s-plan [hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){.pl-drawer,.pl-b,.pl-pbar i{transition:none}}
 </style>
+<style id="compass-cockpit-css">
+/* ═══ Compass v3 · Cockpit ═══════════════════════════════════════════════
+   Dark-first, high contrast, one volt accent, mono numerals. Loaded last, so
+   it re-maps every token the older stylesheets and the planner read.      */
+:root{
+  color-scheme:light;
+  --plane:#f2f3f5;--surface:#ffffff;--surface-2:#f6f7f9;--surface-3:#eaecf0;
+  --ink:#0d1015;--ink-2:#3a414c;--muted:#687180;--grid:#e6e8ec;--axis:#c3c8d0;--border:#e0e3e8;--line:#d3d7de;
+  --accent:#4a7a06;--accent-ink:#ffffff;--accent-soft:rgba(74,122,6,.10);--volt:#c5f24a;
+  --d1:#4a7a06;--d2:#d0632f;--d3:#0f9a6a;--d4:#b7830b;--d5:#7a52d6;--d6:#2f6fd6;
+  --good:#0f9a6a;--warn:#b7780b;--serious:#d0632f;--crit:#d83a4a;--ok-text:#0b7a54;
+  --track:#eaecf0;--pos:#0f9a6a;--neg:#d83a4a;
+  --s0:#eef0f3;--s1:#e3f2c4;--s2:#c8e68a;--s3:#9fcf45;--s4:#6fa51a;--s5:#4a7a06;
+  --shadow:none;--shadow-lg:0 30px 80px rgba(10,14,20,.18);--sidebar:84px;
+  --ma:#2f6fd6;--ke:#0f9a6a;--fy:#7a52d6;--da:#d0632f;--eo:#b7830b;--fa:#0e8fa3;--th:#6b7380;--gen:#3a414c;
+  --pl-accent-soft:rgba(74,122,6,.25);--pl-sum-bg:#f6f7f9;--pl-sum-line:#e0e3e8;--pl-sum-lbl:#4a7a06;
+  --pl-cover-bg:#ffffff;--pl-cover-fg:#0d1015;--pl-cover-eyebrow:#4a7a06;
+  --pl-tip:#0b7a54;--pl-tip-line:#9fd8bf;--pl-bad-bg:#fdecee;--pl-good-bg:#e5f6ee;--pl-warn-bg:#fdf3dd;
+  --st-d:#0f9a6a;--st-i:#2f6fd6;--st-r:#7a52d6;--st-t:#eaecf0;--st-l:#f3f4f6;
+  --sans:"Inter",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --serif:var(--sans);
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --r:14px;--r-sm:9px;
+  --dots:rgba(13,16,21,.05);
+}
+:root[data-theme=dark]{
+  color-scheme:dark;
+  --plane:#08090b;--surface:#0f1114;--surface-2:#15181c;--surface-3:#1c2026;--border:#20252c;--line:#2b313a;
+  --ink:#e9ecf0;--ink-2:#b4bbc5;--muted:#7d8692;--grid:#1c2026;--axis:#3a414c;
+  --accent:#c5f24a;--accent-ink:#0a0c07;--accent-soft:rgba(197,242,74,.10);
+  --d1:#c5f24a;--d2:#ff8a5c;--d3:#3ddc97;--d4:#ffc24a;--d5:#a98bff;--d6:#6aa6ff;
+  --good:#3ddc97;--warn:#ffb547;--serious:#ff8a5c;--crit:#ff5c6a;--ok-text:#3ddc97;
+  --track:#1c2026;--pos:#3ddc97;--neg:#ff5c6a;
+  --s0:#15181c;--s1:#26331a;--s2:#3d5a1c;--s3:#6a9a22;--s4:#9fd133;--s5:#c5f24a;
+  --shadow:none;--shadow-lg:0 30px 90px rgba(0,0,0,.6);
+  --ma:#6aa6ff;--ke:#35d49a;--fy:#a98bff;--da:#ff8f5e;--eo:#f5c04a;--fa:#39c9dc;--th:#9aa3ae;--gen:#c9cfd6;
+  --pl-accent-soft:rgba(197,242,74,.28);--pl-sum-bg:#15181c;--pl-sum-line:#2b313a;--pl-sum-lbl:#c5f24a;
+  --pl-cover-bg:#0f1114;--pl-cover-fg:#e9ecf0;--pl-cover-eyebrow:#c5f24a;
+  --pl-tip:#3ddc97;--pl-tip-line:#1f5e45;--pl-bad-bg:#2a1418;--pl-good-bg:#0f2a20;--pl-warn-bg:#2a2112;
+  --st-d:#3ddc97;--st-i:#6aa6ff;--st-r:#a98bff;--st-t:#1c2026;--st-l:#15181c;
+  --dots:rgba(255,255,255,.035);
+}
+
+/* ── base ── */
+html{scroll-behavior:smooth}
+body.workspace,:root[data-theme=dark] body.workspace{
+  background:var(--plane)!important;color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01","tnum";
+  background-image:radial-gradient(var(--dots) 1px,transparent 1px)!important;background-size:22px 22px!important;background-attachment:fixed!important}
+body.workspace button,body.workspace input,body.workspace select,body.workspace textarea,.tgnav,.tgmore,.tgsync{font-family:var(--sans)}
+h1,h2,h3,h4{font-family:var(--sans)!important;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+body.workspace :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+::selection{background:color-mix(in srgb,var(--accent) 30%,transparent);color:var(--ink)}
+.workspace a{color:var(--accent)}
+kbd,code{font-family:var(--mono)}
+
+/* ── sidebar: an icon rail with five places ── */
+body.workspace .workspace-sidebar,:root[data-theme=dark] body.workspace .workspace-sidebar{
+  width:var(--sidebar);padding:16px 10px 14px;background:var(--surface)!important;border-right:1px solid var(--border)!important;box-shadow:none!important;align-items:stretch}
+.workspace-sidebar:before,.workspace-sidebar:after{display:none!important}
+.workspace-brand{justify-content:center;padding:4px 0 18px!important;margin:0 0 10px!important;border-bottom:1px solid var(--border)}
+.workspace-brand>span:last-child{display:none!important}
+.brand-symbol{width:40px!important;height:40px!important;border-radius:12px!important;display:grid!important;place-items:center;font-size:19px!important;
+  background:var(--accent)!important;color:var(--accent-ink)!important;box-shadow:0 0 0 1px var(--accent),0 0 24px color-mix(in srgb,var(--accent) 35%,transparent)!important}
+.workspace-search,.sidebar-bottom,.nav-group{display:none!important}
+body.workspace .workspace-sidebar nav{margin:0!important;padding:0!important;background:none!important;border:0!important}
+#tabs{display:flex;flex-direction:column;gap:6px}
+body.workspace .tab,:root[data-theme=dark] body.workspace .tab{
+  flex-direction:column;justify-content:center;gap:5px!important;min-height:62px!important;padding:8px 2px!important;border-radius:12px!important;border:1px solid transparent!important;
+  background:transparent!important;color:var(--muted)!important;font-size:11px!important;font-weight:600!important;letter-spacing:.01em;text-align:center!important;box-shadow:none!important;transform:none!important;position:relative}
+body.workspace .tab:hover{color:var(--ink)!important;background:var(--surface-2)!important}
+body.workspace .tab[aria-selected=true]{color:var(--ink)!important;background:var(--surface-3)!important;border-color:var(--line)!important}
+body.workspace .tab[aria-selected=true]:before{content:""!important;display:block!important;position:absolute;left:-10px;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--accent)!important;opacity:1!important}
+body.workspace .tab[aria-selected=true] .nav-icon{color:var(--accent)!important;opacity:1}
+body.workspace .nav-icon{width:22px!important;height:22px;display:block;opacity:.9;color:inherit!important;font-size:0!important}
+.nav-icon svg{width:22px;height:22px;display:block}
+body.workspace .tab .badge{position:absolute;top:6px;right:10px;margin:0!important;min-width:16px;height:16px;line-height:16px;padding:0 4px!important;border-radius:8px!important;font:600 9.5px/16px var(--mono)!important;background:var(--accent)!important;color:var(--accent-ink)!important}
+
+/* ── header: location · sub-pages · actions ── */
+body.workspace .wrap{max-width:1500px;margin-left:var(--sidebar);padding:0 32px 60px}
+body.workspace .workspace-header,:root[data-theme=dark] body.workspace .workspace-header{
+  position:sticky;top:0;z-index:30;height:auto!important;min-height:60px;margin:0 -32px!important;padding:10px 32px!important;gap:14px!important;flex-wrap:wrap;
+  background:color-mix(in srgb,var(--plane) 82%,transparent)!important;border-bottom:1px solid var(--border)!important;backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);box-shadow:none!important}
+.workspace-location{font-family:var(--mono)!important;font-size:11px!important;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)!important;gap:9px!important;flex:none}
+.workspace-location strong{color:var(--ink)!important;font-weight:600!important}
+.breadcrumb-slash{opacity:.45}
+.subnav{flex:1 1 auto;min-width:0;display:flex;justify-content:center}
+.subnav[hidden]{display:none!important}
+.subnav-track{display:inline-flex;gap:2px;padding:3px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border);max-width:100%;overflow-x:auto;scrollbar-width:none}
+.subnav-track::-webkit-scrollbar{display:none}
+.subnav button{flex:none;padding:6px 14px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap;transition:background .15s,color .15s}
+.subnav button:hover{color:var(--ink)}
+.subnav button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1px var(--line),0 1px 0 color-mix(in srgb,var(--ink) 6%,transparent)}
+:root[data-theme=dark] .subnav button[aria-pressed=true]{background:var(--surface-3)}
+.hbtns{gap:6px!important;flex:none;margin-left:auto}
+body.workspace .ghost,:root[data-theme=dark] body.workspace .ghost{
+  background:var(--surface-2)!important;border:1px solid var(--border)!important;color:var(--ink-2)!important;border-radius:var(--r-sm)!important;box-shadow:none!important;transform:none!important;
+  font-weight:600!important;font-size:12.5px!important;padding:7px 12px;transition:border-color .15s,color .15s,background .15s}
+body.workspace .ghost:hover{border-color:var(--line)!important;color:var(--ink)!important;background:var(--surface-3)!important}
+body.workspace .ghost.on,body.workspace .primary,body.workspace #saveBtn,body.workspace .today-primary{
+  background:var(--accent)!important;border:1px solid var(--accent)!important;color:var(--accent-ink)!important;border-radius:var(--r-sm)!important;box-shadow:none!important;font-weight:650!important}
+body.workspace .primary:hover,body.workspace #saveBtn:hover{filter:brightness(1.07);transform:none!important}
+.hbtns .ghost{padding:6px 11px!important;font-size:12px!important}
+#dirtyDot{background:var(--warn)!important}
+
+/* ── page headings ── */
+body.workspace .workspace-page-heading{padding:28px 0 18px!important;margin:0!important;border:0!important}
+.workspace-page-heading .today-kicker{font-family:var(--mono)!important;font-size:10.5px!important;letter-spacing:.14em!important;color:var(--accent)!important;font-weight:600!important;text-transform:uppercase}
+.workspace-page-heading h1{font-size:clamp(26px,2.6vw,34px)!important;font-weight:650!important;letter-spacing:-.03em!important;line-height:1.1!important;margin-top:6px}
+.workspace-page-heading p{color:var(--muted)!important;font-size:14px!important;margin-top:6px!important}
+.today-kicker,.eyebrow,.lbl,.metric-label{font-family:var(--mono)!important;font-size:10.5px!important;font-weight:600!important;letter-spacing:.1em!important;text-transform:uppercase;color:var(--muted)!important}
+
+/* ── cards, fields, pills ── */
+body.workspace .card,:root[data-theme=dark] body.workspace .card,.week-card,.today-metric,:root[data-theme=dark] .week-card{
+  background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:var(--r)!important;box-shadow:none!important;backdrop-filter:none!important}
+body.workspace .card>h2,#todoCard h2,.week-card h3{font-size:16px!important;font-weight:650!important;letter-spacing:-.015em}
+.card>.hint,.hint,.src{color:var(--muted)!important}
+.fld,.composer,.tdadd,body.workspace .fld,:root[data-theme=dark] .fld,:root[data-theme=dark] .composer,:root[data-theme=dark] body.workspace .fld,:root[data-theme=dark] .tdadd,:root[data-theme=dark] .gatechk,:root[data-theme=dark] .anchor,:root[data-theme=dark] .nt{
+  background:var(--surface-2)!important;border:1px solid var(--border)!important;border-radius:var(--r-sm)!important;color:var(--ink)!important}
+.fld:focus,.composer:focus-within{border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--accent-soft)!important;outline:none}
+.fld::placeholder,textarea::placeholder{color:var(--muted);opacity:.8}
+.pills button,:root[data-theme=dark] .pills button{border-radius:999px!important;border:1px solid var(--border)!important;background:var(--surface-2)!important;color:var(--ink-2)!important;box-shadow:none!important}
+.pills button[aria-pressed=true],:root[data-theme=dark] .pills button[aria-pressed=true]{background:var(--accent-soft)!important;border-color:color-mix(in srgb,var(--accent) 55%,transparent)!important;color:var(--accent)!important}
+.box{border-radius:7px!important}
+.box[aria-pressed=true]{background:var(--good)!important;border-color:var(--good)!important;box-shadow:none!important}
+.tdprog i,.cap i{background:var(--good)!important}
+.barfill,.minibar i,.strength .sbar i{background:var(--accent)!important}
+.tdprog,.cap,.bartrack,.minibar,.strength .sbar{background:var(--surface-3)!important}
+.tiles,:root[data-theme=dark] .tiles{border-radius:var(--r)!important;border-color:var(--border)!important;background:var(--border)!important}
+.tile,:root[data-theme=dark] .tile,:root[data-theme=dark] .dom{background:var(--surface)!important}
+.tile .vl{font-family:var(--mono);font-weight:600;letter-spacing:-.02em}
+.callout{border-radius:var(--r-sm)!important}
+.nt,.dom,.anchor{border-radius:var(--r-sm)!important}
+body.workspace .modal .mb,.workspace-dialog{background:var(--surface)!important;border:1px solid var(--line)!important;border-radius:16px!important;box-shadow:var(--shadow-lg)!important}
+.modal{backdrop-filter:blur(6px)}
+.askshell,:root[data-theme=dark] .askshell{border-radius:var(--r)!important;border-color:var(--border)!important;box-shadow:none!important;background:var(--surface)!important}
+details.why summary{color:var(--muted)}
+table th{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* ── Today: retire the old hero pieces, keep priorities, deep block and notes ── */
+#s-today .today-welcome,#s-today .today-overview,#s-today .today-next,#s-today .hero-card,#s-today .today-footer,#trail>.card:not(#blockCard){display:none!important}
+#subline{display:none!important}
+#s-today .tgrid{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:14px}
+#s-today .card{padding:20px}
+#s-today .today-journal{margin-top:14px}
+#s-today .today-journal textarea{width:100%;min-height:90px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--ink);padding:10px 12px;font:inherit;resize:vertical}
+#s-today .today-journal label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+#s-today .today-journal p{color:var(--muted);font-size:13px}
+
+/* ── cockpit ── */
+.ck{padding-top:24px}
+.ck-lbl{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ck-dim{opacity:.8;letter-spacing:.06em}
+.ck-top{display:grid;grid-template-columns:minmax(260px,.9fr) minmax(0,2fr);gap:14px;align-items:stretch;margin-bottom:14px}
+.ck-clock{padding:4px 4px 2px;display:flex;flex-direction:column;justify-content:flex-end}
+.ck-date{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.ck-date span{color:var(--accent);font-weight:600}.ck-date i{font-style:normal;opacity:.5}
+.ck-time{font-family:var(--mono);font-size:clamp(52px,6vw,76px);font-weight:500;letter-spacing:-.06em;line-height:1;margin:8px 0 10px;color:var(--ink)}
+.ck-greet{font-size:15px;color:var(--ink)}.ck-greet span{color:var(--muted)}
+.ck-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ck-kpi{--tone:var(--accent);position:relative;display:flex;flex-direction:column;gap:4px;padding:14px 14px 16px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);text-align:left;overflow:hidden;min-width:0;transition:border-color .15s,transform .15s}
+.ck-kpi:hover{border-color:var(--line);transform:translateY(-1px)}
+.ck-kpi b{font-family:var(--mono);font-size:28px;font-weight:600;letter-spacing:-.04em;line-height:1.1;color:var(--ink);margin-top:6px}
+.ck-kpi b em{font-style:normal;color:var(--muted);font-weight:500}
+.ck-kpi b small{font-size:15px;color:var(--muted);margin-left:2px;font-weight:500}
+.ck-sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ck-kpi:after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tone);opacity:.9}
+.ck-kpi .ck-meter{position:absolute;left:14px;right:14px;bottom:8px}
+.ck-meter{display:block;height:4px;border-radius:4px;background:var(--surface-3);overflow:hidden}
+.ck-meter>i{display:block;height:100%;border-radius:4px;background:var(--tone,var(--accent));transition:width .5s cubic-bezier(.3,.7,.3,1)}
+.ck-meter-lg{height:6px;margin:12px 0 16px}
+
+.ck-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);grid-template-areas:"now check" "line dead" "line load";gap:14px;align-items:start}
+.ck-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;min-width:0}
+.ck-cardhd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.ck-now{grid-area:now;position:relative;overflow:hidden;min-height:228px;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 6%,var(--surface)),var(--surface) 55%);border-color:color-mix(in srgb,var(--accent) 22%,var(--border))}
+.ck-now:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent 70%)}
+.ck-now h2,.ck-now h3{font-size:clamp(22px,2.2vw,28px);line-height:1.15;letter-spacing:-.03em;margin:2px 0 6px}
+.ck-now h3{font-size:18px}
+.ck-info{color:var(--muted);font-size:13.5px;margin:0 0 6px;max-width:60ch;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ck-left{font-size:13px;color:var(--muted);margin-top:auto;padding-top:8px}
+.ck-left b{font-family:var(--mono);font-size:22px;color:var(--ink);font-weight:600;letter-spacing:-.03em;margin-right:3px}
+.ck-big{font-family:var(--mono);font-size:clamp(48px,6vw,72px);font-weight:500;letter-spacing:-.06em;line-height:1;color:var(--accent);margin:4px 0 8px}
+.ck-live{display:inline-flex;align-items:center;gap:8px;color:var(--accent)}
+.ck-live i{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 var(--accent);animation:ckpulse 1.8s infinite}
+@keyframes ckpulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent)}80%,100%{box-shadow:0 0 0 8px transparent}}
+.ck-tag{--c:var(--gen);display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink-2);padding:3px 9px;border-radius:999px;background:color-mix(in srgb,var(--c) 14%,transparent);border:1px solid color-mix(in srgb,var(--c) 35%,transparent);white-space:nowrap}
+.ck-tag:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c)}
+.ck-actions{display:flex;gap:8px;flex-wrap:wrap}
+.ck-btn{height:36px;padding:0 14px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface-2);color:var(--ink);font-size:13px;font-weight:600;white-space:nowrap;transition:border-color .15s,filter .15s}
+.ck-btn:hover{border-color:var(--line)}
+.ck-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.ck-primary:hover{filter:brightness(1.07)}
+.ck-ghost{background:transparent}
+.ck-next{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:13.5px;color:var(--ink-2);display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ck-next b{font-family:var(--mono);color:var(--ink)}
+.ck-next em{--c:var(--gen);font-style:normal;font-size:12px;color:var(--c)}
+.ck-link{font-size:12.5px;font-weight:600;color:var(--accent);padding:2px 0}
+.ck-link:hover{text-decoration:underline}
+
+.ck-check{grid-area:check}
+.ck-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.ck-field{display:flex;flex-direction:column;gap:8px}
+.ck-step{display:inline-flex;align-items:center;gap:4px;padding:3px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border)}
+.ck-step button{width:34px;height:34px;border-radius:9px;font-size:18px;color:var(--ink-2);display:grid;place-items:center}
+.ck-step button:hover{background:var(--surface-3);color:var(--ink)}
+.ck-step output{min-width:78px;text-align:center;font-family:var(--mono);font-size:22px;font-weight:600;letter-spacing:-.03em}
+.ck-step output small{font-size:13px;color:var(--muted);margin-left:1px}
+.ck-step output em{font-style:normal;font-size:12px;color:var(--muted);font-family:var(--sans);font-weight:500;letter-spacing:0}
+.ck-ring{--p:0;--tone:var(--accent);width:92px;height:92px;flex:none;border-radius:50%;display:grid;place-items:center;align-content:center;text-align:center;
+  background:radial-gradient(closest-side,var(--surface) 80%,transparent 81%),conic-gradient(var(--tone) calc(var(--p)*1%),var(--surface-3) 0)}
+.ck-ring b{font-family:var(--mono);font-size:24px;font-weight:600;line-height:1;letter-spacing:-.04em}
+.ck-ring span{font-size:10px;color:var(--muted);max-width:68px;line-height:1.2;margin-top:3px}
+.ck-seg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px;padding:3px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border)}
+.ck-seg button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 2px;border-radius:9px;color:var(--muted);transition:background .15s,color .15s}
+.ck-seg button b{font-family:var(--mono);font-size:15px;color:var(--ink-2)}
+.ck-seg button span{font-size:10.5px}
+.ck-seg button:hover{background:var(--surface-3)}
+.ck-seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+.ck-seg button[aria-pressed=true] b{color:var(--accent-ink)}
+
+.ck-line{grid-area:line}
+.ck-tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.ck-it{--c:var(--gen);display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:12px;padding:8px 10px 8px 8px;border-radius:11px;border:1px solid transparent;position:relative;transition:background .15s}
+.ck-it:hover{background:var(--surface-2)}
+.ck-tm{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;line-height:1.25}
+.ck-tm small{font-size:11px;color:var(--muted);font-weight:500}
+.ck-body{display:flex;flex-direction:column;min-width:0;padding-left:12px;border-left:3px solid var(--c);text-align:left}
+.ck-body b{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ck-body span{font-size:12px;color:var(--muted)}
+.ck-it.school .ck-body{border-left-style:dotted}
+.ck-it.school .ck-body b{font-weight:500;color:var(--ink-2)}
+.ck-it.past,.ck-it.done{opacity:.5}
+.ck-it.done .ck-body b{text-decoration:line-through;text-decoration-color:var(--muted)}
+.ck-it.now{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,transparent);opacity:1}
+.ck-it.now .ck-tm{color:var(--accent)}
+.ck-chip{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:3px 7px;border:1px solid var(--border);border-radius:6px}
+.ck-chk{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--line);display:grid;place-items:center;transition:background .15s,border-color .15s}
+.ck-chk svg{width:14px;height:14px;fill:none;stroke:transparent;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ck-chk:hover{border-color:var(--good)}
+.ck-chk[aria-pressed=true]{background:var(--good);border-color:var(--good)}
+.ck-chk[aria-pressed=true] svg{stroke:var(--plane)}
+.ck-empty{color:var(--muted);font-size:13.5px;padding:10px 4px}
+.ck-foot{display:flex;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+
+.ck-dead{grid-area:dead}
+.ck-dl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.ck-dl li{--tone:var(--good);--c:var(--gen);display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--border)}
+.ck-dl li:first-child{border-top:0;padding-top:2px}
+.ck-dd{font-family:var(--mono);color:var(--tone);text-align:center;border-radius:9px;padding:5px 0;background:color-mix(in srgb,var(--tone) 12%,transparent)}
+.ck-dd b{font-size:18px;font-weight:600;letter-spacing:-.03em}
+.ck-dd small{font-size:11px;margin-left:1px}
+.ck-dt{display:flex;flex-direction:column;min-width:0}
+.ck-dt b{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ck-dt span{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.ck-dt span i{width:6px;height:6px;border-radius:50%;background:var(--c);flex:none}
+
+.ck-load{grid-area:load}
+.ck-load>.ck-meter{margin:-4px 0 14px}
+.ck-bars{display:flex;flex-direction:column;gap:9px}
+.ck-bar{--c:var(--gen);display:grid;grid-template-columns:78px minmax(0,1fr) 78px;gap:10px;align-items:center;font-size:12.5px}
+.ck-bar>span{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ck-bar>i{position:relative;height:8px;border-radius:5px;background:var(--surface-3);overflow:hidden}
+.ck-bar>i>i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--c)}
+.ck-bar>i>i:first-child{opacity:.28}
+.ck-bar>b{font-family:var(--mono);font-size:12px;text-align:right;font-weight:600}
+.ck-bar>b small{color:var(--muted);font-weight:500}
+.ck-sub2{margin:18px 0 8px}
+.ck-spark{position:relative;display:grid;grid-template-columns:repeat(7,1fr);gap:6px;height:84px;align-items:end}
+.ck-spark:before{content:"";position:absolute;left:0;right:0;bottom:calc(16px + (100% - 16px)*var(--goal)/100%);border-top:1px dashed color-mix(in srgb,var(--accent) 55%,transparent);pointer-events:none}
+.ck-sp{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
+.ck-sp i{width:100%;max-width:26px;border-radius:5px 5px 2px 2px;background:var(--surface-3);flex:none;max-height:calc(100% - 16px)}
+.ck-sp.on i{background:var(--accent)}
+.ck-sp span{font-family:var(--mono);font-size:10px;color:var(--muted);height:12px}
+.ck-divider{display:flex;align-items:center;gap:12px;margin:26px 0 14px}
+.ck-divider:after{content:"";flex:1;height:1px;background:var(--border)}
+
+/* ── Planner: flat cockpit cover instead of the burgundy editorial one ── */
+#s-plan .pl-cover{background:var(--surface)!important;border:1px solid var(--border);border-radius:var(--r)!important;color:var(--ink)!important}
+#s-plan .pl-cover h1{color:var(--ink)!important;font-weight:650!important;letter-spacing:-.035em!important}
+#s-plan .pl-cover h1 i{font-style:normal;color:var(--accent)}
+#s-plan .pl-cover .pl-eyebrow{font-family:var(--mono)!important;letter-spacing:.12em!important}
+#s-plan .pl-tags span{background:var(--surface-2)!important;border-color:var(--border)!important;color:var(--ink-2)}
+#s-plan .pl-cstats b{font-family:var(--mono)!important;letter-spacing:-.04em}
+#s-plan .pl-clip{color-scheme:inherit;background:var(--surface-2)!important;color:var(--ink)!important;transform:none!important;box-shadow:none!important;border:1px solid var(--border);border-radius:12px!important}
+#s-plan .pl-clip *{color:inherit}
+#s-plan .pl-clip .pl-sec{border-bottom-color:var(--line)!important;font-family:var(--mono)!important;color:var(--muted)!important}
+#s-plan .pl-clip .pl-hd{font-family:var(--sans)!important}
+#s-plan h2.pl-h2{border-top:1px solid var(--border)!important;font-weight:650!important;letter-spacing:-.025em!important}
+#s-plan h2.pl-h2 .pl-no{font-family:var(--mono)!important}
+#s-plan .pl-lbl{font-family:var(--mono)!important}
+body.workspace .pl-drawer{background:var(--surface)!important;border-left:1px solid var(--line)!important}
+.pl-focus{font-family:var(--sans)!important}
+.pl-focus b{font-family:var(--mono)!important}
+
+/* the Today dashboard already carries today's slip, so the planner cover is just a header */
+#s-plan .pl-cover{grid-template-columns:1fr!important;padding:22px 24px!important;gap:0!important}
+#s-plan .pl-cover>div>p,#s-plan .pl-tags,#s-plan .pl-clip{display:none!important}
+#s-plan .pl-cover h1{font-size:clamp(26px,3vw,36px)!important;margin:.4rem 0 .2rem!important}
+#s-plan .pl-cstats{margin-top:.8rem!important}
+#s-plan .pl-cstats b{font-size:1.45rem!important}
+
+/* ── phone tab bar + sync pill ── */
+body.tg .tgnav,:root[data-theme=dark] body.tg .tgnav{background:color-mix(in srgb,var(--surface) 88%,transparent)!important;border-top:1px solid var(--border)!important;backdrop-filter:saturate(1.4) blur(16px);-webkit-backdrop-filter:saturate(1.4) blur(16px);box-shadow:none!important}
+.tgnav button{color:var(--muted)!important;position:relative}
+.tgnav button span{font-size:10.5px!important;font-weight:600!important}
+.tgnav button[aria-selected=true]{color:var(--ink)!important}
+.tgnav button[aria-selected=true] svg{color:var(--accent);stroke:var(--accent)}
+.tgnav button[aria-selected=true]:before{content:"";position:absolute;top:0;left:30%;right:30%;height:2px;border-radius:0 0 2px 2px;background:var(--accent)}
+.tgnav .nb{background:var(--accent)!important;color:var(--accent-ink)!important}
+.tgsync{background:var(--surface-2)!important;border:1px solid var(--line)!important;color:var(--ink)!important;box-shadow:var(--shadow-lg)!important}
+
+/* ── responsive ── */
+@media(max-width:1180px){
+  .ck-top{grid-template-columns:1fr}
+  .ck-clock{flex-direction:row;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:6px 16px}
+  .ck-clock .ck-date{order:1;width:100%}
+  .ck-time{order:2;margin:0}
+  .ck-greet{order:3;text-align:right;max-width:52%}
+}
+@media(max-width:1000px){
+  body.workspace .wrap{margin-left:0;padding:0 20px 110px}
+  body.workspace .workspace-header,:root[data-theme=dark] body.workspace .workspace-header{margin:0 -20px!important;padding:10px 20px!important}
+  .subnav{order:3;flex-basis:100%;justify-content:flex-start}
+  .ck-grid{grid-template-columns:1fr 1fr;grid-template-areas:"now now" "check line" "dead line" "load load"}
+  #s-today .tgrid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  body.workspace .wrap{padding:0 16px 110px}
+  body.workspace .workspace-header,:root[data-theme=dark] body.workspace .workspace-header{margin:0 -16px!important;padding:8px 16px!important;min-height:52px}
+  #stuckBtn,#saveBtn{display:none!important}
+  .ck{padding-top:16px}
+  .ck-grid{grid-template-columns:1fr;grid-template-areas:"now" "check" "line" "dead" "load";gap:12px}
+  .ck-kpis{grid-template-columns:1fr 1fr;gap:8px}
+  .ck-kpi{padding:12px 12px 14px}.ck-kpi b{font-size:24px}
+  .ck-card{padding:16px}
+  .ck-time{font-size:54px}
+  .ck-greet{max-width:none;text-align:left;width:100%;font-size:14px}
+  .ck-now{min-height:0}
+  .ck-actions .ck-btn{flex:1 1 auto}
+  .ck-bar{grid-template-columns:66px minmax(0,1fr) 72px}
+  .subnav-track{width:100%}
+  .subnav button{flex:1 0 auto;padding:7px 12px}
+}
+@media(prefers-reduced-motion:reduce){.ck-live i{animation:none}.ck-kpi,.ck-meter>i{transition:none}}
+</style>
+
 
 </head>
 <body class="workspace">
@@ -2027,7 +2073,7 @@ body.pl-dragging{user-select:none;cursor:grabbing}
   <div class="sidebar-bottom"><div class="sidebar-tip"><span class="tip-icon">↗</span><b>A little clarity goes a long way.</b><p>Make a plan. Find your focus. Leave room to breathe.</p><button id="sidebarPlan">Plan your day <span>→</span></button></div><div class="workspace-account"><span class="account-avatar">C</span><div>My workspace<small>Personal · Local first</small></div></div></div>
 </aside>
 <div class="wrap">
-<header class="workspace-header"><div class="workspace-location"><span>Workspace</span><span class="breadcrumb-slash">/</span><strong id="workspaceCrumb">Overview</strong></div><div class="hbtns"><button class="ghost" id="stuckBtn">I'm stuck</button><button class="ghost" id="minBtn">Minimum day</button><button class="ghost" id="themeBtn" aria-label="Switch color theme">Dark</button><button class="ghost key" id="saveBtn">Backup</button></div></header>
+<header class="workspace-header"><div class="workspace-location"><span>Workspace</span><span class="breadcrumb-slash">/</span><strong id="workspaceCrumb">Overview</strong></div><nav class="subnav" id="subnav" aria-label="Pages in this section" hidden></nav><div class="hbtns"><button class="ghost" id="stuckBtn">I'm stuck</button><button class="ghost" id="minBtn">Minimum day</button><button class="ghost" id="themeBtn" aria-label="Switch color theme">Dark</button><button class="ghost key" id="saveBtn">Backup</button></div></header>
 <main id="workspaceMain" tabindex="-1">
 <div class="workspace-page-heading" id="workspacePageHeading"><div class="today-kicker" id="workspaceGroup">WORKSPACE</div><h1 id="workspaceTitle">Overview</h1><p id="workspaceDescription"></p></div>
 <div class="workspace-context" id="subline"></div>
@@ -2948,28 +2994,73 @@ function execScore(){
 /* Tasks, Gym and "Why it works" are no longer reachable: the task list now lives
    in the To-do card on Today, and the other two are retired. Their sections stay
    in the document, unlinked, so nothing that still renders them has to change. */
-var TABS=[["today", "Overview"], ["plan", "Planner"], ["focus", "Focus"], ["cal", "Calendar"], ["week", "Weekly review"], ["goals", "Goals"], ["school", "Subjects"], ["classes", "Timetable"], ["revise", "Revision"], ["notes", "Notes"], ["checkin", "Check-in"], ["rituals", "Rituals"], ["reset", "Reset"], ["ask", "Assistant"], ["sync", "Data & sync"]];
+/* v3 navigation: five places you actually go, each with its own sub-pages.
+   Every old page key still works (CompassSetTab('sync'), ('plan') ...), the
+   sidebar and the phone tab bar just show the five groups. Tasks, Gym and
+   "Why it works" stay retired; their sections are kept, unlinked. */
+var TABS=[["today","Dashboard"],["focus","Focus"],["plan","Planner"],["cal","Calendar"],["week","Review"],["school","Subjects"],["classes","Timetable"],["revise","Revision"],["notes","Notes"],["checkin","Check-in"],["goals","Goals"],["rituals","Rituals"],["reset","Reset"],["ask","Assistant"],["sync","Data & sync"]];
 var GONE_TABS={tasks:1, gym:1, why:1};
-var PAGE_META={today:['Workspace','Your day, at a glance.','Plan with intention. Make progress on what matters.','▦'],plan:['Workspace','Your week, hour by hour.','School, hand-ins and real study time, all editable.','▤'],focus:['Workspace','Find your focus.','Protect a block of time for one meaningful task.','◷'],cal:['Workspace','Your calendar.','See your commitments and make room for the work.','▣'],week:['Workspace','Reflect. Then reset.','Review your week and shape the next one.','▤'],goals:['Workspace','A direction worth taking.','Connect your daily actions to your longer-term goals.','◎'],school:['Learning','Your learning, organized.','Keep subjects, workload, and deadlines in view.','◇'],classes:['Learning','Your timetable.','A clear rhythm for your school week.','▦'],revise:['Learning','Build lasting understanding.','Revisit the right topics at the right time.','▥'],notes:['Learning','Make room for ideas.','Capture questions, connect ideas, and revisit what you learn.','▧'],checkin:['Wellbeing','Start where you are.','Check in with your energy, mood, and daily anchors.','♡'],rituals:['Wellbeing','Small actions. Steady rhythm.','Create routines that support the way you want to live.','≋'],reset:['Wellbeing','Begin again, gently.','Find a manageable next step when things feel difficult.','↻'],ask:['Tools','A little help thinking.','Explore a question, work through a problem, or make a plan.','✧'],sync:['Tools','Your data, your control.','Manage saving, device sync, and backups.','⇄']};
+var GROUPS=[
+  {k:"today",n:"Today",p:["today","focus"]},
+  {k:"week",n:"Week",p:["plan","cal","week"]},
+  {k:"school",n:"School",p:["school","classes","revise","notes"]},
+  {k:"me",n:"Me",p:["checkin","goals","rituals","reset"]},
+  {k:"tools",n:"Tools",p:["ask","sync"]}
+];
+var SVGA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">';
+var GICON={
+  today:SVGA+'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  week:SVGA+'<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8.5 3v4M15.5 3v4M8 14h3M8 17h6"/></svg>',
+  school:SVGA+'<path d="M3 8.5 12 4.5l9 4-9 4-9-4z"/><path d="M7 10.6V16c0 1.2 2.2 2.2 5 2.2s5-1 5-2.2v-5.4"/></svg>',
+  me:SVGA+'<path d="M3 12.5h4l2-5 3.2 10 2.4-6 1.4 3H21"/></svg>',
+  tools:SVGA+'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>'
+};
+var PAGE_META={
+  today:['Today','Dashboard','Where you are right now, and what is next.'],
+  focus:['Today','Focus','One block, one question, phone in another room.'],
+  plan:['Week','Planner','Lessons, hand-ins and study blocks, hour by hour.'],
+  cal:['Week','Calendar','Every past day: what you did, slept and finished.'],
+  week:['Week','Weekly review','Look back at the week, then shape the next one.'],
+  school:['School','Subjects','Workload and deadlines per subject.'],
+  classes:['School','Timetable','Your fixed lessons, so plans land in the gaps.'],
+  revise:['School','Revision','Spaced revision: the topics that are due.'],
+  notes:['School','Notes','Questions and ideas, saved per subject.'],
+  checkin:['Me','Check-in','Sleep, energy, mood and your daily anchors.'],
+  goals:['Me','Goals','The longer goals this week is working towards.'],
+  rituals:['Me','Rituals','Start-of-day, shutdown and weekly scripts.'],
+  reset:['Me','Reset','A smaller next step for a hard day.'],
+  ask:['Tools','Assistant','Think something through with the Compass assistant.'],
+  sync:['Tools','Data & sync','Saving, device sync and backups.']
+};
+function groupOf(k){ for(var i=0;i<GROUPS.length;i++) if(GROUPS[i].p.indexOf(k)>-1) return GROUPS[i]; return GROUPS[0]; }
+function pageName(k){ var t=TABS.filter(function(x){return x[0]===k;})[0]; return t?t[1]:k; }
+var LAST={};
+window.COMPASS_NAV={groups:GROUPS,tabs:TABS,meta:PAGE_META,icons:GICON,groupOf:groupOf,pageName:pageName,
+  target:function(g){ var G=GROUPS.filter(function(x){return x.k===g;})[0]; return G?(LAST[g]||G.p[0]):"today"; }};
+function navGo(k){ if(window.CompassSetTab) window.CompassSetTab(k); else show(k); }
 function buildTabs(){
-  var group='';
-  $('#tabs').innerHTML=TABS.map(function(t){
-    var m=PAGE_META[t[0]], heading=m[0]!==group?'<div class="nav-group" role="presentation">'+m[0]+'</div>':'';group=m[0];
-    return heading+'<button id="tab-'+t[0]+'" class="tab" role="tab" data-t="'+t[0]+'" aria-controls="s-'+t[0]+'" aria-selected="false" tabindex="-1"><span class="nav-icon" aria-hidden="true">'+m[3]+'</span><span>'+t[1]+'</span><span class="badge" data-bg="'+t[0]+'" style="display:none"></span></button>';
+  $('#tabs').innerHTML=GROUPS.map(function(g){
+    return '<button id="tab-'+g.k+'" class="tab" role="tab" data-g="'+g.k+'" data-t="'+g.p[0]+'" aria-selected="false" tabindex="-1"><span class="nav-icon" aria-hidden="true">'+GICON[g.k]+'</span><span>'+g.n+'</span><span class="badge" data-bg="'+g.k+'" style="display:none"></span></button>';
   }).join('');
-  $('#tabs').addEventListener('click',function(e){var b=e.target.closest('[data-t]');if(b){if(window.CompassSetTab) window.CompassSetTab(b.dataset.t);else show(b.dataset.t);}});
+  $('#tabs').addEventListener('click',function(e){var b=e.target.closest('[data-g]');if(b) navGo(window.COMPASS_NAV.target(b.dataset.g));});
   $('#tabs').addEventListener('keydown',function(e){if(!['ArrowDown','ArrowUp','Home','End'].includes(e.key))return;var all=Array.from(this.querySelectorAll('[role=tab]')),i=all.indexOf(document.activeElement);if(i<0)return;e.preventDefault();i=e.key==='Home'?0:e.key==='End'?all.length-1:(i+(e.key==='ArrowDown'?1:-1)+all.length)%all.length;all[i].focus();all[i].click();});
+  var sn=$('#subnav');
+  if(sn) sn.addEventListener('click',function(e){var b=e.target.closest('[data-sub]');if(b) navGo(b.dataset.sub);});
 }
 function show(k){
-  if(!PAGE_META[k])k='today';
-  S.tab=k;var m=PAGE_META[k];
-  each('.tab',null,function(b){var active=b.dataset.t===k;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;});
-  each('main>section',null,function(s){var active=s.id==='s-'+k;s.classList.toggle('on',active);s.setAttribute('role','tabpanel');s.setAttribute('aria-labelledby','tab-'+s.id.slice(2));});
-  $('#workspaceCrumb').textContent=TABS.find(function(t){return t[0]===k;})[1];
+  if(!PAGE_META[k]) k='today';
+  S.tab=k; var m=PAGE_META[k], g=groupOf(k); LAST[g.k]=k;
+  each('.tab',null,function(b){var active=b.dataset.g===g.k;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;});
+  each('main>section',null,function(s){var active=s.id==='s-'+k;s.classList.toggle('on',active);s.setAttribute('role','tabpanel');s.setAttribute('aria-labelledby','tab-'+groupOf(s.id.slice(2)).k);});
+  var sn=$('#subnav');
+  if(sn){ sn.hidden=g.p.length<2;
+    sn.innerHTML='<div class="subnav-track">'+g.p.map(function(p){return '<button data-sub="'+p+'" aria-pressed="'+(p===k)+'">'+esc(pageName(p))+'</button>';}).join('')+'</div>'; }
+  var loc=$('.workspace-location span'); if(loc) loc.textContent=g.n;
+  $('#workspaceCrumb').textContent=pageName(k);
   $('#workspaceTitle').textContent=m[1];$('#workspaceGroup').textContent=m[0];$('#workspaceDescription').textContent=m[2];
-  $('#workspacePageHeading').hidden=k==='today';$('#subline').hidden=k!=='today';
-  document.title=$('#workspaceCrumb').textContent+' · Compass';
-  document.body.dataset.page=k;
+  $('#workspacePageHeading').hidden=(k==='today'||k==='plan');$('#subline').hidden=true;
+  document.title=pageName(k)+' · Compass';
+  document.body.dataset.page=k; document.body.dataset.group=g.k;
   window.scrollTo({top:0,behavior:'instant'});
 }
 
@@ -6584,6 +6675,8 @@ window.CompassBridge={
   closeTop:function(){ closeModal(); $("#focusOv").classList.remove("on"); },
   wizards:{ plan:planWizard, shutdown:shutdownWizard, review:reviewWizard, stuck:stuckFlow },
   readiness:function(){ return readiness(); },
+  day:function(k){ return day(k||iso(new Date())); },
+  band:function(v){ return band(v); },
   goalStat:function(g){ return gStat(g); },
   goalLabels:function(){ return {pri:GPRI, status:GSTATUS}; },
   execScore:function(){ return execScore(); },
@@ -7104,24 +7197,13 @@ function doSave(){
 }
 
 /* ── bottom nav ────────────────────────────────────── */
-var PRIMARY=[["today","Today",I.today],["plan","Plan",I.week],["ask","Ask",I.ask],["school","School",I.school],["revise","Revise",I.revise]];
-var MORE=[
-  ["notes","Questions \u0026 notes",I.notes,"What to revise, saved per subject"],
-  ["checkin","Check-in \u0026 anchors",I.checkin,"Mood, sleep, energy and the five fixed points"],
-  ["classes","School schedule",I.grid,"Your weekly lessons, so plans land in the gaps"],
-  ["focus","Focus",I.focus,"Timed deep-work blocks and the hours behind you"],
-  ["cal","Calendar",I.cal,"Every past day — what you did, slept and finished"],
-  ["week","Week",I.week,"Habits, execution score, the six areas"],
-  ["goals","Goals",I.goals,"Two or three, on a 90-day horizon"],
-  ["rituals","Rituals",I.rituals,"The four scripts and the wizards"],
-  ["reset","When it breaks",I.reset,"Read this on the day you've stopped"],
-  ["sync","Sync",I.sync,"Share one copy across your phone, iPad and computer"]
-];
+var NAVG=(window.COMPASS_NAV&&window.COMPASS_NAV.groups)||[];
+var PRIMARY=NAVG.map(function(g){return [g.k,g.n,(window.COMPASS_NAV.icons||{})[g.k]||I.today];});
+var MORE=[];
 var nav=el("div","tgnav");
 nav.innerHTML = PRIMARY.map(function(t){
     return '<button data-nt="'+t[0]+'" aria-selected="false">'+t[2]+'<span>'+t[1]+'</span><i class="nb" data-nb="'+t[0]+'"></i></button>';
-  }).join("")
-  + '<button data-nmore="1" aria-selected="false">'+I.more+'<span>More</span><i class="nb" data-nb="more"></i></button>';
+  }).join("");
 document.body.appendChild(nav);
 
 var sheet=el("div","tgmore");
@@ -7143,14 +7225,12 @@ function setTab(k){
   if(k==="gym" && B.paintGym) B.paintGym();
   if(k==="cal" && B.paintCal) B.paintCal();
   Array.prototype.forEach.call(nav.querySelectorAll("[data-nt]"),function(b){
-    b.setAttribute("aria-selected", String(b.dataset.nt===k)); });
-  var isMore = MORE.some(function(m){return m[0]===k;});
-  nav.querySelector("[data-nmore]").setAttribute("aria-selected", String(isMore));
+    b.setAttribute("aria-selected", String(window.COMPASS_NAV ? window.COMPASS_NAV.groupOf(k).k===b.dataset.nt : b.dataset.nt===k)); });
   refreshBadges();
 }
 nav.addEventListener("click",function(e){
   var b=e.target.closest("[data-nt]");
-  if(b){ H.sel(); setTab(b.dataset.nt); closeSheet(); return; }
+  if(b){ H.sel(); setTab(window.COMPASS_NAV ? window.COMPASS_NAV.target(b.dataset.nt) : b.dataset.nt); closeSheet(); return; }
   if(e.target.closest("[data-nmore]")){ H.sel(); openSheet(); }
 });
 function openSheet(){
@@ -7229,8 +7309,8 @@ document.addEventListener("click",function(e){
 function applyChrome(){
   if(!IN_TG) return;
   var dark = document.documentElement.getAttribute("data-theme")==="dark";
-  var plane = dark ? "#0a0b0c" : "#f9f9f7";
-  var bar   = dark ? "#121417" : "#fcfcfb";
+  var plane = dark ? "#08090b" : "#f2f3f5";
+  var bar   = dark ? "#0f1114" : "#ffffff";
   try{ TG.setBackgroundColor(plane); }catch(e){}
   try{ TG.setHeaderColor(plane); }catch(e){}
   try{ TG.setBottomBarColor(bar); }catch(e){}
@@ -13120,7 +13200,7 @@ document.addEventListener("DOMContentLoaded", function(){
   dialog.innerHTML='<div class="palette-head"><input aria-label="Search workspace pages" placeholder="Where would you like to go?"><button aria-label="Close page finder">Esc</button></div><div class="palette-results"></div>';
   document.body.appendChild(dialog);
   var input=dialog.querySelector('input'),results=dialog.querySelector('.palette-results');
-  function paint(){var query=input.value.trim().toLowerCase();results.replaceChildren();document.querySelectorAll('#tabs [data-t]').forEach(function(tab){var title=tab.querySelector('span:nth-child(2)').textContent;if(!title.toLowerCase().includes(query))return;var button=document.createElement('button');button.className='palette-result';button.textContent=title;button.dataset.page=tab.dataset.t;var hint=document.createElement('small');hint.textContent='Open →';button.appendChild(hint);results.appendChild(button);});if(!results.children.length){var p=document.createElement('p');p.className='palette-empty';p.textContent='No pages found. Try “Notes” or “Focus”.';results.appendChild(p);}}
+  function paint(){var query=input.value.trim().toLowerCase();results.replaceChildren();(window.COMPASS_NAV?window.COMPASS_NAV.tabs:[]).forEach(function(tb){var g=window.COMPASS_NAV.groupOf(tb[0]).n,title=tb[1];if(!(title+' '+g).toLowerCase().includes(query))return;var button=document.createElement('button');button.className='palette-result';button.textContent=g+' / '+title;button.dataset.page=tb[0];var hint=document.createElement('small');hint.textContent='Open →';button.appendChild(hint);results.appendChild(button);});if(!results.children.length){var p=document.createElement('p');p.className='palette-empty';p.textContent='No pages found. Try “Notes” or “Focus”.';results.appendChild(p);}}
   function open(){input.value='';paint();dialog.showModal();input.focus();}
   document.getElementById('workspaceSearch').addEventListener('click',open);
   document.getElementById('sidebarPlan').addEventListener('click',function(){window.CompassSetTab('today');B.wizards.plan();});
@@ -13593,9 +13673,304 @@ var _render=B.render;B.render=function(){var r=_render.apply(this,arguments);try
 new MutationObserver(function(){if(ROOT.classList.contains("on")){renderAll();renderDeadlines();}}).observe(ROOT,{attributes:true,attributeFilter:["class"]});
 renderStatic();renderSyl();renderDeadlines();renderAll();
 setInterval(function(){if(ROOT.classList.contains("on")){renderDeadlines();if(!drag&&!$("#pl-drawer").classList.contains("pl-open"))renderGrid();}},60000);
-window.CompassPlanner={render:renderAll,blocks:function(){return blocks();},focus:function(id,mins){startFocus(byId(id),mins);}};
+window.CompassPlanner={render:renderAll,blocks:function(){return blocks();},focus:function(id,mins){startFocus(byId(id),mins);},
+  lessons:function(d){return effLessons().filter(function(l){return !d||l.d===d;});},deadlines:function(){return DEADLINES.slice();},
+  setDone:function(id,v){setDone(id,v);},edit:function(id){openEdit(id);},editLesson:function(k){openLesson(k);},add:function(d,s){openNew(d,s);},
+  focusing:function(){return fc?{t:fc.t,id:fc.id,mins:fc.mins,endAt:endAt}:null;},stopFocus:function(){stopFocus();}};
 })();
 }, {once:true});
 </script>
+<script id="compass-cockpit">
+document.addEventListener("DOMContentLoaded", function(){
+/* ═══════════════ TODAY COCKPIT (v3) ═══════════════
+   One screen for the day: where you are now, what is next, how you slept,
+   today's lessons and blocks, the deadlines coming at you and the week's
+   study load. It only reads what already exists (S.plan, S.days, S.ms,
+   S.focus) and writes through the same fields the rest of Compass uses,
+   so nothing new is stored and sync is unchanged.                        */
+(function(){
+"use strict";
+var B=window.CompassBridge, CP=window.CompassPlanner;
+var ROOT=document.getElementById("s-today");
+if(!B||!ROOT) return;
+
+var ENERGY=["","Empty","Low","Okay","Good","Full"];
+var SUBN={ma:"Maths AA HL",ke:"Chemistry HL",fy:"Physics SL",da:"Danish B HL",eo:"Economics SL",fa:"Persian A Lit",th:"TOK",gen:"General"};
+var KIND={study:"Study",proj:"Hand-in",hw:"Homework"};
+
+function $(s,r){ return (r||document).querySelector(s); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function pad(n){ return (n<10?"0":"")+n; }
+function ymd(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function mins(hm){ var p=String(hm||"0:0").split(":"); return (+p[0])*60+(+p[1]||0); }
+function hm(m){ return pad(Math.floor(m/60))+":"+pad(m%60); }
+function addDays(d,n){ var x=new Date(d+"T12:00"); x.setDate(x.getDate()+n); return ymd(x); }
+function mondayOf(d){ var x=new Date(d+"T12:00"), n=(x.getDay()+6)%7; x.setDate(x.getDate()-n); return ymd(x); }
+function isoWeek(d){ var t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); var n=t.getUTCDay()||7; t.setUTCDate(t.getUTCDate()+4-n); var y=new Date(Date.UTC(t.getUTCFullYear(),0,1)); return Math.ceil(((t-y)/864e5+1)/7); }
+function fmtH(m){ m=Math.max(0,Math.round(m)); var h=Math.floor(m/60), r=m%60; return h?(r?h+"h "+pad(r):h+"h"):r+"m"; }
+function col(s){ return "var(--"+(SUBN[s]?s:"gen")+")"; }
+function short(s){ return (SUBN[s]||"General").replace(/ (AA HL|HL|SL|Lit)$/,""); }
+function S(){ return B.get(); }
+function dayRec(k){ return B.day ? B.day(k) : (S().days[k]||{}); }
+
+/* subject code from a Compass subject name ("Maths AA HL" → ma) */
+function subCode(name){
+  var n=String(name||"").toLowerCase();
+  if(/math/.test(n)) return "ma"; if(/chem/.test(n)) return "ke"; if(/phys/.test(n)) return "fy";
+  if(/danish|dansk/.test(n)) return "da"; if(/econ/.test(n)) return "eo"; if(/persian|farsi/.test(n)) return "fa";
+  if(/tok|theory/.test(n)) return "th"; return "gen";
+}
+
+/* ── data ── */
+function blocks(){ var s=S(); return (s.plan&&Array.isArray(s.plan.blocks))?s.plan.blocks:[]; }
+function lessons(d){ try{ return CP&&CP.lessons ? CP.lessons(d) : []; }catch(e){ return []; } }
+function timeline(d){
+  var out=[];
+  lessons(d).forEach(function(l){
+    if(l.status==="cancelled") return;
+    out.push({school:1,key:l.key,s:mins(l.s),e:mins(l.e),sub:l.sub,t:l.topic||short(l.sub)+" lesson",status:l.status});
+  });
+  blocks().forEach(function(b){ if(b.d===d) out.push({id:b.id,s:mins(b.s),e:mins(b.e),sub:b.sub,k:b.k,t:b.t,info:b.info,done:!!b.done}); });
+  out.sort(function(a,b){ return a.s-b.s || a.e-b.e; });
+  return out;
+}
+function deadlines(){
+  var now=Date.now(), today=ymd(new Date()), list=[], seen={};
+  try{ (CP&&CP.deadlines?CP.deadlines():[]).forEach(function(x){
+    if(!x.d){ list.push({t:x.t,sub:x.s,at:null,note:x.note||"no date",big:x.big}); return; }
+    var at=new Date(x.d).getTime(); if(at<now-36e5) return;
+    seen[x.d.slice(0,10)+"|"+x.s]=1; list.push({t:x.t,sub:x.s,at:at,big:x.big,est:x.est});
+  }); }catch(e){}
+  (S().ms||[]).forEach(function(m){
+    if(m.done||!m.date||m.date<today) return;
+    var c=subCode(m.subject); if(seen[m.date+"|"+c]) return;
+    list.push({t:m.title+(m.subject?" · "+m.subject:""),sub:c,at:new Date(m.date+"T12:00").getTime(),big:1});
+  });
+  list.sort(function(a,b){ if(a.at==null) return 1; if(b.at==null) return -1; return a.at-b.at; });
+  return list;
+}
+function daysLeft(at){
+  var a=new Date(ymd(new Date())+"T00:00").getTime(), b=new Date(ymd(new Date(at))+"T00:00").getTime();
+  return Math.round((b-a)/864e5);
+}
+function focusRun(){
+  try{ if(CP&&CP.focusing){ var f=CP.focusing(); if(f) return f; } }catch(e){}
+  try{ var o=JSON.parse(localStorage.getItem("compass_pl_focus")||"null"); if(o&&o.endAt>Date.now()) return o; }catch(e){}
+  return null;
+}
+
+/* ── shell ── */
+var box=document.createElement("div");
+box.className="ck"; box.id="ck";
+ROOT.insertBefore(box, ROOT.firstChild);
+
+function head(){
+  var n=new Date(), h=n.getHours();
+  var greet=h<5?"Late night":h<12?"Good morning":h<18?"Good afternoon":"Good evening";
+  var tl=timeline(ymd(n)), cur=n.getHours()*60+n.getMinutes();
+  var left=tl.filter(function(x){return !x.school&&!x.done;});
+  var leftM=left.reduce(function(a,x){return a+(x.e-x.s);},0);
+  var nextL=tl.filter(function(x){return x.school&&x.s>cur;}).length;
+  var line = left.length ? left.length+" block"+(left.length>1?"s":"")+" to go ("+fmtH(leftM)+")" : "No study blocks left today";
+  if(nextL) line += " · "+nextL+" lesson"+(nextL>1?"s":"")+" ahead";
+  return '<div class="ck-clock">'
+    + '<div class="ck-date"><span>'+esc(n.toLocaleDateString("en-GB",{weekday:"long"}))+'</span> '+esc(n.toLocaleDateString("en-GB",{day:"numeric",month:"long"}))+' <i>·</i> Uge '+isoWeek(n)+'</div>'
+    + '<div class="ck-time" id="ckTime">'+pad(n.getHours())+':'+pad(n.getMinutes())+'</div>'
+    + '<div class="ck-greet">'+greet+', Navid. <span>'+esc(line)+'.</span></div>'
+    + '</div>';
+}
+
+function kpis(){
+  var s=S(), today=ymd(new Date()), d=dayRec(today);
+  var tb=blocks().filter(function(b){return b.d===today;});
+  var tDone=tb.filter(function(b){return b.done;});
+  var pm=tb.reduce(function(a,b){return a+mins(b.e)-mins(b.s);},0), dm=tDone.reduce(function(a,b){return a+mins(b.e)-mins(b.s);},0);
+  var goal=(s.focus&&s.focus.goal)||60, fm=d.focus||0;
+  var r=null, bd=null; try{ r=B.readiness(); bd=B.band?B.band(r.total):null; }catch(e){}
+  var dl=deadlines().filter(function(x){return x.at!=null;})[0];
+  function k(label,val,unit,sub,pct,tone,act){
+    return '<button class="ck-kpi" data-ck="'+act+'"'+(tone?' style="--tone:var('+tone+')"':'')+'><span class="ck-lbl">'+label+'</span>'
+      + '<b>'+val+(unit?'<small>'+unit+'</small>':'')+'</b><span class="ck-sub">'+sub+'</span>'
+      + (pct!=null?'<i class="ck-meter"><i style="width:'+Math.min(100,Math.round(pct))+'%"></i></i>':'')+'</button>';
+  }
+  var dd=dl?daysLeft(dl.at):null;
+  return '<div class="ck-kpis">'
+    + k("Blocks today", tb.length?tDone.length+'<em>/'+tb.length+'</em>':'0', '', tb.length?fmtH(dm)+' of '+fmtH(pm)+' done':'nothing planned', tb.length?dm/Math.max(pm,1)*100:0, '--accent', 'plan')
+    + k("Focus", fmtH(fm), '', 'goal '+fmtH(goal), fm/goal*100, '--d3', 'focus')
+    + k("Readiness", r?r.total:'–', '', bd?esc(bd.n):'log sleep + energy', r?r.total:0, bd?bd.c:'--muted', 'checkin')
+    + k("Next deadline", dl?(dd<=0?'Today':dd+'<small>d</small>'):'–', '', dl?esc(dl.t):'nothing dated', null, dl?(dd<=2?'--crit':dd<=7?'--warn':'--good'):'--muted', 'school')
+    + '</div>';
+}
+
+function nowCard(){
+  var n=new Date(), today=ymd(n), cur=n.getHours()*60+n.getMinutes()+n.getSeconds()/60;
+  var f=focusRun();
+  if(f){
+    var ms=Math.max(0,f.endAt-Date.now()), mm=Math.floor(ms/60000), ss=Math.floor(ms%60000/1000), tot=(f.mins||50)*60000;
+    return '<div class="ck-card ck-now ck-focus"><div class="ck-cardhd"><span class="ck-lbl ck-live"><i></i>Focus running</span><span class="ck-lbl">'+esc(f.mins||50)+' min block</span></div>'
+      + '<div class="ck-big" id="ckFocusT">'+pad(mm)+':'+pad(ss)+'</div>'
+      + '<h3>'+esc(f.t||"Focus block")+'</h3>'
+      + '<i class="ck-meter ck-meter-lg"><i id="ckFocusBar" style="width:'+Math.round((1-ms/tot)*100)+'%"></i></i>'
+      + '<div class="ck-actions">'+(f.id?'<button class="ck-btn ck-primary" data-ck-done="'+esc(f.id)+'">Tick it off</button>':'')+'<button class="ck-btn" data-ck="stopfocus">Stop</button></div></div>';
+  }
+  var tl=timeline(today);
+  var now=tl.filter(function(x){return x.s<=cur&&x.e>cur&&!x.done;});
+  var cand=now.filter(function(x){return !x.school;})[0]||now[0];
+  var next=tl.filter(function(x){return x.s>cur&&!x.done;})[0];
+  var html='<div class="ck-card ck-now">';
+  if(cand){
+    var left=Math.round(cand.e-cur), pct=(cur-cand.s)/(cand.e-cand.s)*100;
+    html+='<div class="ck-cardhd"><span class="ck-lbl ck-live"><i></i>Now · '+hm(cand.s)+'–'+hm(cand.e)+'</span><span class="ck-tag" style="--c:'+col(cand.sub)+'">'+esc(short(cand.sub))+(cand.school?' · lesson':cand.k?' · '+esc(KIND[cand.k]||cand.k):'')+'</span></div>'
+      + '<h2>'+esc(cand.t)+'</h2>'
+      + (cand.info?'<p class="ck-info">'+esc(cand.info)+'</p>':'')
+      + '<div class="ck-left"><b>'+fmtH(left)+'</b> left</div>'
+      + '<i class="ck-meter ck-meter-lg"><i style="width:'+Math.round(pct)+'%;background:'+col(cand.sub)+'"></i></i>'
+      + '<div class="ck-actions">'
+      + (cand.school?'<button class="ck-btn" data-ck-les="'+esc(cand.key)+'">Lesson details</button>'
+          :'<button class="ck-btn ck-primary" data-ck-focus="'+esc(cand.id)+'" data-m="'+Math.max(10,Math.min(90,left))+'">Start focus · '+fmtH(Math.max(10,Math.min(90,left)))+'</button><button class="ck-btn" data-ck-done="'+esc(cand.id)+'">Done</button><button class="ck-btn ck-ghost" data-ck-edit="'+esc(cand.id)+'">Edit</button>')
+      + '</div>';
+    if(next) html+='<div class="ck-next"><span class="ck-lbl">Then</span><b>'+hm(next.s)+'</b> '+esc(next.t)+' <em style="--c:'+col(next.sub)+'">'+esc(short(next.sub))+'</em></div>';
+  } else if(next){
+    var wait=Math.round(next.s-cur);
+    html+='<div class="ck-cardhd"><span class="ck-lbl">Up next · in '+fmtH(wait)+'</span><span class="ck-tag" style="--c:'+col(next.sub)+'">'+esc(short(next.sub))+(next.school?' · lesson':next.k?' · '+esc(KIND[next.k]||next.k):'')+'</span></div>'
+      + '<h2>'+esc(next.t)+'</h2>'
+      + (next.info?'<p class="ck-info">'+esc(next.info)+'</p>':'')
+      + '<div class="ck-left"><b>'+hm(next.s)+'</b> to '+hm(next.e)+'</div>'
+      + '<div class="ck-actions">'
+      + (next.school?'<button class="ck-btn" data-ck-les="'+esc(next.key)+'">Lesson details</button>'
+          :'<button class="ck-btn ck-primary" data-ck-focus="'+esc(next.id)+'" data-m="'+Math.min(90,Math.max(10,next.e-next.s))+'">Start it now</button><button class="ck-btn ck-ghost" data-ck-edit="'+esc(next.id)+'">Edit</button>')
+      + '</div>';
+    var after=tl.filter(function(x){return x.s>next.s&&!x.done;})[0];
+    if(after) html+='<div class="ck-next"><span class="ck-lbl">Then</span><b>'+hm(after.s)+'</b> '+esc(after.t)+' <em style="--c:'+col(after.sub)+'">'+esc(short(after.sub))+'</em></div>';
+  } else {
+    var open=tl.filter(function(x){return !x.school&&!x.done;});
+    var tm=addDays(today,1), tmN=timeline(tm).length;
+    html+='<div class="ck-cardhd"><span class="ck-lbl">'+(open.length?'Left over today':'All clear')+'</span></div>'
+      + '<h2>'+(open.length?open.length+' block'+(open.length>1?'s':'')+' not ticked off':(tl.length?'Today’s plan is done.':'Nothing scheduled today.'))+'</h2>'
+      + '<p class="ck-info">'+(open.length?'Tick them off if you did them, or move them in the planner.':'Tomorrow has '+tmN+' item'+(tmN===1?'':'s')+' planned. Wrap up when you are ready.')+'</p>'
+      + '<div class="ck-actions"><button class="ck-btn ck-primary" data-ck="shutdown">Wrap up the day</button><button class="ck-btn" data-ck="plan">Open planner</button><button class="ck-btn ck-ghost" data-ck="add">Add a block</button></div>';
+  }
+  return html+'</div>';
+}
+
+function checkCard(){
+  var d=dayRec(ymd(new Date())), sl=+d.sleep||0, en=+d.energy||0;
+  var r=null, bd=null; try{ r=B.readiness(); bd=B.band?B.band(r.total):null; }catch(e){}
+  var segs=[1,2,3,4,5].map(function(v){ return '<button data-ck-en="'+v+'" aria-pressed="'+(en===v)+'"><b>'+v+'</b><span>'+ENERGY[v]+'</span></button>'; }).join("");
+  return '<div class="ck-card ck-check"><div class="ck-cardhd"><span class="ck-lbl">Check-in</span><button class="ck-link" data-ck="checkin">Full check-in →</button></div>'
+    + '<div class="ck-row"><div class="ck-field"><span class="ck-lbl">Sleep last night</span>'
+    + '<div class="ck-step"><button data-ck-sl="-0.5" aria-label="Less sleep">−</button><output>'+(sl?sl+'<small>h</small>':'<em>not logged</em>')+'</output><button data-ck-sl="0.5" aria-label="More sleep">+</button></div></div>'
+    + '<div class="ck-ring" style="--p:'+(r?r.total:0)+';--tone:var('+(bd?bd.c:'--muted')+')"><b>'+(r?r.total:'–')+'</b><span>'+(bd?esc(bd.n):'readiness')+'</span></div></div>'
+    + '<span class="ck-lbl">Energy right now</span><div class="ck-seg">'+segs+'</div>'
+    + '</div>';
+}
+
+function lineCard(){
+  var n=new Date(), today=ymd(n), cur=n.getHours()*60+n.getMinutes();
+  var tl=timeline(today);
+  var rows=tl.map(function(x){
+    var st=x.done?"done":x.e<=cur?"past":x.s<=cur?"now":"";
+    var right = x.school
+      ? '<span class="ck-chip">'+esc(x.status&&x.status!=="planned"?x.status:"lesson")+'</span>'
+      : '<button class="ck-chk" data-ck-done="'+esc(x.id)+'" aria-pressed="'+x.done+'" aria-label="'+(x.done?'Untick':'Tick off')+'"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></button>';
+    return '<li class="ck-it '+st+(x.school?' school':'')+'" style="--c:'+col(x.sub)+'">'
+      + '<span class="ck-tm">'+hm(x.s)+'<small>'+hm(x.e)+'</small></span>'
+      + '<button class="ck-body" '+(x.school?'data-ck-les="'+esc(x.key)+'"':'data-ck-edit="'+esc(x.id)+'"')+'><b>'+esc(x.t)+'</b><span>'+esc(short(x.sub))+(x.school?' · lesson':x.k?' · '+esc(KIND[x.k]||x.k):'')+' · '+fmtH(x.e-x.s)+'</span></button>'
+      + right+'</li>';
+  });
+  if(!rows.length) rows=['<li class="ck-empty">Nothing on the timeline today. <button class="ck-link" data-ck="add">Add a block</button></li>'];
+  var nm = tl.length ? tl.filter(function(x){return x.done||(x.school&&x.e<=cur);}).length+' of '+tl.length+' behind you' : '';
+  return '<div class="ck-card ck-line"><div class="ck-cardhd"><span class="ck-lbl">Today’s timeline</span><span class="ck-lbl ck-dim">'+nm+'</span></div><ol class="ck-tl">'+rows.join("")+'</ol>'
+    + '<div class="ck-foot"><button class="ck-link" data-ck="add">+ Block</button><button class="ck-link" data-ck="plan">Week view →</button></div></div>';
+}
+
+function deadCard(){
+  var list=deadlines().slice(0,6);
+  var rows=list.map(function(x){
+    var dd=x.at!=null?daysLeft(x.at):null;
+    var tone=dd==null?"--muted":dd<=2?"--crit":dd<=7?"--warn":"--good";
+    var when=x.at!=null?new Date(x.at).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}):esc(x.note||"no date");
+    return '<li style="--tone:var('+tone+');--c:'+col(x.sub)+'"><span class="ck-dd">'+(dd==null?'?':dd<=0?'<b>Now</b>':'<b>'+dd+'</b><small>d</small>')+'</span>'
+      + '<span class="ck-dt"><b>'+esc(x.t)+'</b><span><i></i>'+esc(short(x.sub))+' · '+when+(x.est?' · est.':'')+'</span></span></li>';
+  });
+  return '<div class="ck-card ck-dead"><div class="ck-cardhd"><span class="ck-lbl">Deadlines</span><button class="ck-link" data-ck="school">All →</button></div>'
+    + '<ol class="ck-dl">'+(rows.join("")||'<li class="ck-empty">Nothing coming up.</li>')+'</ol></div>';
+}
+
+function loadCard(){
+  var today=ymd(new Date()), mon=mondayOf(today), sun=addDays(mon,6);
+  var wb=blocks().filter(function(b){return b.d>=mon&&b.d<=sun;}), by={}, tot=0, done=0;
+  wb.forEach(function(b){ var m=mins(b.e)-mins(b.s); by[b.sub]=by[b.sub]||{p:0,d:0}; by[b.sub].p+=m; tot+=m; if(b.done){ by[b.sub].d+=m; done+=m; } });
+  var order=Object.keys(by).sort(function(a,b){return by[b].p-by[a].p;});
+  var max=order.length?by[order[0]].p:1;
+  var bars=order.map(function(s){ var o=by[s];
+    return '<div class="ck-bar" style="--c:'+col(s)+'"><span>'+esc(short(s))+'</span><i><i style="width:'+(o.p/max*100)+'%"></i><i style="width:'+(o.d/max*100)+'%"></i></i><b>'+fmtH(o.d)+'<small>/'+fmtH(o.p)+'</small></b></div>'; }).join("");
+  /* focus minutes, last 7 days */
+  var s=S(), goal=(s.focus&&s.focus.goal)||60, days=[], fmax=goal;
+  for(var i=6;i>=0;i--){ var k=addDays(today,-i), r=s.days&&s.days[k], m=r&&r.focus||0; fmax=Math.max(fmax,m); days.push({k:k,m:m}); }
+  var spark=days.map(function(o){ var dd=new Date(o.k+"T12:00");
+    return '<div class="ck-sp'+(o.k===today?' on':'')+'" title="'+esc(o.k)+': '+fmtH(o.m)+'"><i style="height:'+Math.max(3,o.m/fmax*100)+'%"></i><span>'+dd.toLocaleDateString("en-GB",{weekday:"narrow"})+'</span></div>'; }).join("");
+  return '<div class="ck-card ck-load"><div class="ck-cardhd"><span class="ck-lbl">This week · Uge '+isoWeek(new Date(today+"T12:00"))+'</span><span class="ck-lbl ck-dim">'+fmtH(done)+' / '+fmtH(tot)+' studied</span></div>'
+    + '<i class="ck-meter"><i style="width:'+(tot?done/tot*100:0)+'%"></i></i>'
+    + '<div class="ck-bars">'+(bars||'<p class="ck-info">No blocks planned this week.</p>')+'</div>'
+    + '<div class="ck-cardhd ck-sub2"><span class="ck-lbl">Focus · last 7 days</span><span class="ck-lbl ck-dim">goal '+fmtH(goal)+'/day</span></div>'
+    + '<div class="ck-spark" style="--goal:'+(goal/fmax*100)+'%">'+spark+'</div></div>';
+}
+
+function render(){
+  if(!ROOT.classList.contains("on") && box.innerHTML) return;
+  var y=window.scrollY;
+  box.innerHTML='<div class="ck-top">'+head()+kpis()+'</div>'
+    + '<div class="ck-grid">'+nowCard()+checkCard()+lineCard()+deadCard()+loadCard()+'</div>'
+    + '<div class="ck-divider"><span class="ck-lbl">Priorities & notes</span></div>';
+  if(Math.abs(window.scrollY-y)>2) window.scrollTo(0,y);
+}
+
+/* ── actions ── */
+function after(){ B.touch(); try{ B.render(); }catch(e){} render(); }
+box.addEventListener("click",function(e){
+  var t;
+  if((t=e.target.closest("[data-ck-done]"))){ var id=t.dataset.ckDone, b=blocks().filter(function(x){return x.id===id;})[0];
+    if(b){ if(CP&&CP.setDone) CP.setDone(id,!b.done); else { b.done=!b.done; B.touch(); } var fr=focusRun(); if(b.done && fr && fr.id===id && CP&&CP.stopFocus) CP.stopFocus(); render(); } return; }
+  if((t=e.target.closest("[data-ck-focus]"))){ if(CP&&CP.focus){ CP.focus(t.dataset.ckFocus, +t.dataset.m||50); setTimeout(render,50); } return; }
+  if((t=e.target.closest("[data-ck-edit]"))){ if(CP&&CP.edit) CP.edit(t.dataset.ckEdit); return; }
+  if((t=e.target.closest("[data-ck-les]"))){ if(CP&&CP.editLesson) CP.editLesson(t.dataset.ckLes); return; }
+  if((t=e.target.closest("[data-ck-en]"))){ var d=dayRec(ymd(new Date())), v=+t.dataset.ckEn; d.energy=v; after(); return; }
+  if((t=e.target.closest("[data-ck-sl]"))){ var d2=dayRec(ymd(new Date())), cur=+d2.sleep||0;
+    cur = cur ? cur+(+t.dataset.ckSl) : (+t.dataset.ckSl>0?7.5:7);
+    d2.sleep=Math.max(3,Math.min(11,Math.round(cur*2)/2)); after(); return; }
+  if((t=e.target.closest("[data-ck]"))){
+    var a=t.dataset.ck, go=function(k){ if(window.CompassSetTab) window.CompassSetTab(k); };
+    if(a==="plan") go("plan");
+    else if(a==="focus") go("focus");
+    else if(a==="checkin") go("checkin");
+    else if(a==="school") go("school");
+    else if(a==="shutdown"){ if(B.wizards&&B.wizards.shutdown) B.wizards.shutdown(); }
+    else if(a==="add"){ var n=new Date(), s=Math.min(21*60, Math.ceil((n.getHours()*60+n.getMinutes())/15)*15+15); if(CP&&CP.add) CP.add(ymd(n), hm(Math.max(8*60,s))); }
+    else if(a==="stopfocus"){ if(CP&&CP.stopFocus) CP.stopFocus(); try{ localStorage.removeItem("compass_pl_focus"); }catch(e2){} render(); }
+  }
+});
+
+/* live bits: clock and focus countdown every second, full refresh every minute */
+setInterval(function(){
+  if(!ROOT.classList.contains("on")) return;
+  var n=new Date(), el=$("#ckTime"); if(el) el.textContent=pad(n.getHours())+":"+pad(n.getMinutes());
+  var f=focusRun(), ft=$("#ckFocusT");
+  if(f&&ft){ var ms=Math.max(0,f.endAt-Date.now()); ft.textContent=pad(Math.floor(ms/60000))+":"+pad(Math.floor(ms%60000/1000));
+    var fb=$("#ckFocusBar"); if(fb) fb.style.width=Math.round((1-ms/((f.mins||50)*60000))*100)+"%"; }
+  else if(!f&&ft) render();
+  else if(f&&!ft) render();
+  if(n.getSeconds()===0) render();
+},1000);
+
+var _r=B.render; B.render=function(){ var r=_r.apply(this,arguments); try{ render(); }catch(e){} return r; };
+new MutationObserver(function(){ if(ROOT.classList.contains("on")) render(); }).observe(ROOT,{attributes:true,attributeFilter:["class"]});
+document.addEventListener("visibilitychange",function(){ if(!document.hidden) render(); });
+render();
+window.CompassCockpit={render:render};
+})();
+}, {once:true});
+</script>
+
 
 </body></html>
