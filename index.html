@@ -2015,6 +2015,13 @@ body.workspace .pl-drawer{background:var(--surface)!important;border-left:1px so
 #s-plan .pl-cstats{margin-top:.8rem!important}
 #s-plan .pl-cstats b{font-size:1.45rem!important}
 
+#s-plan .pl-rmv{font:600 12px var(--sans);color:var(--accent);padding:0 0 0 10px;white-space:nowrap}
+#s-plan .pl-rmv:hover{text-decoration:underline}
+#s-plan .pl-rmv[hidden]{display:none}
+#pl-dr-reset[hidden],#pl-f-rep-l[hidden]{display:none!important}
+.cl-edit{font-size:14px!important}
+#clCancel[hidden]{display:none!important}
+
 /* ── phone tab bar + sync pill ── */
 body.tg .tgnav,:root[data-theme=dark] body.tg .tgnav{background:color-mix(in srgb,var(--surface) 88%,transparent)!important;border-top:1px solid var(--border)!important;backdrop-filter:saturate(1.4) blur(16px);-webkit-backdrop-filter:saturate(1.4) blur(16px);box-shadow:none!important}
 .tgnav button{color:var(--muted)!important;position:relative}
@@ -2333,7 +2340,7 @@ body.tg .tgnav,:root[data-theme=dark] body.tg .tgnav{background:color-mix(in srg
       <input class="fld sm" id="clTo" placeholder="09:40" inputmode="numeric" style="flex:0 0 5.5rem" maxlength="5">
       <input class="fld sm" id="clSubj" placeholder="Chemistry HL" style="flex:1 1 10rem">
       <input class="fld sm" id="clRoom" placeholder="Room (optional)" style="flex:0 0 8.5rem">
-      <button class="ghost sm" id="clAdd" style="flex:none">Add</button>
+      <button class="ghost sm" id="clAdd" style="flex:none">Add</button><button class="ghost sm" id="clCancel" style="flex:none" hidden>Cancel</button>
     </div>
     <div id="clMsg" class="note" style="display:none"></div>
   </div>
@@ -2564,7 +2571,7 @@ body.tg .tgnav,:root[data-theme=dark] body.tg .tgnav{background:color-mix(in srg
     <p class="pl-lede">Grey blocks are your classes from Lectio. Coloured blocks are your plan, and <b>all of it is editable</b>: tap a class to change its time or topic or mark it attended, missed or cancelled; tap a block to change or delete it; tap an empty slot to add a block or an extra class. With a mouse, drag a block to move it, or drag its bottom edge to change its length.</p>
     <div class="pl-row">
       <div class="pl-seg" id="pl-tabs" role="group" aria-label="Choose week"></div>
-      <div class="pl-chips"><span id="pl-chips" class="pl-chips" role="group" aria-label="Filter by subject"></span><button class="pl-btn pl-primary pl-pill" id="pl-add">+ Add block</button></div>
+      <div class="pl-chips"><span id="pl-chips" class="pl-chips" role="group" aria-label="Filter by subject"></span><button class="pl-btn pl-pill" id="pl-add-class">+ Add class</button><button class="pl-btn pl-primary pl-pill" id="pl-add">+ Add block</button></div>
     </div>
     <div class="pl-legend">
       <span><i class="pl-sw" style="background:var(--surface-2);border-left:3px solid var(--gen)"></i>Class</span>
@@ -6315,18 +6322,30 @@ function renderClasses(){
       + '<table class="tbl"><tbody>' + rows.map(function(c){
           return '<tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">'+esc(c.from)+'\u2013'+esc(c.to)+'</td>'
             + '<td dir="auto">'+esc(c.subject)+(c.room?' <span style="color:var(--muted)">\u00b7 '+esc(c.room)+'</span>':'')+'</td>'
-            + '<td style="text-align:end"><button class="del" data-clx="'+esc(c.id)+'" style="opacity:1" aria-label="Remove this lesson">&times;</button></td></tr>';
+            + '<td style="text-align:end;white-space:nowrap"><button class="del cl-edit" data-cle="'+esc(c.id)+'" style="opacity:1" aria-label="Edit this lesson">\u270e</button> <button class="del" data-clx="'+esc(c.id)+'" style="opacity:1" aria-label="Remove this lesson">&times;</button></td></tr>';
         }).join("") + '</tbody></table></div>';
   }).join("") || '<div class="card"><div class="hint">Nothing on weekdays yet.</div></div>';
 
+  each("[data-cle]",box,function(b){
+    on(b,"click",function(){
+      var c=CL().filter(function(x){ return x.id===b.dataset.cle; })[0]; if(!c) return;
+      clEditing=c.id; $("#clDay").value=String(c.day); $("#clFrom").value=c.from; $("#clTo").value=c.to;
+      $("#clSubj").value=c.subject||""; $("#clRoom").value=c.room||"";
+      $("#clAdd").textContent="Save"; $("#clCancel").hidden=false; clNote("Editing "+(c.subject||"lesson")+". Change it above and press Save.");
+      window.scrollTo({top:0,behavior:"smooth"}); $("#clSubj").focus();
+    });
+  });
   each("[data-clx]",box,function(b){
     on(b,"click",function(){
+      if(clEditing===b.dataset.clx) clStopEdit();
       S.classes=CL().filter(function(c){ return c.id!==b.dataset.clx; });
       touch(); renderClasses(); renderToday();
     });
   });
 }
 
+var clEditing=null;
+function clStopEdit(){ clEditing=null; if($("#clAdd")) $("#clAdd").textContent="Add"; if($("#clCancel")) $("#clCancel").hidden=true; }
 function clAddFromForm(){
   if(!$("#clDay")) return;
   var day=okDay($("#clDay").value), from=okTime($("#clFrom").value), to=okTime($("#clTo").value);
@@ -6335,8 +6354,10 @@ function clAddFromForm(){
   if(day===null){ clNote("Pick a day."); return; }
   if(!from||!to){ clNote("Times look like 08:10."); return; }
   if(to<=from){ clNote("The end time has to be after the start."); return; }
-  CL().push({id:nid(), day:day, from:from, to:to, subject:subj.slice(0,60), room:room.slice(0,40)});
-  $("#clSubj").value=""; $("#clRoom").value="";
+  var keepId=clEditing;
+  if(keepId) S.classes=CL().filter(function(c){ return c.id!==keepId; });
+  CL().push({id:keepId||nid(), day:day, from:from, to:to, subject:subj.slice(0,60), room:room.slice(0,40)});
+  $("#clSubj").value=""; $("#clRoom").value=""; clStopEdit();
   clNote(""); touch(); renderClasses(); renderToday();
 }
 
@@ -6508,6 +6529,7 @@ function renderAll(){
   renderClasses();
 }
 on($("#clAdd"),"click",clAddFromForm);
+on($("#clCancel"),"click",function(){ clStopEdit(); $("#clSubj").value=""; $("#clRoom").value=""; clNote(""); });
 each("#clSubj,#clRoom,#clFrom,#clTo",null,function(e){
   on(e,"keydown",function(ev){ if(ev.key==="Enter"){ ev.preventDefault(); clAddFromForm(); } });
 });
@@ -13404,6 +13426,8 @@ function renderGrid(){
   $("#pl-bar").style.width=ts.length?(n/ts.length*100)+"%":"0";
   $("#pl-count").textContent=ts.length?n+" of "+ts.length+" blocks done":"nothing planned yet";
   var wl=effLessons().filter(function(l){return l.d>=curMon&&l.d<addDays(curMon,7);}),cnt={};wl.forEach(function(l){cnt[l.status]=(cnt[l.status]||0)+1;});
+  var rmv=removedThisWeek(),rb=$("#pl-rmv"),lc0=$("#pl-lcount");if(!rb&&lc0){rb=document.createElement("button");rb.id="pl-rmv";rb.className="pl-rmv";lc0.parentNode.insertBefore(rb,lc0.nextSibling);}
+  if(rb){rb.hidden=!rmv.length;rb.textContent=rmv.length+" removed · restore";}
   var lc=$("#pl-lcount");if(lc)lc.textContent=wl.length?wl.length+" classes"+["attended","missed","cancelled","changed"].filter(function(k){return cnt[k];}).map(function(k){return " · "+cnt[k]+" "+LSTAT[k].toLowerCase().replace(" / moved","");}).join(""):"";
   renderBalance();
 }
@@ -13487,34 +13511,37 @@ extra.innerHTML='<div id="pl-progress"></div><div class="pl-scrim" id="pl-scrim"
  +'<div class="pl-r2"><label class="f" for="pl-f-sub">Subject<select id="pl-f-sub">'+Object.keys(SUB).map(function(k){return '<option value="'+k+'">'+esc(SUB[k])+'</option>';}).join("")+'</select></label>'
  +'<label class="f" for="pl-f-kind">Type<select id="pl-f-kind"><option value="study">Study</option><option value="proj">Hand-in / IA</option><option value="hw">Homework</option><option value="lesson">Class (lesson)</option></select></label></div>'
  +'<label class="f" id="pl-f-status-l" for="pl-f-status" hidden>Class status<select id="pl-f-status">'+Object.keys(LSTAT).map(function(k){return '<option value="'+k+'">'+LSTAT[k]+'</option>';}).join("")+'</select></label>'
+ +'<label class="f" id="pl-f-rep-l" for="pl-f-rep" hidden>Repeat<select id="pl-f-rep"><option value="1">Just this once</option><option value="2">Same time every week, for 2 weeks</option><option value="4">Same time every week, for 4 weeks</option><option value="8">Same time every week, for 8 weeks</option><option value="12">Same time every week, for 12 weeks</option><option value="20">Same time every week, for 20 weeks</option></select></label>'
  +'<div class="pl-r2"><label class="f full" for="pl-f-date">Date<input id="pl-f-date" type="date"></label><label class="f" for="pl-f-start">Start<input id="pl-f-start" type="time" step="300"></label><label class="f" for="pl-f-end">End<input id="pl-f-end" type="time" step="300"></label></div>'
  +'<label class="f" for="pl-f-info"><span id="pl-l-info">What to do</span><textarea id="pl-f-info" rows="4"></textarea></label>'
  +'<label class="f" id="pl-f-src-l" for="pl-f-src">Source / pages<input id="pl-f-src" type="text" autocomplete="off"></label>'
  +'<div class="pl-err" id="pl-f-err" hidden></div></div>'
  +'<div class="pl-acts"><label class="pl-check" id="pl-dr-checkline" for="pl-dr-check"><input type="checkbox" id="pl-dr-check"> Mark as done</label>'
- +'<button class="pl-btn pl-primary" id="pl-dr-save">Save changes</button><button class="pl-btn" id="pl-dr-focus">Start a 50-minute focus</button><button class="pl-btn pl-danger" id="pl-dr-del">Delete block</button></div></aside>'
+ +'<button class="pl-btn pl-primary" id="pl-dr-save">Save changes</button><button class="pl-btn" id="pl-dr-focus">Start a 50-minute focus</button><button class="pl-btn pl-danger" id="pl-dr-del">Delete block</button><button class="pl-btn" id="pl-dr-reset" hidden>Undo my changes (back to Lectio)</button></div></aside>'
  +'<div class="pl-toast" id="pl-toast" role="status" aria-live="polite" hidden></div>'
  +'<div class="pl-focus" id="pl-focus" hidden><b id="pl-fc-time">50:00</b><span class="ft" id="pl-fc-title"></span><button id="pl-fc-tick" hidden>Tick it off</button><button id="pl-fc-stop">Stop</button></div>';
 while(extra.firstChild) document.body.appendChild(extra.firstChild);
 
 var openId=null,isNew=false,delArm=false,impMode=false,lesKey=null;
-function lessonMode(on){$("#pl-f-status-l").hidden=!on;$("#pl-f-src-l").hidden=on;$("#pl-l-title").textContent=on?"Topic (optional)":"Title";$("#pl-l-info").textContent=on?"Notes":"What to do";
+function lessonMode(on){$("#pl-f-status-l").hidden=!on;$("#pl-f-rep-l").hidden=!(on&&!lesKey);if(!on)$("#pl-f-rep").value="1";$("#pl-f-src-l").hidden=on;$("#pl-l-title").textContent=on?"Topic (optional)":"Title";$("#pl-l-info").textContent=on?"Notes":"What to do";
   $("#pl-f-kind").disabled=!!(on&&lesKey);}
 function fillForm(t){$("#pl-f-title").value=t.t||"";$("#pl-f-sub").value=t.sub||"da";$("#pl-f-kind").value=t.k||"study";$("#pl-f-date").value=t.d||"";$("#pl-f-start").value=t.s||"16:00";$("#pl-f-end").value=t.e||"16:50";$("#pl-f-info").value=t.info||"";$("#pl-f-src").value=t.src||"";$("#pl-f-err").hidden=true;}
 function showDrawer(){$("#pl-drawer").classList.add("pl-open");$("#pl-drawer").setAttribute("aria-hidden","false");$("#pl-scrim").hidden=false;setTimeout(function(){var f=$("#pl-f-title");if(f)f.focus();},60);}
 function openEdit(id){var t=byId(id);if(!t)return;openId=id;isNew=false;delArm=false;
   $("#pl-dr-sub").textContent=SUB[t.sub]||"";$("#pl-dr-sub").style.color=col(t.sub);$("#pl-dr-title").textContent="Edit block";
   $("#pl-dr-meta").innerHTML='<span class="pl-kind '+esc(t.k)+'">'+esc(KIND[t.k]||t.k)+'</span><span>'+fmtDay(t.d)+' · '+esc(t.s)+'–'+esc(t.e)+'</span><span>'+fmtH(dur(t))+'</span>';
-  lesKey=null;fillForm(t);lessonMode(false);$("#pl-dr-check").checked=!!t.done;$("#pl-dr-checkline").hidden=false;$("#pl-dr-focus").hidden=false;$("#pl-dr-del").hidden=false;$("#pl-dr-del").textContent="Delete block";$("#pl-dr-save").textContent="Save changes";showDrawer();}
+  lesKey=null;fillForm(t);lessonMode(false);$("#pl-dr-check").checked=!!t.done;$("#pl-dr-checkline").hidden=false;$("#pl-dr-focus").hidden=false;$("#pl-dr-del").hidden=false;$("#pl-dr-del").textContent="Delete block";$("#pl-dr-reset").hidden=true;$("#pl-dr-save").textContent="Save changes";showDrawer();}
 function openNew(d,s){openId=null;isNew=true;delArm=false;var e=hm(Math.min(mins(s)+50,G1));
   $("#pl-dr-sub").textContent="New block";$("#pl-dr-sub").style.color="var(--accent)";$("#pl-dr-title").textContent="Add to your plan";$("#pl-dr-meta").innerHTML="<span>"+fmtDay(d)+"</span>";
-  lesKey=null;fillForm({d:d,s:s,e:e,sub:"da",k:"study"});$("#pl-f-status").value="planned";lessonMode(false);$("#pl-dr-checkline").hidden=true;$("#pl-dr-focus").hidden=true;$("#pl-dr-del").hidden=true;$("#pl-dr-save").textContent="Add block";showDrawer();}
+  lesKey=null;fillForm({d:d,s:s,e:e,sub:"da",k:"study"});$("#pl-f-status").value="planned";lessonMode(false);$("#pl-dr-checkline").hidden=true;$("#pl-dr-focus").hidden=true;$("#pl-dr-del").hidden=true;$("#pl-dr-reset").hidden=true;$("#pl-f-rep").value="1";$("#pl-dr-save").textContent="Add block";showDrawer();}
+function openNewClass(d,s){openNew(d,s);$("#pl-f-kind").value="lesson";$("#pl-f-end").value=hm(Math.min(mins(s)+95,G1));$("#pl-f-status").value="planned";lessonMode(true);
+  $("#pl-dr-sub").textContent="New class";$("#pl-dr-title").textContent="Add a class";$("#pl-dr-save").textContent="Add class";}
 function openLesson(key){var l=lessonByKey(key);if(!l)return;lesKey=key;openId=null;isNew=false;delArm=false;
   $("#pl-dr-sub").textContent=SUB[l.sub]||"";$("#pl-dr-sub").style.color=col(l.sub);$("#pl-dr-title").textContent="Edit class";
   $("#pl-dr-meta").innerHTML='<span class="pl-kind">'+(l.orig?"Lectio lesson":"Your class")+'</span><span>'+fmtDay(l.d)+' · '+esc(l.s)+'–'+esc(l.e)+'</span><span>'+esc(LSTAT[l.status])+'</span>';
   fillForm({t:l.topic,sub:l.sub,k:"lesson",d:l.d,s:l.s,e:l.e,info:l.note});$("#pl-f-status").value=l.status;lessonMode(true);
   $("#pl-dr-checkline").hidden=true;$("#pl-dr-focus").hidden=true;$("#pl-dr-del").hidden=false;
-  $("#pl-dr-del").textContent=l.orig?"Reset to Lectio":"Delete class";$("#pl-dr-save").textContent="Save class";showDrawer();}
+  $("#pl-dr-del").textContent=l.orig?"Remove this class":"Delete class";$("#pl-dr-reset").hidden=!(l.orig&&lessonStore().lessonEdits[key]);$("#pl-dr-save").textContent="Save class";showDrawer();}
 function closeDrawer(){$("#pl-drawer").classList.remove("pl-open");$("#pl-drawer").setAttribute("aria-hidden","true");$("#pl-scrim").hidden=true;openId=null;isNew=false;lesKey=null;$("#pl-f-kind").disabled=false;}
 function readForm(){var o={t:$("#pl-f-title").value.trim(),sub:$("#pl-f-sub").value,k:$("#pl-f-kind").value,d:$("#pl-f-date").value,s:$("#pl-f-start").value,e:$("#pl-f-end").value,info:$("#pl-f-info").value.trim(),src:$("#pl-f-src").value.trim()};
   o.status=$("#pl-f-status").value;var err="";if(!o.t&&o.k!=="lesson")err="Give the block a title.";else if(!o.d)err="Pick a date.";else if(!o.s||!o.e)err="Set a start and end time.";else if(mins(o.e)<=mins(o.s))err="The end time has to be after the start time.";
@@ -13525,15 +13552,20 @@ function saveForm(){var r=readForm();if(r.err){$("#pl-f-err").textContent=r.err;
     if(l.orig){ls.lessonEdits[lesKey]={d:o.d,s:o.s,e:o.e,sub:o.sub,topic:o.t,status:o.status,note:o.info};}
     else{var x=ls.extraLessons.filter(function(z){return "x:"+z.id===lesKey;})[0];if(x){x.d=o.d;x.s=o.s;x.e=o.e;x.sub=o.sub;x.topic=o.t;x.status=o.status;x.note=o.info;}}
     curMon=mondayOf(o.d);closeDrawer();commit("Class saved · "+LSTAT[o.status]);return;}
-  if(o.k==="lesson"){ls.extraLessons.push({id:"c"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),d:o.d,s:o.s,e:o.e,sub:o.sub,topic:o.t,status:o.status,note:o.info});
+  if(o.k==="lesson"){var rn=Math.max(1,Math.min(20,+$("#pl-f-rep").value||1));
+    for(var ri=0;ri<rn;ri++)ls.extraLessons.push({id:"c"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)+ri,d:addDays(o.d,7*ri),s:o.s,e:o.e,sub:o.sub,topic:o.t,status:ri?"planned":o.status,note:o.info});
     if(!isNew&&openId){var pp=P();var oid=openId;pp.blocks=pp.blocks.filter(function(b){return b.id!==oid;});}
-    curMon=mondayOf(o.d);closeDrawer();commit("Class added");return;}
+    curMon=mondayOf(o.d);closeDrawer();commit(rn>1?rn+" classes added, one a week":"Class added");return;}
   delete r.o.status;
   if(isNew){var nb=r.o;nb.id="b"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);nb.done=false;nb.edited=true;blocks().push(nb);curMon=mondayOf(nb.d);closeDrawer();commit("Added");}
   else{var t=byId(openId);if(!t)return closeDrawer();for(var k in r.o)t[k]=r.o[k];t.edited=true;closeDrawer();commit("Saved");}}
+function resetLesson(){if(!lesKey)return;var ls=lessonStore();delete ls.lessonEdits[lesKey];closeDrawer();commit("Class reset to Lectio");}
+function removedThisWeek(){var ls=lessonStore();return LESSONS.filter(function(l){var ed=ls.lessonEdits[l[0]+"|"+l[1]+"|"+l[3]];return ed&&ed.deleted&&l[0]>=curMon&&l[0]<addDays(curMon,7);});}
+function restoreRemoved(){var ls=lessonStore(),n=0;removedThisWeek().forEach(function(l){var k=l[0]+"|"+l[1]+"|"+l[3],ed=ls.lessonEdits[k];delete ed.deleted;n++;if(!Object.keys(ed).length)delete ls.lessonEdits[k];});commit(n+" class"+(n===1?"":"es")+" restored");}
 function delBlock(){
   if(lesKey){var l=lessonByKey(lesKey),ls=lessonStore();if(!l)return closeDrawer();
-    if(l.orig){delete ls.lessonEdits[lesKey];closeDrawer();commit("Class reset to Lectio");return;}
+    if(l.orig){if(!delArm){delArm=true;$("#pl-dr-del").textContent="Tap again to remove it";return;}
+      var ed=ls.lessonEdits[lesKey]||{};ed.deleted=true;ls.lessonEdits[lesKey]=ed;closeDrawer();commit("Class removed · restore it under the week grid");return;}
     if(!delArm){delArm=true;$("#pl-dr-del").textContent="Tap again to delete for good";return;}
     ls.extraLessons=ls.extraLessons.filter(function(z){return "x:"+z.id!==lesKey;});closeDrawer();commit("Class deleted");return;}
   if(!openId)return;if(!delArm){delArm=true;$("#pl-dr-del").textContent="Tap again to delete for good";return;}
@@ -13642,6 +13674,7 @@ document.addEventListener("click",function(e){
     if(t.id==="pl-scrim"||t.id==="pl-dr-x"){if(impMode)endImport();closeDrawer();return;}
     if(t.id==="pl-dr-save"){if(impMode){if(t.dataset.ro){endImport();closeDrawer();}else doImport();}else saveForm();return;}
     if(t.id==="pl-dr-del"){delBlock();return;}
+    if(t.id==="pl-dr-reset"){resetLesson();return;}
     if(t.id==="pl-dr-focus"&&openId){startFocus(byId(openId));closeDrawer();return;}
     return;}
   if(t.id==="pl-fc-stop"){stopFocus();return;}
@@ -13655,6 +13688,8 @@ document.addEventListener("click",function(e){
   var lb=t.closest("button.pl-b[data-plles]");if(lb){openLesson(lb.dataset.plles);return;}
   if(t.classList.contains("pl-col")){var m=Math.max(G0,Math.min(snap(minuteAt(t,e.clientY),15),G1-15));openNew(t.dataset.date,hm(m));return;}
   if(t.id==="pl-add"){var k=ymd(now());openNew(k>=curMon&&k<addDays(curMon,7)?k:curMon,"16:00");return;}
+  if(t.id==="pl-add-class"){var k2=ymd(now());openNewClass(k2>=curMon&&k2<addDays(curMon,7)?k2:curMon,"08:00");return;}
+  if(t.id==="pl-rmv"){restoreRemoved();return;}
   if(t.id==="pl-export"){exportPlan();return;}
   if(t.id==="pl-import"){openImport("",false);return;}
 });
@@ -13675,7 +13710,7 @@ renderStatic();renderSyl();renderDeadlines();renderAll();
 setInterval(function(){if(ROOT.classList.contains("on")){renderDeadlines();if(!drag&&!$("#pl-drawer").classList.contains("pl-open"))renderGrid();}},60000);
 window.CompassPlanner={render:renderAll,blocks:function(){return blocks();},focus:function(id,mins){startFocus(byId(id),mins);},
   lessons:function(d){return effLessons().filter(function(l){return !d||l.d===d;});},deadlines:function(){return DEADLINES.slice();},
-  setDone:function(id,v){setDone(id,v);},edit:function(id){openEdit(id);},editLesson:function(k){openLesson(k);},add:function(d,s){openNew(d,s);},
+  setDone:function(id,v){setDone(id,v);},edit:function(id){openEdit(id);},editLesson:function(k){openLesson(k);},add:function(d,s){openNew(d,s);},addClass:function(d,s){openNewClass(d,s);},
   focusing:function(){return fc?{t:fc.t,id:fc.id,mins:fc.mins,endAt:endAt}:null;},stopFocus:function(){stopFocus();}};
 })();
 }, {once:true});
@@ -13881,7 +13916,7 @@ function lineCard(){
   if(!rows.length) rows=['<li class="ck-empty">Nothing on the timeline today. <button class="ck-link" data-ck="add">Add a block</button></li>'];
   var nm = tl.length ? tl.filter(function(x){return x.done||(x.school&&x.e<=cur);}).length+' of '+tl.length+' behind you' : '';
   return '<div class="ck-card ck-line"><div class="ck-cardhd"><span class="ck-lbl">Today’s timeline</span><span class="ck-lbl ck-dim">'+nm+'</span></div><ol class="ck-tl">'+rows.join("")+'</ol>'
-    + '<div class="ck-foot"><button class="ck-link" data-ck="add">+ Block</button><button class="ck-link" data-ck="plan">Week view →</button></div></div>';
+    + '<div class="ck-foot"><span><button class="ck-link" data-ck="add">+ Block</button> &nbsp; <button class="ck-link" data-ck="addclass">+ Class</button></span><button class="ck-link" data-ck="plan">Week view →</button></div></div>';
 }
 
 function deadCard(){
@@ -13947,6 +13982,7 @@ box.addEventListener("click",function(e){
     else if(a==="school") go("school");
     else if(a==="shutdown"){ if(B.wizards&&B.wizards.shutdown) B.wizards.shutdown(); }
     else if(a==="add"){ var n=new Date(), s=Math.min(21*60, Math.ceil((n.getHours()*60+n.getMinutes())/15)*15+15); if(CP&&CP.add) CP.add(ymd(n), hm(Math.max(8*60,s))); }
+    else if(a==="addclass"){ var n2=new Date(); if(CP&&CP.addClass) CP.addClass(ymd(n2), "08:00"); }
     else if(a==="stopfocus"){ if(CP&&CP.stopFocus) CP.stopFocus(); try{ localStorage.removeItem("compass_pl_focus"); }catch(e2){} render(); }
   }
 });
