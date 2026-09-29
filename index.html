@@ -14487,8 +14487,109 @@ var CITIES=[
     for(x=300;x<470;x+=10) S.glints.push(x);
   },
   fg:function(c,t,S){}
+},
+{ k:"shiraz", n:"Shiraz", sub:"Spring night at the Tomb of Hafez", hz:204, weather:"clear", amb:[["crickets",0.7],["water",0.35],["night",0.5]],
+  sky:[[0,"#070a20"],[0.5,"#17194a"],[0.82,"#3a2d62"],[1,"#7a4a6a"]], starsN:150, moon:[392,38,9,5], water:["#0a1030",0.45,0.8],
+  build:function(c,R,S){
+    ridge(c,R,120,34,"#1a1a3c",0.9);
+    var near=ridge(c,R,150,26,"#141633",1.7);
+    // the Quran Gate on the pass, lit warm, standing on the near ridge
+    var gx=78, gy=near[gx]+1; halo(c,gx,gy-6,20,"#ffcf8a");
+    px(c,gx-14,gy,29,3,"#141633");
+    px(c,gx-9,gy-12,19,14,"#c9a36a"); px(c,gx-9,gy-12,19,2,"#e8c48a");
+    px(c,gx-3,gy-6,7,8,"#2a1d2a"); px(c,gx-2,gy-8,5,2,"#2a1d2a"); px(c,gx-1,gy-9,3,1,"#2a1d2a");
+    px(c,gx-6,gy-17,13,5,"#c9a36a"); px(c,gx-4,gy-16,9,2,"#3b78b8");
+    for(var i=0;i<260;i++){ var x=ri(R,0,W-1), y=ri(R,168,192); px(c,x,y,1,1,pick(R,["#ffd79a","#ffe9c4","#ffb866","#fff4dc"])); }
+    px(c,0,190,W,14,"#0d1a1a");
+    // cypress rows either side of the pavilion
+    [[18,40],[46,52],[78,44],[112,56],[146,46],[334,48],[366,56],[398,44],[430,52],[462,40]].forEach(function(t){ cypress(c,t[0],196,t[1],7,"#0f2a22","#1c4a3a"); });
+    for(i=0;i<W;i+=ri(R,6,12)) disc(c,i,196,ri(R,3,6),pick(R,["#10261f","#133026"]));
+    for(i=0;i<40;i++) px(c,ri(R,0,W),ri(R,188,200),1,1,pick(R,["#ffb347","#fff1d6"]));
+    // Hafezieh: stone platform, eight columns, the copper "dervish hat" dome
+    var cx=240; halo(c,cx,160,64,"#ffd9a0");
+    px(c,cx-58,196,117,8,"#b9a07a"); px(c,cx-52,190,105,6,"#cdb58c"); px(c,cx-46,186,93,4,"#dcc59c");
+    px(c,cx-58,196,117,1,"#e9d5ac"); px(c,cx-52,190,105,1,"#f1dfb8");
+    px(c,cx-8,178,17,8,"#f4ecd8"); px(c,cx-8,178,17,1,"#ffffff");
+    [-40,-28,-14,0,14,28,40].forEach(function(dx,j){ px(c,cx+dx-1,150,3,36,j===0||j===6?"#d8c7a4":"#efe2c4"); px(c,cx+dx-1,150,1,36,"#fff6e2"); });
+    px(c,cx-46,146,93,5,"#e7d6b2"); px(c,cx-46,151,93,2,"#2f6fb0"); px(c,cx-46,153,93,1,"#58a6c8");
+    for(var y=0;y<42;y++){
+      var f=y/41, hw=Math.round(1+Math.pow(f,1.9)*34+(f>0.9?(f-0.9)*50:0));
+      px(c,cx-hw,104+y,hw*2+1,1,"#b8733a");
+      for(var rx=-hw+3;rx<hw;rx+=6) px(c,cx+rx,104+y,1,1,"#8f5a2e");
+      px(c,cx-hw,104+y,Math.max(1,hw>>2),1,"#d89a5c");
+    }
+    px(c,cx,96,1,8,"#e0b070"); px(c,cx-1,95,3,1,"#f3cf8a");
+    for(i=cx-54;i<=cx+54;i+=12) S.glints.push(i);
+    S.lamps=[cx-66,cx+66,20,W-20];
+    S.lamps.forEach(function(x){ px(c,x,182,1,14,"#3a3030"); px(c,x-1,180,3,2,"#ffe3a8"); halo(c,x,181,7,"#ffe3a8"); S.glints.push(x); });
+  },
+  fg:function(c,t,S){
+    px(c,0,204,W,2,"#2f6fb0"); px(c,0,204,W,1,"#6fb4d8");
+    for(var k=0;k<3;k++){ var fx=150+k*90, h=4+Math.round(2*Math.sin(t*3+k));
+      c.fillStyle="rgba(210,235,255,.55)"; c.fillRect(fx,236-h,1,h); c.fillRect(fx-1,236-h+1,1,1); c.fillRect(fx+1,236-h+1,1,1);
+      c.fillStyle="rgba(210,235,255,.25)"; c.fillRect(fx-3,236,7,1); }
+  }
+},
+{ k:"tabriz", n:"Tabriz", sub:"Snowy night at El Goli", hz:200, weather:"snow", amb:[["wind",0.6],["water",0.3],["night",0.4]],
+  sky:[[0,"#0a0f22"],[0.5,"#1c2744"],[1,"#4e5a78"]], clouds:"#2c3654", water:["#0b1430",0.5,0.84],
+  build:function(c,R,S){
+    // Mount Sahand, snow on its shoulders
+    for(var x=0;x<W;x++){
+      var top=Math.round(118-40*Math.exp(-Math.pow((x-300)/130,2))+Math.sin(x/13)*3+Math.sin(x/4.7));
+      for(var y=top;y<180;y++){ var snow=y<top+18-Math.abs(Math.sin(x/9))*8;
+        px(c,x,y,1,1,snow?((x+y)%5===0?"#b9c3da":"#d3dbec"):(y<top+26&&(x*7+y)%3===0?"#8a95b2":"#2a3352")); }
+    }
+    ridge(c,R,160,16,"#1c2440",2.3);
+    blocks(c,R,S,{base:192,h:[8,22],w:[8,16],col:"#1a2138",win:["#ffd79a","#ffe9c4"],p:[0.2,0.5],sx:3,sy:3,flicker:true,
+      after:function(c,R,S,x,top,w){ px(c,x,top-1,w,1,"#e6ecf7"); }});
+    // the Blue Mosque on the right shore
+    var mx=410; px(c,mx-26,170,52,22,"#6b5a4a"); px(c,mx-26,170,52,1,"#e6ecf7");
+    px(c,mx-8,158,17,34,"#7a6652"); px(c,mx-5,164,11,28,"#2f63a8"); px(c,mx-3,168,7,24,"#1b2f5a");
+    px(c,mx+2,164,22,6,"#6b5a4a"); px(c,mx+2,164,22,1,"#8a7660");
+    for(var yy=0;yy<14;yy++){ var hw=Math.round(12*Math.sqrt(1-Math.pow((13-yy)/14,2))); px(c,mx+13-hw,150+yy,hw*2+1,1,yy<3?"#e6ecf7":"#2f63a8"); }
+    for(yy=155;yy<164;yy+=3) px(c,mx+5,yy,17,1,"#3f7cc4");
+    halo(c,mx,176,30,"#9ec4ff");
+    // bare trees along the far shore
+    for(x=6;x<W;x+=ri(R,14,26)) if(Math.abs(x-240)>60) tree(c,R,x,196);
+    px(c,0,194,W,6,"#dfe6f2"); px(c,0,194,W,1,"#ffffff");
+    // the causeway and the pavilion on its island
+    var cx=240; halo(c,cx,176,56,"#ffe0a0");
+    px(c,cx-50,192,101,8,"#9a8a74"); px(c,cx-50,192,101,1,"#e6ecf7");
+    px(c,cx-34,172,69,20,"#eadfc6"); px(c,cx-34,172,69,1,"#ffffff");
+    for(x=cx-30;x<cx+32;x+=6){ px(c,x,177,3,10,"#ffd27a"); px(c,x+1,176,1,1,"#ffd27a"); px(c,x,186,3,1,"#c9b48e"); }
+    px(c,cx-36,170,73,3,"#8a6a4a");
+    px(c,cx-26,154,53,16,"#e3d6ba"); for(x=cx-22;x<cx+24;x+=6){ px(c,x,158,3,9,"#ffe4a0"); px(c,x+1,157,1,1,"#ffe4a0"); }
+    px(c,cx-28,151,57,3,"#8a6a4a"); px(c,cx-28,150,57,1,"#f2f5fb");
+    for(x=cx-27;x<cx+29;x+=3) px(c,x,146,1,4,"#d9ccb0");
+    px(c,cx-28,145,57,1,"#e6ecf7");
+    for(x=cx-48;x<cx+50;x+=16){ S.glints.push(x); }
+    for(x=cx-40;x<=cx+40;x+=10) S.glints.push(x);
+  },
+  fg:function(c,t,S){
+    px(c,0,238,W,4,"#8f8070"); px(c,0,237,W,1,"#e6ecf7");
+    for(var x=12;x<W;x+=44){ px(c,x,228,1,9,"#4a4240"); px(c,x-1,226,3,2,"#ffe0a0"); c.fillStyle="rgba(255,224,160,.12)"; c.fillRect(x-3,224,7,6); }
+  }
 }
 ];
+/* A mountain line: a few sines stacked, filled down to the horizon. */
+function ridge(c,R,base,amp,col,k){
+  var p1=R()*6, p2=R()*6;
+  var ys=[];
+  for(var x=0;x<W;x++){ var y=Math.round(base-amp*(0.55+0.3*Math.sin(x/(47*k)+p1)+0.15*Math.sin(x/(11*k)+p2))); px(c,x,y,1,210-y,col); ys.push(y); }
+  return ys;
+}
+/* An Italian cypress: narrow, pointed, widest two-thirds of the way down. */
+function cypress(c,x,base,h,w,col,lit){
+  for(var y=0;y<h;y++){ var f=y/h, hw=Math.max(0,Math.round(w*Math.sin(Math.PI*Math.min(1,0.15+f*0.95))*Math.min(1,f*1.8)));
+    px(c,x-hw,base-h+y,hw*2+1,1,col); if(hw>0) px(c,x+hw,base-h+y,1,1,lit); }
+  px(c,x,base,1,3,"#2a1e18");
+}
+/* A bare winter tree with snow on the upper branches. */
+function tree(c,R,x,base){
+  var h=ri(R,12,20); px(c,x,base-h,1,h,"#2a2226");
+  for(var i=0;i<5;i++){ var y=base-h+ri(R,1,h-4), d=R()<0.5?-1:1, l=ri(R,3,7);
+    for(var k=0;k<l;k++){ px(c,x+d*k,y-Math.floor(k/2),1,1,"#2a2226"); if(k%2===0) px(c,x+d*k,y-Math.floor(k/2)-1,1,1,"#dfe6f2"); } }
+}
 
 function drawCars(c,t,l){
   var span=(l.x1||W)+40;
