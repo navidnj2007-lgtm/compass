@@ -2125,6 +2125,18 @@ body.tg .tgnav,:root[data-theme=dark] body.tg .tgnav{background:color-mix(in srg
 .lofi-stage.idle .lofi-clock{opacity:1}
 .lofi-stage.idle{cursor:none}
 body.lofi-noscroll{overflow:hidden}
+/* Spotify source */
+.lofi-sp{padding:14px 18px 12px;border-bottom:1px solid var(--border)}
+.lofi-sp[hidden],.lofi [data-lofionly][hidden],.lofi-sp-err[hidden]{display:none}
+.lofi-sp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.lofi-sp-head b{display:block;font-size:14px}
+.lofi-sp-head span{display:block;font-size:12px;color:var(--muted);line-height:1.45;max-width:52ch}
+.lofi-sp-head button{flex:none;white-space:nowrap}
+.lofi-sp-form{display:flex;gap:8px;margin-bottom:10px}
+.lofi-sp-form input{flex:1;min-width:0}
+.lofi-sp-err{font-size:12px;color:var(--warn);margin:-2px 0 10px}
+.lofi-sp-embed iframe{display:block;border:0;border-radius:12px;width:100%}
+.lofi.sp #lofiSkip{display:none}
 /* a small pill so the music can be paused from any page */
 .lofi-mini{position:fixed;left:16px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:93;display:flex;align-items:center;gap:4px;
   padding:4px 4px 4px 12px;border-radius:999px;background:#12112a;color:#f3f1ff;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:calc(100vw - 32px);font-size:12.5px}
@@ -6778,7 +6790,6 @@ window.CompassBridge={
     var w=fWhere(fPos()); if(w.k==="end") return null;
     return {on:!!S.timer.on, brk:w.k==="b", left:w.left, label:S.timer.label||""};
   },
-  audio:function(){ return fAudioCtx(); },
   paintGym:function(){ if(typeof renderGym==="function") renderGym(); },
   paintClasses:function(){ if(typeof renderClasses==="function") renderClasses(); },
   paintCal:function(){ if(typeof renderCal==="function") renderCal(); },
@@ -14119,7 +14130,7 @@ if(!MOUNT) return;
 function on(el,ev,fn){ if(el) el.addEventListener(ev,fn); }
 
 var PKEY="compass.lofi.v1";
-var P={city:"tokyo",vibe:"jazzhop",mood:"chill",band:"full",vol:0.7,amb:0.5,vinyl:0.5,withFocus:false,open:false};
+var P={city:"tokyo",vibe:"jazzhop",mood:"chill",band:"full",vol:0.7,amb:0.4,vinyl:0.35,withFocus:false,open:false,src:"lofi",sp:""};
 try{
   var saved=JSON.parse(localStorage.getItem(PKEY)||"null");
   if(saved && typeof saved==="object") Object.keys(P).forEach(function(k){ if(typeof saved[k]===typeof P[k]) P[k]=saved[k]; });
@@ -14667,22 +14678,23 @@ function weather(c,S,t,dt,reduced){
    vinyl crackle underneath. */
 var AU=null;
 function mtof(m){ return 440*Math.pow(2,(m-69)/12); }
+/* Its own context, not the timer's: "playback" asks the browser for larger
+   buffers, which is what stops the crackle when the page is busy drawing. */
 function audioCtx(){
-  var c=null;
-  try{ c=B.audio?B.audio():null; }catch(e){}
-  if(!c){ var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null; try{ c=new AC(); }catch(e){ return null; } }
-  return c;
+  var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null;
+  try{ return new AC({latencyHint:"playback"}); }catch(e){}
+  try{ return new AC(); }catch(e){ return null; }
 }
 function gn(v){ var n=AU.c.createGain(); n.gain.value=v; return n; }
 function bq(type,f,q){ var n=AU.c.createBiquadFilter(); n.type=type; n.frequency.value=f; if(q!=null) n.Q.value=q; return n; }
-function osc(type,f,t,stop){ var o=AU.c.createOscillator(); o.type=type; o.frequency.setValueAtTime(f,t); o.start(t); o.stop(stop); return o; }
+function osc(type,f,t,stop){ t=Math.max(t,AU.c.currentTime); var o=AU.c.createOscillator(); o.type=type; o.frequency.setValueAtTime(f,t); o.start(t); o.stop(stop); return o; }
 /* Attack to peak, decay towards sustain, release from the end of the note.
    Returns when the last of the sound is gone, for stopping oscillators. */
 function adsr(p,t,a,d,s,dur,r,peak){
-  dur=Math.max(dur,a+0.01);
+  dur=Math.max(dur,a+0.01); t=Math.max(t,AU.c.currentTime+0.005);
   p.setValueAtTime(0,t); p.linearRampToValueAtTime(peak,t+a);
   p.setTargetAtTime(peak*s,t+a,d/3); p.setTargetAtTime(0,t+dur,r/3);
-  return t+dur+r*1.6;
+  return t+dur+r*3;
 }
 function out(node,rev){ node.connect(AU.bus); if(rev){ var s=gn(rev); node.connect(s); s.connect(AU.send); } }
 function noiseBuf(c,sec,brown){
@@ -14702,8 +14714,8 @@ function crackleBuf(c,sec){
   var n=Math.floor(c.sampleRate*sec), b=c.createBuffer(1,n,c.sampleRate), d=b.getChannelData(0), lp=0, pop=0;
   for(var i=0;i<n;i++){
     lp+=((Math.random()*2-1)-lp)*0.08;
-    if(Math.random()<0.00012) pop=(Math.random()<0.5?-1:1)*(0.25+Math.random()*0.6);
-    d[i]=lp*0.05+pop; pop*=0.8;
+    if(Math.random()<0.00008) pop=(Math.random()<0.5?-1:1)*(0.05+Math.random()*0.18);
+    d[i]=lp*0.03+pop; pop*=0.7;
   }
   return b;
 }
@@ -14720,7 +14732,7 @@ function initAudio(){
   var flu=c.createOscillator(), fg=gn(0.00008); flu.frequency.value=6.1; flu.connect(fg); fg.connect(wow.delayTime); flu.start();
   var bus=gn(1); bus.connect(wow);
   var drums=gn(0.9), dlp=bq("lowpass",7000,0.3); drums.connect(dlp); dlp.connect(hp);
-  var rev=c.createConvolver(); rev.buffer=impulse(c,2.6);
+  var rev=c.createConvolver(); rev.buffer=impulse(c,1.8);
   var send=gn(1), revOut=gn(0.22); send.connect(rev); rev.connect(revOut); revOut.connect(hp);
   var crk=c.createBufferSource(); crk.buffer=crackleBuf(c,7); crk.loop=true;
   var crkG=gn(0); crk.connect(crkG); crkG.connect(tone); crk.start();
@@ -15036,12 +15048,12 @@ function drums(t,s,bar,sd,f){
 }
 function tick(){
   if(!PLAY||!AU) return;
-  var c=AU.c, la=document.hidden?1.5:0.2;
-  if(NEXT<c.currentTime) NEXT=c.currentTime+0.05;
+  var c=AU.c, la=document.hidden?1.5:0.35;
+  if(NEXT<c.currentTime+0.03) NEXT=c.currentTime+0.08;   // fell behind: skip ahead rather than play late
   while(NEXT<c.currentTime+la){
     if(((POS/16)|0)>=TR.bars) newTrack();
     var sd=60/TR.bpm/4, sw=POS%2?TR.V.swing*sd:0;
-    try{ stepAt(POS,NEXT+sw,sd); }catch(e){ if(!tick.err){ tick.err=1; console.error("lofi music",e); } }
+    try{ stepAt(POS,Math.max(NEXT+sw,c.currentTime+0.02),sd); }catch(e){ if(!tick.err){ tick.err=1; console.error("lofi music",e); } }
     NEXT+=sd; POS++;
   }
   if(HORN && c.currentTime>HORN){ foghorn(c.currentTime+0.1); HORN=c.currentTime+32+Math.random()*20; }
@@ -15051,7 +15063,7 @@ function tick(){
 function loopSrc(buf){ var s=AU.c.createBufferSource(); s.buffer=buf; s.loop=true; s.start(0,Math.random()*buf.duration*0.9); return s; }
 function lfoTo(param,rate,depth){ var o=AU.c.createOscillator(), g=gn(depth); o.frequency.value=rate; o.connect(g); g.connect(param); o.start(); return o; }
 var AMBF={
-  rain:function(v){ var o=gn(0), s=loopSrc(AU.white), hp=bq("highpass",600,0.5), lp=bq("lowpass",6500,0.3), g=gn(0.2);
+  rain:function(v){ var o=gn(0), s=loopSrc(AU.white), hp=bq("highpass",500,0.5), lp=bq("lowpass",3800,0.3), g=gn(0.1);
     s.connect(hp); hp.connect(lp); lp.connect(g); g.connect(o);
     var s2=loopSrc(AU.brown), l2=bq("lowpass",900,0.3), g2=gn(0.5); s2.connect(l2); l2.connect(g2); g2.connect(o);
     return {o:o,v:v,src:[s,s2]}; },
@@ -15126,17 +15138,26 @@ MOUNT.innerHTML=
 +     '</div>'
 +   '</div>'
 + '</div>'
++ '<div class="lofi-sp" id="lofiSp" hidden>'
++   '<div class="lofi-sp-head"><div><b>Your Spotify</b><span>Paste a playlist, album or track link. Log in so whole songs play instead of 30-second previews.</span></div>'
++     '<button type="button" class="ghost sm" id="lofiSpLogin">Log in to Spotify</button></div>'
++   '<form class="lofi-sp-form" id="lofiSpForm"><input class="fld sm" id="lofiSpUrl" inputmode="url" autocomplete="off" placeholder="https://open.spotify.com/playlist/…" value="'+String(P.sp).replace(/"/g,"&quot;")+'">'
++     '<button type="submit" class="primary sm">Load</button></form>'
++   '<div class="lofi-sp-err" id="lofiSpErr" hidden></div>'
++   '<div class="lofi-sp-embed" id="lofiSpEmbed"></div>'
++ '</div>'
 + '<div class="lofi-panel" id="lofiPanel" hidden>'
++   '<label class="lbl">Music</label>'+pills("src",[["lofi","Lofi Cities"],["spotify","Spotify"]])
 +   '<label class="lbl">City</label>'+pills("city",CITIES.map(function(c){ return [c.k,c.n]; }))
-+   '<label class="lbl">Vibe</label>'+pills("vibe",VIBE_KEYS.map(function(k){ return [k,VIBES[k].n]; }))
++   '<div data-lofionly="1"><label class="lbl">Vibe</label>'+pills("vibe",VIBE_KEYS.map(function(k){ return [k,VIBES[k].n]; }))
 +   '<div class="lofi-two">'
 +     '<div><label class="lbl">Mood</label>'+pills("mood",[["chill","Chill"],["upbeat","Upbeat"]])+'</div>'
 +     '<div><label class="lbl">Band</label>'+pills("band",[["full","Full band"],["nodrums","No drums"],["chords","Chords only"]])+'</div>'
-+   '</div>'
++   '</div></div>'
 +   '<div class="lofi-sliders">'
-+     '<label>Music<input type="range" min="0" max="1" step="0.01" data-lvol="vol" value="'+P.vol+'"></label>'
++     '<label data-lofionly="1">Music<input type="range" min="0" max="1" step="0.01" data-lvol="vol" value="'+P.vol+'"></label>'
 +     '<label>City sounds<input type="range" min="0" max="1" step="0.01" data-lvol="amb" value="'+P.amb+'"></label>'
-+     '<label>Vinyl<input type="range" min="0" max="1" step="0.01" data-lvol="vinyl" value="'+P.vinyl+'"></label>'
++     '<label data-lofionly="1">Vinyl<input type="range" min="0" max="1" step="0.01" data-lvol="vinyl" value="'+P.vinyl+'"></label>'
 +   '</div>'
 +   '<label class="fchk lofi-auto"><input type="checkbox" id="lofiWith"'+(P.withFocus?' checked':'')+'> Start the music when a focus session starts, stop it when you stop</label>'
 + '</div>'
@@ -15193,6 +15214,14 @@ setInterval(function(){ if(!RAF && (onTab()||FULL)) clock(); },1000);
 
 function nowPlaying(){
   var c=cityOf(P.city), V=VIBES[P.vibe];
+  if(P.src==="spotify"){
+    var u=spParse(P.sp);
+    document.getElementById("lofiTrack").textContent="Spotify";
+    document.getElementById("lofiMeta").textContent=!u?"Paste a link in the Spotify box below"
+      : PLAY?"Playing your "+u.split(":")[1]+" \u00b7 "+c.n+" city sounds":"Press play, or use the player below";
+    MINI.querySelector(".lofi-mini-t").textContent=c.n+" \u00b7 Spotify";
+    return;
+  }
   document.getElementById("lofiTrack").textContent=PLAY&&TR?TR.name:"Lofi Cities";
   document.getElementById("lofiMeta").textContent=PLAY&&TR
     ? V.n+" · "+(P.mood==="upbeat"?"upbeat":"chill")+" · "+TR.bpm+" bpm"
@@ -15212,24 +15241,101 @@ function syncPills(){
     g.querySelectorAll("button").forEach(function(b){ b.setAttribute("aria-pressed",String(P[k]===b.getAttribute("data-v"))); });
   });
 }
+/* City sounds run under either source. */
+function ambOn(){
+  var a=initAudio(); if(!a) return;
+  if(a.c.state==="suspended"){ try{ a.c.resume(); }catch(e){} }
+  ramp(a.amb.gain,P.amb,1.2); startAmb();
+}
+function ambOff(){ if(AU){ ramp(AU.amb.gain,0,0.6); stopAmb(); } }
 function play(){
+  if(P.src==="spotify") return spPlay();
   var a=initAudio(); if(!a) return;
   if(a.c.state==="suspended"){ try{ a.c.resume(); }catch(e){} }
   PLAY=true;
   if(!TR||TR.vk!==P.vibe) newTrack();
   NEXT=a.c.currentTime+0.1;
-  ramp(a.master.gain,P.vol,0.5); ramp(a.crkG.gain,P.vinyl*0.6,0.5); ramp(a.amb.gain,P.amb,1.2);
-  startAmb();
+  ramp(a.master.gain,P.vol,0.5); ramp(a.crkG.gain,P.vinyl*0.6,0.5);
+  ambOn();
   clearInterval(TIMER); TIMER=setInterval(tick,40); tick();
   ui();
 }
 function pause(){
   PLAY=false; AUTO=false; clearInterval(TIMER);
-  if(AU){ ramp(AU.master.gain,0,0.4); ramp(AU.crkG.gain,0,0.3); ramp(AU.amb.gain,0,0.6); stopAmb(); }
-  ui();
+  if(SP.ctl && !SP.paused){ try{ SP.ctl.pause(); }catch(e){} }
+  if(AU){ ramp(AU.master.gain,0,0.4); ramp(AU.crkG.gain,0,0.3); }
+  ambOff(); ui();
+}
+
+/* ── Spotify ──
+   Spotify's own embed player, driven through its iFrame API. Logging in
+   happens on Spotify's site, so Compass never sees the password or a token;
+   once the browser is logged in, the embed plays whole songs. */
+var SP={api:null,ctl:null,uri:null,paused:true,loading:false,wait:[],chk:0};
+function spParse(v){
+  var m=String(v||"").match(/(playlist|album|track|artist|episode|show)[\/:]([A-Za-z0-9]{22})/);
+  return m?"spotify:"+m[1]+":"+m[2]:null;
+}
+function spErr(t){ var e=document.getElementById("lofiSpErr"); e.textContent=t||""; e.hidden=!t; }
+function spApi(cb){
+  if(SP.api) return cb();
+  SP.wait.push(cb);
+  if(SP.loading) return; SP.loading=true;
+  window.onSpotifyIframeApiReady=function(API){ SP.api=API; var w=SP.wait; SP.wait=[]; w.forEach(function(f){ f(); }); };
+  var sc=document.createElement("script"); sc.src="https://open.spotify.com/embed/iframe-api/v1"; sc.async=true;
+  sc.onerror=function(){ SP.loading=false; SP.wait=[]; sc.remove(); spErr("Couldn't reach Spotify. Check your connection and try again."); };
+  document.head.appendChild(sc);
+}
+function spMount(then){
+  var uri=spParse(P.sp); if(!uri) return;
+  spErr("");
+  spApi(function(){
+    if(SP.ctl){
+      if(SP.uri!==uri){ SP.ctl.loadUri(uri); SP.uri=uri; SP.paused=true; }
+      if(then) then(); return;
+    }
+    var box=document.getElementById("lofiSpEmbed"); box.innerHTML="<div></div>";
+    SP.api.createController(box.firstChild,{uri:uri,width:"100%",height:152},function(ctl){
+      SP.ctl=ctl; SP.uri=uri; SP.paused=true;
+      ctl.addListener("playback_update",function(e){
+        var paused=!(e&&e.data)||!!e.data.isPaused;
+        if(paused===SP.paused) return;
+        SP.paused=paused;
+        if(P.src!=="spotify") return;
+        if(!paused && !PLAY){ PLAY=true; ambOn(); ui(); }
+        else if(paused && PLAY){ PLAY=false; AUTO=false; ambOff(); ui(); }
+        if(!paused) spErr("");
+      });
+      if(then) ctl.addListener("ready",function(){ then(); });
+    });
+  });
+}
+function spPlay(){
+  if(!spParse(P.sp)){ spErr("Paste a Spotify link first, then press play."); document.getElementById("lofiSpUrl").focus(); return; }
+  PLAY=true; ambOn(); ui();
+  spMount(function(){
+    if(SP.paused){ try{ SP.ctl.togglePlay(); }catch(e){} }
+    /* Some browsers only let the embed start after a click inside it. */
+    clearTimeout(SP.chk);
+    SP.chk=setTimeout(function(){
+      if(PLAY && SP.paused && P.src==="spotify"){
+        PLAY=false; AUTO=false; ambOff(); ui();
+        spErr("Press play in the Spotify player once. Your browser wants that first click inside it.");
+      }
+    },3500);
+  });
+}
+function applySrc(){
+  var sp=P.src==="spotify";
+  ROOT.classList.toggle("sp",sp);
+  document.getElementById("lofiSp").hidden=!sp;
+  ROOT.querySelectorAll("[data-lofionly]").forEach(function(el){ el.hidden=sp; });
+  if(sp) spMount();
+  nowPlaying();
 }
 /* A new track: dip the mix so the old tails don't clash with the new key. */
 function skip(){
+  if(P.src==="spotify") return;
   if(!PLAY){ TR=null; nowPlaying(); return; }
   var now=AU.c.currentTime;
   AU.master.gain.cancelScheduledValues(now); AU.master.gain.setValueAtTime(AU.master.gain.value,now);
@@ -15263,6 +15369,7 @@ ROOT.querySelectorAll("[data-lset]").forEach(function(g){
     var b=e.target.closest("button"); if(!b) return;
     var v=b.getAttribute("data-v"); if(P[k]===v) return;
     if(k==="city"){ setCity(v); return; }
+    if(k==="src"){ if(PLAY) pause(); P.src=v; saveP(); syncPills(); applySrc(); return; }
     P[k]=v; saveP(); syncPills();
     if(k==="vibe"||k==="mood"){ if(PLAY) skip(); else TR=null; }
     nowPlaying();
@@ -15272,6 +15379,24 @@ ROOT.querySelectorAll("[data-lvol]").forEach(function(r){
   on(r,"input",function(){ setVol(r.getAttribute("data-lvol"),+r.value); });
 });
 on(document.getElementById("lofiWith"),"change",function(e){ P.withFocus=e.target.checked; saveP(); });
+on(document.getElementById("lofiSpForm"),"submit",function(e){
+  e.preventDefault();
+  var v=document.getElementById("lofiSpUrl").value.trim();
+  if(!spParse(v)){ spErr("That isn't a Spotify link. In Spotify use Share, then Copy link, and paste it here."); return; }
+  var was=PLAY; if(was) pause();
+  P.sp=v; saveP(); spMount(); nowPlaying();
+});
+/* Log in on Spotify's own page in a small window; when it closes, rebuild
+   the embed so it picks up the new session. */
+on(document.getElementById("lofiSpLogin"),"click",function(){
+  var w=window.open("https://accounts.spotify.com/login?continue="+encodeURIComponent("https://open.spotify.com/"),"spotifyLogin","width=480,height=720");
+  if(!w){ window.open("https://accounts.spotify.com/login","_blank"); return; }
+  var t=setInterval(function(){
+    if(!w.closed) return; clearInterval(t);
+    if(SP.ctl){ try{ SP.ctl.destroy(); }catch(e){} SP.ctl=null; SP.paused=true; if(PLAY) pause(); }
+    spMount();
+  },800);
+});
 on(MINI.querySelector(".lofi-mini-p"),"click",function(){ pause(); });
 on(MINI.querySelector(".lofi-mini-go"),"click",function(){
   if(window.CompassSetTab) window.CompassSetTab("focus"); else if(B.show) B.show("focus");
@@ -15313,6 +15438,7 @@ document.addEventListener("compass:focus",function(e){
 
 if(P.open){ document.getElementById("lofiPanel").hidden=false; document.getElementById("lofiVibeBtn").setAttribute("aria-expanded","true"); }
 setCity(P.city);
+applySrc();
 ui();
 
 })();
