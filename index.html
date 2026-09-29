@@ -2068,6 +2068,66 @@ body.tg .tgnav,:root[data-theme=dark] body.tg .tgnav{background:color-mix(in srg
 </style>
 
 
+<style id="compass-health-css">
+/* ═══ Health · Apple Watch data via an iPhone Shortcut ═══ */
+#s-health .hl-kpis{margin-bottom:14px}
+#s-health .ck-kpi{cursor:default}
+#s-health .ck-kpi:hover{transform:none}
+.hl-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;align-items:start}
+.hl-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.hl-call{--tone:var(--muted);position:relative;overflow:hidden}
+.hl-call:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tone)}
+.hl-call h3{font-size:22px;margin:4px 0 6px;color:var(--ink)}
+.hl-call h3 span{color:var(--tone)}
+.hl-call p{margin:0 0 6px;color:var(--ink-2);font-size:14px;max-width:62ch}
+.hl-why{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.hl-chip{display:inline-flex;align-items:center;gap:6px;font:600 11.5px/1 var(--sans);color:var(--ink-2);padding:6px 9px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border)}
+.hl-chip i{width:7px;height:7px;border-radius:50%;background:var(--c,var(--muted));display:inline-block}
+.hl-note{font-size:12px;color:var(--muted);margin:10px 0 0}
+.hl-chart{width:100%;height:auto;display:block;overflow:visible}
+.hl-chart text{font:500 10px var(--mono);fill:var(--muted)}
+.hl-chart .hl-grid-l{stroke:var(--grid);stroke-width:1}
+.hl-chart .hl-target{stroke:var(--accent);stroke-width:1.2;stroke-dasharray:4 4}
+.hl-chart .hl-base{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 4}
+.hl-legend{display:flex;flex-wrap:wrap;gap:12px;margin:10px 0 0;font-size:11.5px;color:var(--muted)}
+.hl-legend span{display:inline-flex;align-items:center;gap:6px}
+.hl-legend i{width:10px;height:10px;border-radius:3px;display:inline-block;background:var(--c)}
+.hl-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.hl-stats div{min-width:0}
+.hl-stats b{display:block;font:600 18px/1.2 var(--mono);letter-spacing:-.03em;color:var(--ink);white-space:nowrap}
+.hl-stats span{font-size:11.5px;color:var(--muted)}
+.hl-empty{font-size:13.5px;color:var(--muted);padding:18px 0;text-align:center}
+.hl-setup ol{margin:6px 0 0;padding-left:20px;color:var(--ink-2);font-size:13.5px}
+.hl-setup li{margin:0 0 12px;padding-left:4px}
+.hl-setup li b{color:var(--ink)}
+.hl-setup summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hl-setup summary::-webkit-details-marker{display:none}
+.hl-setup summary:after{content:"＋";color:var(--muted);font-size:14px}
+.hl-setup[open] summary:after{content:"－"}
+.hl-code{display:flex;gap:6px;align-items:center;margin:6px 0 2px;flex-wrap:wrap}
+.hl-code code,.hl-code input{flex:1 1 220px;min-width:0;font:500 12px/1.4 var(--mono);color:var(--ink);background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 10px;word-break:break-all}
+.hl-sc{margin:8px 0 0;padding:10px 12px;border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border);font-size:12.5px;color:var(--ink-2)}
+.hl-sc ol{font-size:12.5px;margin:4px 0 0}
+.hl-sc li{margin:0 0 6px}
+.hl-sc code,.hl-setup code{font:500 11.5px var(--mono);color:var(--ink);background:var(--surface-3);padding:1px 5px;border-radius:5px}
+.hl-status{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+.hl-status i{width:8px;height:8px;border-radius:50%;background:var(--c,var(--muted));box-shadow:0 0 0 3px color-mix(in srgb,var(--c,var(--muted)) 20%,transparent)}
+.hl-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.hl-private{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5}
+.hl-nudge{margin:10px 0 4px;padding:9px 11px;border-radius:8px;font-size:12.5px;line-height:1.45;color:var(--ink);background:var(--pl-warn-bg,#fdf3dd);border-left:3px solid var(--warn)}
+.hl-nudge.crit{background:var(--pl-bad-bg,#fdecee);border-left-color:var(--crit)}
+.hl-nudge b{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;font-family:var(--mono)}
+.ck-watch{font-size:11px;color:var(--muted);margin-top:4px}
+@media (max-width:980px){
+  .hl-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:640px){
+  .hl-chart text{font-size:19px}
+  #s-health .ck-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hl-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hl-call h3{font-size:19px}
+}
+</style>
 <style id="lofi-css">
 /* ═══ LOFI CITIES (Focus tab) ═══════════════════════════════════════════
    The scene is always night, so the stage keeps its own dark palette in both
@@ -2744,6 +2804,9 @@ body.lofi-noscroll{overflow:hidden}
   </div>
 </section>
 
+<!-- ═══════════════ HEALTH (Apple Watch via an iPhone Shortcut) ═══════════════ -->
+<section id="s-health"></section>
+
 <!-- ═══════════════ NOTES ═══════════════ -->
 <section id="s-notes">
   <div class="ntgrid">
@@ -3261,13 +3324,13 @@ function execScore(){
    Every old page key still works (CompassSetTab('sync'), ('plan') ...), the
    sidebar and the phone tab bar just show the five groups. Tasks, Gym and
    "Why it works" stay retired; their sections are kept, unlinked. */
-var TABS=[["today","Dashboard"],["focus","Focus"],["plan","Planner"],["cal","Calendar"],["week","Review"],["school","Subjects"],["classes","Timetable"],["revise","Revision"],["notes","Notes"],["checkin","Check-in"],["goals","Goals"],["rituals","Rituals"],["reset","Reset"],["ask","Assistant"],["sync","Data & sync"]];
+var TABS=[["today","Dashboard"],["focus","Focus"],["plan","Planner"],["cal","Calendar"],["week","Review"],["school","Subjects"],["classes","Timetable"],["revise","Revision"],["notes","Notes"],["checkin","Check-in"],["health","Health"],["goals","Goals"],["rituals","Rituals"],["reset","Reset"],["ask","Assistant"],["sync","Data & sync"]];
 var GONE_TABS={tasks:1, gym:1, why:1};
 var GROUPS=[
   {k:"today",n:"Today",p:["today","focus"]},
   {k:"week",n:"Week",p:["plan","cal","week"]},
   {k:"school",n:"School",p:["school","classes","revise","notes"]},
-  {k:"me",n:"Me",p:["checkin","goals","rituals","reset"]},
+  {k:"me",n:"Me",p:["checkin","health","goals","rituals","reset"]},
   {k:"tools",n:"Tools",p:["ask","sync"]}
 ];
 var SVGA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">';
@@ -3289,6 +3352,7 @@ var PAGE_META={
   revise:['School','Revision','Spaced revision: the topics that are due.'],
   notes:['School','Notes','Questions and ideas, saved per subject.'],
   checkin:['Me','Check-in','Sleep, energy, mood and your daily anchors.'],
+  health:['Me','Health','Sleep, heart and steps from your Apple Watch.'],
   goals:['Me','Goals','The longer goals this week is working towards.'],
   rituals:['Me','Rituals','Start-of-day, shutdown and weekly scripts.'],
   reset:['Me','Reset','A smaller next step for a hard day.'],
@@ -6907,7 +6971,7 @@ on($("#shutBtn2"),"click",shutdownWizard);
 on($("#revBtn"),"click",reviewWizard);
 on($("#modal"),"click",function(e){ if(e.target===$("#modal")) closeModal(); });
 
-on($("#sleepR"),"input",function(){ T().sleep=+$("#sleepR").value; touch(); renderToday(); });
+on($("#sleepR"),"input",function(){ T().sleep=+$("#sleepR").value; delete T().sleepSrc; touch(); renderToday(); });
 on($("#energyR"),"input",function(){ T().energy=+$("#energyR").value; touch(); renderToday(); });
 on($("#win"),"input",function(){ T().win=$("#win").value; touch(); });
 on($("#dump"),"input",function(){ T().dump=$("#dump").value; touch(); });
@@ -14234,9 +14298,10 @@ function checkCard(){
   var segs=[1,2,3,4,5].map(function(v){ return '<button data-ck-en="'+v+'" aria-pressed="'+(en===v)+'"><b>'+v+'</b><span>'+ENERGY[v]+'</span></button>'; }).join("");
   return '<div class="ck-card ck-check"><div class="ck-cardhd"><span class="ck-lbl">Check-in</span><button class="ck-link" data-ck="checkin">Full check-in →</button></div>'
     + '<div class="ck-row"><div class="ck-field"><span class="ck-lbl">Sleep last night</span>'
-    + '<div class="ck-step"><button data-ck-sl="-0.5" aria-label="Less sleep">−</button><output>'+(sl?sl+'<small>h</small>':'<em>not logged</em>')+'</output><button data-ck-sl="0.5" aria-label="More sleep">+</button></div></div>'
+    + '<div class="ck-step"><button data-ck-sl="-0.5" aria-label="Less sleep">−</button><output>'+(sl?sl+'<small>h</small>':'<em>not logged</em>')+'</output><button data-ck-sl="0.5" aria-label="More sleep">+</button></div>'+(sl&&d.sleepSrc==="watch"?'<span class="ck-watch">from your Watch</span>':'')+'</div>'
     + '<div class="ck-ring" style="--p:'+(r?r.total:0)+';--tone:var('+(bd?bd.c:'--muted')+')"><b>'+(r?r.total:'–')+'</b><span>'+(bd?esc(bd.n):'readiness')+'</span></div></div>'
     + '<span class="ck-lbl">Energy right now</span><div class="ck-seg">'+segs+'</div>'
+    + (window.CompassHealth&&window.CompassHealth.nudgeHtml?window.CompassHealth.nudgeHtml():'')
     + '</div>';
 }
 
@@ -14313,7 +14378,7 @@ box.addEventListener("click",function(e){
   if((t=e.target.closest("[data-ck-en]"))){ var d=dayRec(ymd(new Date())), v=+t.dataset.ckEn; d.energy=v; after(); return; }
   if((t=e.target.closest("[data-ck-sl]"))){ var d2=dayRec(ymd(new Date())), cur=+d2.sleep||0;
     cur = cur ? cur+(+t.dataset.ckSl) : (+t.dataset.ckSl>0?7.5:7);
-    d2.sleep=Math.max(3,Math.min(11,Math.round(cur*2)/2)); after(); return; }
+    d2.sleep=Math.max(3,Math.min(11,Math.round(cur*2)/2)); delete d2.sleepSrc; after(); return; }
   if((t=e.target.closest("[data-ck]"))){
     var a=t.dataset.ck, go=function(k){ if(window.CompassSetTab) window.CompassSetTab(k); };
     if(a==="plan") go("plan");
@@ -14349,6 +14414,293 @@ window.CompassCockpit={render:render};
 </script>
 
 
+<script id="compass-health">
+document.addEventListener("DOMContentLoaded", function(){
+/* ═══════════════ HEALTH (Apple Watch) ═══════════════
+   The Watch syncs into Health on the iPhone. A Shortcut automation posts
+   the last few days to the worker (/health, its own write-only key); the
+   worker keeps one small record per day in KV. This page reads it with
+   health.get behind the normal passphrase, caches it on this device only
+   (compass_health_v1), fills in "sleep last night" when he hasn't logged
+   it, and turns the numbers into one plain call for the day.            */
+(function(){
+"use strict";
+var B=window.CompassBridge, ROOT=document.getElementById("s-health");
+if(!B||!ROOT) return;
+var CACHE="compass_health_v1";
+var H=load(), busy=false, lastErr="", wkOld=false, keySet=null, setupOpen=null;
+
+function $(s,r){ return (r||document).querySelector(s); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function pad(n){ return (n<10?"0":"")+n; }
+function ymd(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function addD(k,n){ var p=k.split("-"); var d=new Date(+p[0],+p[1]-1,+p[2]+n,12); return ymd(d); }
+function today(){ return ymd(new Date()); }
+function hm(min){ min=Math.round(min||0); return Math.floor(min/60)+"h "+pad(min%60)+"m"; }
+function hShort(min){ return (Math.round(min/6)/10)+"h"; }
+function fmtN(n){ return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,","); }
+function dayName(k){ var p=k.split("-"); return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString("en-GB",{weekday:"short"}); }
+function load(){ try{ return JSON.parse(localStorage.getItem(CACHE)||"null")||{days:{}}; }catch(e){ return {days:{}}; } }
+function keep(){ try{ localStorage.setItem(CACHE,JSON.stringify(H)); }catch(e){} }
+function cfg(){ try{ var c=JSON.parse(localStorage.getItem("compass_ai_cfg")||"null"); return c&&c.url&&c.secret?c:null; }catch(e){ return null; } }
+function D(k){ return (H.days||{})[k]||null; }
+function median(a){ a=a.slice().sort(function(x,y){return x-y;}); if(!a.length) return null; var m=Math.floor(a.length/2); return a.length%2?a[m]:(a[m-1]+a[m])/2; }
+
+/* ── fetch from the worker ── */
+function pull(force){
+  var c=cfg(); if(!c||busy) return Promise.resolve(false);
+  if(!force && H.fetchedAt && Date.now()-H.fetchedAt<5*60000) return Promise.resolve(false);
+  busy=true;
+  return fetch(c.url,{method:"POST",headers:{"Content-Type":"application/json","X-Compass-Secret":c.secret},body:JSON.stringify({action:"health.get"})})
+    .then(function(r){ return r.json().catch(function(){return {};}).then(function(j){ return {s:r.status,j:j}; }); })
+    .then(function(r){
+      busy=false;
+      if(r.s===200 && r.j && r.j.ok && r.j.days){
+        H={days:r.j.days, updatedAt:r.j.updatedAt||null, fetchedAt:Date.now()};
+        keySet=!!r.j.keySet; wkOld=false; lastErr=""; keep(); fill(); paint(); return true;
+      }
+      wkOld = r.s===400 && /messages/.test(String(r.j&&r.j.error||""));
+      lastErr = wkOld ? "" : (r.j&&r.j.error) || ("The worker answered "+r.s+".");
+      paint(); return false;
+    })
+    .catch(function(e){ busy=false; lastErr="Couldn't reach the worker ("+e.message+")."; paint(); return false; });
+}
+
+/* ── fill "sleep last night" where he hasn't logged it ── */
+function fill(){
+  var changed=false, t=today(), S=B.get();
+  for(var i=0;i<7;i++){
+    var k=addD(t,-i), w=D(k); if(!w||!w.sleep||!w.sleep.min) continue;
+    var ex=S.days&&S.days[k];
+    if(ex && +ex.sleep>0) continue;
+    var d=B.day(k), h=Math.max(3,Math.min(11,Math.round(w.sleep.min/30)/2));
+    d.sleep=h; d.sleepSrc="watch"; changed=true;
+  }
+  if(changed){ B.touch(); try{ B.render(); }catch(e){} }
+}
+
+/* ── derived numbers ── */
+function base(field,k,days){
+  var a=[]; for(var i=1;i<=(days||30);i++){ var w=D(addD(k,-i)); if(w&&w[field]!=null) a.push(+w[field]); }
+  return a.length>=5?median(a):null;
+}
+function latest(field){
+  var t=today(); for(var i=0;i<3;i++){ var k=addD(t,-i), w=D(k); if(w&&w[field]!=null) return {k:k,v:+w[field]}; } return null;
+}
+function sleepMin(k){
+  var w=D(k); if(w&&w.sleep&&w.sleep.min) return {min:w.sleep.min,src:"watch",w:w.sleep};
+  var S=B.get(), d=S.days&&S.days[k]; if(d&&+d.sleep>0) return {min:+d.sleep*60,src:"you"};
+  return null;
+}
+function call(){
+  var t=today(), sl=sleepMin(t), r=latest("rhr"), v=latest("hrv");
+  var br=r?base("rhr",r.k):null, bv=v?base("hrv",v.k):null;
+  var hrvLow = v&&bv ? v.v<bv*0.8 : false, rhrUp = r&&br ? r.v>br+5 : false;
+  var flags=[];
+  if(sl) flags.push({c: sl.min<360?"--crit":sl.min<420?"--warn":"--good", t:"Slept "+hm(sl.min)});
+  if(v&&bv) flags.push({c: hrvLow?"--warn":"--good", t:"HRV "+Math.round(v.v)+" ms vs "+Math.round(bv)+" usual"});
+  if(r&&br) flags.push({c: rhrUp?"--warn":"--good", t:"Resting HR "+Math.round(r.v)+" vs "+Math.round(br)+" usual"});
+  if(!sl && !v && !r) return {n:"No data yet", c:"--muted", p:"Once your Shortcut has run, this turns last night's sleep and your heart numbers into one call for the day.", f:flags};
+  var strain = hrvLow || rhrUp;
+  if(sl && (sl.min<360 || (sl.min<420 && strain)))
+    return {n:"Protect", c:"--crit", f:flags, p:"Same hours, gentler work. Put review, flashcards and notes in today's blocks and move the timed Danish paper or new Maths to a better-rested day. In bed by 22:30 tonight."};
+  if((sl && sl.min<420) || strain)
+    return {n:"Pace it", c:"--warn", f:flags, p:"Keep the plan, but do the hardest block first while you're freshest, keep the 10 to 15 minute gaps, and stop at 22:00."};
+  return {n:"Push", c:"--good", f:flags, p:"You're rested. Today is a good day for the hardest thing on the list: a timed paper, new Maths, or the Danish text you've been avoiding."};
+}
+
+/* ── charts ── */
+function sleepChart(){
+  var t=today(), W=640, Hh=210, L=30, R=8, T=10, Bm=24, n=14, bw=(W-L-R)/n, max=11*60;
+  var y=function(m){ return T+(Hh-T-Bm)*(1-Math.min(m,max)/max); };
+  var g='';
+  [0,4,8].forEach(function(h){ g+='<line class="hl-grid-l" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(h*60)+'" y2="'+y(h*60)+'"/><text x="'+(L-6)+'" y="'+(y(h*60)+3)+'" text-anchor="end">'+h+'h</text>'; });
+  var any=false;
+  for(var i=0;i<n;i++){
+    var k=addD(t,-(n-1-i)), x=L+i*bw+bw*0.18, w=bw*0.64, s=sleepMin(k);
+    g+='<text x="'+(L+i*bw+bw/2)+'" y="'+(Hh-8)+'" text-anchor="middle">'+(k===t?"now":dayName(k).slice(0,2))+'</text>';
+    if(!s) continue; any=true;
+    var tip=esc(k+" · "+hm(s.min)+(s.w?" · "+s.w.bed+" to "+s.w.wake:" · logged by you"));
+    if(s.w && s.w.staged){
+      var y0=y(0), parts=[["deep","--fy"],["core","--ma"],["rem","--fa"]], other=Math.max(0,s.min-s.w.deep-s.w.core-s.w.rem);
+      if(other) parts.push(["_o","--gen"]);
+      parts.forEach(function(p){ var m=p[0]==="_o"?other:s.w[p[0]]; if(!m) return; var h=y(0)-y(m); y0-=h;
+        g+='<rect x="'+x+'" y="'+y0+'" width="'+w+'" height="'+Math.max(0,h-0.5)+'" rx="2" fill="var('+p[1]+')"><title>'+tip+'</title></rect>'; });
+    } else {
+      g+='<rect x="'+x+'" y="'+y(s.min)+'" width="'+w+'" height="'+(y(0)-y(s.min))+'" rx="3" fill="var('+(s.src==="you"?"--axis":"--ma")+')"><title>'+tip+'</title></rect>';
+    }
+    if(s.min<420) g+='<circle cx="'+(x+w/2)+'" cy="'+(y(s.min)-6)+'" r="2.6" fill="var(--crit)"/>';
+  }
+  g+='<line class="hl-target" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(480)+'" y2="'+y(480)+'"/><text x="'+(W-R)+'" y="'+(y(480)-5)+'" text-anchor="end" style="fill:var(--accent)">8h</text>';
+  return any?'<svg class="hl-chart" viewBox="0 0 '+W+' '+Hh+'" role="img" aria-label="Sleep, last 14 nights">'+g+'</svg>':'<div class="hl-empty">No nights synced yet.</div>';
+}
+function lineChart(field,unit,days,col,label){
+  var t=today(), W=640, Hh=130, L=30, R=8, T=12, Bm=20, pts=[];
+  for(var i=0;i<days;i++){ var k=addD(t,-(days-1-i)), w=D(k); if(w&&w[field]!=null) pts.push({i:i,v:+w[field],k:k}); }
+  if(pts.length<2) return '<div class="hl-empty">'+(pts.length?"One day so far. The line appears after two.":"No "+label+" data yet.")+'</div>';
+  var vs=pts.map(function(p){return p.v;}), lo=Math.min.apply(null,vs), hi=Math.max.apply(null,vs), b=median(vs);
+  var pad2=Math.max(3,(hi-lo)*0.25); lo=Math.floor(lo-pad2); hi=Math.ceil(hi+pad2);
+  var x=function(i){ return L+(W-L-R)*i/(days-1); }, y=function(v){ return T+(Hh-T-Bm)*(1-(v-lo)/(hi-lo)); };
+  var d=pts.map(function(p,j){ return (j?"L":"M")+x(p.i).toFixed(1)+" "+y(p.v).toFixed(1); }).join(" ");
+  var g='<text x="'+(L-6)+'" y="'+(y(hi)+3)+'" text-anchor="end">'+hi+'</text><text x="'+(L-6)+'" y="'+(y(lo)+3)+'" text-anchor="end">'+lo+'</text>'
+    +'<line class="hl-base" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(b)+'" y2="'+y(b)+'"/>'
+    +'<path d="'+d+'" fill="none" stroke="var('+col+')" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+  pts.forEach(function(p){ g+='<circle cx="'+x(p.i)+'" cy="'+y(p.v)+'" r="2.8" fill="var(--surface)" stroke="var('+col+')" stroke-width="1.6"><title>'+esc(p.k+" · "+Math.round(p.v)+" "+unit)+'</title></circle>'; });
+  g+='<text x="'+L+'" y="'+(Hh-4)+'">'+days+' days ago</text><text x="'+(W-R)+'" y="'+(Hh-4)+'" text-anchor="end">today</text>';
+  return '<svg class="hl-chart" viewBox="0 0 '+W+' '+Hh+'" role="img" aria-label="'+esc(label)+', last '+days+' days">'+g+'</svg>';
+}
+function stepsChart(){
+  var t=today(), W=640, Hh=150, L=36, R=8, T=10, Bm=22, n=14, bw=(W-L-R)/n, vals=[];
+  for(var i=0;i<n;i++){ var k=addD(t,-(n-1-i)), w=D(k); vals.push({k:k,v:w&&w.steps!=null?+w.steps:null}); }
+  var mx=Math.max.apply(null,vals.map(function(o){return o.v||0;}).concat([8000]));
+  if(!vals.some(function(o){return o.v!=null;})) return '<div class="hl-empty">No steps synced yet.</div>';
+  var y=function(v){ return T+(Hh-T-Bm)*(1-v/mx); }, g='';
+  g+='<line class="hl-grid-l" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(0)+'" y2="'+y(0)+'"/><text x="'+(L-6)+'" y="'+(y(mx)+3)+'" text-anchor="end">'+Math.round(mx/1000)+'k</text>';
+  vals.forEach(function(o,i){
+    var x=L+i*bw+bw*0.2, w=bw*0.6;
+    g+='<text x="'+(L+i*bw+bw/2)+'" y="'+(Hh-6)+'" text-anchor="middle">'+(o.k===t?"now":dayName(o.k).slice(0,2))+'</text>';
+    if(o.v==null) return;
+    g+='<rect x="'+x+'" y="'+y(o.v)+'" width="'+w+'" height="'+(y(0)-y(o.v))+'" rx="3" fill="var('+(o.k===t?"--axis":"--ke")+')"><title>'+esc(o.k+" · "+fmtN(o.v)+" steps"+(o.k===t?" so far":""))+'</title></rect>';
+  });
+  return '<svg class="hl-chart" viewBox="0 0 '+W+' '+Hh+'" role="img" aria-label="Steps, last 14 days">'+g+'</svg>';
+}
+
+/* ── sleep stats and the sleep → focus link ── */
+function sleepStats(){
+  var t=today(), mins=[], beds=[], good=0;
+  for(var i=0;i<14;i++){ var k=addD(t,-i), s=sleepMin(k); if(!s) continue; mins.push(s.min); if(s.min>=480) good++;
+    if(s.w&&s.w.bed){ var p=s.w.bed.split(":"), m=(+p[0])*60+(+p[1]); if(m<12*60) m+=24*60; beds.push(m); } }
+  if(!mins.length) return "";
+  var avg=mins.reduce(function(a,b){return a+b;},0)/mins.length, sd="–", ab="–";
+  if(beds.length>=3){ var mb=beds.reduce(function(a,b){return a+b;},0)/beds.length;
+    sd="±"+Math.round(Math.sqrt(beds.reduce(function(a,b){return a+(b-mb)*(b-mb);},0)/beds.length))+"m";
+    var am=Math.round(mb)%(24*60); ab=pad(Math.floor(am/60))+":"+pad(am%60); }
+  return '<div class="hl-stats"><div><b>'+hm(avg)+'</b><span>average, '+mins.length+' nights</span></div>'
+    +'<div><b>'+good+'<small style="font-size:12px;color:var(--muted)">/'+mins.length+'</small></b><span>nights of 8h+</span></div>'
+    +'<div><b>'+ab+'</b><span>usual bedtime</span></div><div><b>'+sd+'</b><span>bedtime spread</span></div></div>';
+}
+function focusLink(){
+  var S=B.get(), t=today(), hi=[], lo=[];
+  for(var i=1;i<=60;i++){ var k=addD(t,-i), s=sleepMin(k), d=S.days&&S.days[k]; if(!s||!d) continue;
+    var f=+d.focus||0; if(s.min>=450) hi.push(f); else if(s.min<420) lo.push(f); }
+  if(hi.length<4||lo.length<4) return '<p class="hl-note">After about two weeks of synced nights with focus sessions logged, this shows how much you get done after a good night compared with a short one.</p>';
+  var a=function(x){ return Math.round(x.reduce(function(p,c){return p+c;},0)/x.length); };
+  return '<div class="hl-stats" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div><b>'+a(hi)+'m</b><span>focus after 7h 30m+ ('+hi.length+' days)</span></div><div><b>'+a(lo)+'m</b><span>focus after under 7h ('+lo.length+' days)</span></div></div>'
+    +'<p class="hl-note">Your own numbers, not a study. Other things change on those days too.</p>';
+}
+
+/* ── setup ── */
+function setupCard(open){
+  var c=cfg(), url=c?String(c.url).replace(/\/+$/,"")+"/health":"(connect sync first)";
+  var st = !c ? ['--muted','Sync isn’t connected on this device. Set it up in Tools, Data & sync.']
+    : wkOld ? ['--warn','Your worker doesn’t have the Health endpoint yet. Step 1 below.']
+    : lastErr ? ['--crit',lastErr]
+    : keySet===false ? ['--warn','Worker updated. It still needs the HEALTH_KEY secret (step 2).']
+    : H.updatedAt ? ['--good','Last data from your iPhone: '+new Date(H.updatedAt).toLocaleString("en-GB",{weekday:"short",hour:"2-digit",minute:"2-digit",day:"numeric",month:"short"})]
+    : keySet ? ['--warn','Worker ready. Waiting for the first run of the Shortcut.'] : ['--muted','Checking the worker…'];
+  return '<details class="ck-card hl-setup"'+(open?' open':'')+'><summary><span class="ck-lbl">Set up and connection</span></summary>'
+    +'<p class="hl-status" style="--c:var('+st[0]+')"><i></i>'+esc(st[1])+'</p>'
+    +'<ol>'
+    +'<li><b>Update the worker.</b> The new worker.js in your repo has a <code>/health</code> endpoint. Paste it into Cloudflare (Workers, compass-ai, Edit code) and deploy, or ask Claude to do it.</li>'
+    +'<li><b>Make a Health key.</b> This key can only add data, never read it. Generate one, then in Cloudflare add it as a <b>Secret</b> named <code>HEALTH_KEY</code> (Settings, Variables and Secrets). Compass doesn’t store it.'
+    +'<div class="hl-code"><input id="hlKey" readonly placeholder="Press Generate" aria-label="Generated Health key"><button class="ck-btn" data-hl="gen">Generate</button><button class="ck-btn ck-ghost" data-hl="copykey">Copy</button></div></li>'
+    +'<li><b>Build the Shortcut on your iPhone.</b> Shortcuts app, new shortcut, name it <i>Compass Health</i>.'
+    +'<div class="hl-sc"><ol>'
+    +'<li>Add <b>Find Health Samples</b>: type <i>Sleep</i>, filter <i>Start Date is in the last 2 days</i>.</li>'
+    +'<li>Add <b>Repeat with Each</b> item in Health Samples. Inside it add a <b>Text</b> action and build this line from the Repeat Item: <code>Value;Unit;Start Date;End Date</code>. Tap each date and set Date Format to <i>ISO 8601</i> with time on.</li>'
+    +'<li>After <i>End Repeat</i> add <b>Combine Text</b> (Repeat Results, with New Lines), then <b>Set Variable</b> <code>Sleep</code>.</li>'
+    +'<li>Do the same for <i>Resting Heart Rate</i> (variable <code>RHR</code>) and <i>Heart Rate Variability</i> (<code>HRV</code>) with <i>in the last 3 days</i>. For <i>Steps</i> (<code>Steps</code>), and if you like <i>Active Energy</i> (<code>Energy</code>) and <i>Exercise Minutes</i> (<code>Exercise</code>), also set <i>Group By: Day</i>. Long-press an action and choose Duplicate to save typing.</li>'
+    +'<li>Add <b>Get Contents of URL</b>: URL <code>'+esc(url)+'</code>, Method <i>POST</i>, add Header <code>X-Health-Key</code> with your key, Request Body <i>JSON</i> with text fields <code>sleep</code>, <code>rhr</code>, <code>hrv</code>, <code>steps</code>, <code>energy</code>, <code>exercise</code> set to those variables.</li>'
+    +'<li>Optional: <b>Get Dictionary Value</b> <code>summary</code>, then <b>Show Notification</b>.</li>'
+    +'<li>Run it once by hand and allow Health access.</li>'
+    +'</ol></div>'
+    +'<div class="hl-code"><code>'+esc(url)+'</code><button class="ck-btn ck-ghost" data-hl="copyurl"'+(c?'':' disabled')+'>Copy URL</button></div></li>'
+    +'<li><b>Automate it.</b> Shortcuts, Automation, new, <i>App</i>: pick an app you open every morning (Lectio or Mail works), <i>Is Opened</i>, <i>Run Immediately</i>, then choose Compass Health. The iPhone only lets Shortcuts read Health while it’s unlocked, which is why an app trigger works better than a clock time. Add a second one in the evening if you want same-day steps.</li>'
+    +'</ol>'
+    +'<div class="hl-actions"><button class="ck-btn ck-primary" data-hl="pull">Check now</button><button class="ck-btn ck-ghost" data-hl="forget">Forget on this device</button><button class="ck-btn ck-ghost" data-hl="wipe"'+(c?'':' disabled')+'>Delete from worker</button></div>'
+    +'<p class="hl-private">Health data goes from your iPhone to your own Cloudflare worker and this device. Only the sleep hours it fills into your check-in join your normal Compass data, the same as a check-in you typed yourself. These are Watch estimates, not medical measurements.</p>'
+    +'</details>';
+}
+
+/* ── page ── */
+function kpi(label,val,sub,tone){ return '<div class="ck-kpi" style="--tone:var('+tone+')"><span class="ck-lbl">'+label+'</span><b>'+val+'</b><span class="ck-sub">'+sub+'</span></div>'; }
+function paint(){
+  if(!ROOT.classList.contains("on") && ROOT.innerHTML) return;
+  var t=today(), sl=sleepMin(t), r=latest("rhr"), v=latest("hrv"), y=D(addD(t,-1)), td=D(t);
+  var br=r?base("rhr",r.k):null, bv=v?base("hrv",v.k):null, has=Object.keys(H.days||{}).length>0;
+  var slv = sl ? hm(sl.min).replace(/h /,'<small>h</small> ').replace(/m$/,'<small>m</small>') : '<em>–</em>';
+  var sls = sl ? (sl.w ? sl.w.bed+" to "+sl.w.wake+(sl.w.deep?" · deep "+hm(sl.w.deep):"") : "logged by you") : "no night synced for today";
+  var k1=kpi("Last night",slv,sls, sl?(sl.min<360?"--crit":sl.min<420?"--warn":"--good"):"--muted");
+  var k2=kpi("Resting HR", r?Math.round(r.v)+'<small>bpm</small>':'<em>–</em>', r?(br?"usual "+Math.round(br)+(r.v>br+5?" · up":""):"baseline after 5 days"):"not synced", r&&br&&r.v>br+5?"--warn":"--good");
+  var k3=kpi("HRV", v?Math.round(v.v)+'<small>ms</small>':'<em>–</em>', v?(bv?"usual "+Math.round(bv)+(v.v<bv*0.8?" · low":""):"baseline after 5 days"):"not synced", v&&bv&&v.v<bv*0.8?"--warn":"--good");
+  var k4=kpi("Steps yesterday", y&&y.steps!=null?fmtN(y.steps):'<em>–</em>', td&&td.steps!=null?"today so far "+fmtN(td.steps):(y&&y.energy?fmtN(y.energy)+" kcal active":"not synced"), "--ke");
+  var cl=call();
+  var callHtml='<div class="ck-card hl-call" style="--tone:var('+cl.c+')"><div class="ck-cardhd"><span class="ck-lbl">Today’s call</span><button class="ck-link" data-hl="pull">Refresh</button></div>'
+    +'<h3><span>'+esc(cl.n)+'.</span></h3><p>'+esc(cl.p)+'</p>'
+    +(cl.f.length?'<div class="hl-why">'+cl.f.map(function(f){return '<span class="hl-chip" style="--c:var('+f.c+')"><i></i>'+esc(f.t)+'</span>';}).join("")+'</div>':'')
+    +(sl&&sl.src==="watch"&&((B.get().days||{})[t]||{}).sleepSrc==="watch"?'<p class="hl-note">Filled into your check-in automatically. Change it there if the Watch got it wrong.</p>':'')
+    +'</div>';
+  var sleepCard='<div class="ck-card"><div class="ck-cardhd"><span class="ck-lbl">Sleep · last 14 nights</span><span class="ck-lbl ck-dim">target 8h</span></div>'+sleepChart()
+    +'<div class="hl-legend"><span style="--c:var(--fy)"><i></i>Deep</span><span style="--c:var(--ma)"><i></i>Core</span><span style="--c:var(--fa)"><i></i>REM</span><span style="--c:var(--axis)"><i></i>Logged by you</span><span style="--c:var(--crit)"><i style="border-radius:50%"></i>Under 7h</span></div>'
+    +sleepStats()+'</div>';
+  var heart='<div class="ck-card"><div class="ck-cardhd"><span class="ck-lbl">Resting heart rate · 30 days</span><span class="ck-lbl ck-dim">bpm · dashed = your usual</span></div>'+lineChart("rhr","bpm",30,"--accent","resting heart rate")
+    +'<div class="ck-cardhd" style="margin-top:16px"><span class="ck-lbl">Heart rate variability · 30 days</span><span class="ck-lbl ck-dim">ms · dashed = your usual</span></div>'+lineChart("hrv","ms",30,"--fy","HRV")
+    +'<p class="hl-note">Compare with your own usual, never with other people. A lower HRV and a higher resting heart rate than usual together often mean poor sleep, stress or a cold coming.</p></div>';
+  var move='<div class="ck-card"><div class="ck-cardhd"><span class="ck-lbl">Steps · 14 days</span><span class="ck-lbl ck-dim">today is partial</span></div>'+stepsChart()+'</div>';
+  var link='<div class="ck-card"><div class="ck-cardhd"><span class="ck-lbl">Sleep and focus</span></div>'+focusLink()+'</div>';
+  var y0=window.scrollY, wasOpen=setupOpen==null?!has:setupOpen, keyVal=($("#hlKey",ROOT)||{}).value||"";
+  ROOT.innerHTML='<div class="ck-kpis hl-kpis">'+k1+k2+k3+k4+'</div>'
+    +'<div class="hl-grid"><div class="hl-col">'+callHtml+sleepCard+link+'</div><div class="hl-col">'+heart+move+setupCard(wasOpen)+'</div></div>';
+  if(keyVal) $("#hlKey",ROOT).value=keyVal;
+  if(Math.abs(window.scrollY-y0)>2) window.scrollTo(0,y0);
+  nudge();
+}
+
+/* ── the planner's "Today's slip" gets one line after a short night ── */
+function nudgeHtml(){
+  var cl=call(), sl=sleepMin(today());
+  if(cl.n!=="Protect" && cl.n!=="Pace it") return "";
+  return '<div class="hl-nudge'+(cl.n==="Protect"?' crit':'')+'"><b>'+(sl?"Slept "+hm(sl.min):"Body under strain")+' · '+cl.n+'</b>'+(cl.n==="Protect"
+    ?"Same hours, gentler work: review and flashcards now, timed papers on a better-rested day."
+    :"Hardest block first, keep the gaps, stop at 22:00.")+'</div>';
+}
+function nudge(){
+  var lede=document.querySelector("#pl-week-sec .pl-lede"), el=document.getElementById("hl-plnudge"), h=nudgeHtml();
+  if(lede){
+    if(!h){ if(el) el.remove(); }
+    else { if(!el){ el=document.createElement("div"); el.id="hl-plnudge"; lede.parentNode.insertBefore(el, lede.nextSibling); } el.innerHTML=h; }
+  }
+  if(window.CompassCockpit && document.getElementById("s-today").classList.contains("on")){ var ck=document.querySelector(".ck-check"); if(ck && !!ck.querySelector(".hl-nudge")!==!!h) window.CompassCockpit.render(); }
+}
+
+/* ── events ── */
+ROOT.addEventListener("click",function(e){ var sm=e.target.closest(".hl-setup>summary"); if(sm) setupOpen=!sm.parentNode.open; });
+ROOT.addEventListener("click",function(e){
+  var b=e.target.closest("[data-hl]"); if(!b) return;
+  var a=b.dataset.hl;
+  if(a==="pull"){ b.disabled=true; pull(true).then(function(){ b.disabled=false; }); }
+  else if(a==="gen"){ var u=new Uint8Array(24); crypto.getRandomValues(u);
+    var k="hk_"+btoa(String.fromCharCode.apply(null,u)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+    $("#hlKey",ROOT).value=k; }
+  else if(a==="copykey"){ var kv=$("#hlKey",ROOT).value; if(kv&&navigator.clipboard) navigator.clipboard.writeText(kv).then(function(){ b.textContent="Copied"; setTimeout(function(){b.textContent="Copy";},1500); }); }
+  else if(a==="copyurl"){ var c=cfg(); if(c&&navigator.clipboard) navigator.clipboard.writeText(String(c.url).replace(/\/+$/,"")+"/health").then(function(){ b.textContent="Copied"; setTimeout(function(){b.textContent="Copy URL";},1500); }); }
+  else if(a==="forget"){ H={days:{}}; try{ localStorage.removeItem(CACHE); }catch(e2){} paint(); }
+  else if(a==="wipe"){ if(!confirm("Delete every health day stored in your worker? Your iPhone still has the originals.")) return;
+    var c2=cfg(); fetch(c2.url,{method:"POST",headers:{"Content-Type":"application/json","X-Compass-Secret":c2.secret},body:JSON.stringify({action:"health.clear"})})
+      .then(function(){ H={days:{}}; try{ localStorage.removeItem(CACHE); }catch(e3){} paint(); }); }
+});
+
+var _r=B.render; B.render=function(){ var r=_r.apply(this,arguments); try{ if(ROOT.classList.contains("on")) paint(); nudge(); }catch(e){} return r; };
+new MutationObserver(function(){ if(ROOT.classList.contains("on")){ paint(); pull(false); } }).observe(ROOT,{attributes:true,attributeFilter:["class"]});
+var PL=document.getElementById("s-plan"); if(PL) new MutationObserver(function(){ if(PL.classList.contains("on")) nudge(); }).observe(PL,{attributes:true,attributeFilter:["class"]});
+document.addEventListener("visibilitychange",function(){ if(!document.hidden) pull(false); });
+setInterval(function(){ if(!document.hidden) pull(false); }, 20*60000);
+setTimeout(function(){ fill(); nudge(); pull(false); }, 4000);
+paint();
+window.CompassHealth={pull:function(){ return pull(true); }, days:function(){ return H.days; }, call:call, render:paint, nudgeHtml:nudgeHtml};
+})();
+}, {once:true});
+</script>
 <script id="compass-lofi">
 document.addEventListener("DOMContentLoaded", function(){
 /* ═══════════════ LOFI CITIES ═══════════════

@@ -5,6 +5,7 @@
  *   • chat completions, streamed straight back (text + images)
  *   • cross-device sync of the Compass state, in Workers KV
  *   • a Notion proxy, so the assistant can read and write Navid's notes
+ *   • /health, where an iPhone Shortcut drops Apple Watch data (own key)
  *
  * Every credential lives here, never in the browser or the public repo.
  *
@@ -14,6 +15,7 @@
  *     QWEN_API_KEY    the provider API key
  *     APP_SECRET      the passphrase also typed into Compass on each device
  *     NOTION_TOKEN    a Notion internal integration secret (ntn_...), optional
+ *     HEALTH_KEY      a long random key used only by the iPhone Health Shortcut, optional
  *
  *   Plain variables:
  *     ALLOWED_ORIGIN  https://navidnj2007-lgtm.github.io
@@ -332,10 +334,218 @@ async function handleSync(env, body, allowed) {
   return json({ ok: true, rev: record.rev, updatedAt: record.updatedAt }, 200, allowed);
 }
 
+/* ── Apple Health (via an iPhone Shortcut) ─────────────────────────────
+ *
+ * The Watch syncs into the Health app on the iPhone. A personal automation
+ * in Shortcuts reads the last few days from Health and POSTs them here:
+ *
+ *   POST <worker url>/health
+ *   X-Health-Key: <HEALTH_KEY>          (a second secret, write-only scope)
+ *   { "sleep": "...", "steps": "...", "energy": "...", "exercise": "...",
+ *     "rhr": "...", "hrv": "..." }
+ *
+ * Each field is text, one sample per line: value;unit;start;end (dates in
+ * ISO 8601). Values in any locale are accepted (8.432 / 8,432 / 62,5).
+ * The worker boils the samples down to one small record per day and keeps
+ * 400 days in KV under compass:health. Compass reads it with health.get,
+ * behind the normal passphrase. HEALTH_KEY can only add data, never read.
+ */
+const HEALTH_KEY_KV = "compass:health";
+const HEALTH_DAYS = 400;
+const HEALTH_MAX_BODY = 400000;
+
+function sameSecret(a, b) {
+  a = String(a || ""); b = String(b || "");
+  if (!a || !b || a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+
+/** "8.432", "8,432", "8 432", "62,5", "1.234,5" -> number. `big` = counts that are never fractional. */
+function healthNum(raw, big) {
+  let s = String(raw || "").replace(/[\s  '’]/g, "").replace(/[^0-9.,\-]/g, "");
+  if (!s) return NaN;
+  const hasDot = s.indexOf(".") > -1, hasComma = s.indexOf(",") > -1;
+  if (hasDot && hasComma) {
+    const dec = s.lastIndexOf(".") > s.lastIndexOf(",") ? "." : ",";
+    s = s.split(dec === "." ? "," : ".").join("").replace(",", ".");
+  } else if (hasDot || hasComma) {
+    const sep = hasDot ? "." : ",";
+    const parts = s.split(sep);
+    if (parts.length > 2) s = parts.join("");
+    else if (big && parts[1].length === 3) s = parts.join("");
+    else s = parts.join(".");
+  }
+  return parseFloat(s);
+}
+
+function healthLocal(ms, tz) {
+  const f = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  }).formatToParts(new Date(ms));
+  const g = (t) => (f.find((x) => x.type === t) || {}).value;
+  return { date: `${g("year")}-${g("month")}-${g("day")}`, hm: `${g("hour")}:${g("minute")}` };
+}
+
+function healthLines(v) {
+  if (Array.isArray(v)) v = v.join("\n");
+  return String(v || "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean).slice(0, 6000)
+    .map((l) => {
+      const p = l.split(";").map((x) => x.trim());
+      if (p.length === 3) p.splice(1, 0, "");
+      const start = Date.parse(p[2]), end = Date.parse(p[3] || p[2]);
+      return { v: p[0], unit: (p[1] || "").toLowerCase(), start, end };
+    })
+    .filter((x) => !isNaN(x.start));
+}
+
+function sleepKind(v) {
+  const s = String(v).toLowerCase();
+  if (/awake|vågen|vaagen|wach|réveil|despierto/.test(s)) return "awake";
+  if (/in ?bed|i seng|im bett|au lit|en cama/.test(s)) return "inbed";
+  if (/deep|dyb|tief|profond|profundo/.test(s)) return "deep";
+  if (/\brem\b/.test(s)) return "rem";
+  if (/core|kerne|kern|essentiel|principal/.test(s)) return "core";
+  return "asleep";
+}
+
+function unionMinutes(iv) {
+  iv = iv.filter((x) => x[1] > x[0]).sort((a, b) => a[0] - b[0]);
+  let tot = 0, cs = -1, ce = -1;
+  for (const [s, e] of iv) {
+    if (s > ce) { if (ce > cs) tot += ce - cs; cs = s; ce = e; }
+    else if (e > ce) ce = e;
+  }
+  if (ce > cs) tot += ce - cs;
+  return Math.round(tot / 60000);
+}
+
+function healthDigest(body, tz) {
+  const days = {};
+  const day = (k) => (days[k] = days[k] || {});
+
+  // sleep: a night belongs to the day you wake up (anything ending before 18:00)
+  const nights = {};
+  for (const x of healthLines(body.sleep)) {
+    if (isNaN(x.end) || x.end <= x.start || x.end - x.start > 20 * 3600000) continue;
+    const k = healthLocal(x.end + 6 * 3600000, tz).date;
+    (nights[k] = nights[k] || []).push({ kind: sleepKind(x.v), s: x.start, e: x.end });
+  }
+  for (const k of Object.keys(nights)) {
+    const n = nights[k];
+    const asleep = n.filter((x) => x.kind !== "awake" && x.kind !== "inbed");
+    const inbed = n.filter((x) => x.kind === "inbed");
+    const sum = (kind) => Math.round(n.filter((x) => x.kind === kind).reduce((a, x) => a + (x.e - x.s), 0) / 60000);
+    let min = unionMinutes(asleep.map((x) => [x.s, x.e]));
+    const bedMin = unionMinutes(inbed.map((x) => [x.s, x.e]));
+    const src = asleep.length ? asleep : inbed;
+    if (!min && bedMin) min = Math.max(0, bedMin - sum("awake"));
+    if (!min) continue;
+    const first = Math.min(...src.map((x) => x.s)), last = Math.max(...src.map((x) => x.e));
+    day(k).sleep = {
+      min, deep: sum("deep"), rem: sum("rem"), core: sum("core"), awake: sum("awake"),
+      inbed: bedMin, bed: healthLocal(first, tz).hm, wake: healthLocal(last, tz).hm,
+      staged: asleep.some((x) => x.kind === "deep" || x.kind === "rem" || x.kind === "core"),
+    };
+  }
+
+  // daily totals
+  const totals = { steps: [true, 1], energy: [true, 1], exercise: [false, 1] };
+  for (const key of Object.keys(totals)) {
+    const acc = {};
+    for (const x of healthLines(body[key])) {
+      let v = healthNum(x.v, totals[key][0]);
+      if (!isFinite(v) || v < 0) continue;
+      if (key === "energy" && /kj/.test(x.unit)) v = v / 4.184;
+      if (key === "exercise" && /^(s|sec)/.test(x.unit)) v = v / 60;
+      if (key === "exercise" && /^(h|hr)/.test(x.unit)) v = v * 60;
+      const k = healthLocal(x.start, tz).date;
+      acc[k] = (acc[k] || 0) + v;
+    }
+    for (const k of Object.keys(acc)) day(k)[key] = Math.round(acc[k]);
+  }
+
+  // daily averages
+  const avgs = { rhr: [25, 200], hrv: [3, 300] };
+  for (const key of Object.keys(avgs)) {
+    const acc = {};
+    for (const x of healthLines(body[key])) {
+      const v = healthNum(x.v, false);
+      if (!isFinite(v) || v < avgs[key][0] || v > avgs[key][1]) continue;
+      const k = healthLocal(x.start, tz).date;
+      (acc[k] = acc[k] || []).push(v);
+    }
+    for (const k of Object.keys(acc)) {
+      const a = acc[k];
+      day(k)[key] = Math.round(a.reduce((s, v) => s + v, 0) / a.length * 10) / 10;
+      day(k)[key + "N"] = a.length;
+    }
+  }
+  return days;
+}
+
+function healthMerge(old, add) {
+  const out = Object.assign({}, old);
+  for (const k of Object.keys(add)) {
+    const o = Object.assign({}, out[k] || {}), n = add[k];
+    if (n.sleep && (!o.sleep || n.sleep.min >= o.sleep.min)) o.sleep = n.sleep;
+    for (const f of ["steps", "energy", "exercise"]) if (n[f] != null) o[f] = Math.max(o[f] || 0, n[f]);
+    for (const f of ["rhr", "hrv"]) if (n[f] != null && (n[f + "N"] || 0) >= (o[f + "N"] || 0)) { o[f] = n[f]; o[f + "N"] = n[f + "N"]; }
+    o.at = new Date().toISOString();
+    out[k] = o;
+  }
+  const keys = Object.keys(out).sort();
+  while (keys.length > HEALTH_DAYS) delete out[keys.shift()];
+  return out;
+}
+
+function hm(min) { return `${Math.floor(min / 60)}h ${String(min % 60).padStart(2, "0")}m`; }
+
+async function handleHealthPush(request, env) {
+  const plainJson = (o, s) => new Response(JSON.stringify(o), { status: s || 200, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
+  if (request.method !== "POST") return plainJson({ error: "Use POST." }, 405);
+  if (!env.HEALTH_KEY) return plainJson({ error: "Add the HEALTH_KEY secret in Cloudflare first." }, 503);
+  if (!sameSecret(request.headers.get("X-Health-Key"), env.HEALTH_KEY)) return plainJson({ error: "Wrong or missing X-Health-Key." }, 401);
+  if (!env.SYNC) return plainJson({ error: "The SYNC KV binding is missing." }, 503);
+  const text = await request.text();
+  if (text.length > HEALTH_MAX_BODY) return plainJson({ error: "Too much data in one go. Use a shorter date range." }, 413);
+  let body;
+  try { body = JSON.parse(text); } catch { return plainJson({ error: "Body must be JSON." }, 400); }
+  const tz = typeof body.tz === "string" && /^[A-Za-z_]+\/[A-Za-z_]+$/.test(body.tz) ? body.tz : (env.HEALTH_TZ || "Europe/Copenhagen");
+  let add;
+  try { add = healthDigest(body || {}, tz); } catch (e) { return plainJson({ error: `Could not read the samples: ${e.message}` }, 400); }
+  const raw = await env.SYNC.get(HEALTH_KEY_KV);
+  const rec = raw ? JSON.parse(raw) : { days: {} };
+  rec.days = healthMerge(rec.days || {}, add);
+  rec.updatedAt = new Date().toISOString();
+  rec.pushes = (rec.pushes || 0) + 1;
+  await env.SYNC.put(HEALTH_KEY_KV, JSON.stringify(rec));
+  const today = healthLocal(Date.now(), tz).date, t = rec.days[today] || {};
+  const bits = [];
+  if (t.sleep) bits.push(`Slept ${hm(t.sleep.min)}`);
+  if (t.rhr) bits.push(`resting HR ${Math.round(t.rhr)}`);
+  if (t.hrv) bits.push(`HRV ${Math.round(t.hrv)} ms`);
+  return plainJson({ ok: true, days: Object.keys(add).length, summary: bits.length ? bits.join(" · ") : "Saved. Nothing for today yet." });
+}
+
+async function handleHealth(env, body, allowed) {
+  if (!env.SYNC) return fail(503, "Sync isn't set up — the KV binding is missing.", allowed);
+  if (body.action === "health.clear") {
+    await env.SYNC.delete(HEALTH_KEY_KV);
+    return json({ ok: true }, 200, allowed);
+  }
+  const raw = await env.SYNC.get(HEALTH_KEY_KV);
+  const rec = raw ? JSON.parse(raw) : { days: {} };
+  return json({ ok: true, keySet: !!env.HEALTH_KEY, updatedAt: rec.updatedAt || null, days: rec.days || {} }, 200, allowed);
+}
+
 /* ── entry point ────────────────────────────────────────────────────── */
 
 export default {
   async fetch(request, env) {
+    if (new URL(request.url).pathname.replace(/\/+$/, "") === "/health") return handleHealthPush(request, env);
     const allowed = env.ALLOWED_ORIGIN || "";
     const origin = request.headers.get("Origin") || "";
 
@@ -359,9 +569,10 @@ export default {
 
     if (act === "sync.get" || act === "sync.put") return handleSync(env, body, allowed);
     if (typeof act === "string" && act.indexOf("notion.") === 0) return handleNotion(env, body, allowed);
+    if (act === "health.get" || act === "health.clear") return handleHealth(env, body, allowed);
 
     if (act === "capabilities") {
-      return json({ sync: !!env.SYNC, notion: !!env.NOTION_TOKEN, model: env.QWEN_MODEL || DEFAULTS.model }, 200, allowed);
+      return json({ sync: !!env.SYNC, notion: !!env.NOTION_TOKEN, health: !!env.HEALTH_KEY, model: env.QWEN_MODEL || DEFAULTS.model }, 200, allowed);
     }
 
     if (!env.QWEN_API_KEY) return fail(500, "Worker is missing QWEN_API_KEY.", allowed);
