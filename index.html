@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f3f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#08090b" media="(prefers-color-scheme: dark)">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2308090b'/%3E%3Cpath d='M32 12 44 32 32 52 20 32Z' fill='none' stroke='%23c5f24a' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23c5f24a'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2308090b'/%3E%3Cpath d='M32 12 44 32 32 52 20 32Z' fill='none' stroke='%23ff4655' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23ff4655'/%3E%3C/svg%3E">
 <style>
 /* Design tokens — shared by every feature and both color themes. */
 :root{color-scheme:light;--plane:#f6f7f9;--surface:#fff;--surface-2:#f4f6f7;--surface-3:#e9edef;--ink:#202d2a;--ink-2:#5f6d69;--muted:#697873;--grid:#e8edeb;--axis:#b9c7c1;--border:#e2e8e5;--d1:#267761;--d2:#cb784c;--d3:#378f73;--d4:#b98a2e;--d5:#b16590;--d6:#4b8761;--good:#278258;--warn:#c49228;--serious:#c97745;--crit:#c44949;--ok-text:#247047;--track:#deeee7;--pos:#267761;--neg:#c44949;--s0:#edf1ef;--s1:#dcebe3;--s2:#b6d5c4;--s3:#8abb9f;--s4:#4b9374;--s5:#276349;--shadow:0 2px 4px #203c2d03;--shadow-lg:0 24px 70px #16291f26;--sidebar:232px;--accent:var(--d1);--accent-ink:#fff}
@@ -1720,15 +1720,15 @@ body.pl-dragging{user-select:none;cursor:grabbing}
   color-scheme:light;
   --plane:#f2f3f5;--surface:#ffffff;--surface-2:#f6f7f9;--surface-3:#eaecf0;
   --ink:#0d1015;--ink-2:#3a414c;--muted:#687180;--grid:#e6e8ec;--axis:#c3c8d0;--border:#e0e3e8;--line:#d3d7de;
-  --accent:#4a7a06;--accent-ink:#ffffff;--accent-soft:rgba(74,122,6,.10);--volt:#c5f24a;
-  --d1:#4a7a06;--d2:#d0632f;--d3:#0f9a6a;--d4:#b7830b;--d5:#7a52d6;--d6:#2f6fd6;
+  --accent:#c0162a;--accent-ink:#ffffff;--accent-soft:rgba(192,22,42,.10);--volt:#ff4655;
+  --d1:#c0162a;--d2:#d0632f;--d3:#0f9a6a;--d4:#b7830b;--d5:#7a52d6;--d6:#2f6fd6;
   --good:#0f9a6a;--warn:#b7780b;--serious:#d0632f;--crit:#d83a4a;--ok-text:#0b7a54;
   --track:#eaecf0;--pos:#0f9a6a;--neg:#d83a4a;
-  --s0:#eef0f3;--s1:#e3f2c4;--s2:#c8e68a;--s3:#9fcf45;--s4:#6fa51a;--s5:#4a7a06;
+  --s0:#eef0f3;--s1:#fbdcdf;--s2:#f5aab2;--s3:#ec6b79;--s4:#d83545;--s5:#c0162a;
   --shadow:none;--shadow-lg:0 30px 80px rgba(10,14,20,.18);--sidebar:84px;
   --ma:#2f6fd6;--ke:#0f9a6a;--fy:#7a52d6;--da:#d0632f;--eo:#b7830b;--fa:#0e8fa3;--th:#6b7380;--gen:#3a414c;
-  --pl-accent-soft:rgba(74,122,6,.25);--pl-sum-bg:#f6f7f9;--pl-sum-line:#e0e3e8;--pl-sum-lbl:#4a7a06;
-  --pl-cover-bg:#ffffff;--pl-cover-fg:#0d1015;--pl-cover-eyebrow:#4a7a06;
+  --pl-accent-soft:rgba(192,22,42,.25);--pl-sum-bg:#f6f7f9;--pl-sum-line:#e0e3e8;--pl-sum-lbl:#c0162a;
+  --pl-cover-bg:#ffffff;--pl-cover-fg:#0d1015;--pl-cover-eyebrow:#c0162a;
   --pl-tip:#0b7a54;--pl-tip-line:#9fd8bf;--pl-bad-bg:#fdecee;--pl-good-bg:#e5f6ee;--pl-warn-bg:#fdf3dd;
   --st-d:#0f9a6a;--st-i:#2f6fd6;--st-r:#7a52d6;--st-t:#eaecf0;--st-l:#f3f4f6;
   --sans:"Inter",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
@@ -1741,15 +1741,15 @@ body.pl-dragging{user-select:none;cursor:grabbing}
   color-scheme:dark;
   --plane:#08090b;--surface:#0f1114;--surface-2:#15181c;--surface-3:#1c2026;--border:#20252c;--line:#2b313a;
   --ink:#e9ecf0;--ink-2:#b4bbc5;--muted:#7d8692;--grid:#1c2026;--axis:#3a414c;
-  --accent:#c5f24a;--accent-ink:#0a0c07;--accent-soft:rgba(197,242,74,.10);
-  --d1:#c5f24a;--d2:#ff8a5c;--d3:#3ddc97;--d4:#ffc24a;--d5:#a98bff;--d6:#6aa6ff;
+  --accent:#ff4655;--accent-ink:#0c0707;--accent-soft:rgba(255,70,85,.10);
+  --d1:#ff4655;--d2:#ff8a5c;--d3:#3ddc97;--d4:#ffc24a;--d5:#a98bff;--d6:#6aa6ff;
   --good:#3ddc97;--warn:#ffb547;--serious:#ff8a5c;--crit:#ff5c6a;--ok-text:#3ddc97;
   --track:#1c2026;--pos:#3ddc97;--neg:#ff5c6a;
-  --s0:#15181c;--s1:#26331a;--s2:#3d5a1c;--s3:#6a9a22;--s4:#9fd133;--s5:#c5f24a;
+  --s0:#15181c;--s1:#331a1d;--s2:#5a1c24;--s3:#9a2230;--s4:#e6384a;--s5:#ff4655;
   --shadow:none;--shadow-lg:0 30px 90px rgba(0,0,0,.6);
   --ma:#6aa6ff;--ke:#35d49a;--fy:#a98bff;--da:#ff8f5e;--eo:#f5c04a;--fa:#39c9dc;--th:#9aa3ae;--gen:#c9cfd6;
-  --pl-accent-soft:rgba(197,242,74,.28);--pl-sum-bg:#15181c;--pl-sum-line:#2b313a;--pl-sum-lbl:#c5f24a;
-  --pl-cover-bg:#0f1114;--pl-cover-fg:#e9ecf0;--pl-cover-eyebrow:#c5f24a;
+  --pl-accent-soft:rgba(255,70,85,.28);--pl-sum-bg:#15181c;--pl-sum-line:#2b313a;--pl-sum-lbl:#ff4655;
+  --pl-cover-bg:#0f1114;--pl-cover-fg:#e9ecf0;--pl-cover-eyebrow:#ff4655;
   --pl-tip:#3ddc97;--pl-tip-line:#1f5e45;--pl-bad-bg:#2a1418;--pl-good-bg:#0f2a20;--pl-warn-bg:#2a2112;
   --st-d:#3ddc97;--st-i:#6aa6ff;--st-r:#a98bff;--st-t:#1c2026;--st-l:#15181c;
   --dots:rgba(255,255,255,.035);
@@ -2146,6 +2146,11 @@ body.lofi-noscroll{overflow:hidden}
 .lofi-sp-form input{flex:1;min-width:0}
 .lofi-sp-err{font-size:12px;color:var(--warn);margin:-2px 0 10px}
 .lofi-sp-embed iframe{display:block;border:0;border-radius:12px;width:100%}
+/* Square, full-size player: artwork, controls and the track list all fit. */
+.lofi-sp-embed{width:100%;max-width:520px;margin:4px auto 0;aspect-ratio:1/1;min-height:380px;border-radius:18px;overflow:hidden;
+  background:var(--surface-2);border:1px solid var(--border);box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.lofi-sp-embed:empty{display:none}
+.lofi-sp-embed>div,.lofi-sp-embed iframe{width:100%!important;height:100%!important;border-radius:18px}
 .lofi.sp #lofiSkip{display:none}
 /* a small pill so the music can be paused from any page */
 .lofi-mini{position:fixed;left:16px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:93;display:flex;align-items:center;gap:4px;
@@ -2169,6 +2174,154 @@ body.lofi-noscroll{overflow:hidden}
   .lofi-two{grid-template-columns:1fr}
   .lofi-sliders{grid-template-columns:1fr}
   .lofi-mini{bottom:calc(140px + env(safe-area-inset-bottom,0px))}
+}
+</style>
+<style>
+/* ═══ Focus timer · instrument ════════════════════════════════════════════
+   Loaded last. The setup readout and the running dial share one language:
+   mono tabular numerals, hairline ticks, one accent arc. */
+
+/* ── setup ── */
+.fdial{position:relative;overflow:hidden;border-radius:18px;padding:22px 18px 16px;
+  background:radial-gradient(120% 90% at 50% 0%,color-mix(in srgb,var(--accent) 9%,var(--surface)) 0%,var(--surface) 60%);
+  border:1px solid color-mix(in srgb,var(--accent) 16%,var(--border))}
+.fdial:before{content:"";position:absolute;left:18%;right:18%;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent) 70%,transparent),transparent)}
+.fstep{gap:22px;margin:0 0 16px}
+.fstep button{width:46px;height:46px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);
+  color:var(--ink-2);box-shadow:none;transition:border-color .15s,color .15s,background .15s,transform .1s}
+.fstep button:hover:not(:disabled){border-color:color-mix(in srgb,var(--accent) 60%,var(--border));color:var(--accent);
+  background:color-mix(in srgb,var(--accent) 8%,var(--surface-2))}
+.fnum{min-width:176px}
+.fnum b{font-family:var(--mono);font-size:52px;font-weight:500;letter-spacing:-.05em;line-height:1;
+  color:var(--ink);background:none;-webkit-background-clip:border-box;background-clip:border-box;white-space:nowrap}
+.fnum b small{font-size:.42em;font-weight:500;color:var(--muted);letter-spacing:0;margin-left:2px}
+.fnum span{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.14em;margin-top:9px;color:var(--muted)}
+.fSessionBox .fnum{min-width:150px}
+.fSessionBox .fnum b{font-size:40px}
+
+.fpre{display:inline-flex;gap:3px;padding:3px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border);
+  margin:0 auto 16px;flex-wrap:wrap;justify-content:center}
+.fdial>.fpre{display:flex;width:max-content;max-width:100%}
+.fpre button{border:0;background:none;border-radius:9px;padding:6px 13px;font-family:var(--mono);font-size:12px;
+  font-weight:600;color:var(--muted)}
+.fpre button:hover{color:var(--ink);background:var(--surface-3)}
+.fpre button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border:0}
+
+.fmap{gap:5px;height:28px}
+.fseg{border-radius:7px;background:var(--surface-2);border-color:var(--border)}
+.fseg .fill{background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 55%,transparent),var(--accent));border-radius:6px 0 0 6px}
+.fseg.br .fill{background:color-mix(in srgb,var(--d6) 70%,transparent)}
+.fseg em{font-family:var(--mono);font-size:10.5px;font-weight:600}
+.fseg.cur{border-color:color-mix(in srgb,var(--accent) 55%,var(--border));box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 14%,transparent)}
+.onbreak .fseg.cur{border-color:color-mix(in srgb,var(--d6) 55%,var(--border));box-shadow:0 0 0 3px color-mix(in srgb,var(--d6) 14%,transparent)}
+.fseg.was em{color:var(--accent-ink)}
+.fends{font-family:var(--mono);font-size:11px;letter-spacing:.02em}
+.fends b{color:var(--ink)}
+
+/* ── running dial ── */
+.fLiveCard .gauge.fbig,body.tg .fLiveCard .gauge.fbig{width:min(288px,78vw);height:auto;aspect-ratio:1;margin:8px auto 6px}
+.fLiveCard .gauge.fmid,body.tg .fLiveCard .gauge.fmid{width:196px;height:auto;aspect-ratio:1;margin:4px auto 0}
+
+.gauge.fring{container-type:inline-size}
+.gauge.fring svg.fr{overflow:visible}
+.fr-face{fill:color-mix(in srgb,var(--tone) 4%,var(--surface))}
+.fr-ticks line{stroke:var(--line);stroke-width:1.2;stroke-linecap:round}
+.fr-ticks line.mj{stroke:var(--axis);stroke-width:2}
+.fr-track{fill:none;stroke:var(--surface-3);stroke-width:7}
+.fr-arc{fill:none;stroke-width:7;stroke-linecap:round;
+  filter:drop-shadow(0 0 6px color-mix(in srgb,var(--tone) 55%,transparent));
+  transition:stroke-dashoffset .95s linear}
+.fr-head{fill:var(--surface);stroke:var(--tone);stroke-width:3;
+  filter:drop-shadow(0 0 5px color-mix(in srgb,var(--tone) 70%,transparent));transition:cx .95s linear,cy .95s linear}
+.fLiveCard .gauge.fring .num{gap:0}
+.fLiveCard .gauge.fring .num b{font-family:var(--mono);font-size:21cqw;font-weight:500;letter-spacing:-.06em;
+  line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);margin:6px 0 5px}
+.fLiveCard .gauge.fring .num span{margin:0;font-family:var(--mono);letter-spacing:.14em;font-weight:600;color:var(--muted)}
+.fLiveCard .gauge.fring .fr-state{display:inline-flex;align-items:center;gap:6px;font-size:max(9px,3.6cqw);
+  padding:3px 9px;border-radius:999px;color:var(--tone)!important;
+  background:color-mix(in srgb,var(--tone) 12%,transparent);border:1px solid color-mix(in srgb,var(--tone) 30%,transparent)}
+.fLiveCard .gauge.fring .fr-state:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;
+  animation:frpulse 1.8s infinite}
+.fLiveCard .gauge.fring .fr-of{font-size:max(9px,3.4cqw);text-transform:uppercase}
+@keyframes frpulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,currentColor 60%,transparent)}80%,100%{box-shadow:0 0 0 7px transparent}}
+
+/* paused: the arc stops glowing and the digits step back */
+.fLiveCard.ispaused .gauge.fring svg{opacity:1}
+.fLiveCard.ispaused .fr-arc{filter:none;opacity:.35}
+.fLiveCard.ispaused .fr-head{filter:none;opacity:.5}
+.fLiveCard.ispaused .gauge.fring .num b{color:var(--muted)}
+.fLiveCard.ispaused .gauge.fring .fr-state{--tone:var(--warn);color:var(--warn)!important}
+.fLiveCard.ispaused .gauge.fring .fr-state:before{animation:none}
+
+/* analog wall clock: its own small face in the card corner, clear of the countdown */
+.fLiveCard{position:relative;container-type:inline-size}
+.fclock{position:absolute;top:18px;right:18px;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1}
+.fclock svg{display:block;width:78px;height:78px;overflow:visible}
+.fSessionBox .fclock{top:0;right:0}
+.fSessionBox .fclock svg{width:58px;height:58px}
+.fc-face{fill:color-mix(in srgb,var(--tone,var(--accent)) 3%,var(--surface-2));stroke:var(--border);stroke-width:1.5}
+.fc-ticks line{stroke:var(--line);stroke-width:1.6;stroke-linecap:round}
+.fc-ticks line.mj{stroke:var(--axis);stroke-width:2.4}
+.fc-hand{transform-box:view-box;transform-origin:50px 50px;transition:transform .35s cubic-bezier(.4,2.1,.55,1)}
+.fc-hand line{stroke-linecap:round}
+.fc-hand.hh line{stroke:var(--ink);stroke-width:4}
+.fc-hand.mh line{stroke:var(--ink);stroke-width:2.6}
+.fc-hand.sh line{stroke:var(--accent);stroke-width:1.2}
+.fc-hub{fill:var(--accent)}
+.fc-pin{fill:var(--surface)}
+.fclock-t{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.12em;color:var(--muted)}
+/* too narrow to share a row with the dial: sit centred above it instead */
+@container (max-width:560px){
+  .fclock{position:static;flex-direction:row;justify-content:center;gap:10px;margin:0 auto 4px}
+  .fclock svg{width:44px;height:44px}
+}
+@media(prefers-reduced-motion:reduce){.fc-hand{transition:none}}
+.fLiveCard .fmeta .fwhat{font-size:17px;letter-spacing:-.015em}
+.fstats{border-radius:14px}
+.fstats b{font-family:var(--mono);font-size:15px;letter-spacing:-.03em}
+.fstats span{font-family:var(--mono);letter-spacing:.12em;font-weight:600}
+
+/* ── the clock over the city ── */
+.lofi-clock{min-width:132px;padding:9px 12px 10px;border-radius:14px;text-align:left;
+  background:linear-gradient(180deg,rgba(18,16,40,.72),rgba(10,10,28,.58));border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.08);
+  -webkit-backdrop-filter:blur(10px) saturate(140%);backdrop-filter:blur(10px) saturate(140%)}
+.lofi-clock .lc-st{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;opacity:.8;min-width:0}
+.lofi-clock .lc-st i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--accent);color:var(--accent);animation:frpulse 1.8s infinite}
+.lofi-clock .lc-st em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lofi-clock b{font-family:var(--mono);font-size:30px;font-weight:500;letter-spacing:-.05em;line-height:1;margin:6px 0 8px}
+.lofi-clock .lc-rail{display:block;height:3px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}
+.lofi-clock .lc-rail i{display:block;height:100%;width:0;border-radius:3px;background:var(--accent);
+  box-shadow:0 0 8px var(--accent);transition:width .95s linear}
+.lofi-clock.brk .lc-st i,.lofi-clock.brk .lc-rail i{background:var(--d6);color:var(--d6);box-shadow:0 0 8px var(--d6)}
+.lofi-clock.paused .lc-st i{background:var(--warn);animation:none}
+.lofi-clock.paused b{opacity:.6}
+.lofi.lofi-full .lofi-clock{min-width:200px;padding:14px 18px 14px}
+.lofi.lofi-full .lofi-clock b{font-size:54px}
+@media (max-width:560px){.lofi-clock{min-width:104px;padding:7px 9px 8px}.lofi-clock b{font-size:21px}}
+
+/* ── focus music: weather, sleep timer, shortcuts ── */
+.lofi-wxrow{display:flex;align-items:center;gap:16px;margin:2px 0 14px;flex-wrap:wrap}
+.lofi-wxrow label{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:600;color:var(--ink-2);flex:0 1 260px}
+.lofi-wxrow input{flex:1;min-width:120px;accent-color:var(--accent)}
+.lofi-wxrow input:disabled{opacity:.4}
+.lofi-wxnote{font-size:11.5px;color:var(--muted);flex:1 1 200px}
+.lofi-sliders input{accent-color:var(--accent)}
+.lofi-sleep{margin:2px 0 12px}
+.lofi-sleep .lbl span{font-family:var(--mono);color:var(--accent);letter-spacing:.04em;text-transform:none}
+.lofi-keys{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);
+  font-size:11.5px;color:var(--muted)}
+.lofi-keys kbd{font-family:var(--mono);font-size:10.5px;padding:1px 6px;border-radius:5px;border:1px solid var(--border);
+  border-bottom-width:2px;background:var(--surface-2);color:var(--ink-2)}
+.lofi-keys kbd:not(:first-child){margin-left:6px}
+.lofi-keys kbd+kbd{margin-left:-2px}
+@media (max-width:560px){.lofi-keys{display:none}}
+
+@media(prefers-reduced-motion:reduce){
+  .fr-arc,.fr-head,.lofi-clock .lc-rail i{transition:none}
+  .fLiveCard .gauge.fring .fr-state:before,.lofi-clock .lc-st i{animation:none}
 }
 </style>
 </head>
@@ -4007,8 +4160,7 @@ function fTickLive(){
     if(card.getAttribute("data-seg")!==String(w.i)){ fresh=false; return; }
     var n=card.querySelector(".num b");
     if(n) n.textContent = mm+":"+String(ss).padStart(2,"0");
-    var ring=card.querySelector(".gauge circle:last-of-type");
-    if(ring) ring.setAttribute("stroke-dashoffset", C*(w.left/w.len));
+    fRingSet(card, w.len ? w.left/w.len : 0);
     var pb=card.querySelector("[data-fpause]");
     if(pb) pb.textContent = t.on?"Pause":"Resume";
     /* The strip, the three figures and the paused styling are as live as the
@@ -4050,7 +4202,7 @@ function fSetupHTML(compact){
     + '<div class="fdial">'
     +   '<div class="fstep">'
     +     '<button class="ghost" data-fminus="1" aria-label="Less time"'+(F.plan<=5?' disabled':'')+'>'+IMINUS+'</button>'
-    +     '<div class="fnum"><b>'+F.plan+'</b><span>mins</span></div>'
+    +     '<div class="fnum"><b>'+fDurHTML(F.plan)+'</b><span>Session length</span></div>'
     +     '<button class="ghost" data-fplus="1" aria-label="More time"'+(F.plan>=480?' disabled':'')+'>'+IPLUS+'</button>'
     +   '</div>'
     +   '<div class="fpre">'+F_PRESETS.map(function(m){
@@ -4083,6 +4235,81 @@ function fSetupHTML(compact){
 }
 var fPickSub=null;
 
+/* ── the dial ──
+   A watch-face ring: sixty minute ticks, a hairline track, the arc of time
+   left in this segment and a bead riding its end. The geometry lives only in
+   these three functions, so the full draw and the once-a-second tick agree. */
+var FR_R=92, FR_C=2*Math.PI*FR_R;
+function fRingHead(frac){
+  var a=Math.max(0,Math.min(1,frac))*2*Math.PI;
+  return {x:(120+FR_R*Math.cos(a)).toFixed(2), y:(120+FR_R*Math.sin(a)).toFixed(2)};
+}
+function fRingSVG(frac, gid){
+  var ticks="";
+  for(var i=0;i<60;i++){
+    var a=i/60*2*Math.PI, mj=i%5===0, r1=113, r2=mj?103:108, c=Math.cos(a), s=Math.sin(a);
+    ticks+='<line'+(mj?' class="mj"':'')+' x1="'+(120+r1*c).toFixed(2)+'" y1="'+(120+r1*s).toFixed(2)
+      +'" x2="'+(120+r2*c).toFixed(2)+'" y2="'+(120+r2*s).toFixed(2)+'"/>';
+  }
+  var h=fRingHead(frac);
+  return '<svg class="fr" viewBox="0 0 240 240" style="width:100%;height:100%" aria-hidden="true">'
+    + '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="1" y2="1">'
+    +   '<stop offset="0%" style="stop-color:var(--tone);stop-opacity:.5"/>'
+    +   '<stop offset="100%" style="stop-color:var(--tone)"/></linearGradient></defs>'
+    + '<circle class="fr-face" cx="120" cy="120" r="98"/>'
+    + '<g class="fr-ticks">'+ticks+'</g>'
+    + '<circle class="fr-track" cx="120" cy="120" r="'+FR_R+'"/>'
+    + '<circle class="fr-arc" cx="120" cy="120" r="'+FR_R+'" stroke="url(#'+gid+')"'
+    +   ' stroke-dasharray="'+FR_C.toFixed(2)+'" stroke-dashoffset="'+(FR_C*(1-frac)).toFixed(2)+'"/>'
+    + '<circle class="fr-head" cx="'+h.x+'" cy="'+h.y+'" r="6"/>'
+    + '</svg>';
+}
+/* The wall clock, beside the countdown rather than inside it, so the two
+   never cross. Hands are drawn pointing at 12 and turned with CSS. Angles
+   only ever grow (seconds since midnight), so 59->0 doesn't spin back. */
+function fHandsDeg(d){
+  var s=d.getHours()*3600+d.getMinutes()*60+d.getSeconds();
+  return {h:s/120, m:s/10, s:s*6};
+}
+function fClockHTML(){
+  var d=new Date(), a=fHandsDeg(d), ticks="";
+  for(var i=0;i<12;i++){
+    var r=i*Math.PI/6, s=Math.sin(r), c=Math.cos(r), r1=45, r2=i%3===0?38:41;
+    ticks+='<line'+(i%3===0?' class="mj"':'')+' x1="'+(50+r1*s).toFixed(2)+'" y1="'+(50-r1*c).toFixed(2)
+      +'" x2="'+(50+r2*s).toFixed(2)+'" y2="'+(50-r2*c).toFixed(2)+'"/>';
+  }
+  function hand(cls,deg,inner){ return '<g class="fc-hand '+cls+'" style="transform:rotate('+deg+'deg)">'+inner+'</g>'; }
+  return '<div class="fclock" role="img" aria-label="Current time">'
+    + '<svg viewBox="0 0 100 100" aria-hidden="true">'
+    +   '<circle class="fc-face" cx="50" cy="50" r="48"/>'
+    +   '<g class="fc-ticks">'+ticks+'</g>'
+    +   hand('hh',a.h,'<line x1="50" y1="56" x2="50" y2="27"/>')
+    +   hand('mh',a.m,'<line x1="50" y1="58" x2="50" y2="15"/>')
+    +   hand('sh',a.s,'<line x1="50" y1="61" x2="50" y2="11"/>')
+    +   '<circle class="fc-hub" cx="50" cy="50" r="3"/><circle class="fc-pin" cx="50" cy="50" r="1.1"/>'
+    + '</svg>'
+    + '<span class="fclock-t">'+fClock(d)+'</span></div>';
+}
+function fHandsSet(card){
+  var d=new Date(), a=fHandsDeg(d), hs=card.querySelectorAll(".fc-hand");
+  if(hs.length===3){ hs[0].style.transform="rotate("+a.h+"deg)"; hs[1].style.transform="rotate("+a.m+"deg)"; hs[2].style.transform="rotate("+a.s+"deg)"; }
+  var tx=card.querySelector(".fclock-t"); if(tx) tx.textContent=fClock(d);
+  var cl=card.querySelector(".fclock"); if(cl) cl.setAttribute("aria-label","Current time "+fClock(d));
+}
+/* The session tick stops while paused; the wall clock must not. */
+setInterval(function(){ var cs=document.querySelectorAll(".fLiveCard"); for(var i=0;i<cs.length;i++) fHandsSet(cs[i]); },1000);
+function fRingSet(card, frac){
+  var arc=card.querySelector(".fr-arc");
+  if(arc) arc.setAttribute("stroke-dashoffset", (FR_C*(1-frac)).toFixed(2));
+  var hd=card.querySelector(".fr-head");
+  if(hd){ var h=fRingHead(frac); hd.setAttribute("cx",h.x); hd.setAttribute("cy",h.y); }
+}
+/* 25 -> "25m", 120 -> "2h 00m": the length reads as a duration, not a count. */
+function fDurHTML(min){
+  if(min<60) return min+'<small>m</small>';
+  return Math.floor(min/60)+'<small>h</small> '+String(min%60).padStart(2,"0")+'<small>m</small>';
+}
+
 /* The clock. Returns "" if the session has just run out, so callers know to
    fall back to the setup card instead of drawing a dead ring. */
 function fLiveHTML(compact){
@@ -4094,19 +4321,16 @@ function fLiveHTML(compact){
   var paused=!t.on;
   /* Both cards can be in the document at once, so the ring gradient needs an id
      each rather than one they would fight over. */
-  var gid='fg-'+(compact?'c':'f'), tone=onBreak?"--d1":"--d3";
+  var gid='fg-'+(compact?'c':'f'), tone=onBreak?"--d6":"--accent";
   return '<div class="'+(compact?'fSessionBox':'card')+' fLiveCard'
     +   (onBreak?' onbreak':'')+(paused?' ispaused':'')+'" data-seg="'+w.i+'">'
-    + '<div class="gauge fring '+(compact?'fmid':'fbig')+'">'
-    +   '<svg viewBox="0 0 132 132" style="width:100%;height:100%">'
-    +     '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="1" y2="1">'
-    +       '<stop offset="0%" stop-color="var('+tone+')" stop-opacity=".5"/>'
-    +       '<stop offset="100%" stop-color="var('+tone+')"/></linearGradient></defs>'
-    +     '<circle cx="66" cy="66" r="54" fill="none" stroke="var(--surface-2)" stroke-width="10"/>'
-    +     '<circle cx="66" cy="66" r="54" fill="none" stroke="url(#'+gid+')" stroke-width="10" stroke-linecap="round"'
-    +       ' stroke-dasharray="'+C+'" stroke-dashoffset="'+(C*(1-pct))+'"/></svg>'
-    +   '<div class="num"><b>'+mm+':'+String(ss).padStart(2,"0")+'</b>'
-    +     '<span data-fstate="1">'+(paused?"Paused":onBreak?"Break":"Block "+no+" / "+blocks)+'</span></div>'
+    + fClockHTML()
+    + '<div class="gauge fring '+(compact?'fmid':'fbig')+'" style="--tone:var('+tone+')">'
+    +   fRingSVG(1-pct, gid)
+    +   '<div class="num">'
+    +     '<span class="fr-state" data-fstate="1">'+(paused?"Paused":onBreak?"Break":"Block "+no+" / "+blocks)+'</span>'
+    +     '<b role="timer" aria-live="off">'+mm+':'+String(ss).padStart(2,"0")+'</b>'
+    +     '<span class="fr-of">of '+Math.round(w.len/60)+' min</span></div>'
     + '</div>'
     + '<div class="fmeta">'
     +   '<div class="fwhat">'+esc(t.label||"Deep work")+'</div>'
@@ -6798,7 +7022,7 @@ window.CompassBridge={
   focusNow:function(){
     if(!fLive()) return null;
     var w=fWhere(fPos()); if(w.k==="end") return null;
-    return {on:!!S.timer.on, brk:w.k==="b", left:w.left, label:S.timer.label||""};
+    return {on:!!S.timer.on, brk:w.k==="b", left:w.left, len:w.len, label:S.timer.label||""};
   },
   paintGym:function(){ if(typeof renderGym==="function") renderGym(); },
   paintClasses:function(){ if(typeof renderClasses==="function") renderClasses(); },
@@ -14140,11 +14364,13 @@ if(!MOUNT) return;
 function on(el,ev,fn){ if(el) el.addEventListener(ev,fn); }
 
 var PKEY="compass.lofi.v1";
-var P={city:"tokyo",vibe:"jazzhop",mood:"chill",band:"full",vol:0.7,amb:0.4,vinyl:0.35,withFocus:false,open:false,src:"lofi",sp:""};
+var P={city:"tokyo",vibe:"jazzhop",mood:"chill",band:"full",vol:0.7,amb:0.4,vinyl:0.35,withFocus:false,open:false,src:"lofi",sp:"",wx:"auto",wxI:1,sleep:"0"};
 try{
   var saved=JSON.parse(localStorage.getItem(PKEY)||"null");
   if(saved && typeof saved==="object") Object.keys(P).forEach(function(k){ if(typeof saved[k]===typeof P[k]) P[k]=saved[k]; });
 }catch(e){}
+if(["auto","clear","drizzle","rain","storm","snow","fog"].indexOf(P.wx)<0) P.wx="auto";
+P.wxI=Math.max(0.3,Math.min(1.6,+P.wxI||1)); P.sleep="0";   // a sleep timer never outlives the page
 function saveP(){ try{ localStorage.setItem(PKEY,JSON.stringify(P)); }catch(e){} }
 
 /* ── pixel toolkit ── everything is drawn on a 480×270 canvas and scaled up
@@ -14660,7 +14886,7 @@ function buildCity(city){
   wc.fillStyle=g; wc.fillRect(0,0,W,wh);
   S.wtint=wt;
   S.up=canvas(W,city.hz);
-  S.parts=particles(city.weather);
+  S.parts=particles(city.weather, P.wxI);
   return S;
 }
 function cloudStrip(R,col,h,dens){
@@ -14674,12 +14900,12 @@ function cloudStrip(R,col,h,dens){
 }
 function ellipse(c,cx,cy,rx,ry,col){ c.fillStyle=col;
   for(var y=-Math.floor(ry);y<=ry;y++){ var w=Math.floor(rx*Math.sqrt(Math.max(0,1-(y*y)/(ry*ry)))); c.fillRect(Math.round(cx-w),Math.round(cy+y),w*2+1,1); } }
-function particles(kind){
-  var n={rain:240,drizzle:110,snow:170}[kind]||0, a=[];
+function particles(kind,k){
+  var n=Math.round(({rain:240,storm:380,drizzle:110,snow:170}[kind]||0)*(k||1)), a=[];
   for(var i=0;i<n;i++) a.push({x:Math.random()*W,y:Math.random()*H,v:0,s:Math.random(),p:Math.random()*6.28});
   a.forEach(function(p){
-    p.v=kind==="snow"?10+p.s*22:kind==="rain"?260+p.s*120:160+p.s*80;
-    p.l=kind==="rain"?4+Math.round(p.s*4):2+Math.round(p.s*2);
+    p.v=kind==="snow"?10+p.s*22:kind==="storm"?330+p.s*150:kind==="rain"?260+p.s*120:160+p.s*80;
+    p.l=kind==="storm"?5+Math.round(p.s*5):kind==="rain"?4+Math.round(p.s*4):2+Math.round(p.s*2);
   });
   return a;
 }
@@ -14739,6 +14965,7 @@ function drawFrame(ctx,S,t,dt,reduced){
   }
   if(city.fg) city.fg(ctx,t,S);
   weather(ctx,S,t,dt,reduced);
+  if(city.weather==="storm") storm(ctx,S,t,reduced);
   if(S.fog){
     var fw=S.fog.width*2, fo=(t*6)%fw, fy=city.weather==="fog"?hz-78:hz-60;
     ctx.imageSmoothingEnabled=false;
@@ -14768,18 +14995,65 @@ function weather(c,S,t,dt,reduced){
     }
     return;
   }
-  var wind=kind==="rain"?-60:-30;
-  c.fillStyle=kind==="rain"?"rgba(170,190,255,.42)":"rgba(170,190,255,.26)";
+  var heavy=kind==="rain"||kind==="storm", wind=kind==="storm"?-115+Math.sin(t*0.4)*35:kind==="rain"?-60:-30;
+  c.fillStyle=kind==="storm"?"rgba(180,196,255,.5)":heavy?"rgba(170,190,255,.42)":"rgba(170,190,255,.26)";
   for(i=0;i<n;i++){ p=ps[i];
     p.y+=p.v*dt; p.x+=wind*dt;
     var floor=p.s>0.5?H:ground+(p.s*2)*(H-ground);
     if(p.y>floor){
-      if(kind==="rain" && S.city.road && p.y<H) { c.fillRect(Math.round(p.x)-1,Math.round(floor)-1,1,1); c.fillRect(Math.round(p.x)+1,Math.round(floor)-1,1,1); }
+      if(heavy && S.city.road && p.y<H) { c.fillRect(Math.round(p.x)-1,Math.round(floor)-1,1,1); c.fillRect(Math.round(p.x)+1,Math.round(floor)-1,1,1); }
       p.y=-p.l-Math.random()*40; p.x=Math.random()*(W+60);
     }
     var x=Math.round(p.x), y=Math.round(p.y), h=p.l>>1;
     c.fillRect(x,y,1,h); c.fillRect(x-1,y+h,1,p.l-h);
   }
+}
+
+/* Lightning: a darker sky, then every 7-20 s a forked bolt, a flash (sometimes
+   a double one) and, a moment later, thunder. Reduced motion keeps the storm
+   but drops the bolt and softens the flash to a glow. */
+function storm(c,S,t,reduced){
+  c.fillStyle="rgba(4,5,16,.22)"; c.fillRect(0,0,W,H);
+  var b=S.bolt||(S.bolt={next:t+3+Math.random()*5,at:-99,path:null});
+  if(t<b.at) { b.at=-99; b.next=t+3; }                    // the clock was reset
+  if(t>=b.next){
+    b.at=t; b.next=t+7+Math.random()*13; b.dbl=Math.random()<0.5;
+    var x=40+Math.random()*(W-80), y=0, pts=[[x,0]];
+    while(y<S.hz-20){ y+=6+Math.random()*12; x+=(Math.random()-0.5)*22; pts.push([x,y]); }
+    b.path=pts; b.fork=Math.floor(pts.length*(0.3+Math.random()*0.3));
+    if(typeof thunder==="function") thunder(0.4+Math.random()*1.6, 0.6+Math.random()*0.5);
+  }
+  var e=t-b.at; if(e<0 || e>1.1) return;
+  var a=e<0.07?0.5:(b.dbl && e>0.15 && e<0.23)?0.38:0.22*Math.max(0,1-e/1.1);
+  c.fillStyle="rgba(205,214,255,"+(reduced?a*0.35:a).toFixed(3)+")"; c.fillRect(0,0,W,H);
+  if(reduced || e>0.3 || !b.path) return;
+  c.fillStyle="#f4f6ff";
+  for(var i=1;i<b.path.length;i++) line(c,Math.round(b.path[i-1][0]),Math.round(b.path[i-1][1]),Math.round(b.path[i][0]),Math.round(b.path[i][1]),"#f4f6ff");
+  var f=b.path[b.fork]; if(f) line(c,Math.round(f[0]),Math.round(f[1]),Math.round(f[0]+18),Math.round(f[1]+26),"#c9d2ff");
+}
+
+/* The weather picker. "Auto" is each city as it was drawn; anything else is
+   laid over the same city: its clouds, mist and fog are swapped to suit, and
+   the weather half of its soundscape (rain, wind) is replaced while the rest
+   (traffic, water, crickets, the foghorn) stays. Intensity scales both the
+   particles and those weather sounds. */
+var WX=[["auto","Auto"],["clear","Clear"],["drizzle","Drizzle"],["rain","Rain"],["storm","Storm"],["snow","Snow"],["fog","Fog"]];
+var WX_NAME={clear:"Clear skies",drizzle:"Drizzle",rain:"Rain",storm:"Thunderstorm",snow:"Snow",fog:"Fog"};
+function sceneCity(base){
+  var c=Object.create(base), w=P.wx==="auto"?base.weather:P.wx, k=P.wxI;
+  c.weather=w;
+  if(P.wx!=="auto"){
+    c.fog = w==="fog" ? Math.max(base.fog||0,0.55) : 0;
+    c.mist= w==="fog"||w==="clear" ? 0 : (base.mist || (w==="snow"?0:0.18));
+    c.clouds = w==="clear" ? (base.weather==="clear"?base.clouds:null)
+      : (base.clouds || (w==="snow"?"#3b4264":w==="storm"?"#1d2138":"#272c47"));
+  }
+  var keep=base.amb.filter(function(a){ return a[0]!=="rain" && a[0]!=="wind"; });
+  var wxAmb=P.wx==="auto" ? base.amb.filter(function(a){ return a[0]==="rain"||a[0]==="wind"; })
+    : ({clear:[],drizzle:[["rain",0.45]],rain:[["rain",0.9]],storm:[["rain",1.15],["wind",0.55]],
+        snow:[["wind",0.7]],fog:[["wind",0.45]]}[w]||[]);
+  c.amb=keep.concat(wxAmb.map(function(a){ return [a[0],a[1]*k]; }));
+  return c;
 }
 
 /* ── the band ──
@@ -15202,10 +15476,24 @@ function foghorn(t){
 }
 function startAmb(){
   stopAmb(); if(!AU) return;
-  cityOf(P.city).amb.forEach(function(it){
+  (SC?SC.city:sceneCity(cityOf(P.city))).amb.forEach(function(it){
     var n=AMBF[it[0]] && AMBF[it[0]](it[1]); if(!n) return;
     n.o.connect(AU.amb); n.o.gain.setTargetAtTime(n.v*0.5,AU.c.currentTime,0.8); AMBN.push(n);
   });
+}
+/* Thunder: a low brown-noise roll with a sharper crack on top, on the city
+   sounds bus so the City sounds slider controls it too. */
+function thunder(delay,power){
+  if(!AU || !PLAY) return;
+  var c=AU.c, t=c.currentTime+delay, v=power*Math.min(1.4,P.wxI);
+  var s=loopSrc(AU.brown), lp=bq("lowpass",260,0.6), g=gn(0);
+  lp.frequency.setValueAtTime(420,t); lp.frequency.exponentialRampToValueAtTime(120,t+3.5);
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(1.3*v,t+0.12);
+  g.gain.setTargetAtTime(0.7*v,t+0.3,0.4); g.gain.setTargetAtTime(0,t+1.2,1.1);
+  s.connect(lp); lp.connect(g); g.connect(AU.amb); s.stop(t+6);
+  var k=loopSrc(AU.white), hp=bq("bandpass",900,0.7), kg=gn(0);
+  kg.gain.setValueAtTime(0,t); kg.gain.linearRampToValueAtTime(0.35*v,t+0.02); kg.gain.setTargetAtTime(0,t+0.05,0.18);
+  k.connect(hp); hp.connect(kg); kg.connect(AU.amb); k.stop(t+1.5);
 }
 function stopAmb(){
   HORN=0; if(!AU) return;
@@ -15217,6 +15505,7 @@ function stopAmb(){
 /* ── the player ── */
 function cityOf(k){ for(var i=0;i<CITIES.length;i++) if(CITIES[i].k===k) return CITIES[i]; return CITIES[0]; }
 var IC={
+  wx:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17.3 9 3.5 3.5 0 0 1 17 16z"/><path d="M9 19.5l-1 2M13 19.5l-1 2M17 19.5l-1 2"/></svg>',
   play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>',
   pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 5.5h3v13h-3zM13.5 5.5h3v13h-3z" fill="currentColor"/></svg>',
   next:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6v12l8.5-6zM16 6h2.5v12H16z" fill="currentColor"/></svg>',
@@ -15237,7 +15526,7 @@ MOUNT.innerHTML=
 +   '<canvas id="lofiCv" width="'+W+'" height="'+H+'" role="img" aria-label="Animated pixel-art city at night"></canvas>'
 +   '<div class="lofi-hud">'
 +     '<div class="lofi-top"><div class="lofi-place"><b id="lofiCity"></b><span id="lofiSub"></span></div>'
-+       '<div class="lofi-clock" id="lofiClock" hidden><b></b><span></span></div></div>'
++       '<div class="lofi-clock" id="lofiClock" hidden><span class="lc-st"><i></i><em></em></span><b></b><span class="lc-rail"><i></i></span></div></div>'
 +     '<button type="button" class="lofi-arrow l" data-lcity="-1" aria-label="Previous city">'+IC.prev+'</button>'
 +     '<button type="button" class="lofi-arrow r" data-lcity="1" aria-label="Next city">'+IC.fwd+'</button>'
 +     '<div class="lofi-bar">'
@@ -15245,6 +15534,7 @@ MOUNT.innerHTML=
 +       '<div class="lofi-now"><b id="lofiTrack">Lofi Cities</b><span id="lofiMeta">Press play: lofi composed live in your browser</span></div>'
 +       '<span class="lofi-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>'
 +       '<button type="button" id="lofiSkip" aria-label="Next track">'+IC.next+'</button>'
++       '<button type="button" id="lofiWx" aria-label="Change weather">'+IC.wx+'</button>'
 +       '<button type="button" id="lofiVibeBtn" aria-label="Vibe settings" aria-expanded="false">'+IC.vibe+'</button>'
 +       '<button type="button" id="lofiFull" aria-label="Full screen">'+IC.full+'</button>'
 +     '</div>'
@@ -15259,6 +15549,9 @@ MOUNT.innerHTML=
 +     '<button type="button" class="ghost sm" id="lofiSpLogin">Log in to Spotify</button></div>'
 + '</div>'
 + '<div class="lofi-panel" id="lofiPanel" hidden>'
++   '<label class="lbl">Weather</label>'+pills("wx",WX)
++   '<div class="lofi-wxrow"><label>Intensity<input type="range" min="0.3" max="1.6" step="0.05" id="lofiWxI" value="'+P.wxI+'"></label>'
++     '<span class="lofi-wxnote" id="lofiWxNote"></span></div>'
 +   '<label class="lbl">City</label>'+pills("city",CITIES.map(function(c){ return [c.k,c.n]; }))
 +   '<div data-lofionly="1"><label class="lbl">Vibe</label>'+pills("vibe",VIBE_KEYS.map(function(k){ return [k,VIBES[k].n]; }))
 +   '<div class="lofi-two">'
@@ -15270,7 +15563,10 @@ MOUNT.innerHTML=
 +     '<label>City sounds<input type="range" min="0" max="1" step="0.01" data-lvol="amb" value="'+P.amb+'"></label>'
 +     '<label data-lofionly="1">Vinyl<input type="range" min="0" max="1" step="0.01" data-lvol="vinyl" value="'+P.vinyl+'"></label>'
 +   '</div>'
++   '<div class="lofi-sleep"><label class="lbl">Sleep timer <span id="lofiSleepLeft"></span></label>'
++     pills("sleep",[["0","Off"],["15","15 min"],["30","30 min"],["45","45 min"],["60","1 hour"]])+'</div>'
 +   '<label class="fchk lofi-auto"><input type="checkbox" id="lofiWith"'+(P.withFocus?' checked':'')+'> Start the music when a focus session starts, stop it when you stop</label>'
++   '<div class="lofi-keys" aria-label="Keyboard shortcuts"><kbd>Space</kbd> play <kbd>N</kbd> next track <kbd>W</kbd> weather <kbd>[</kbd><kbd>]</kbd> city <kbd>F</kbd> full screen</div>'
 + '</div>'
 + '</div>';
 
@@ -15286,10 +15582,11 @@ var SC=null, T0=performance.now(), RAF=0, LAST=0, SEEN=false, FULL=false;
 var REDUCED=window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 function setCity(k){
   P.city=cityOf(k).k; saveP();
-  SC=buildCity(cityOf(P.city));
   var c=cityOf(P.city);
+  SC=buildCity(sceneCity(c));
   document.getElementById("lofiCity").textContent=c.n;
-  document.getElementById("lofiSub").textContent=c.sub;
+  document.getElementById("lofiSub").textContent=P.wx==="auto"?c.sub:WX_NAME[P.wx]+" over "+c.n;
+  wxUi();
   syncPills();
   if(PLAY) startAmb();
   nowPlaying();
@@ -15316,10 +15613,10 @@ var CLK=document.getElementById("lofiClock"), clkLast="";
 function clock(){
   var f=null; try{ f=B.focusNow?B.focusNow():null; }catch(e){}
   var txt=f?Math.floor(f.left/60)+":"+String(f.left%60).padStart(2,"0"):"";
-  if(txt===clkLast) return; clkLast=txt;
+  var key=f?txt+"|"+f.on+"|"+f.brk:""; if(key===clkLast) return; clkLast=key;
   CLK.hidden=!f; if(!f) return;
   CLK.querySelector("b").textContent=txt;
-  CLK.querySelector("span").textContent=!f.on?"Paused":f.brk?"Break":(f.label||"Focus");
+  CLK.querySelector(".lc-st em").textContent=!f.on?"Paused":f.brk?"Break":(f.label||"Focus"); CLK.classList.toggle("paused",!f.on); CLK.classList.toggle("brk",!!f.brk); var rl=CLK.querySelector(".lc-rail i"); if(rl) rl.style.width=(f.len?(1-f.left/f.len)*100:0)+"%";
 }
 setInterval(function(){ if(!RAF && (onTab()||FULL)) clock(); },1000);
 
@@ -15406,7 +15703,7 @@ function spMount(then){
       if(then) then(); return;
     }
     var box=document.getElementById("lofiSpEmbed"); box.innerHTML="<div></div>";
-    SP.api.createController(box.firstChild,{uri:uri,width:"100%",height:152},function(ctl){
+    SP.api.createController(box.firstChild,{uri:uri,width:"100%",height:480},function(ctl){
       SP.ctl=ctl; SP.uri=uri; SP.paused=true;
       ctl.addListener("playback_update",function(e){
         var paused=!(e&&e.data)||!!e.data.isPaused;
@@ -15480,6 +15777,8 @@ ROOT.querySelectorAll("[data-lset]").forEach(function(g){
     var b=e.target.closest("button"); if(!b) return;
     var v=b.getAttribute("data-v"); if(P[k]===v) return;
     if(k==="city"){ setCity(v); return; }
+    if(k==="wx"){ setWx(v); return; }
+    if(k==="sleep"){ setSleep(+v); return; }
     if(k==="src"){ if(PLAY) pause(); P.src=v; saveP(); syncPills(); applySrc(); return; }
     P[k]=v; saveP(); syncPills();
     if(k==="vibe"||k==="mood"){ if(PLAY) skip(); else TR=null; }
@@ -15489,6 +15788,60 @@ ROOT.querySelectorAll("[data-lset]").forEach(function(g){
 ROOT.querySelectorAll("[data-lvol]").forEach(function(r){
   on(r,"input",function(){ setVol(r.getAttribute("data-lvol"),+r.value); });
 });
+/* ── weather ── */
+function wxUi(){
+  var w=P.wx==="auto"?cityOf(P.city).weather:P.wx, b=document.getElementById("lofiWx");
+  if(b){ b.setAttribute("aria-label","Weather: "+(P.wx==="auto"?"Auto ("+WX_NAME[w]+")":WX_NAME[w])+". Change weather"); b.title=b.getAttribute("aria-label"); }
+  var n=document.getElementById("lofiWxNote");
+  if(n) n.textContent=P.wx==="auto"?"Auto uses the weather this city was drawn with: "+WX_NAME[w].toLowerCase()+".":"";
+  var r=document.getElementById("lofiWxI"); if(r) r.disabled=(w==="clear");
+}
+function setWx(v){
+  P.wx=v; saveP(); syncPills(); setCity(P.city);
+}
+on(document.getElementById("lofiWx"),"click",function(){
+  var i=WX.map(function(x){ return x[0]; }).indexOf(P.wx); setWx(WX[(i+1)%WX.length][0]);
+});
+var wxIT=0;
+on(document.getElementById("lofiWxI"),"input",function(e){
+  P.wxI=+e.target.value; saveP();
+  if(SC) SC.parts=particles(SC.city.weather,P.wxI);
+  clearTimeout(wxIT); wxIT=setTimeout(function(){ SC.city=sceneCity(cityOf(P.city)); if(PLAY) startAmb(); },250);
+});
+
+/* ── sleep timer: fade out and stop after a set time ── */
+var SLEEP=0, sleepInt=0;
+function sleepPaint(){
+  var el=document.getElementById("lofiSleepLeft"); if(!el) return;
+  if(!SLEEP){ el.textContent=""; return; }
+  var s=Math.max(0,Math.round((SLEEP-Date.now())/1000));
+  el.textContent="· "+Math.floor(s/60)+":"+String(s%60).padStart(2,"0")+" left";
+}
+function setSleep(min){
+  clearInterval(sleepInt); SLEEP=min?Date.now()+min*60000:0; P.sleep=String(min||0); syncPills(); sleepPaint();
+  if(!SLEEP) return;
+  sleepInt=setInterval(function(){
+    sleepPaint();
+    if(Date.now()<SLEEP) return;
+    clearInterval(sleepInt); SLEEP=0; P.sleep="0"; syncPills(); sleepPaint();
+    if(PLAY){ if(AU) ramp(AU.master.gain,0,4); setTimeout(function(){ if(PLAY) pause(); },4200); }
+  },1000);
+}
+
+/* ── keyboard: only on the Focus tab or in full screen, never while typing ── */
+document.addEventListener("keydown",function(e){
+  if(!(onTab()||FULL) || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
+  var el=document.activeElement, tag=el&&el.tagName;
+  if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||(el&&el.isContentEditable)) return;
+  if(document.querySelector("dialog[open], #modal.on, .modal.on")) return;
+  var k=e.key;
+  if(k===" " && !(tag==="BUTTON"||tag==="A")){ e.preventDefault(); PLAY?pause():play(); }
+  else if(k==="n"||k==="N") skip();
+  else if(k==="w"||k==="W") document.getElementById("lofiWx").click();
+  else if(k==="["||k==="]"){ var i=CITIES.indexOf(cityOf(P.city)); setCity(CITIES[(i+(k==="]"?1:-1)+CITIES.length)%CITIES.length].k); }
+  else if(k==="f"||k==="F") setFull(!FULL);
+});
+
 on(document.getElementById("lofiWith"),"change",function(e){ P.withFocus=e.target.checked; saveP(); });
 on(document.getElementById("lofiSpForm"),"submit",function(e){
   e.preventDefault();
