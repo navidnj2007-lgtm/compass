@@ -2202,6 +2202,8 @@ body.lofi-noscroll{overflow:hidden}
 .lofi-sp-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px}
 .lofi-sp-foot span{font-size:12px;color:var(--muted);line-height:1.45}
 .lofi-sp-foot button{flex:none;white-space:nowrap}
+.lofi-sp-btns{display:flex;gap:6px;flex:none;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:480px){.lofi-sp-foot{flex-direction:column;align-items:stretch}.lofi-sp-btns{justify-content:flex-start}}
 .lofi-sp-form{display:flex;gap:8px;margin-bottom:10px}
 .lofi-sp-form input{flex:1;min-width:0}
 .lofi-sp-err{font-size:12px;color:var(--warn);margin:-2px 0 10px}
@@ -8154,6 +8156,46 @@ register({
   spec:'  {"do":"win.clipboard_read"}   what he last copied, text only',
   args:function(){ return {}; },
   describe:function(){ return {t:"Read what you last copied"}; }
+});
+
+/* ── the document index ───────────────────────────────────────────────
+   Opt-in, and off until he builds it. `win.grep_files` already answers the same question by
+   reading files; the index answers it faster and is bought with a second copy of the opening
+   text of his documents on disk. So the model can search it and rebuild it, and every one of
+   these says what is stored rather than describing it as "the index". */
+
+register({
+  name:"win.index_status", cmd:"index_status", kind:"read", risk:"low",
+  spec:'  {"do":"win.index_status"}   whether the document index exists, how big it is, and exactly what it holds',
+  args:function(){ return {}; },
+  describe:function(){ return {t:"Check the document index"}; }
+});
+
+register({
+  name:"win.index_search", cmd:"index_search", kind:"read", risk:"low",
+  spec:'  {"do":"win.index_search","query":"electrochemistry","limit":20}   fast, but only the first 4,000 characters of each file and only as current as the last rebuild. win.grep_files reads whole files',
+  args:function(a){
+    var q = isStr(a.query) ? clip(a.query,200) : "";
+    if(!q) return null;
+    return { query:q, limit:okInt(a.limit, 20, 1, 60) };
+  },
+  describe:function(a){ return {t:"Search the document index for "+qt(a.query)}; }
+});
+
+register({
+  name:"win.index_rebuild", cmd:"index_rebuild", kind:"write", risk:"medium",
+  spec:'  {"do":"win.index_rebuild"}   reads every document in the allowed folders and stores name, size, date and first 4,000 characters. Only when he asks for it',
+  args:function(){ return {}; },
+  describe:function(){
+    return {t:"Build the document index \u2014 reads your documents and stores the first part of each one"};
+  }
+});
+
+register({
+  name:"win.index_clear", cmd:"index_clear", kind:"write", risk:"medium",
+  spec:'  {"do":"win.index_clear"}   deletes everything stored about his documents',
+  args:function(){ return {}; },
+  describe:function(){ return {t:"Delete everything stored about your documents", del:true}; }
 });
 
 /* ── the screen and the machine ───────────────────────────────────────
@@ -15928,7 +15970,8 @@ MOUNT.innerHTML=
 +   '<div class="lofi-sp-err" id="lofiSpErr" hidden></div>'
 +   '<div class="lofi-sp-embed" id="lofiSpEmbed"></div>'
 +   '<div class="lofi-sp-foot"><span>Only hearing 30-second previews? Log in once and whole songs play.</span>'
-+     '<button type="button" class="ghost sm" id="lofiSpLogin">Log in to Spotify</button></div>'
++     '<span class="lofi-sp-btns"><button type="button" class="ghost sm" id="lofiSpApp" title="Play this in the Spotify app instead">Open in app</button>'
++     '<button type="button" class="ghost sm" id="lofiSpLogin">Log in to Spotify</button></span></div>'
 + '</div>'
 + '<div class="lofi-panel" id="lofiPanel" hidden>'
 +   '<label class="lbl">Weather</label>'+pills("wx",WX)
@@ -16233,15 +16276,51 @@ on(document.getElementById("lofiSpForm"),"submit",function(e){
   P.sp=v; saveP(); spMount(); nowPlaying();
 });
 /* Log in on Spotify's own page in a small window; when it closes, rebuild
-   the embed so it picks up the new session. */
+   the embed so it picks up the new session.
+   In the desktop app that window is a Compass window sharing the player's
+   cookies (desktop 1.1 and later), and it closes itself once the login lands on
+   open.spotify.com. Desktop 1.0 refuses every popup, so say so instead of
+   failing silently. A login in his normal browser would not help there: the
+   desktop player keeps its own cookies. */
+var SP_DESK=!!(window.__TAURI__ || window.__TAURI_INTERNALS__);
+function spDeskNew(){
+  var h=window.CompassAgent && CompassAgent.host ? CompassAgent.host() : null;
+  var m=String(h && h.version || "").match(/^(\d+)\.(\d+)/);
+  return !!m && (+m[1]>1 || (+m[1]===1 && +m[2]>=1));
+}
 on(document.getElementById("lofiSpLogin"),"click",function(){
-  var w=window.open("https://accounts.spotify.com/login?continue="+encodeURIComponent("https://open.spotify.com/"),"spotifyLogin","width=480,height=720");
-  if(!w){ window.open("https://accounts.spotify.com/login","_blank"); return; }
+  var w=null;
+  try{ w=window.open("https://accounts.spotify.com/login?continue="+encodeURIComponent("https://open.spotify.com/"),"spotifyLogin","width=480,height=720"); }catch(e){ w=null; }
+  if(!w){
+    spErr(SP_DESK
+      ? "This version of the Compass desktop app can't open the Spotify login window. Install the new Compass desktop version, or use Open in app to play it in Spotify."
+      : "Your browser blocked the login window. Allow pop-ups for Compass and try again.");
+    return;
+  }
+  spErr("");
   var t=setInterval(function(){
-    if(!w.closed) return; clearInterval(t);
+    var closed=true; try{ closed=w.closed; }catch(e){}
+    if(!closed) return; clearInterval(t);
     if(SP.ctl){ try{ SP.ctl.destroy(); }catch(e){} SP.ctl=null; SP.paused=true; if(PLAY) pause(); }
     spMount();
   },800);
+});
+/* Hand the link to the Spotify app itself. Useful on the desktop, where the
+   app plays everything with no login dance and keeps going when Compass closes. */
+on(document.getElementById("lofiSpApp"),"click",function(){
+  var uri=spParse(P.sp);
+  if(!uri){ spErr("Paste a Spotify link first."); document.getElementById("lofiSpUrl").focus(); return; }
+  if(PLAY) pause();
+  /* Desktop 1.1+ hands spotify: links straight to Windows. Desktop 1.0 can only
+     do it through the assistant's opener, which asks first. */
+  if(SP_DESK && !spDeskNew()){
+    if(window.CompassAgent && CompassAgent.openUrl){
+      CompassAgent.openUrl(uri).then(function(err){ if(err) spErr("Couldn't open Spotify: "+err); });
+    }
+    return;
+  }
+  var a=document.createElement("a"); a.href=uri; a.rel="noopener"; a.style.display="none";
+  document.body.appendChild(a); a.click(); a.remove();
 });
 on(MINI.querySelector(".lofi-mini-p"),"click",function(){ pause(); });
 on(MINI.querySelector(".lofi-mini-go"),"click",function(){
