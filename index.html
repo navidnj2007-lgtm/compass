@@ -16298,11 +16298,22 @@ on(document.getElementById("lofiSpLogin"),"click",function(){
     return;
   }
   spErr("");
-  var t=setInterval(function(){
-    var closed=true; try{ closed=w.closed; }catch(e){}
-    if(!closed) return; clearInterval(t);
+  /* Spotify's login page sends Cross-Origin-Opener-Policy, which cuts the link
+     to the window, so w.closed can read true at once or never. So the player is
+     rebuilt when Compass gets focus back after the login, and w.closed is only
+     a second signal, trusted once the window has been open a few seconds. */
+  var t0=Date.now(), done=false;
+  function rebuild(){
+    if(done) return; done=true; clearInterval(t); window.removeEventListener("focus",onFocus);
     if(SP.ctl){ try{ SP.ctl.destroy(); }catch(e){} SP.ctl=null; SP.paused=true; if(PLAY) pause(); }
     spMount();
+  }
+  function onFocus(){ if(Date.now()-t0>3000) rebuild(); }
+  window.addEventListener("focus",onFocus);
+  var t=setInterval(function(){
+    var closed=false; try{ closed=w.closed; }catch(e){}
+    if(closed && Date.now()-t0>4000) rebuild();
+    if(Date.now()-t0>15*60000){ clearInterval(t); }
   },800);
 });
 /* Hand the link to the Spotify app itself. Useful on the desktop, where the
