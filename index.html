@@ -3125,9 +3125,15 @@ try{
     if(!n.reps) n.reps=0;
     if(!n.made) n.made=iso(new Date());
   });
+  ensureSubjects();
+})();
+/* Economics SL joined the four the app shipped with. Match on name so a
+   subject the user already added by hand is never duplicated. Runs at load
+   and again whenever synced state replaces S (an older copy in the cloud
+   would otherwise drop Economics from every device on the next pull). */
+function ensureSubjects(){
   if(!Array.isArray(S.subjects)) S.subjects=[];
-  /* Economics SL joined the four the app shipped with. Match on name so a
-     subject the user already added by hand is never duplicated. */
+  var added=false;
   var hasEcon = S.subjects.some(function(x){
     return /econ|samfundsøk/i.test(String(x.name||""));
   });
@@ -3142,8 +3148,23 @@ try{
         S.rev.push({id:"r"+id+i, s:id, t:t, box:1, next:null, reps:0});
       });
     }
+    added=true;
   }
-})();
+  /* Persian A Literature (self-taught) is a real subject too, so focus time
+     can count towards it. Same rule: never duplicate a hand-made one. */
+  var hasFa = S.subjects.some(function(x){
+    return /persian|farsi|fārsī|فارسی/i.test(String(x.name||""));
+  });
+  if(!hasFa){
+    var fid="su6", fn=1;
+    while(S.subjects.some(function(x){return x.id===fid;})) fid="su6_"+(++fn);
+    var used2={}; S.subjects.forEach(function(x){ used2[x.c]=1; });
+    var free2=["--d6","--d5","--d2","--d3","--d4","--d1"].filter(function(c){return !used2[c];})[0]||"--d6";
+    S.subjects.push({id:fid, name:"Persian A Lit SL", level:"SL", c:free2, mins:0});
+    added=true;
+  }
+  return added;
+}
 
 /* ══════════ UTIL ══════════ */
 var uid=0; function nid(){ return "x"+(++uid)+Date.now().toString(36).slice(-4); }
@@ -3733,7 +3754,7 @@ function fBlockNo(idx){
 
 /* Write one finished block into the record. */
 function fRecord(mins, label, sub){
-  if(!(mins>0)) return;
+  if(!(mins>0) || sub==="__break") return;
   var F=fCfg(), k=iso(new Date());
   F.log.push({d:k, m:mins, t:String(label||"").slice(0,90), s:sub||null, at:Date.now()});
   if(F.log.length>500) F.log=F.log.slice(-500);
@@ -4292,6 +4313,7 @@ function fSetupHTML(compact){
     +   '<button data-fsub="" aria-pressed="'+(!fPickSub?'true':'false')+'">Nothing</button>'
     +   S.subjects.map(function(x){
           return '<button data-fsub="'+x.id+'" aria-pressed="'+(fPickSub===x.id?'true':'false')+'">'+esc(x.name)+'</button>'; }).join("")
+    +   '<button data-fsub="__break" aria-pressed="'+(fPickSub==="__break"?'true':'false')+'" title="A timed break. It isn\u2019t counted as focus time.">Break</button>'
     + '</div>'
     + '<button class="primary" data-fgo="1" style="width:100%;margin-top:'+(compact?'6':'16')+'px">'
     +   (compact ? 'Start '+fHrs(F.plan) : 'Start focus session')+'</button>'
@@ -4454,6 +4476,12 @@ function fBindSetup(root){
        right beside it is the same field, so either page names the same task. */
     var box=lab || $("#blockQ");
     var text=String(box ? box.value : T().q||"").trim();
+    if(fPickSub==="__break"){
+      fAudioPrime();
+      if(F.notify) fAskNotify();
+      fStart(F.plan, "Break", "__break", true);
+      return;
+    }
     if(!text){
       if(box){ box.focus(); box.placeholder="Name the actual task first"; }
       return;
@@ -7077,7 +7105,9 @@ buildTabs(); applyTheme(); renderAll(); show(S.tab||"today"); fRestore();
 window.CompassBridge={
   get:function(){ return S; },
   set:function(o){ if(!o||typeof o!=="object") return false;
-    Object.keys(o).forEach(function(k){ S[k]=o[k]; }); return true; },
+    Object.keys(o).forEach(function(k){ S[k]=o[k]; });
+    if(ensureSubjects()) setTimeout(touch, 0);
+    return true; },
   render:function(){ renderAll(); },
   applyTheme:function(){ applyTheme(); },
   restoreTimer:function(){ fRestore(); },
