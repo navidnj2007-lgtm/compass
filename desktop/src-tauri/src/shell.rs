@@ -26,7 +26,11 @@
 //! one, and a stale planner is a much smaller problem than an executable
 //! frontend.
 
-use tauri::{AppHandle, WebviewUrl, WebviewWindowBuilder};
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+use tauri::webview::{NewWindowResponse, PageLoadEvent};
+use tauri::{AppHandle, Url, WebviewUrl, WebviewWindowBuilder};
+use tauri_plugin_opener::OpenerExt;
 
 /// The live frontend. This is the source of truth for the UI on every platform.
 ///
@@ -123,7 +127,20 @@ pub fn open_main(app: &AppHandle, source: Source) -> tauri::Result<()> {
         Source::Bundled => WebviewUrl::App("index.html".into()),
     };
 
+    let popup_app = app.clone();
+    let nav_app = app.clone();
     let win = WebviewWindowBuilder::new(app, "main", url)
+        .additional_browser_args(BROWSER_ARGS)
+        .on_new_window(move |url, features| new_window(&popup_app, url, features))
+        .on_navigation(move |url| {
+            // A link to spotify:, tg:, mailto: and so on is a hand-off to another
+            // app, never a page this window should try to show.
+            if is_app_scheme(url.scheme()) {
+                let _ = nav_app.opener().open_url(url.as_str(), None::<&str>);
+                return false;
+            }
+            true
+        })
         .title("Compass")
         .inner_size(1180.0, 820.0)
         .min_inner_size(420.0, 560.0)
@@ -161,4 +178,94 @@ pub fn open_main(app: &AppHandle, source: Source) -> tauri::Result<()> {
 
     let _ = app;
     Ok(())
+}
+
+/// WebView2 flags for every Compass window.
+///
+/// The first part repeats wry's defaults, which setting any flags replaces. The
+/// autoplay flag lets Compass's own play button start the Spotify embed: without
+/// it WebView2 wants a click *inside* the embed's frame first, and the focus
+/// player's play button silently does nothing.
+const BROWSER_ARGS: &str = "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection \
+--autoplay-policy=no-user-gesture-required";
+
+/// Schemes that belong to another application. The same list `open_url`
+/// accepts, minus the web: handing one of these to Windows is what a browser does
+/// with the same link.
+fn is_app_scheme(scheme: &str) -> bool {
+    matches!(scheme, "spotify" | "tg" | "whatsapp" | "notion" | "mailto")
+}
+
+/// Pages that open *inside* Compass, in a small window of their own.
+///
+/// Only logins whose cookies the main window needs. The Spotify player in the
+/// focus page is Spotify's embed, and it plays whole songs only when the
+/// webview itself is logged in to Spotify; a login in his normal browser keeps
+/// its cookies there. So this window shares the main window's WebView2
+/// environment, and with it the cookie jar.
+fn opens_inside(url: &Url) -> bool {
+    url.scheme() == "https" && url.host_str() == Some("accounts.spotify.com")
+}
+
+static POPUPS: AtomicUsize = AtomicUsize::new(0);
+
+/// `window.open` from any Compass window.
+///
+/// Version 1.0 had no handler here, and without one WebView2 refuses every new
+/// window silently, which is why the Spotify login button did nothing. Now:
+///   * a Spotify login opens in a Compass window that shares cookies;
+///   * any other web address opens in his default browser, as a link would;
+///   * spotify:, tg:, mailto: and friends go to their own apps;
+///   * anything else (file:, javascript:, data:) is refused.
+///
+/// The login window is labelled `login-N`, and the capability files grant IPC to
+/// the window labelled `main` only, so a page loaded in it cannot reach any
+/// native command.
+fn new_window(
+    app: &AppHandle,
+    url: Url,
+    features: tauri::webview::NewWindowFeatures,
+) -> NewWindowResponse<tauri::Wry> {
+    if opens_inside(&url) {
+        let label = format!("login-{}", POPUPS.fetch_add(1, Ordering::Relaxed));
+        let blank: Url = "about:blank".parse().expect("about:blank parses");
+        let open_app = app.clone();
+        let built = WebviewWindowBuilder::new(app, label, WebviewUrl::External(blank))
+            .window_features(features)
+            .additional_browser_args(BROWSER_ARGS)
+            .title("Log in to Spotify")
+            .inner_size(480.0, 720.0)
+            .center()
+            .resizable(true)
+            // Links out of the login page (help, sign-up) go to his browser.
+            .on_new_window(move |u, _| {
+                open_outside(&open_app, &u);
+                NewWindowResponse::Deny
+            })
+            // The login finishes on open.spotify.com. Once it gets there the cookie
+            // is set, so the window has done its job; Compass sees it close and
+            // rebuilds the player.
+            .on_page_load(|w, p| {
+                if p.event() == PageLoadEvent::Finished
+                    && p.url().host_str() == Some("open.spotify.com")
+                {
+                    let _ = w.close();
+                }
+            })
+            .build();
+        return match built {
+            Ok(window) => NewWindowResponse::Create { window },
+            Err(_) => NewWindowResponse::Deny,
+        };
+    }
+    open_outside(app, &url);
+    NewWindowResponse::Deny
+}
+
+/// Hand an address to Windows if it is one a browser would also hand over.
+fn open_outside(app: &AppHandle, url: &Url) {
+    let s = url.scheme();
+    if s == "http" || s == "https" || is_app_scheme(s) {
+        let _ = app.opener().open_url(url.as_str(), None::<&str>);
+    }
 }
