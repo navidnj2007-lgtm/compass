@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Compass",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "identifier": "app.compass.desktop",
 
   "build": {
@@ -15,12 +15,12 @@
       "capabilities": ["compass-local", "compass-remote"],
       "csp": {
         "default-src": "'self'",
-        "script-src": "'self' 'unsafe-inline' https://telegram.org https://cdnjs.cloudflare.com",
+        "script-src": "'self' 'unsafe-inline' https://telegram.org https://cdnjs.cloudflare.com https://open.spotify.com",
         "style-src": "'self' 'unsafe-inline'",
         "img-src": "'self' data: blob: https:",
         "font-src": "'self' data:",
         "connect-src": "'self' ipc: http://ipc.localhost https: wss:",
-        "frame-src": "'none'",
+        "frame-src": "https://open.spotify.com",
         "object-src": "'none'",
         "worker-src": "'self' blob:",
         "base-uri": "'self'",

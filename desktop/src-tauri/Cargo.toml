@@ -1,6 +1,6 @@
 [package]
 name = "compass-desktop"
-version = "1.0.0"
+version = "1.1.0"
 description = "Compass — the desktop shell and native agent layer"
 authors = ["Navid NJ"]
 edition = "2021"
