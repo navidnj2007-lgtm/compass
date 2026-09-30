@@ -1,6 +1,6 @@
 {
   "name": "compass-desktop",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Windows shell for Compass. Holds no frontend of its own — it loads the live one and carries the native agent tools.",
   "scripts": {
