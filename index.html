@@ -1308,6 +1308,17 @@ body.tg .line.td{padding-left:11px}
 
 /* ── alert switches ── */
 .fopts{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+.fweek{display:flex;flex-direction:column;gap:6px;max-height:252px;overflow:auto;padding:1px}
+.fwk{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;row-gap:2px;align-items:center;text-align:left;
+  width:100%;padding:9px 12px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:inherit;cursor:pointer;font:inherit}
+.fwk:hover{border-color:var(--accent)}
+.fwk[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.fwk-dot{grid-row:1/3;width:9px;height:9px;border-radius:50%}
+.fwk-t{font-size:13.5px;font-weight:600;line-height:1.3;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fwk-m{font-size:11.5px;color:var(--muted)}
+.fwk.late .fwk-m{color:var(--warn,var(--muted))}
+.fweek-empty{font-size:12.5px;color:var(--muted);line-height:1.45}
+.flinked{font-size:12px;color:var(--muted);margin-top:3px}
 .fopts .fchk{gap:7px;font-size:12.5px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
 .fopts .fchk input{width:16px;height:16px;accent-color:var(--d1);cursor:pointer;flex:none}
 .fopts .fchk:hover{color:var(--ink)}
@@ -3762,6 +3773,109 @@ function fRecord(mins, label, sub){
   if(F.log.length>500) F.log=F.log.slice(-500);
   var d=day(k); d.focus=(d.focus||0)+mins;
   if(sub){ var su=S.subjects.filter(function(x){ return x.id===sub; })[0]; if(su) su.mins=(su.mins||0)+mins; }
+  var lo=fLinkObj(S.timer && S.timer.link);
+  if(lo) lo.focused=(lo.focused||0)+mins;
+}
+
+/* ── the week, inside the timer ──
+   A session can be tied to one planner block (S.plan.blocks) or one to-do
+   (S.tasks). The link is {b:id} or {t:id} on S.timer, so it syncs with the
+   session. Focus minutes are added to the item as `focused`, and when the
+   session ends Compass offers to tick the item off. */
+function fLinkObj(link){
+  if(!link) return null;
+  if(link.b) return ((S.plan&&S.plan.blocks)||[]).filter(function(x){ return x.id===link.b; })[0]||null;
+  if(link.t) return (S.tasks||[]).filter(function(x){ return x.id===link.t; })[0]||null;
+  if(link.g!=null){
+    /* A row on that day's to-do list (big3). Rows have no id, so the index is
+       checked against the text and, if the list was reordered, found by text. */
+    var dd=S.days && S.days[link.k]; var a=(dd && dd.big3)||[];
+    if(a[link.g] && a[link.g].t===link.x) return a[link.g];
+    return a.filter(function(r){ return r && r.t===link.x; })[0]||null;
+  }
+  return null;
+}
+function fLinkDone(o){ return !!(o && (o.done || o.d===true)); }
+/* Planner subject codes to his own subject list, by name. */
+var F_SUBKEY={ma:/math/i, ke:/chem|kemi/i, fy:/phys|fysik/i, da:/dan/i, eo:/econ|øko/i, fa:/pers|farsi/i, th:/tok|theory/i};
+function fSubFor(code){
+  var re=F_SUBKEY[code]; if(!re) return null;
+  var su=S.subjects.filter(function(x){ return re.test(x.name||""); })[0];
+  return su ? su.id : null;
+}
+function fHM(m){ return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"); }
+function fMinOf(hm){ var p=String(hm||"").split(":"); return (+p[0]||0)*60+(+p[1]||0); }
+/* What is worth working on right now: today's blocks not yet done, then this
+   week's blocks that slipped, then today's and this week's to-dos. */
+function fWeekItems(){
+  var today=iso(new Date()), ws=iso(wkStart(new Date())), out=[];
+  var bl=((S.plan&&S.plan.blocks)||[]).filter(function(b){ return b && !b.done && b.d && b.d<=today && b.d>=ws; });
+  bl.sort(function(a,b){ return (a.d===b.d ? (a.s<b.s?-1:1) : (a.d<b.d?1:-1)); });
+  bl.sort(function(a,b){ return (a.d===today?0:1)-(b.d===today?0:1); });
+  bl.slice(0,8).forEach(function(b){
+    var mins=Math.max(5, Math.min(480, fMinOf(b.e)-fMinOf(b.s)));
+    out.push({k:"b", id:b.id, title:b.t||"Study block", sub:b.sub||"gen", mins:mins||50,
+      when:(b.d===today?"":new Date(b.d+"T12:00").toLocaleDateString("en-GB",{weekday:"short"})+" ")+(b.s||""),
+      late:b.d<today, done:b.focused||0});
+  });
+  /* Today's to-do list, then this week's to-dos. */
+  ((T().big3)||[]).forEach(function(r,i){
+    if(!r || r.d || !String(r.t||"").trim()) return;
+    out.push({k:"g", id:String(i), x:r.t, title:r.t, sub:null, mins:(r.mins>0?Math.min(480,Math.max(5,r.mins)):0),
+      when:"To-do today", late:false, done:r.focused||0});
+  });
+  var nt=0;
+  (S.tasks||[]).forEach(function(t){
+    if(!t || t.done || t.bucket!=="week" || nt>=4) return; nt++;
+    out.push({k:"t", id:t.id, title:t.text||"Task", sub:null, mins:(t.mins>0?Math.min(480,Math.max(5,t.mins)):0),
+      when:"This week", late:false, done:t.focused||0});
+  });
+  return out;
+}
+var fPickLink=null;
+function fWeekHTML(){
+  var items=fWeekItems();
+  if(!items.length) return '<label class="lbl" style="margin-top:14px">From your week</label>'
+    + '<div class="fweek-empty">Nothing left in your planner for today. Add blocks in Week, or name a task below.</div>';
+  return '<label class="lbl" style="margin-top:14px">From your week</label>'
+    + '<div class="fweek" role="list">' + items.map(function(x){
+        var on=fPickLink && fPickLink.k===x.k && fPickLink.id===x.id;
+        return '<button type="button" class="fwk'+(x.late?' late':'')+'" role="listitem" data-flink="'+x.k+':'+esc(x.id)+'" aria-pressed="'+(on?'true':'false')+'">'
+          + '<i class="fwk-dot" style="background:var(--'+(x.sub||'gen')+',var(--accent))"></i>'
+          + '<span class="fwk-t">'+esc(x.title)+'</span>'
+          + '<span class="fwk-m">'+esc(x.when)+(x.mins?' \u00b7 '+fHrs(x.mins):'')+(x.done?' \u00b7 '+fHrs(x.done)+' done':'')+'</span>'
+          + '</button>';
+      }).join("") + '</div>';
+}
+function fPickWeek(key){
+  var i=key.indexOf(":"), k=key.slice(0,i), id=key.slice(i+1);
+  if(fPickLink && fPickLink.k===k && fPickLink.id===id){ fPickLink=null; fPaint(true); return; }
+  var x=fWeekItems().filter(function(y){ return y.k===k && y.id===id; })[0]; if(!x) return;
+  fPickLink={k:k, id:id, x:x.x};
+  var F=fCfg();
+  T().q=x.title;
+  if(x.mins) F.plan=x.mins;
+  if(x.sub){ var sid=fSubFor(x.sub); if(sid) fPickSub=sid; }
+  touch(); fPaint(true);
+}
+/* Called when a session that was tied to a week item ends. */
+function fOfferTick(link){
+  var o=fLinkObj(link); if(!o || fLinkDone(o)) return;
+  var name=link.b ? (o.t||"this block") : link.g!=null ? (o.t||"this to-do") : (o.text||"this task");
+  openModal('<h2>Done with it?</h2>'
+    +'<div class="md">\u201C'+esc(name)+'\u201D'+(o.focused?' has '+fHrs(o.focused)+' of focus on it now.':'.')+'</div>'
+    +'<div class="row"><button class="primary" id="fTickYes">Tick it off</button>'
+    +'<button class="ghost" id="fTickNo">Not yet</button></div>',
+    function(root){
+      on(root.querySelector("#fTickYes"),"click",function(){
+        if(link.b && window.CompassPlanner && CompassPlanner.setDone) CompassPlanner.setDone(link.b,true);
+        else if(link.g!=null){ o.d=true; o.doneAt=new Date().toISOString(); touch(); }
+        else { o.done=true; o.doneAt=new Date().toISOString(); touch(); }
+        closeModal(); fPaint(true); renderToday();
+        if(typeof renderTodo==="function") try{ renderTodo(); }catch(e){}
+      });
+      on(root.querySelector("#fTickNo"),"click",closeModal);
+    });
 }
 /* Log every focus block that has finished since we last looked. */
 function fHarvest(){
@@ -3828,11 +3942,13 @@ function fMapHTML(seg, curIdx, curPct){
   }).join("") + '</div>';
 }
 
-function fStart(totalMin, label, sub, skip){
+function fStart(totalMin, label, sub, skip, link){
   var F=fCfg();
   F.plan=totalMin; F.skip=!!skip;
   S.timer={ v:2, on:true, startAt:Date.now(), paused:0, pausedAt:null,
-    seg:fBuild(totalMin, skip), logged:0, label:label||"", sub:sub||null, planMin:totalMin };
+    seg:fBuild(totalMin, skip), logged:0, label:label||"", sub:sub||null, planMin:totalMin,
+    link:link||null };
+  fPickLink=null;
   fSaid=null; touch(); fLoop(); fCue(); fPaint(true); renderToday();
   fBroadcast(true);
 }
@@ -3844,8 +3960,8 @@ function fBroadcast(on){
 /* The phone gate used to sit on the Today button only, so starting from the
    Focus tab skipped the one check that matters. Both go through here now, and
    both remember the answer for the rest of the day. */
-function fStartGated(totalMin, label, sub, skip){
-  if(T().gate.phone){ fStart(totalMin, label, sub, skip); return; }
+function fStartGated(totalMin, label, sub, skip, link){
+  if(T().gate.phone){ fStart(totalMin, label, sub, skip, link); return; }
   openModal('<h2>Phone in another room?</h2>'
     +'<div class="md">Not face down. Not in your pocket. A phone in sight costs measurable working memory even switched off (Ward et al., 2017).</div>'
     +'<div class="row"><button class="primary" id="gYes">It\'s in another room now</button>'
@@ -3853,10 +3969,10 @@ function fStartGated(totalMin, label, sub, skip){
     function(root){
       on(root.querySelector("#gYes"),"click",function(){
         T().gate.phone=true; touch(); closeModal(); renderGate();
-        fStart(totalMin, label, sub, skip);
+        fStart(totalMin, label, sub, skip, link);
       });
       on(root.querySelector("#gNo"),"click",function(){
-        closeModal(); fStart(totalMin, label, sub, skip);
+        closeModal(); fStart(totalMin, label, sub, skip, link);
       });
     });
 }
@@ -3872,6 +3988,7 @@ function fResume(){
   t.pausedAt=null; t.on=true; touch(); fLoop(); fCue(); fPaint(true);
 }
 function fStop(){
+  var link=fLive() ? S.timer.link : null;
   if(fLive()){
     fHarvest();
     // Stopping part-way through a block used to throw that block away. Time you
@@ -3886,7 +4003,33 @@ function fStop(){
   fCancelCue(); fSaid=null;
   touch(); fLoop(); fPaint(true); renderToday();
   fBroadcast(false);
+  if(link) fOfferTick(link);
 }
+/* The Week planner and the Today cockpit start focus through here, so there is
+   one timer in Compass rather than two. */
+window.CompassFocus={
+  start:function(o){
+    o=o||{}; var F=fCfg();
+    var mins=Math.max(5, Math.min(480, Math.round(+o.mins||F.plan||50)));
+    var link=o.b ? {b:o.b} : (o.t ? {t:o.t} : null);
+    var sub=o.sub ? fSubFor(o.sub) : null;
+    if(fLive()) fStop();
+    fAudioPrime();
+    if(F.notify) fAskNotify();
+    T().q=String(o.title||"").slice(0,200); touch();
+    /* From the Today cockpit the session shows right there; from Week, go to it. */
+    var td=document.getElementById("s-today");
+    if(!(td && td.classList.contains("on"))) if(window.CompassSetTab) window.CompassSetTab("focus");
+    fStartGated(mins, T().q||"Deep work", sub, F.skip, link);
+  },
+  stop:function(){ if(fLive()) fStop(); },
+  current:function(){
+    if(!fLive()) return null;
+    var t=S.timer, l=t.link||{};
+    return { t:t.label||"Deep work", id:l.b||l.t||null, mins:t.planMin||0,
+      endAt:Date.now()+fLeftTotal()*1000, on:!!t.on };
+  }
+};
 /* Remove one logged block — for a session left running by mistake, or a
    mis-tap. Takes the minutes back off the day and the subject too. */
 function fUnlog(at){
@@ -3930,10 +4073,13 @@ function fTick(){
   var logged=fHarvest();
   var w=fWhere(fPos());
   if(w.k==="end"){
+    var endLink=S.timer.link;
     fAnnounce("done", true);
     S.timer={v:2, on:false, seg:null};
     fCancelCue(); fLastSeg=null;
-    touch(); fLoop(); fPaint(true); renderToday(); return;
+    touch(); fLoop(); fPaint(true); renderToday();
+    if(endLink) fOfferTick(endLink);
+    return;
   }
   var crossed = was!==null && was!==w.i;
   fLastSeg=w.i;
@@ -4307,8 +4453,8 @@ function fSetupHTML(compact){
     + (F.notify && window.Notification && Notification.permission==="denied"
         ? '<div class="fwarn">Notifications are blocked for this site in your browser settings, so only the chime will play.</div>'
         : '')
-    + (compact ? '' :
-        '<label class="lbl" style="margin-top:14px">What exactly are you doing?</label>'
+    + (compact ? '' : fWeekHTML()
+      + '<label class="lbl" style="margin-top:14px">What exactly are you doing?</label>'
       + '<input class="fld sm" data-flabel="1" placeholder="Not “revise Chemistry” — “the 8 equilibrium questions on p.212”" value="'+esc(T().q||"")+'">')
     + '<label class="lbl" style="margin-top:'+(compact?'13':'11')+'px">Count it towards</label>'
     + '<div class="pills" data-fsubs="1">'
@@ -4422,6 +4568,7 @@ function fLiveHTML(compact){
     + '</div>'
     + '<div class="fmeta">'
     +   '<div class="fwhat">'+esc(t.label||"Deep work")+'</div>'
+    +   (fLinkObj(t.link) ? '<div class="flinked">From your week'+(fLinkObj(t.link).focused?' \u00b7 '+fHrs(fLinkObj(t.link).focused)+' focused on it so far':'')+'</div>' : '')
     +   '<div class="fsub">'+(onBreak
           ? "Off screens. Walk, stretch, look out of a window — scrolling isn’t a break."
           : "When you drift, come back without commentary.")+'</div>'
@@ -4473,6 +4620,9 @@ function fBindSetup(root){
   each("[data-fsub]",root,function(b){
     on(b,"click",function(){ fPickSub=b.dataset.fsub||null; fPaint(true); });
   });
+  each("[data-flink]",root,function(b){
+    on(b,"click",function(){ fPickWeek(b.dataset.flink); });
+  });
   on(root.querySelector("[data-fgo]"),"click",function(){
     /* The Today card has no label field of its own — the "one question" input
        right beside it is the same field, so either page names the same task. */
@@ -4491,7 +4641,9 @@ function fBindSetup(root){
     T().q=text; touch();
     fAudioPrime();                       /* while we still have the gesture */
     if(F.notify) fAskNotify();
-    fStartGated(F.plan, text, fPickSub, F.skip);
+    var link=!fPickLink ? null : fPickLink.k==="b" ? {b:fPickLink.id}
+      : fPickLink.k==="t" ? {t:fPickLink.id} : {g:+fPickLink.id, k:iso(new Date()), x:fPickLink.x};
+    fStartGated(F.plan, text, fPickSub, F.skip, link);
   });
 }
 
@@ -13993,7 +14145,7 @@ extra.innerHTML='<div id="pl-progress"></div><div class="pl-scrim" id="pl-scrim"
  +'<label class="f" id="pl-f-src-l" for="pl-f-src">Source / pages<input id="pl-f-src" type="text" autocomplete="off"></label>'
  +'<div class="pl-err" id="pl-f-err" hidden></div></div>'
  +'<div class="pl-acts"><label class="pl-check" id="pl-dr-checkline" for="pl-dr-check"><input type="checkbox" id="pl-dr-check"> Mark as done</label>'
- +'<button class="pl-btn pl-primary" id="pl-dr-save">Save changes</button><button class="pl-btn" id="pl-dr-focus">Start a 50-minute focus</button><button class="pl-btn pl-danger" id="pl-dr-del">Delete block</button><button class="pl-btn" id="pl-dr-reset" hidden>Undo my changes (back to Lectio)</button></div></aside>'
+ +'<button class="pl-btn pl-primary" id="pl-dr-save">Save changes</button><button class="pl-btn" id="pl-dr-focus">Focus on this block</button><button class="pl-btn pl-danger" id="pl-dr-del">Delete block</button><button class="pl-btn" id="pl-dr-reset" hidden>Undo my changes (back to Lectio)</button></div></aside>'
  +'<div class="pl-toast" id="pl-toast" role="status" aria-live="polite" hidden></div>'
  +'<div class="pl-focus" id="pl-focus" hidden><b id="pl-fc-time">50:00</b><span class="ft" id="pl-fc-title"></span><button id="pl-fc-tick" hidden>Tick it off</button><button id="pl-fc-stop">Stop</button></div>';
 while(extra.firstChild) document.body.appendChild(extra.firstChild);
@@ -14085,12 +14237,17 @@ function finish(quiet){if(!fc||fired)return;fired=true;clearInterval(timer);
     try{if(navigator.vibrate)navigator.vibrate([200,100,200,100,400]);}catch(e){}
     document.title="✓ Done · "+fc.t;setTimeout(function(){if(!document.hidden)document.title=baseTitle;},8000);}
   saveF();paintPill();}
-function startFocus(t,mins){if(!t)return;mins=mins||50;clearInterval(timer);cancelCue();fired=false;
+/* One timer in Compass: a block's focus runs on the Focus page's engine, which
+   logs the minutes against the block and offers to tick it off at the end. */
+function blockMins(t){var a=String(t.s||"").split(":"),b=String(t.e||"").split(":");var m=((+b[0]||0)*60+(+b[1]||0))-((+a[0]||0)*60+(+a[1]||0));return m>0?m:50;}
+function startFocus(t,mins){if(!t)return;
+  if(window.CompassFocus){if(fc)stopFocus();window.CompassFocus.start({b:t.id,title:t.t,mins:mins||blockMins(t),sub:t.sub});return;}
+  mins=mins||50;clearInterval(timer);cancelCue();fired=false;
   fc={t:t.t,id:t.id,mins:mins};endAt=Date.now()+mins*60000;
   var c=actx();if(c){cued=chime(c.currentTime+mins*60);if(cued[0])cued[0].onended=function(){finish(false);};}
   askNotify();saveF();paintPill();timer=setInterval(tick,1000);
   toast("Focus started · you'll hear a chime and get a notification at the end");}
-function stopFocus(){clearInterval(timer);cancelCue();fc=null;fired=false;saveF();paintPill();}
+function stopFocus(){if(!fc&&window.CompassFocus){window.CompassFocus.stop();return;}clearInterval(timer);cancelCue();fc=null;fired=false;saveF();paintPill();}
 /* a timer that was running before a reload keeps going (sound re-arms on the next tap) */
 (function(){var o=null;try{o=JSON.parse(localStorage.getItem(FKEY)||"null");}catch(e){}if(!o||!o.endAt)return;
   fc={t:o.t,id:o.id,mins:o.mins};endAt=o.endAt;
@@ -14187,7 +14344,7 @@ setInterval(function(){if(ROOT.classList.contains("on")){renderDeadlines();if(!d
 window.CompassPlanner={render:renderAll,blocks:function(){return blocks();},focus:function(id,mins){startFocus(byId(id),mins);},
   lessons:function(d){return effLessons().filter(function(l){return !d||l.d===d;});},deadlines:function(){return DEADLINES.slice();},
   setDone:function(id,v){setDone(id,v);},edit:function(id){openEdit(id);},editLesson:function(k){openLesson(k);},add:function(d,s){openNew(d,s);},addClass:function(d,s){openNewClass(d,s);},
-  focusing:function(){return fc?{t:fc.t,id:fc.id,mins:fc.mins,endAt:endAt}:null;},stopFocus:function(){stopFocus();}};
+  focusing:function(){if(fc)return {t:fc.t,id:fc.id,mins:fc.mins,endAt:endAt};return window.CompassFocus?window.CompassFocus.current():null;},stopFocus:function(){stopFocus();}};
 })();
 }, {once:true});
 </script>
