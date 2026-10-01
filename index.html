@@ -2528,6 +2528,24 @@ body.lofi-noscroll{overflow:hidden}
 .brand-symbol svg{display:block;width:40px;height:40px}
 @media(max-width:1000px){.workspace-location:before{content:''!important;width:26px;height:26px;display:inline-block;flex:none;border-radius:7px;
   background:url("icon-192.png") center/cover no-repeat}}
+
+/* ══════════ YOUTUBE CARD ══════════ */
+.ytc{padding:14px 18px 14px!important}
+.ytc-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
+.ytc-head b{font-size:14px;font-weight:650}
+.ytc-head span{font-size:11.5px;color:var(--muted)}
+.ytc-frame{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;border:1px solid var(--border);margin:2px 0 10px;
+  box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.ytc-frame[hidden]{display:none}
+.ytc-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.ytc-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.ytc-foot>span:first-child{font-size:12px;color:var(--muted);line-height:1.45;flex:1 1 180px}
+.ytc-btns{display:flex;gap:6px}
+.ytc-btns button[hidden]{display:none}
+#ytErr{margin-top:-2px}
+
+/* the YouTube card makes the music column taller than the screen, so it scrolls with the page */
+.fgrid>#lofiMount{position:static!important}
 </style>
 </head>
 <body class="workspace">
@@ -15095,7 +15113,7 @@ if(!MOUNT) return;
 function on(el,ev,fn){ if(el) el.addEventListener(ev,fn); }
 
 var PKEY="compass.lofi.v1";
-var P={city:"tokyo",vibe:"jazzhop",mood:"chill",band:"full",vol:0.7,amb:0.4,vinyl:0.35,withFocus:false,open:false,src:"lofi",sp:"",wx:"auto",wxI:1,sleep:"0"};
+var P={city:"tokyo",vibe:"jazzhop",mood:"chill",band:"full",vol:0.7,amb:0.4,vinyl:0.35,withFocus:false,open:false,src:"lofi",sp:"",wx:"auto",wxI:1,sleep:"0",yt:""};
 try{
   var saved=JSON.parse(localStorage.getItem(PKEY)||"null");
   if(saved && typeof saved==="object") Object.keys(P).forEach(function(k){ if(typeof saved[k]===typeof P[k]) P[k]=saved[k]; });
@@ -16300,6 +16318,16 @@ MOUNT.innerHTML=
 +   '<label class="fchk lofi-auto"><input type="checkbox" id="lofiWith"'+(P.withFocus?' checked':'')+'> Start the music when a focus session starts, stop it when you stop</label>'
 +   '<div class="lofi-keys" aria-label="Keyboard shortcuts"><kbd>Space</kbd> play <kbd>N</kbd> next track <kbd>W</kbd> weather <kbd>[</kbd><kbd>]</kbd> city <kbd>F</kbd> full screen</div>'
 + '</div>'
++ '</div>'
+/* YouTube: a lecture, a study-with-me stream or a playlist, under the music. */
++ '<div class="card ytc" id="ytCard">'
++   '<div class="ytc-head"><b>YouTube</b><span>Video, lecture or playlist</span></div>'
++   '<form class="lofi-sp-form" id="ytForm" aria-label="YouTube link"><input class="fld sm" id="ytUrl" inputmode="url" autocomplete="off" placeholder="https://www.youtube.com/watch?v=…" value="'+String(P.yt||"").replace(/"/g,"&quot;")+'">'
++     '<button type="submit" class="primary sm">Load</button></form>'
++   '<div class="lofi-sp-err" id="ytErr" hidden></div>'
++   '<div class="ytc-frame" id="ytFrame" hidden></div>'
++   '<div class="ytc-foot" id="ytFoot"><span>Paste any YouTube link. It stays here until you remove it.</span>'
++     '<span class="ytc-btns"><button type="button" class="ghost sm" id="ytOpen" hidden>Open on YouTube</button><button type="button" class="ghost sm" id="ytClear" hidden>Remove</button></span></div>'
 + '</div>';
 
 var ROOT=document.getElementById("lofi"), STAGE=document.getElementById("lofiStage"), CV=document.getElementById("lofiCv"),
@@ -16325,6 +16353,58 @@ function setCity(k){
   draw(true);
 }
 function onTab(){ return SEC && SEC.classList.contains("on"); }
+
+/* ── YouTube ──
+   A plain privacy-enhanced embed (youtube-nocookie.com). Watch, youtu.be,
+   shorts, live, embed and playlist links all work. The player is only created
+   once the Focus page has been opened, so it costs nothing elsewhere. */
+function ytParse(v){
+  v=String(v||"").trim(); if(!v) return null;
+  var u; try{ u=new URL(/^https?:/i.test(v)?v:"https://"+v); }catch(e){ return null; }
+  if(!/(^|\.)(youtube\.com|youtube-nocookie\.com|youtu\.be)$/i.test(u.hostname)) return null;
+  var id=null, list=u.searchParams.get("list"), t=u.searchParams.get("t")||u.searchParams.get("start");
+  if(/youtu\.be$/i.test(u.hostname)) id=u.pathname.slice(1).split("/")[0];
+  else if(u.searchParams.get("v")) id=u.searchParams.get("v");
+  else { var m=u.pathname.match(/^\/(?:embed|shorts|live|v)\/([A-Za-z0-9_-]{11})/); if(m) id=m[1]; }
+  if(id && !/^[A-Za-z0-9_-]{11}$/.test(id)) id=null;
+  if(list && !/^[A-Za-z0-9_-]{10,64}$/.test(list)) list=null;
+  if(!id && !list) return null;
+  var start=0; if(t){ var mm=String(t).match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/); if(mm) start=(+mm[1]||0)*3600+(+mm[2]||0)*60+(+mm[3]||0); }
+  var q="rel=0&modestbranding=1&playsinline=1"+(start?"&start="+start:"");
+  var src = id ? "https://www.youtube-nocookie.com/embed/"+id+"?"+q+(list?"&list="+list:"")
+               : "https://www.youtube-nocookie.com/embed/videoseries?list="+list+"&"+q;
+  var open = id ? "https://www.youtube.com/watch?v="+id+(list?"&list="+list:"") : "https://www.youtube.com/playlist?list="+list;
+  return {src:src, open:open};
+}
+var ytShown=null;
+function ytErr(t){ var e=document.getElementById("ytErr"); e.textContent=t||""; e.hidden=!t; }
+function ytMount(){
+  var y=ytParse(P.yt), box=document.getElementById("ytFrame");
+  document.getElementById("ytClear").hidden=!P.yt;
+  document.getElementById("ytOpen").hidden=!y;
+  if(!y){ box.hidden=true; box.innerHTML=""; ytShown=null; return; }
+  if(ytShown===y.src) return;
+  ytShown=y.src; box.hidden=false;
+  box.innerHTML='<iframe src="'+y.src+'" title="YouTube player" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" loading="lazy"></iframe>';
+}
+on(document.getElementById("ytForm"),"submit",function(e){
+  e.preventDefault();
+  var v=document.getElementById("ytUrl").value.trim();
+  if(!ytParse(v)){ ytErr("That isn\u2019t a YouTube link. On YouTube use Share, then Copy, and paste it here."); return; }
+  ytErr(""); if(PLAY) pause();          /* two soundtracks at once is never what he wants */
+  P.yt=v; saveP(); ytMount();
+});
+on(document.getElementById("ytClear"),"click",function(){
+  P.yt=""; saveP(); document.getElementById("ytUrl").value=""; ytErr(""); ytShown=null; ytMount();
+});
+on(document.getElementById("ytOpen"),"click",function(){
+  var y=ytParse(P.yt); if(!y) return;
+  if(window.CompassAgent && CompassAgent.openUrl && (window.__TAURI__||window.__TAURI_INTERNALS__)) CompassAgent.openUrl(y.open);
+  else window.open(y.open,"_blank","noopener");
+});
+if(onTab()) ytMount();
+else if(SEC) new MutationObserver(function(_,o){ if(onTab()){ ytMount(); o.disconnect(); } }).observe(SEC,{attributes:true,attributeFilter:["class"]});
+
 function shouldRun(){ return !document.hidden && (FULL || (SEEN && onTab())); }
 function loop(now){
   RAF=0; if(!shouldRun()) return;
