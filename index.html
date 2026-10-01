@@ -2396,6 +2396,103 @@ body.lofi-noscroll{overflow:hidden}
   .fr-arc,.fr-head,.lofi-clock .lc-rail i{transition:none}
   .fLiveCard .gauge.fring .fr-state:before,.lofi-clock .lc-st i{animation:none}
 }
+
+/* ══════════ WEEK PLANNER GRID (v2) ══════════
+   Same structure, calmer surface: day headers with a big date, hour and
+   half-hour rules, quiet classes, tinted study blocks with a subject bar,
+   framed hand-ins, dashed homework, and a 2px gap so stacked blocks never
+   merge. Loaded last so it wins over the original planner rules. */
+.pl-weekwrap{border:1px solid var(--border);border-radius:var(--r,14px);background:var(--surface);overflow-x:auto;overflow-y:hidden;
+  box-shadow:0 1px 0 rgba(255,255,255,.02) inset}
+.pl-week{min-width:860px;grid-template-columns:54px repeat(7,minmax(0,1fr))}
+.pl-wh{background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);padding:10px 10px 9px;display:flex;align-items:baseline;gap:8px}
+.pl-wh:first-child{border-right:1px solid var(--border)}
+.pl-wh b{order:2;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pl-wh span{order:1;font-size:20px;font-weight:650;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
+.pl-wh .pl-mo{order:3;font-style:normal;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0;margin-left:auto}
+.pl-wh.pl-wknd span{color:var(--ink-2)}
+.pl-wh.pl-today{box-shadow:none}
+.pl-wh.pl-today span{color:var(--accent-ink);background:var(--accent);border-radius:999px;min-width:30px;height:30px;
+  display:inline-grid;place-items:center;padding:0 7px;font-size:16px;margin:-5px 0}
+.pl-wh.pl-today b{color:var(--accent)}
+.pl-axis{border-right:1px solid var(--border)}
+.pl-axis span{right:8px;font-family:var(--mono);font-size:10.5px;color:var(--muted);transform:translateY(-50%);letter-spacing:.02em}
+.pl-axis span::after{content:":00";opacity:.55}
+.pl-col{border-right:1px solid var(--grid);
+  background-image:
+    repeating-linear-gradient(to bottom,var(--grid) 0 1px,transparent 1px var(--ph,46.8px)),
+    repeating-linear-gradient(to bottom,transparent 0 calc(var(--ph,46.8px)/2),color-mix(in srgb,var(--grid) 55%,transparent) calc(var(--ph,46.8px)/2) calc(var(--ph,46.8px)/2 + 1px),transparent calc(var(--ph,46.8px)/2 + 1px) var(--ph,46.8px))}
+.pl-col.pl-wknd{background-color:color-mix(in srgb,var(--surface-2) 55%,transparent)}
+.pl-col.pl-past{background-color:color-mix(in srgb,var(--plane) 35%,transparent)}
+.pl-col.pl-tcol{background-color:color-mix(in srgb,var(--accent) 4%,transparent)}
+.pl-col.pl-hol{background-color:color-mix(in srgb,var(--pl-tip-line) 10%,transparent)}
+.pl-col.pl-past .pl-b:not(.pl-drag){filter:saturate(.75)}
+.pl-now{border-top:2px solid var(--accent);z-index:4;box-shadow:0 0 12px color-mix(in srgb,var(--accent) 55%,transparent)}
+.pl-now::before{left:-5px;top:-6px;width:10px;height:10px;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+
+/* every block */
+.pl-b{border-radius:8px;padding:5px 8px 5px 11px;font-size:11.5px;line-height:1.3;color:var(--ink);
+  transition:transform .12s ease,box-shadow .12s ease,filter .12s ease,opacity .15s;display:flex;flex-direction:column;gap:1px;
+  box-shadow:0 1px 2px rgba(0,0,0,.18)}
+.pl-b::before{content:"";position:absolute;left:3px;top:4px;bottom:4px;width:3px;border-radius:3px;background:var(--c)}
+.pl-b:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.28);z-index:5;filter:brightness(1.08)}
+.pl-b:focus-visible{outline:2px solid var(--accent);outline-offset:1px;z-index:5}
+.pl-b .pl-bt{font-weight:600;font-size:11.5px;letter-spacing:-.005em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;word-break:break-word}
+.pl-b .pl-bm{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-b .pl-bm i{font-style:normal;color:var(--c);font-weight:600}
+.pl-b.pl-tall .pl-bt{-webkit-line-clamp:3}
+.pl-b.pl-mid .pl-bt{-webkit-line-clamp:1}
+
+/* classes from Lectio: present but quiet */
+.pl-b.pl-school{background:color-mix(in srgb,var(--surface-2) 85%,transparent);border:1px solid var(--border);border-left:0;color:var(--ink-2);box-shadow:none}
+.pl-b.pl-school::before{opacity:.75}
+.pl-b.pl-school .pl-bt{font-weight:550;color:var(--ink-2)}
+.pl-b.pl-school:hover{box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.pl-b.pl-ls-cancelled{background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,transparent 6px 12px);border-style:dashed;border-left:0}
+
+/* study: tinted, subject bar */
+.pl-b.pl-study{background:color-mix(in srgb,var(--c) 16%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 26%,transparent);border-left:0}
+.pl-b.pl-study .pl-bt{color:color-mix(in srgb,var(--c) 22%,var(--ink))}
+
+/* hand-in: framed and stronger, with a due flag */
+.pl-b.pl-proj{background:linear-gradient(180deg,color-mix(in srgb,var(--c) 30%,var(--surface)),color-mix(in srgb,var(--c) 20%,var(--surface)));
+  border:1.5px solid var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 12%,transparent),0 2px 6px rgba(0,0,0,.25)}
+.pl-b.pl-proj::before{display:none}
+.pl-b.pl-proj{padding-left:8px}
+.pl-b.pl-proj .pl-bt::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--c);margin-right:5px;vertical-align:1px;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 30%,transparent)}
+
+/* homework: dashed outline */
+.pl-b.pl-hw{background:color-mix(in srgb,var(--c) 6%,var(--surface));border:1.5px dashed color-mix(in srgb,var(--c) 75%,transparent);box-shadow:none}
+.pl-b.pl-hw::before{display:none}
+.pl-b.pl-hw{padding-left:8px}
+
+/* done */
+.pl-b.pl-done{opacity:.5;filter:saturate(.5)}
+.pl-b.pl-done:hover{opacity:.85}
+
+/* small and narrow blocks */
+.pl-b.pl-short{flex-direction:row;align-items:center;gap:6px;padding-top:2px;padding-bottom:2px}
+.pl-b.pl-short .pl-bt{-webkit-line-clamp:1;flex:1;min-width:0;display:block;white-space:nowrap;text-overflow:ellipsis}
+.pl-b.pl-short .pl-bm{flex:none}
+.pl-b.pl-narrow{padding:4px 5px 4px 9px;font-size:10.5px}
+.pl-b.pl-narrow .pl-bt{font-size:10.5px}
+.pl-b.pl-narrow .pl-bm{display:block}
+.pl-b.pl-narrow.pl-short .pl-bm{display:none}
+.pl-week.pl-filtered .pl-b:not(.pl-on){opacity:.14;filter:grayscale(1)}
+.pl-b.pl-drag{transform:scale(1.02);box-shadow:0 14px 30px rgba(0,0,0,.4)}
+
+/* legend swatches follow the same rules */
+.pl-legend .pl-sw{width:22px;height:13px;border-radius:4px;position:relative}
+.pl-legend .pl-sw.sw-class{background:var(--surface-2);border:1px solid var(--border);box-shadow:inset 3px 0 0 var(--gen)}
+.pl-legend .pl-sw.sw-study{background:color-mix(in srgb,var(--ma) 16%,var(--surface));border:1px solid color-mix(in srgb,var(--ma) 26%,transparent);box-shadow:inset 3px 0 0 var(--ma)}
+.pl-legend .pl-sw.sw-proj{background:color-mix(in srgb,var(--ma) 28%,var(--surface));border:1.5px solid var(--ma)}
+.pl-legend .pl-sw.sw-hw{border:1.5px dashed var(--ma)}
+:root:not([data-theme=dark]) .pl-b{box-shadow:0 1px 2px rgba(10,14,20,.06)}
+:root:not([data-theme=dark]) .pl-b:hover{box-shadow:0 6px 16px rgba(10,14,20,.12)}
+:root:not([data-theme=dark]) .pl-b.pl-study .pl-bt{color:color-mix(in srgb,var(--c) 45%,var(--ink))}
+@media(prefers-reduced-motion:reduce){.pl-b{transition:none}.pl-b:hover{transform:none}}
 </style>
 </head>
 <body class="workspace">
@@ -2906,10 +3003,10 @@ body.lofi-noscroll{overflow:hidden}
       <div class="pl-chips"><span id="pl-chips" class="pl-chips" role="group" aria-label="Filter by subject"></span><button class="pl-btn pl-pill" id="pl-add-class">+ Add class</button><button class="pl-btn pl-primary pl-pill" id="pl-add">+ Add block</button></div>
     </div>
     <div class="pl-legend">
-      <span><i class="pl-sw" style="background:var(--surface-2);border-left:3px solid var(--gen)"></i>Class</span>
-      <span><i class="pl-sw" style="background:color-mix(in srgb,var(--ma) 15%,var(--surface));border-left:3px solid var(--ma)"></i>Study (Notion section)</span>
-      <span><i class="pl-sw" style="background:color-mix(in srgb,var(--ma) 26%,var(--surface));box-shadow:inset 0 0 0 1.5px var(--ma)"></i>Hand-in / IA</span>
-      <span><i class="pl-sw" style="border:1px dashed var(--ma)"></i>Homework</span>
+      <span><i class="pl-sw sw-class"></i>Class</span>
+      <span><i class="pl-sw sw-study"></i>Study (Notion section)</span>
+      <span><i class="pl-sw sw-proj"></i>Hand-in / IA</span>
+      <span><i class="pl-sw sw-hw"></i>Homework</span>
     </div>
     <div class="pl-banner" id="pl-banner" hidden></div>
     <div class="pl-weekwrap"><div class="pl-week" id="pl-grid"></div></div>
@@ -14001,7 +14098,7 @@ var toastT=null;
 function toast(msg,bad){var t=$("#pl-toast");t.textContent=msg;t.classList.toggle("bad",!!bad);t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},bad?5000:1800);}
 
 /* ── week grid ── */
-var G0=8*60,G1=22*60+15,PM=.78;
+var G0=8*60,G1=22*60+15,PM=.9;
 var curMon=mondayOf(ymd(now())); if(curMon<FIXED[0]) curMon=FIXED[0];
 var filter={};Object.keys(SUB).forEach(function(k){filter[k]=1;});
 function fcount(){return Object.keys(filter).length;}
@@ -14018,10 +14115,10 @@ function renderGrid(){
   var note=WEEKNOTE[curMon],bn=$("#pl-banner");
   if(note){bn.hidden=false;bn.innerHTML="<b>"+esc(note.title)+"</b> "+esc(note.text);}else bn.hidden=true;
   var html='<div class="pl-wh"></div>';
-  days.forEach(function(d){var dd=new Date(d+"T12:00");html+='<div class="pl-wh'+(d===today?" pl-today":"")+'"><b>'+dd.toLocaleDateString("en-GB",{weekday:"short"})+'</b><span>'+dd.toLocaleDateString("en-GB",{day:"numeric",month:"short"})+'</span></div>';});
+  days.forEach(function(d,i){var dd=new Date(d+"T12:00");html+='<div class="pl-wh'+(d===today?" pl-today":"")+(i>4?" pl-wknd":"")+'"><b>'+dd.toLocaleDateString("en-GB",{weekday:"short"})+'</b><span>'+dd.getDate()+'</span>'+((i===0||dd.getDate()===1)?'<em class="pl-mo">'+dd.toLocaleDateString("en-GB",{month:"short"})+'</em>':'')+'</div>';});
   var ax='<div class="pl-axis" style="height:'+H+'px">';for(var h=9;h<=22;h++)ax+='<span style="top:'+((h*60-G0)*PM)+'px">'+pad(h)+'</span>';html+=ax+'</div>';
   days.forEach(function(d){
-    var cls=["pl-col"];if(d<today)cls.push("pl-past");if(d===today)cls.push("pl-tcol");if(note&&note.hol)cls.push("pl-hol");
+    var cls=["pl-col"];if(d<today)cls.push("pl-past");if(new Date(d+"T12:00").getDay()%6===0)cls.push("pl-wknd");if(d===today)cls.push("pl-tcol");if(note&&note.hol)cls.push("pl-hol");
     var c='<div class="'+cls.join(" ")+'" data-date="'+d+'" style="height:'+H+'px">';
     /* Lay out lessons and plan blocks side by side when they overlap (calendar-style lanes),
        so nothing is ever hidden under another block. */
@@ -14039,16 +14136,21 @@ function renderGrid(){
     });
     flush();
     items.forEach(function(it){
-      var top=(it.s-G0)*PM,hh=Math.max((it.e-it.s)*PM,it.school?20:22),pos="left:calc("+(it.lane*100/it.cols)+"% + 2px);width:calc("+(100/it.cols)+"% - 4px);";
+      /* 1px in from the hour line top and bottom, so blocks that meet still read as two;
+         lanes share the column with a 3px gutter. */
+      var top=(it.s-G0)*PM+1,hh=Math.max((it.e-it.s)*PM,it.school?20:22)-2,
+        pos="left:calc("+(it.lane*100/it.cols)+"% + 3px);width:calc("+(100/it.cols)+"% - "+(it.cols>1?4:6)+"px);",
+        sz=hh<38?" pl-short":hh<50?" pl-mid":hh>=80?" pl-tall":"";
       if(it.school){var l=it.l;
-        c+='<button class="pl-b pl-school pl-ls-'+esc(l.status)+(filter[l.sub]?" pl-on":"")+(it.cols>1?" pl-narrow":"")+'" data-plles="'+esc(l.key)+'" title="'+esc((SUB[l.sub]||"")+" · "+l.s+"–"+l.e+(l.topic?" · "+l.topic:"")+" · "+LSTAT[l.status])+'" style="'+pos+'top:'+top+'px;height:'+hh+'px;--c:'+col(l.sub)+'"><span class="pl-bt">'+esc(SUB[l.sub]||l.sub)+'</span><span class="pl-bm">'+esc(l.s)+(l.topic?" · "+esc(l.topic):"")+'</span></button>';}
+        c+='<button class="pl-b pl-school pl-ls-'+esc(l.status)+(filter[l.sub]?" pl-on":"")+(it.cols>1?" pl-narrow":"")+sz+'" data-plles="'+esc(l.key)+'" title="'+esc((SUB[l.sub]||"")+" · "+l.s+"–"+l.e+(l.topic?" · "+l.topic:"")+" · "+LSTAT[l.status])+'" style="'+pos+'top:'+top+'px;height:'+hh+'px;--c:'+col(l.sub)+'"><span class="pl-bt">'+esc(SUB[l.sub]||l.sub)+'</span><span class="pl-bm">'+esc(l.s)+'–'+esc(l.e)+(l.topic&&hh>=38?" · "+esc(l.topic):"")+'</span></button>';}
       else{var t=it.t;
-        c+='<button class="pl-b pl-'+esc(t.k)+(t.done?" pl-done":"")+(filter[t.sub]?" pl-on":"")+(it.cols>1?" pl-narrow":"")+'" data-plid="'+esc(t.id)+'" title="'+esc(t.t+" · "+t.s+"–"+t.e)+'" style="'+pos+'top:'+top+'px;height:'+hh+'px;--c:'+col(t.sub)+'"><span class="pl-bt">'+esc(t.t)+'</span>'+(hh>34?'<span class="pl-bm">'+esc(t.s)+'–'+esc(t.e)+'</span>':'')+'<span class="pl-rz" aria-hidden="true"></span></button>';}
+        var kl=t.k==="proj"?"Hand-in":t.k==="hw"?"Homework":(SUB[t.sub]||"General").replace(/ (AA HL|HL|SL|Lit)$/,"");
+        c+='<button class="pl-b pl-'+esc(t.k)+(t.done?" pl-done":"")+(filter[t.sub]?" pl-on":"")+(it.cols>1?" pl-narrow":"")+sz+'" data-plid="'+esc(t.id)+'" title="'+esc(t.t+" · "+t.s+"–"+t.e+" · "+(SUB[t.sub]||"")+(t.k!=="study"?" · "+kl:""))+'" style="'+pos+'top:'+top+'px;height:'+hh+'px;--c:'+col(t.sub)+'"><span class="pl-bt">'+esc(t.t)+'</span><span class="pl-bm">'+esc(t.s)+(hh>=38?'–'+esc(t.e)+(it.cols>1?'':' · <i>'+esc(kl)+'</i>'):'')+'</span><span class="pl-rz" aria-hidden="true"></span></button>';}
     });
     if(d===today){var n=now(),m=n.getHours()*60+n.getMinutes();if(m>G0&&m<G1)c+='<div class="pl-now" style="top:'+((m-G0)*PM)+'px"></div>';}
     html+=c+'</div>';
   });
-  g.innerHTML=html;g.classList.toggle("pl-filtered",fcount()<Object.keys(SUB).length);
+  g.innerHTML=html;g.style.setProperty("--ph",(60*PM)+"px");g.classList.toggle("pl-filtered",fcount()<Object.keys(SUB).length);
   var ts=weekBlocks(curMon),n=ts.filter(function(t){return t.done;}).length;
   $("#pl-range").textContent=fmtDay(curMon)+" – "+fmtDay(addDays(curMon,6));
   $("#pl-bar").style.width=ts.length?(n/ts.length*100)+"%":"0";
