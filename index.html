@@ -10,7 +10,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f3f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#08090b" media="(prefers-color-scheme: dark)">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2308090b'/%3E%3Cpath d='M32 12 44 32 32 52 20 32Z' fill='none' stroke='%23ff4655' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23ff4655'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"%3E%3Cdefs%3E%3ClinearGradient id="tile" x1="0" y1="0" x2="1" y2="1"%3E%3Cstop offset="0" stop-color="#1b1f26"/%3E%3Cstop offset="1" stop-color="#08090b"/%3E%3C/linearGradient%3E%3ClinearGradient id="north" x1="0" y1="1" x2="1" y2="0"%3E%3Cstop offset="0" stop-color="#e2303f"/%3E%3Cstop offset="1" stop-color="#ff5c69"/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width="512" height="512" rx="112" fill="url%28#tile%29"/%3E%3Crect x="3" y="3" width="506" height="506" rx="109" fill="none" stroke="#ffffff" stroke-opacity=".06" stroke-width="6"/%3E%3Cpath d="M396.95 204.70 A150 150 0 1 1 307.30 115.05" fill="none" stroke="#e9ecf0" stroke-width="34" stroke-linecap="round"/%3E%3Cpath d="M171.1 340.9 L232 232 L280 280 Z" fill="#e9ecf0" fill-opacity=".38"/%3E%3Cpath d="M390.3 121.7 L232 232 L256 256 Z" fill="#ff6b77"/%3E%3Cpath d="M390.3 121.7 L256 256 L280 280 Z" fill="url%28#north%29"/%3E%3Ccircle cx="256" cy="256" r="15" fill="#08090b" stroke="#e9ecf0" stroke-width="7"/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
 <style>
 /* Design tokens — shared by every feature and both color themes. */
 :root{color-scheme:light;--plane:#f6f7f9;--surface:#fff;--surface-2:#f4f6f7;--surface-3:#e9edef;--ink:#202d2a;--ink-2:#5f6d69;--muted:#697873;--grid:#e8edeb;--axis:#b9c7c1;--border:#e2e8e5;--d1:#267761;--d2:#cb784c;--d3:#378f73;--d4:#b98a2e;--d5:#b16590;--d6:#4b8761;--good:#278258;--warn:#c49228;--serious:#c97745;--crit:#c44949;--ok-text:#247047;--track:#deeee7;--pos:#267761;--neg:#c44949;--s0:#edf1ef;--s1:#dcebe3;--s2:#b6d5c4;--s3:#8abb9f;--s4:#4b9374;--s5:#276349;--shadow:0 2px 4px #203c2d03;--shadow-lg:0 24px 70px #16291f26;--sidebar:232px;--accent:var(--d1);--accent-ink:#fff}
@@ -2493,6 +2495,39 @@ body.lofi-noscroll{overflow:hidden}
 :root:not([data-theme=dark]) .pl-b:hover{box-shadow:0 6px 16px rgba(10,14,20,.12)}
 :root:not([data-theme=dark]) .pl-b.pl-study .pl-bt{color:color-mix(in srgb,var(--c) 45%,var(--ink))}
 @media(prefers-reduced-motion:reduce){.pl-b{transition:none}.pl-b:hover{transform:none}}
+
+/* ══════════ CHECK-IN (v2) ══════════ */
+@media(min-width:1201px){.cigrid{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}}
+.ci-side{display:flex;flex-direction:column;gap:18px;min-width:0}
+.ci-side>.card{margin-bottom:0!important}
+.ci-head{margin-bottom:6px;align-items:center;flex-wrap:wrap;gap:8px}
+.ci-head h2{font-size:16px;font-weight:650;letter-spacing:-.01em;margin:0}
+.ci-badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--border);border-radius:999px;padding:3px 9px;white-space:nowrap}
+#s-checkin .lbl .q{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}
+#s-checkin .why summary{font-size:12px}
+
+/* ══════════ HEALTH (v2) ══════════ */
+.hl-setupwrap{margin-top:14px}
+@media(min-width:1100px){
+  .hl-setup>ol{columns:2;column-gap:36px}
+  .hl-setup>ol>li{break-inside:avoid}
+}
+.hl-sub{margin:8px 0 4px}
+.hl-setup .hl-sub>summary{display:block;justify-content:normal}
+.hl-setup .hl-sub>summary::after{content:none}
+.hl-sub>summary{cursor:pointer;font-size:12.5px;font-weight:600;color:var(--accent);list-style:none}
+.hl-sub>summary::-webkit-details-marker{display:none}
+.hl-sub>summary::before{content:"›";display:inline-block;margin-right:6px;transition:transform .15s}
+.hl-sub[open]>summary::before{transform:rotate(90deg)}
+.hl-call h3{font-size:24px;letter-spacing:-.015em}
+.hl-kpis .ck-lbl{letter-spacing:.08em}
+
+/* ══════════ BRAND MARK (Oct 2026) ══════════ */
+.brand-symbol{background:none!important;box-shadow:0 0 0 1px var(--border),0 6px 18px rgba(0,0,0,.35)!important;border-radius:11px!important;overflow:hidden}
+.brand-symbol svg{display:block;width:40px;height:40px}
+@media(max-width:1000px){.workspace-location:before{content:''!important;width:26px;height:26px;display:inline-block;flex:none;border-radius:7px;
+  background:url("icon-192.png") center/cover no-repeat}}
 </style>
 </head>
 <body class="workspace">
@@ -2500,7 +2535,7 @@ body.lofi-noscroll{overflow:hidden}
 <script id="state-data" type="application/json">null</script>
 <a class="skip-link" href="#workspaceMain">Skip to content</a>
 <aside class="workspace-sidebar" aria-label="Workspace sidebar">
-  <a class="workspace-brand" href="#today" aria-label="Compass overview"><span class="brand-symbol">◈</span><span>compass<small>PERSONAL WORKSPACE</small></span></a>
+  <a class="workspace-brand" href="#today" aria-label="Compass overview"><span class="brand-symbol"><svg aria-hidden="true" width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="cmpTile" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1b1f26"/><stop offset="1" stop-color="#08090b"/></linearGradient><linearGradient id="cmpNorth" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#e2303f"/><stop offset="1" stop-color="#ff5c69"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#cmpTile)"/><rect x="3" y="3" width="506" height="506" rx="109" fill="none" stroke="#ffffff" stroke-opacity=".06" stroke-width="6"/><path d="M396.95 204.70 A150 150 0 1 1 307.30 115.05" fill="none" stroke="#e9ecf0" stroke-width="34" stroke-linecap="round"/><path d="M171.1 340.9 L232 232 L280 280 Z" fill="#e9ecf0" fill-opacity=".38"/><path d="M390.3 121.7 L232 232 L256 256 Z" fill="#ff6b77"/><path d="M390.3 121.7 L256 256 L280 280 Z" fill="url(#cmpNorth)"/><circle cx="256" cy="256" r="15" fill="#08090b" stroke="#e9ecf0" stroke-width="7"/></svg></span><span>compass<small>PERSONAL WORKSPACE</small></span></a>
   <button class="workspace-search" id="workspaceSearch"><span>⌕ &nbsp; Find a page</span><kbd>Ctrl K</kbd></button>
   <nav aria-label="Main navigation"><div class="tabs" role="tablist" aria-label="Workspace pages" aria-orientation="vertical" id="tabs"></div></nav>
   <div class="sidebar-bottom"><div class="sidebar-tip"><span class="tip-icon">↗</span><b>A little clarity goes a long way.</b><p>Make a plan. Find your focus. Leave room to breathe.</p><button id="sidebarPlan">Plan your day <span>→</span></button></div><div class="workspace-account"><span class="account-avatar">C</span><div>My workspace<small>Personal · Local first</small></div></div></div>
@@ -2857,7 +2892,7 @@ body.lofi-noscroll{overflow:hidden}
     </div>
     <div class="row">
       <button class="ghost" id="planBtn">Run the daily plan</button>
-      <button class="ghost" id="shutBtn2">Run the shutdown</button>
+      <button class="ghost" id="shutBtn2">Start evening review</button>
       <button class="ghost" id="revBtn">Run the Sunday review</button>
     </div>
   </div>
@@ -2868,48 +2903,49 @@ body.lofi-noscroll{overflow:hidden}
 <section id="s-checkin">
   <div class="cigrid">
     <div class="card">
-      <div class="eyebrow">Check-in · 20 seconds</div>
-      <div class="hint">Do this once a day, whenever you remember. The numbers feed the readiness score on Today and the sleep/mood charts on Week.</div>
+      <div class="spread ci-head"><h2>Daily check-in</h2><span class="ci-badge">About 20 seconds</span></div>
+      <div class="hint">Complete once a day. Your answers feed the readiness score on Today and the sleep and mood charts in Week.</div>
+      <label class="lbl" style="margin-top:4px">Mood <span class="q">· pick the closest word</span></label>
       <div class="moodgrid" id="moodGrid"></div>
-      <label class="lbl">Sleep last night <span class="q">— hours</span></label>
+      <label class="lbl">Sleep last night <span class="q">· hours</span></label>
       <input type="range" min="3" max="11" step="0.5" id="sleepR">
       <div class="spread" style="font-size:11.5px;color:var(--muted);margin:-2px 0 14px">
         <span>3h</span><span id="sleepTxt" style="color:var(--ink-2);font-weight:600"></span><span>11h</span>
       </div>
-      <label class="lbl">Energy right now</label>
+      <label class="lbl">Current energy level</label>
       <input type="range" min="1" max="5" id="energyR">
       <div class="spread" style="font-size:11.5px;color:var(--muted);margin:-2px 0 0">
-        <span>Empty</span><span id="energyTxt" style="color:var(--ink-2);font-weight:600"></span><span>Full</span>
+        <span>Very low</span><span id="energyTxt" style="color:var(--ink-2);font-weight:600"></span><span>Very high</span>
       </div>
       <details class="why">
-        <summary>Why naming it helps</summary>
-        <div class="src">Naming a feeling precisely measurably reduces its intensity. Pick the closest word.</div>
+        <summary>Why label your mood?</summary>
+        <div class="src">Putting a precise name to an emotion, known as affect labelling, has been shown to reduce its intensity. Over time the log also shows how mood follows sleep and workload.</div>
       </details>
     </div>
 
+    <div class="ci-side">
     <div class="card">
-      <h2 style="font-size:15.5px;margin-bottom:10px">Anchors</h2>
-      <div class="hint" id="anchorHint">Five fixed points that hold the day's shape. Deliberately small — these are the ones you keep on your worst days.</div>
+      <div class="spread ci-head"><h2>Daily anchors</h2><span class="ci-badge" id="anchorCount"></span></div>
+      <div class="hint" id="anchorHint">Five small habits that give the day its structure, designed to be achievable even on a difficult day.</div>
       <div class="anchors" id="anchors"></div>
       <details class="why">
-        <summary>Why five, and why these five</summary>
-        <div class="src">Anchors are the floor, not the ceiling. On a good day you will do far more than this; on a bad one these five are the whole assignment, and doing them still counts as a day you showed up.</div>
+        <summary>How anchors work</summary>
+        <div class="src">Anchors are a minimum standard, not a target. On a good day you will do far more; on a difficult day, completing these is enough for the day to count.</div>
       </details>
     </div>
 
     <div class="card">
-      <div class="eyebrow">Evening · 5 minutes</div>
-      <div class="spread" style="margin-bottom:12px">
-        <h2 style="font-size:15px">Shutdown</h2>
-        <button class="ghost sm" id="shutBtn">Run the ritual</button>
+      <div class="spread ci-head"><h2>End-of-day review</h2><span class="ci-badge">About 5 minutes</span></div>
+      <div class="hint">Close the day deliberately so unfinished work doesn't follow you into the evening.</div>
+      <label class="lbl">One thing that went well</label>
+      <textarea class="fld" id="win" placeholder="A small win counts."></textarea>
+      <label class="lbl" style="margin-top:13px">Open items <span class="q">· one per line</span></label>
+      <textarea class="fld" id="dump" placeholder="Anything still on your mind that needs a decision or a next step."></textarea>
+      <div class="row" style="margin-top:12px;gap:8px">
+        <button class="ghost sm" id="dumpToTasks">Add to inbox</button>
+        <button class="primary sm" id="shutBtn">Start guided review</button>
       </div>
-      <label class="lbl">One thing that went right</label>
-      <textarea class="fld" id="win" placeholder="However small. Write something."></textarea>
-      <label class="lbl" style="margin-top:13px">Brain dump — everything still rattling around</label>
-      <textarea class="fld" id="dump" placeholder="One per line. Doesn't have to be organised."></textarea>
-      <div class="row" style="margin-top:10px">
-        <button class="ghost sm" id="dumpToTasks">Send each line to the inbox</button>
-      </div>
+    </div>
     </div>
   </div>
 </section>
@@ -3169,11 +3205,11 @@ function S_DEFAULT(){
       {k:"order", n:"Order",  c:"--d6", s:5, focus:"", next:"", hint:"Money, room, admin, files, inbox"}
     ],
     anchors:[
-      {id:"a1", n:"Up on time",        t:"fixed wake time", core:true},
-      {id:"a2", n:"Daylight + water",  t:"first 10 min",    core:false},
-      {id:"a3", n:"Phone in another room", t:"one block",   core:true},
-      {id:"a4", n:"One deep block",    t:"50 min",          core:true},
-      {id:"a5", n:"Shutdown said out loud", t:"before bed", core:false}
+      {id:"a1", n:"Wake on time",          t:"Consistent wake time",        core:true},
+      {id:"a2", n:"Daylight and water",    t:"Within 10 min of waking",     core:false},
+      {id:"a3", n:"Phone out of the room", t:"During one focus block",      core:true},
+      {id:"a4", n:"One deep-work block",   t:"At least 50 min",             core:true},
+      {id:"a5", n:"Evening shutdown",      t:"Before bed",                  core:false}
     ],
     habits:[
       {id:"h1", n:"Fixed wake time, no snooze", anchor:"my alarm goes off", tiny:"Sit up and put both feet on the floor", target:7},
@@ -3243,6 +3279,14 @@ try{
    would otherwise drop Economics from every device on the next pull). */
 function ensureSubjects(){
   if(!Array.isArray(S.subjects)) S.subjects=[];
+  /* The anchors were renamed in Oct 2026. Only rows still carrying the old
+     default wording are updated; anything he renamed himself is left alone. */
+  if(Array.isArray(S.anchors)){
+    var A_OLD={"Up on time":["Wake on time","Consistent wake time"],"Daylight + water":["Daylight and water","Within 10 min of waking"],
+      "Phone in another room":["Phone out of the room","During one focus block"],"One deep block":["One deep-work block","At least 50 min"],
+      "Shutdown said out loud":["Evening shutdown","Before bed"]};
+    S.anchors.forEach(function(a){ var nw=a&&A_OLD[a.n]; if(nw){ a.n=nw[0]; a.t=nw[1]; } });
+  }
   var added=false;
   var hasEcon = S.subjects.some(function(x){
     return /econ|samfundsøk/i.test(String(x.name||""));
@@ -3482,8 +3526,8 @@ var PAGE_META={
   classes:['School','Timetable','Your fixed lessons, so plans land in the gaps.'],
   revise:['School','Revision','Spaced revision: the topics that are due.'],
   notes:['School','Notes','Questions and ideas, saved per subject.'],
-  checkin:['Me','Check-in','Sleep, energy, mood and your daily anchors.'],
-  health:['Me','Health','Sleep, heart and steps from your Apple Watch.'],
+  checkin:['Me','Check-in','Mood, sleep, energy and the habits that structure your day.'],
+  health:['Me','Health','Sleep, heart rate and activity from your Apple Watch.'],
   goals:['Me','Goals','The longer goals this week is working towards.'],
   rituals:['Me','Rituals','Start-of-day, shutdown and weekly scripts.'],
   reset:['Me','Reset','A smaller next step for a hard day.'],
@@ -3591,8 +3635,9 @@ function renderToday(){
     var d=T(),i=d.anchors.indexOf(e.dataset.a); if(i>-1)d.anchors.splice(i,1); else d.anchors.push(e.dataset.a);
     touch(); renderToday();});});
   $("#anchorHint").textContent = S.minMode
-    ? "Minimum day: three anchors only. Doing these still counts as a day you showed up — that is the whole point of having a floor."
-    : "Five fixed points that hold the day’s shape. Deliberately small — these are the ones you keep on your worst days.";
+    ? "Minimum day is on: only the three core anchors are shown. Completing them still counts as a full day."
+    : "Five small habits that give the day its structure, designed to be achievable even on a difficult day.";
+  var ac=$("#anchorCount"); if(ac) ac.textContent=acts.filter(function(a){return t.anchors.indexOf(a.id)>-1;}).length+" of "+acts.length+" done";
   $("#minBtn").textContent = S.minMode ? "Full day" : "Minimum day";
 
   $("#moodGrid").innerHTML = MOODQ.map(function(q){
@@ -3607,9 +3652,9 @@ function renderToday(){
     touch(); renderToday();});});
 
   $("#sleepR").value=t.sleep||7.5;
-  $("#sleepTxt").textContent = !t.sleep ? "not logged"
-    : t.sleep+" hours"+(t.sleep<SLEEP_LOW ? " · below the "+SLEEP_LOW+"–"+SLEEP_HIGH+"h range for your age"
-      : t.sleep>SLEEP_HIGH ? " · above it" : " · in range");
+  $("#sleepTxt").textContent = !t.sleep ? "Not logged"
+    : t.sleep+" h"+(t.sleep<SLEEP_LOW ? " · below the recommended "+SLEEP_LOW+"–"+SLEEP_HIGH+" h"
+      : t.sleep>SLEEP_HIGH ? " · above the recommended range" : " · within the recommended range");
   $("#energyR").value=t.energy||3; $("#energyTxt").textContent=ENERGY[t.energy||3];
   var mini=$("#ciMini");
   if(mini){
@@ -6599,7 +6644,7 @@ function planWizard(){
 }
 function shutdownWizard(){
   runWizard([
-    {h:"What actually happened", d:"Honestly. An accurate bad day is more useful than a flattering one.",
+    {h:"Review today's list", d:"Tick off what you finished. An accurate record is more useful than a flattering one.",
      body:function(){ var t=T();
        return t.big3.filter(function(x){return x.t.trim();}).map(function(x,j){
          var i=t.big3.indexOf(x);
@@ -6608,20 +6653,20 @@ function shutdownWizard(){
          || '<div style="color:var(--muted);font-size:13px">Nothing was set today.</div>'; },
      bind:function(root){ each("[data-sb]",root,function(e){on(e,"click",function(){
        var i=+e.dataset.sb; T().big3[i].d=!T().big3[i].d; e.setAttribute("aria-pressed",String(T().big3[i].d)); touch();});}); }},
-    {h:"One thing that went right", d:"You will resist this most on the days you need it most. Write it anyway.",
-     body:function(){ return '<textarea class="fld" id="swWin" placeholder="However small.">'+esc(T().win||"")+'</textarea>'; },
+    {h:"One thing that went well", d:"It is easiest to skip on a difficult day, which is when it matters most.",
+     body:function(){ return '<textarea class="fld" id="swWin" placeholder="A small win counts.">'+esc(T().win||"")+'</textarea>'; },
      save:function(){ T().win=$("#swWin").value; touch(); }},
-    {h:"Empty your head", d:"Everything unfinished goes on the page so it stops circling at midnight. One per line — it doesn't have to be organised.",
+    {h:"Capture open items", d:"Write down everything unfinished so it is recorded and no longer on your mind. One item per line.",
      body:function(){ return '<textarea class="fld" id="swDump" style="min-height:120px">'+esc(T().dump||"")+'</textarea>'; },
      save:function(){ T().dump=$("#swDump").value; touch(); }},
-    {h:"The next fourteen days", d:"A quick look ahead, so nothing arrives as a surprise.",
+    {h:"The next two weeks", d:"A quick look at upcoming deadlines, so nothing arrives as a surprise.",
      body:function(){
        var soon=S.ms.filter(function(m){return !m.done&&dBetween(TODAY,m.date)>=0&&dBetween(TODAY,m.date)<=14;})
          .sort(function(a,b){return a.date<b.date?-1:1;});
        return soon.length? soon.map(function(m){
          return '<div class="line"><span class="chip">'+dBetween(TODAY,m.date)+'d</span><span style="flex:1;font-size:13.5px">'+esc(m.title)+'</span></div>';}).join("")
          : '<div class="callout ok" style="margin:0">Clear for two weeks.</div>'; }},
-    {h:"Tomorrow's list", d:"Decide tomorrow tonight, so the morning has no decisions in it.",
+    {h:"Plan tomorrow", d:"Set tomorrow's priorities tonight so the morning starts without decisions.",
      body:function(){
        var tk=iso(addD(NOW,1)), d=day(tk);
        return d.big3.map(function(x,j){
@@ -6629,9 +6674,9 @@ function shutdownWizard(){
      },
      bind:function(root){ var tk=iso(addD(NOW,1));
        each("[data-t3]",root,function(e){on(e,"input",function(){day(tk).big3[+e.dataset.t3].t=e.value;touch();});}); }},
-    {h:"Say it out loud", d:"“Shutdown complete.” Out loud, actually. It only works because the four steps above genuinely happened — that's what makes it a signal your brain believes rather than a phrase. A day without an ending bleeds into the night and you never really rest.",
+    {h:"Close the day", d:"Everything is recorded and tomorrow is planned. Saying “shutdown complete” marks a clear end to the working day, which makes it easier to rest.",
      cta:"Shutdown complete",
-     body:function(){ return '<div class="callout ok" style="margin:0">Everything is captured. Nothing is lost. There is nothing useful you can do about any of it before tomorrow.</div>'; }}
+     body:function(){ return '<div class="callout ok" style="margin:0">Everything is captured and nothing is lost. The rest can wait until tomorrow.</div>'; }}
   ], function(){ var t=T(); t.shut.push(new Date().toISOString()); touch(); renderToday(); });
 }
 function reviewWizard(){
@@ -14828,16 +14873,16 @@ function call(){
   var br=r?base("rhr",r.k):null, bv=v?base("hrv",v.k):null;
   var hrvLow = v&&bv ? v.v<bv*0.8 : false, rhrUp = r&&br ? r.v>br+5 : false;
   var flags=[];
-  if(sl) flags.push({c: sl.min<360?"--crit":sl.min<420?"--warn":"--good", t:"Slept "+hm(sl.min)});
-  if(v&&bv) flags.push({c: hrvLow?"--warn":"--good", t:"HRV "+Math.round(v.v)+" ms vs "+Math.round(bv)+" usual"});
-  if(r&&br) flags.push({c: rhrUp?"--warn":"--good", t:"Resting HR "+Math.round(r.v)+" vs "+Math.round(br)+" usual"});
-  if(!sl && !v && !r) return {n:"No data yet", c:"--muted", p:"Once your Shortcut has run, this turns last night's sleep and your heart numbers into one call for the day.", f:flags};
+  if(sl) flags.push({c: sl.min<360?"--crit":sl.min<420?"--warn":"--good", t:"Sleep "+hm(sl.min)});
+  if(v&&bv) flags.push({c: hrvLow?"--warn":"--good", t:"HRV "+Math.round(v.v)+" ms (baseline "+Math.round(bv)+")"});
+  if(r&&br) flags.push({c: rhrUp?"--warn":"--good", t:"Resting HR "+Math.round(r.v)+" bpm (baseline "+Math.round(br)+")"});
+  if(!sl && !v && !r) return {n:"No data yet", c:"--muted", p:"Your readiness appears once the Compass Health shortcut has sent last night's sleep and heart-rate data.", f:flags};
   var strain = hrvLow || rhrUp;
   if(sl && (sl.min<360 || (sl.min<420 && strain)))
-    return {n:"Protect", c:"--crit", f:flags, p:"Same hours, gentler work. Put review, flashcards and notes in today's blocks and move the timed Danish paper or new Maths to a better-rested day. In bed by 22:30 tonight."};
+    return {n:"Protect", c:"--crit", f:flags, p:"Keep today’s hours but lower the intensity: use your blocks for review, flashcards and notes, and move timed papers or new material to a better-rested day. Aim to be in bed by 22:30."};
   if((sl && sl.min<420) || strain)
-    return {n:"Pace it", c:"--warn", f:flags, p:"Keep the plan, but do the hardest block first while you're freshest, keep the 10 to 15 minute gaps, and stop at 22:00."};
-  return {n:"Push", c:"--good", f:flags, p:"You're rested. Today is a good day for the hardest thing on the list: a timed paper, new Maths, or the Danish text you've been avoiding."};
+    return {n:"Pace it", c:"--warn", f:flags, p:"Follow the plan, but start with the most demanding block while you are fresh, keep 10 to 15 minute breaks, and finish by 22:00."};
+  return {n:"Push", c:"--good", f:flags, p:"You are well rested. Today suits your most demanding work, such as a timed paper or new Maths content."};
 }
 
 /* ── charts ── */
@@ -14914,29 +14959,29 @@ function focusLink(){
   var S=B.get(), t=today(), hi=[], lo=[];
   for(var i=1;i<=60;i++){ var k=addD(t,-i), s=sleepMin(k), d=S.days&&S.days[k]; if(!s||!d) continue;
     var f=+d.focus||0; if(s.min>=450) hi.push(f); else if(s.min<420) lo.push(f); }
-  if(hi.length<4||lo.length<4) return '<p class="hl-note">After about two weeks of synced nights with focus sessions logged, this shows how much you get done after a good night compared with a short one.</p>';
+  if(hi.length<4||lo.length<4) return '<p class="hl-note">Compares your focus time after a full night’s sleep with your focus time after a short one. Available after about two weeks of synced sleep and logged focus sessions.</p>';
   var a=function(x){ return Math.round(x.reduce(function(p,c){return p+c;},0)/x.length); };
   return '<div class="hl-stats" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div><b>'+a(hi)+'m</b><span>focus after 7h 30m+ ('+hi.length+' days)</span></div><div><b>'+a(lo)+'m</b><span>focus after under 7h ('+lo.length+' days)</span></div></div>'
-    +'<p class="hl-note">Your own numbers, not a study. Other things change on those days too.</p>';
+    +'<p class="hl-note">Based on your own data only. Other factors also differ between these days.</p>';
 }
 
 /* ── setup ── */
 function setupCard(open){
   var c=cfg(), url=c?String(c.url).replace(/\/+$/,"")+"/health":"(connect sync first)";
-  var st = !c ? ['--muted','Sync isn’t connected on this device. Set it up in Tools, Data & sync.']
-    : wkOld ? ['--warn','Your worker doesn’t have the Health endpoint yet. Step 1 below.']
+  var st = !c ? ['--muted','Sync is not connected on this device. Connect it in Tools › Data & sync.']
+    : wkOld ? ['--warn','Your worker does not have the Health endpoint yet. See step 1.']
     : lastErr ? ['--crit',lastErr]
-    : keySet===false ? ['--warn','Worker updated. It still needs the HEALTH_KEY secret (step 2).']
-    : H.updatedAt ? ['--good','Last data from your iPhone: '+new Date(H.updatedAt).toLocaleString("en-GB",{weekday:"short",hour:"2-digit",minute:"2-digit",day:"numeric",month:"short"})]
-    : keySet ? ['--warn','Worker ready. Waiting for the first run of the Shortcut.'] : ['--muted','Checking the worker…'];
-  return '<details class="ck-card hl-setup"'+(open?' open':'')+'><summary><span class="ck-lbl">Set up and connection</span></summary>'
+    : keySet===false ? ['--warn','Worker updated. Add the HEALTH_KEY secret to finish (step 2).']
+    : H.updatedAt ? ['--good','Last sync from iPhone: '+new Date(H.updatedAt).toLocaleString("en-GB",{weekday:"short",hour:"2-digit",minute:"2-digit",day:"numeric",month:"short"})]
+    : keySet ? ['--warn','Worker ready. Waiting for the first shortcut run.'] : ['--muted','Checking the worker…'];
+  return '<details class="ck-card hl-setup"'+(open?' open':'')+'><summary><span class="ck-lbl">Apple Health connection</span></summary>'
     +'<p class="hl-status" style="--c:var('+st[0]+')"><i></i>'+esc(st[1])+'</p>'
     +'<ol>'
-    +'<li><b>Update the worker.</b> The new worker.js in your repo has a <code>/health</code> endpoint. Paste it into Cloudflare (Workers, compass-ai, Edit code) and deploy, or ask Claude to do it.</li>'
-    +'<li><b>Make a Health key.</b> This key can only add data, never read it. Generate one, then in Cloudflare add it as a <b>Secret</b> named <code>HEALTH_KEY</code> (Settings, Variables and Secrets). Compass doesn’t store it.'
+    +'<li><b>Update the worker.</b> The current worker.js in your repo includes a <code>/health</code> endpoint. In Cloudflare open Workers › compass-ai › Edit code, paste it in and deploy.</li>'
+    +'<li><b>Create a Health key.</b> This key can only add data, never read it. Generate one here, then add it in Cloudflare as a <b>Secret</b> named <code>HEALTH_KEY</code> (Settings › Variables and Secrets). Compass does not store it.'
     +'<div class="hl-code"><input id="hlKey" readonly placeholder="Press Generate" aria-label="Generated Health key"><button class="ck-btn" data-hl="gen">Generate</button><button class="ck-btn ck-ghost" data-hl="copykey">Copy</button></div></li>'
-    +'<li><b>Build the Shortcut on your iPhone.</b> Shortcuts app, new shortcut, name it <i>Compass Health</i>.'
-    +'<div class="hl-sc"><ol>'
+    +'<li><b>Build the shortcut on your iPhone.</b> In the Shortcuts app, create a new shortcut named <i>Compass Health</i>.'
+    +'<details class="hl-sub"><summary>Show the seven shortcut actions</summary><div class="hl-sc"><ol>'
     +'<li>Add <b>Find Health Samples</b>: type <i>Sleep</i>, filter <i>Start Date is in the last 2 days</i>.</li>'
     +'<li>Add <b>Repeat with Each</b> item in Health Samples. Inside it add a <b>Text</b> action and build this line from the Repeat Item: <code>Value;Unit;Start Date;End Date</code>. Tap each date and set Date Format to <i>ISO 8601</i> with time on.</li>'
     +'<li>After <i>End Repeat</i> add <b>Combine Text</b> (Repeat Results, with New Lines), then <b>Set Variable</b> <code>Sleep</code>.</li>'
@@ -14944,44 +14989,47 @@ function setupCard(open){
     +'<li>Add <b>Get Contents of URL</b>: URL <code>'+esc(url)+'</code>, Method <i>POST</i>, add Header <code>X-Health-Key</code> with your key, Request Body <i>JSON</i> with text fields <code>sleep</code>, <code>rhr</code>, <code>hrv</code>, <code>steps</code>, <code>energy</code>, <code>exercise</code> set to those variables.</li>'
     +'<li>Optional: <b>Get Dictionary Value</b> <code>summary</code>, then <b>Show Notification</b>.</li>'
     +'<li>Run it once by hand and allow Health access.</li>'
-    +'</ol></div>'
+    +'</ol></div></details>'
     +'<div class="hl-code"><code>'+esc(url)+'</code><button class="ck-btn ck-ghost" data-hl="copyurl"'+(c?'':' disabled')+'>Copy URL</button></div></li>'
-    +'<li><b>Automate it.</b> Shortcuts, Automation, new, <i>App</i>: pick an app you open every morning (Lectio or Mail works), <i>Is Opened</i>, <i>Run Immediately</i>, then choose Compass Health. The iPhone only lets Shortcuts read Health while it’s unlocked, which is why an app trigger works better than a clock time. Add a second one in the evening if you want same-day steps.</li>'
+    +'<li><b>Automate it.</b> In Shortcuts › Automation, create an <i>App</i> automation for an app you open every morning (Lectio or Mail), set to <i>Is Opened</i> and <i>Run Immediately</i>, and choose Compass Health. iOS only allows Health access while the phone is unlocked, so an app trigger is more reliable than a fixed time. Add a second automation in the evening for same-day steps.</li>'
     +'</ol>'
-    +'<div class="hl-actions"><button class="ck-btn ck-primary" data-hl="pull">Check now</button><button class="ck-btn ck-ghost" data-hl="forget">Forget on this device</button><button class="ck-btn ck-ghost" data-hl="wipe"'+(c?'':' disabled')+'>Delete from worker</button></div>'
-    +'<p class="hl-private">Health data goes from your iPhone to your own Cloudflare worker and this device. Only the sleep hours it fills into your check-in join your normal Compass data, the same as a check-in you typed yourself. These are Watch estimates, not medical measurements.</p>'
+    +'<div class="hl-actions"><button class="ck-btn ck-primary" data-hl="pull">Sync now</button><button class="ck-btn ck-ghost" data-hl="forget">Remove from this device</button><button class="ck-btn ck-ghost" data-hl="wipe"'+(c?'':' disabled')+'>Delete from worker</button></div>'
+    +'<p class="hl-private">Health data travels only from your iPhone to your own Cloudflare worker and this device. Only sleep hours are copied into your check-in. All values are Apple Watch estimates, not medical measurements.</p>'
     +'</details>';
 }
 
 /* ── page ── */
+/* `n` stays as the internal code (the planner nudge reads it); this is what he sees. */
+var HL_LABEL={"Protect":"Recovery day","Pace it":"Moderate day","Push":"Ready for demanding work","No data yet":"Awaiting data"};
 function kpi(label,val,sub,tone){ return '<div class="ck-kpi" style="--tone:var('+tone+')"><span class="ck-lbl">'+label+'</span><b>'+val+'</b><span class="ck-sub">'+sub+'</span></div>'; }
 function paint(){
   if(!ROOT.classList.contains("on") && ROOT.innerHTML) return;
   var t=today(), sl=sleepMin(t), r=latest("rhr"), v=latest("hrv"), y=D(addD(t,-1)), td=D(t);
   var br=r?base("rhr",r.k):null, bv=v?base("hrv",v.k):null, has=Object.keys(H.days||{}).length>0;
   var slv = sl ? hm(sl.min).replace(/h /,'<small>h</small> ').replace(/m$/,'<small>m</small>') : '<em>–</em>';
-  var sls = sl ? (sl.w ? sl.w.bed+" to "+sl.w.wake+(sl.w.deep?" · deep "+hm(sl.w.deep):"") : "logged by you") : "no night synced for today";
-  var k1=kpi("Last night",slv,sls, sl?(sl.min<360?"--crit":sl.min<420?"--warn":"--good"):"--muted");
-  var k2=kpi("Resting HR", r?Math.round(r.v)+'<small>bpm</small>':'<em>–</em>', r?(br?"usual "+Math.round(br)+(r.v>br+5?" · up":""):"baseline after 5 days"):"not synced", r&&br&&r.v>br+5?"--warn":"--good");
-  var k3=kpi("HRV", v?Math.round(v.v)+'<small>ms</small>':'<em>–</em>', v?(bv?"usual "+Math.round(bv)+(v.v<bv*0.8?" · low":""):"baseline after 5 days"):"not synced", v&&bv&&v.v<bv*0.8?"--warn":"--good");
-  var k4=kpi("Steps yesterday", y&&y.steps!=null?fmtN(y.steps):'<em>–</em>', td&&td.steps!=null?"today so far "+fmtN(td.steps):(y&&y.energy?fmtN(y.energy)+" kcal active":"not synced"), "--ke");
+  var sls = sl ? (sl.w ? sl.w.bed+" to "+sl.w.wake+(sl.w.deep?" · deep "+hm(sl.w.deep):"") : "logged by you") : "No data for last night";
+  var k1=kpi("Sleep last night",slv,sls, sl?(sl.min<360?"--crit":sl.min<420?"--warn":"--good"):"--muted");
+  var k2=kpi("Resting heart rate", r?Math.round(r.v)+'<small>bpm</small>':'<em>–</em>', r?(br?"Baseline "+Math.round(br)+(r.v>br+5?" · elevated":""):"Baseline after 5 days"):"No data yet", r&&br&&r.v>br+5?"--warn":"--good");
+  var k3=kpi("Heart rate variability", v?Math.round(v.v)+'<small>ms</small>':'<em>–</em>', v?(bv?"Baseline "+Math.round(bv)+(v.v<bv*0.8?" · below baseline":""):"Baseline after 5 days"):"No data yet", v&&bv&&v.v<bv*0.8?"--warn":"--good");
+  var k4=kpi("Steps yesterday", y&&y.steps!=null?fmtN(y.steps):'<em>–</em>', td&&td.steps!=null?"Today so far: "+fmtN(td.steps):(y&&y.energy?fmtN(y.energy)+" kcal active energy":"No data yet"), "--ke");
   var cl=call();
-  var callHtml='<div class="ck-card hl-call" style="--tone:var('+cl.c+')"><div class="ck-cardhd"><span class="ck-lbl">Today’s call</span><button class="ck-link" data-hl="pull">Refresh</button></div>'
-    +'<h3><span>'+esc(cl.n)+'.</span></h3><p>'+esc(cl.p)+'</p>'
+  var callHtml='<div class="ck-card hl-call" style="--tone:var('+cl.c+')"><div class="ck-cardhd"><span class="ck-lbl">Today’s readiness</span><button class="ck-link" data-hl="pull">Refresh</button></div>'
+    +'<h3><span>'+esc(HL_LABEL[cl.n]||cl.n)+'</span></h3><p>'+esc(cl.p)+'</p>'
     +(cl.f.length?'<div class="hl-why">'+cl.f.map(function(f){return '<span class="hl-chip" style="--c:var('+f.c+')"><i></i>'+esc(f.t)+'</span>';}).join("")+'</div>':'')
-    +(sl&&sl.src==="watch"&&((B.get().days||{})[t]||{}).sleepSrc==="watch"?'<p class="hl-note">Filled into your check-in automatically. Change it there if the Watch got it wrong.</p>':'')
+    +(sl&&sl.src==="watch"&&((B.get().days||{})[t]||{}).sleepSrc==="watch"?'<p class="hl-note">Sleep has been added to today’s check-in automatically. You can correct it there if needed.</p>':'')
     +'</div>';
-  var sleepCard='<div class="ck-card"><div class="ck-cardhd"><span class="ck-lbl">Sleep · last 14 nights</span><span class="ck-lbl ck-dim">target 8h</span></div>'+sleepChart()
+  var sleepCard='<div class="ck-card"><div class="ck-cardhd"><span class="ck-lbl">Sleep · last 14 nights</span><span class="ck-lbl ck-dim">Target 8 h</span></div>'+sleepChart()
     +'<div class="hl-legend"><span style="--c:var(--fy)"><i></i>Deep</span><span style="--c:var(--ma)"><i></i>Core</span><span style="--c:var(--fa)"><i></i>REM</span><span style="--c:var(--axis)"><i></i>Logged by you</span><span style="--c:var(--crit)"><i style="border-radius:50%"></i>Under 7h</span></div>'
     +sleepStats()+'</div>';
-  var heart='<div class="ck-card"><div class="ck-cardhd"><span class="ck-lbl">Resting heart rate · 30 days</span><span class="ck-lbl ck-dim">bpm · dashed = your usual</span></div>'+lineChart("rhr","bpm",30,"--accent","resting heart rate")
-    +'<div class="ck-cardhd" style="margin-top:16px"><span class="ck-lbl">Heart rate variability · 30 days</span><span class="ck-lbl ck-dim">ms · dashed = your usual</span></div>'+lineChart("hrv","ms",30,"--fy","HRV")
-    +'<p class="hl-note">Compare with your own usual, never with other people. A lower HRV and a higher resting heart rate than usual together often mean poor sleep, stress or a cold coming.</p></div>';
-  var move='<div class="ck-card"><div class="ck-cardhd"><span class="ck-lbl">Steps · 14 days</span><span class="ck-lbl ck-dim">today is partial</span></div>'+stepsChart()+'</div>';
+  var heart='<div class="ck-card"><div class="ck-cardhd"><span class="ck-lbl">Resting heart rate · 30 days</span><span class="ck-lbl ck-dim">bpm · dashed line = baseline</span></div>'+lineChart("rhr","bpm",30,"--accent","resting heart rate")
+    +'<div class="ck-cardhd" style="margin-top:16px"><span class="ck-lbl">Heart rate variability · 30 days</span><span class="ck-lbl ck-dim">ms · dashed line = baseline</span></div>'+lineChart("hrv","ms",30,"--fy","HRV")
+    +'<p class="hl-note">Compare these values with your own baseline, not with other people. A drop in HRV together with a rise in resting heart rate often points to short sleep, stress or an oncoming illness.</p></div>';
+  var move='<div class="ck-card"><div class="ck-cardhd"><span class="ck-lbl">Steps · 14 days</span><span class="ck-lbl ck-dim">Today in progress</span></div>'+stepsChart()+'</div>';
   var link='<div class="ck-card"><div class="ck-cardhd"><span class="ck-lbl">Sleep and focus</span></div>'+focusLink()+'</div>';
   var y0=window.scrollY, wasOpen=setupOpen==null?!has:setupOpen, keyVal=($("#hlKey",ROOT)||{}).value||"";
   ROOT.innerHTML='<div class="ck-kpis hl-kpis">'+k1+k2+k3+k4+'</div>'
-    +'<div class="hl-grid"><div class="hl-col">'+callHtml+sleepCard+link+'</div><div class="hl-col">'+heart+move+setupCard(wasOpen)+'</div></div>';
+    +'<div class="hl-grid"><div class="hl-col">'+callHtml+sleepCard+link+'</div><div class="hl-col">'+heart+move+'</div></div>'
+    +'<div class="hl-setupwrap">'+setupCard(wasOpen)+'</div>';
   if(keyVal) $("#hlKey",ROOT).value=keyVal;
   if(Math.abs(window.scrollY-y0)>2) window.scrollTo(0,y0);
   nudge();
@@ -14991,9 +15039,9 @@ function paint(){
 function nudgeHtml(){
   var cl=call(), sl=sleepMin(today());
   if(cl.n!=="Protect" && cl.n!=="Pace it") return "";
-  return '<div class="hl-nudge'+(cl.n==="Protect"?' crit':'')+'"><b>'+(sl?"Slept "+hm(sl.min):"Body under strain")+' · '+cl.n+'</b>'+(cl.n==="Protect"
-    ?"Same hours, gentler work: review and flashcards now, timed papers on a better-rested day."
-    :"Hardest block first, keep the gaps, stop at 22:00.")+'</div>';
+  return '<div class="hl-nudge'+(cl.n==="Protect"?' crit':'')+'"><b>'+(sl?"Sleep "+hm(sl.min):"Elevated strain")+' · '+(HL_LABEL[cl.n]||cl.n)+'</b>'+(cl.n==="Protect"
+    ?"Lower the intensity today: review and flashcards now, timed papers on a better-rested day."
+    :"Start with the most demanding block, keep your breaks, and finish by 22:00.")+'</div>';
 }
 function nudge(){
   var lede=document.querySelector("#pl-week-sec .pl-lede"), el=document.getElementById("hl-plnudge"), h=nudgeHtml();
@@ -15016,7 +15064,7 @@ ROOT.addEventListener("click",function(e){
   else if(a==="copykey"){ var kv=$("#hlKey",ROOT).value; if(kv&&navigator.clipboard) navigator.clipboard.writeText(kv).then(function(){ b.textContent="Copied"; setTimeout(function(){b.textContent="Copy";},1500); }); }
   else if(a==="copyurl"){ var c=cfg(); if(c&&navigator.clipboard) navigator.clipboard.writeText(String(c.url).replace(/\/+$/,"")+"/health").then(function(){ b.textContent="Copied"; setTimeout(function(){b.textContent="Copy URL";},1500); }); }
   else if(a==="forget"){ H={days:{}}; try{ localStorage.removeItem(CACHE); }catch(e2){} paint(); }
-  else if(a==="wipe"){ if(!confirm("Delete every health day stored in your worker? Your iPhone still has the originals.")) return;
+  else if(a==="wipe"){ if(!confirm("Delete all health data stored in your worker? The original data stays on your iPhone.")) return;
     var c2=cfg(); fetch(c2.url,{method:"POST",headers:{"Content-Type":"application/json","X-Compass-Secret":c2.secret},body:JSON.stringify({action:"health.clear"})})
       .then(function(){ H={days:{}}; try{ localStorage.removeItem(CACHE); }catch(e3){} paint(); }); }
 });
