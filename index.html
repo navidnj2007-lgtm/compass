@@ -2546,6 +2546,85 @@ body.lofi-noscroll{overflow:hidden}
 
 /* the YouTube card makes the music column taller than the screen, so it scrolls with the page */
 .fgrid>#lofiMount{position:static!important}
+
+/* ══════════ NUTRITION ══════════ */
+#s-nutri{--nu-p:var(--accent);--nu-c:var(--eo);--nu-f:var(--fa)}
+.nu-day{display:flex;align-items:center;gap:10px;margin:0 0 14px;flex-wrap:wrap}
+.nu-day b{font-size:15px;font-weight:650;letter-spacing:-.01em;min-width:0}
+.nu-nav{display:inline-grid!important;place-items:center;width:34px;height:34px;padding:0!important;font-size:19px;line-height:1;border:1px solid var(--border)!important;border-radius:10px!important;background:var(--surface)!important;color:var(--ink)}
+.nu-nav:disabled{opacity:.35;cursor:default}
+.nu-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:start}
+.nu-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+@media(max-width:1000px){.nu-grid{grid-template-columns:minmax(0,1fr)}.nu-col{display:contents}.nu-col>*{order:4}.nu-col>.nu-sum{order:1}.nu-col>.nu-add{order:2}.nu-col>.nu-log{order:3}}
+.nu-sumgrid{display:grid;grid-template-columns:200px minmax(0,1fr);gap:26px;align-items:center}
+@media(max-width:560px){.nu-sumgrid{grid-template-columns:minmax(0,1fr);justify-items:center}.nu-macs{width:100%}}
+.nu-ringbox{position:relative;width:200px;height:200px}
+.nu-ring{width:200px;height:200px;display:block}
+.nu-track{fill:none;stroke:var(--surface-3);stroke-width:14}
+.nu-arc{fill:none;stroke:var(--accent);stroke-width:14;stroke-linecap:round;transition:stroke-dasharray .5s ease;filter:drop-shadow(0 0 8px color-mix(in srgb,var(--accent) 45%,transparent))}
+.nu-arc.over{stroke:var(--warn);filter:drop-shadow(0 0 8px color-mix(in srgb,var(--warn) 45%,transparent))}
+.nu-ringtxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.nu-ringtxt b{font-family:var(--mono);font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1}
+.nu-ringtxt span{font-size:12px;color:var(--muted);margin-top:4px}
+.nu-ringtxt em{font-style:normal;font-size:12px;font-weight:650;color:var(--good);margin-top:8px;padding:3px 9px;border-radius:999px;background:color-mix(in srgb,var(--good) 12%,transparent)}
+.nu-ringtxt em.over{color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
+.nu-macs{display:flex;flex-direction:column;gap:16px;min-width:0}
+.nu-mac{--mc:var(--nu-p)}.nu-mac.c{--mc:var(--nu-c)}.nu-mac.f{--mc:var(--nu-f)}
+.nu-mrow{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:7px}
+.nu-mrow b{font-size:13.5px;font-weight:650;display:flex;align-items:center;gap:7px}
+.nu-mrow b::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--mc)}
+.nu-mrow span{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.nu-mrow em{font-style:normal;color:var(--ink);font-weight:650;font-family:var(--mono)}
+.nu-bar{height:9px;border-radius:999px;background:var(--surface-3);overflow:hidden}
+.nu-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--mc) 70%,transparent),var(--mc));transition:width .5s ease}
+.nu-msub{font-size:11.5px;color:var(--muted);margin-top:5px}
+.nu-meals{display:flex;gap:4px;padding:3px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border);margin-bottom:12px}
+.nu-meals button{flex:1;text-align:center;border:0;background:none;color:var(--muted);font-size:12.5px;font-weight:600;padding:7px 4px;border-radius:9px;cursor:pointer}
+.nu-meals button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.25),inset 0 0 0 1px var(--border)}
+#nuAdd>.fld{width:100%;margin-bottom:10px}
+.nu-num{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.nu-num label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+.nu-num label::first-line{color:var(--muted)}
+.nu-num label.p{color:var(--nu-p)}.nu-num label.c{color:var(--nu-c)}.nu-num label.f{color:var(--nu-f)}
+.nu-num .fld{width:100%;font-family:var(--mono);text-align:right}
+.nu-addrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.nu-addrow .primary{min-width:110px;text-align:center;justify-content:center}
+#nuAdd.nu-bad .fld[name=n]{border-color:var(--crit);box-shadow:0 0 0 3px color-mix(in srgb,var(--crit) 20%,transparent)}
+.nu-note{font-size:12px;color:var(--muted);line-height:1.45;margin:10px 0 0}
+.nu-quick{display:flex;flex-wrap:wrap;gap:6px}
+.nu-quick button{display:inline-flex;align-items:center;gap:8px;max-width:100%;border:1px solid var(--border);background:var(--surface-2);color:var(--ink);border-radius:999px;padding:6px 6px 6px 12px;font-size:12.5px;cursor:pointer}
+.nu-quick button:hover{border-color:var(--accent)}
+.nu-quick span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+.nu-quick em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--surface-3);border-radius:999px;padding:2px 7px}
+.nu-meal{padding:12px 0;border-top:1px solid var(--border)}
+.nu-meal:first-of-type{border-top:0;padding-top:2px}
+.nu-mealhd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.nu-mealhd b{font-size:14px;font-weight:650}
+.nu-mealhd span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.nu-meal ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.nu-meal li{display:grid;grid-template-columns:minmax(0,1fr) auto auto 28px;align-items:center;gap:12px;padding:8px 6px 8px 12px;border-radius:10px;background:var(--surface-2)}
+.nu-in{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nu-im{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.nu-meal li b{font-family:var(--mono);font-size:13px;font-weight:600}
+.nu-x{width:28px;height:28px;border:0;border-radius:8px;background:none;color:var(--muted);font-size:17px;cursor:pointer}
+.nu-x:hover{background:var(--surface-3);color:var(--crit)}
+@media(max-width:560px){.nu-meal li{grid-template-columns:minmax(0,1fr) auto 28px}.nu-im{grid-column:1;grid-row:2;margin-top:-4px}.nu-meal li b{grid-row:1/3;grid-column:2}.nu-x{grid-row:1/3;grid-column:3}}
+.nu-week{width:100%;height:auto;display:block}
+.nu-week text{font-size:11px;fill:var(--muted)}
+.nu-week text.sel{fill:var(--ink);font-weight:700}
+.nu-goal{stroke:var(--muted);stroke-dasharray:4 4;stroke-width:1}
+.nu-b.ok{fill:var(--good)}.nu-b.hi{fill:var(--warn)}.nu-b.lo{fill:color-mix(in srgb,var(--ma) 80%,transparent)}.nu-b.none{fill:var(--surface-3)}
+.nu-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.nu-stats b{display:block;font-family:var(--mono);font-size:20px;font-weight:600}
+.nu-stats small{font-size:12px;color:var(--muted)}
+.nu-stats span{font-size:11.5px;color:var(--muted);line-height:1.35}
+.nu-goals summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.nu-goals summary::-webkit-details-marker{display:none}
+.nu-gsum{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.nu-gform{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;align-items:end;margin-top:14px}
+.nu-gform label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:600;color:var(--muted)}
+.nu-gform .fld{width:100%;font-family:var(--mono)}
+@media(max-width:560px){.nu-gform{grid-template-columns:repeat(2,minmax(0,1fr))}.nu-gform button{grid-column:1/-1}}
 </style>
 </head>
 <body class="workspace">
@@ -2970,6 +3049,7 @@ body.lofi-noscroll{overflow:hidden}
 
 <!-- ═══════════════ HEALTH (Apple Watch via an iPhone Shortcut) ═══════════════ -->
 <section id="s-health"></section>
+<section id="s-nutri"></section>
 
 <!-- ═══════════════ NOTES ═══════════════ -->
 <section id="s-notes">
@@ -3517,13 +3597,13 @@ function execScore(){
    Every old page key still works (CompassSetTab('sync'), ('plan') ...), the
    sidebar and the phone tab bar just show the five groups. Tasks, Gym and
    "Why it works" stay retired; their sections are kept, unlinked. */
-var TABS=[["today","Dashboard"],["focus","Focus"],["plan","Planner"],["cal","Calendar"],["week","Review"],["school","Subjects"],["classes","Timetable"],["revise","Revision"],["notes","Notes"],["checkin","Check-in"],["health","Health"],["goals","Goals"],["rituals","Rituals"],["reset","Reset"],["ask","Assistant"],["sync","Data & sync"]];
+var TABS=[["today","Dashboard"],["focus","Focus"],["plan","Planner"],["cal","Calendar"],["week","Review"],["school","Subjects"],["classes","Timetable"],["revise","Revision"],["notes","Notes"],["checkin","Check-in"],["health","Health"],["nutri","Nutrition"],["goals","Goals"],["rituals","Rituals"],["reset","Reset"],["ask","Assistant"],["sync","Data & sync"]];
 var GONE_TABS={tasks:1, gym:1, why:1};
 var GROUPS=[
   {k:"today",n:"Today",p:["today","focus"]},
   {k:"week",n:"Week",p:["plan","cal","week"]},
   {k:"school",n:"School",p:["school","classes","revise","notes"]},
-  {k:"me",n:"Me",p:["checkin","health","goals","rituals","reset"]},
+  {k:"me",n:"Me",p:["checkin","health","nutri","goals","rituals","reset"]},
   {k:"tools",n:"Tools",p:["ask","sync"]}
 ];
 var SVGA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">';
@@ -3546,6 +3626,7 @@ var PAGE_META={
   notes:['School','Notes','Questions and ideas, saved per subject.'],
   checkin:['Me','Check-in','Mood, sleep, energy and the habits that structure your day.'],
   health:['Me','Health','Sleep, heart rate and activity from your Apple Watch.'],
+  nutri:['Me','Nutrition','Calories and macros, logged by meal.'],
   goals:['Me','Goals','The longer goals this week is working towards.'],
   rituals:['Me','Rituals','Start-of-day, shutdown and weekly scripts.'],
   reset:['Me','Reset','A smaller next step for a hard day.'],
@@ -15095,6 +15176,201 @@ setInterval(function(){ if(!document.hidden) pull(false); }, 20*60000);
 setTimeout(function(){ fill(); nudge(); pull(false); }, 4000);
 paint();
 window.CompassHealth={pull:function(){ return pull(true); }, days:function(){ return H.days; }, call:call, render:paint, nudgeHtml:nudgeHtml};
+})();
+}, {once:true});
+</script>
+<script id="compass-nutrition">
+document.addEventListener("DOMContentLoaded", function(){
+/* ═══════════════ NUTRITION ═══════════════
+   Calories and macros, logged by meal. Everything lives in S.nutri, so it
+   syncs between devices like the rest of Compass:
+     goals  {kcal,p,c,f}                      daily targets
+     log    {"YYYY-MM-DD":[{id,n,m,kcal,p,c,f}]}  what he ate, m = meal
+     foods  [{n,kcal,p,c,f,u}]                saved foods, u = times used   */
+(function(){
+"use strict";
+var B=window.CompassBridge, ROOT=document.getElementById("s-nutri");
+if(!B||!ROOT) return;
+
+var MEALS=[["b","Breakfast"],["l","Lunch"],["d","Dinner"],["s","Snacks"]];
+var DEF={kcal:2250,p:180,c:220,f:70};
+var cur=null, meal=null, editGoals=false;
+
+function $(s,r){ return (r||document).querySelector(s); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function pad(n){ return (n<10?"0":"")+n; }
+function ymd(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function addD(k,n){ var p=k.split("-"); return ymd(new Date(+p[0],+p[1]-1,+p[2]+n,12)); }
+function today(){ return ymd(new Date()); }
+function fmt(n){ return Math.round(n||0).toString().replace(/\B(?=(\d{3})+(?!\d))/g,","); }
+function num(v){ var x=parseFloat(String(v==null?"":v).replace(",",".")); return isFinite(x)&&x>=0?Math.round(x*10)/10:0; }
+function N(){ return B.get().nutri||null; }
+function ensure(){ var S=B.get(); if(!S.nutri||typeof S.nutri!=="object") S.nutri={}; var n=S.nutri;
+  if(!n.goals) n.goals={kcal:DEF.kcal,p:DEF.p,c:DEF.c,f:DEF.f}; if(!n.log) n.log={}; if(!Array.isArray(n.foods)) n.foods=[]; return n; }
+function goals(){ var n=N(); return (n&&n.goals)||DEF; }
+function items(k){ var n=N(); return (n&&n.log&&n.log[k])||[]; }
+function sum(list){ return list.reduce(function(a,x){ a.kcal+=+x.kcal||0; a.p+=+x.p||0; a.c+=+x.c||0; a.f+=+x.f||0; return a; },{kcal:0,p:0,c:0,f:0}); }
+function kcalOf(p,c,f){ return Math.round(p*4+c*4+f*9); }
+function defMeal(){ var h=new Date().getHours(); return h<11?"b":h<15?"l":h<21?"d":"s"; }
+function nid(){ return "n"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function dayLabel(k){
+  var t=today(), p=k.split("-"), d=new Date(+p[0],+p[1]-1,+p[2]);
+  var s=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  return k===t?"Today · "+s : k===addD(t,-1)?"Yesterday · "+s : s;
+}
+
+/* ── pieces ── */
+function ring(v,g){
+  var R=78, C=2*Math.PI*R, f=g>0?Math.min(v/g,1):0, over=g>0&&v>g*1.05;
+  return '<svg class="nu-ring" viewBox="0 0 200 200" aria-hidden="true">'
+    +'<circle cx="100" cy="100" r="'+R+'" class="nu-track"/>'
+    +(f>0?'<circle cx="100" cy="100" r="'+R+'" class="nu-arc'+(over?' over':'')+'" stroke-dasharray="'+(C*f).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 100 100)"/>':'')
+    +'</svg>';
+}
+function bar(label,cls,v,g){
+  var pct=g>0?Math.min(v/g*100,100):0, left=Math.round(g-v);
+  return '<div class="nu-mac '+cls+'"><div class="nu-mrow"><b>'+label+'</b><span><em>'+fmt(v)+'</em> / '+fmt(g)+' g</span></div>'
+    +'<div class="nu-bar"><i style="width:'+pct.toFixed(1)+'%"></i></div>'
+    +'<div class="nu-msub">'+(left>=0?fmt(left)+' g left':fmt(-left)+' g over')+'</div></div>';
+}
+function weekCard(){
+  var t=today(), g=goals(), days=[], max=g.kcal*1.25, totP=0, n=0, hit=0;
+  for(var i=6;i>=0;i--){ var k=addD(t,-i), s=sum(items(k)); days.push({k:k,s:s}); if(s.kcal>0){ n++; totP+=s.p; if(Math.abs(s.kcal-g.kcal)<=g.kcal*0.1) hit++; } max=Math.max(max,s.kcal); }
+  var W=560,H=150,L=8,Rr=8,T=10,Bm=22,bw=(W-L-Rr)/7, y=function(v){ return T+(H-T-Bm)*(1-v/max); };
+  var svg='<svg class="nu-week" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Calories, last 7 days">';
+  svg+='<line class="nu-goal" x1="'+L+'" x2="'+(W-Rr)+'" y1="'+y(g.kcal).toFixed(1)+'" y2="'+y(g.kcal).toFixed(1)+'"/>';
+  days.forEach(function(d,i){
+    var x=L+i*bw+bw*0.22, w=bw*0.56, v=d.s.kcal, top=y(v), cls=v<=0?"none":Math.abs(v-g.kcal)<=g.kcal*0.1?"ok":v>g.kcal?"hi":"lo";
+    if(v>0) svg+='<rect class="nu-b '+cls+'" x="'+x.toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+(H-Bm-top).toFixed(1)+'" rx="5"><title>'+d.k+' · '+fmt(v)+' kcal · '+fmt(d.s.p)+' g protein</title></rect>';
+    else svg+='<rect class="nu-b none" x="'+x.toFixed(1)+'" y="'+(H-Bm-3)+'" width="'+w.toFixed(1)+'" height="3" rx="1.5"/>';
+    var p=d.k.split("-"), lab=d.k===t?"Today":new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString("en-GB",{weekday:"short"});
+    svg+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(H-6)+'" text-anchor="middle"'+(d.k===cur?' class="sel"':'')+'>'+lab+'</text>';
+  });
+  svg+='</svg>';
+  return '<div class="ck-card nu-card"><div class="ck-cardhd"><span class="ck-lbl">Last 7 days</span><span class="ck-lbl ck-dim">dashed line = target</span></div>'+svg
+    +'<div class="nu-stats"><div><b>'+(n?fmt(days.reduce(function(a,d){return a+d.s.kcal;},0)/n):"–")+'</b><span>avg kcal on logged days</span></div>'
+    +'<div><b>'+(n?fmt(totP/n)+'<small> g</small>':"–")+'</b><span>avg protein</span></div>'
+    +'<div><b>'+hit+'<small> / '+n+'</small></b><span>days within 10% of target</span></div></div></div>';
+}
+function goalsCard(){
+  var g=goals(), implied=kcalOf(g.p,g.c,g.f);
+  return '<details class="ck-card nu-card nu-goals"'+(editGoals?' open':'')+'><summary><span class="ck-lbl">Daily targets</span><span class="nu-gsum">'+fmt(g.kcal)+' kcal · P '+fmt(g.p)+' · C '+fmt(g.c)+' · F '+fmt(g.f)+'</span></summary>'
+    +'<form class="nu-gform" id="nuGoals">'
+    +'<label>Calories<input class="fld sm" name="kcal" inputmode="decimal" value="'+g.kcal+'"></label>'
+    +'<label>Protein (g)<input class="fld sm" name="p" inputmode="decimal" value="'+g.p+'"></label>'
+    +'<label>Carbs (g)<input class="fld sm" name="c" inputmode="decimal" value="'+g.c+'"></label>'
+    +'<label>Fat (g)<input class="fld sm" name="f" inputmode="decimal" value="'+g.f+'"></label>'
+    +'<button class="primary sm" type="submit">Save targets</button></form>'
+    +'<p class="nu-note">Your macro targets add up to '+fmt(implied)+' kcal'+(Math.abs(implied-g.kcal)>60?', which differs from your calorie target by '+fmt(Math.abs(implied-g.kcal))+' kcal.':'.')+'</p></details>';
+}
+
+/* ── page ── */
+function render(){
+  if(!ROOT.classList.contains("on") && ROOT.innerHTML) return;
+  if(!cur) cur=today(); if(!meal) meal=defMeal();
+  var g=goals(), list=items(cur), s=sum(list), left=Math.round(g.kcal-s.kcal), n=N();
+  var foods=((n&&n.foods)||[]).slice().sort(function(a,b){ return (b.u||0)-(a.u||0); });
+  var keepForm=captureForm();
+
+  var head='<div class="nu-day"><button class="nu-nav" data-nu="prev" aria-label="Previous day">‹</button>'
+    +'<b>'+esc(dayLabel(cur))+'</b><button class="nu-nav" data-nu="next" aria-label="Next day"'+(cur>=today()?' disabled':'')+'>›</button>'
+    +(cur!==today()?'<button class="ck-btn" data-nu="today">Back to today</button>':'')+'</div>';
+
+  var split=s.kcal>0?[Math.round(s.p*4/s.kcal*100),Math.round(s.c*4/s.kcal*100),Math.round(s.f*9/s.kcal*100)]:null;
+  var summary='<div class="ck-card nu-card nu-sum"><div class="ck-cardhd"><span class="ck-lbl">Summary</span>'
+    +(split?'<span class="ck-lbl ck-dim">P '+split[0]+'% · C '+split[1]+'% · F '+split[2]+'% of calories</span>':'')+'</div>'
+    +'<div class="nu-sumgrid"><div class="nu-ringbox">'+ring(s.kcal,g.kcal)
+    +'<div class="nu-ringtxt"><b>'+fmt(s.kcal)+'</b><span>of '+fmt(g.kcal)+' kcal</span><em class="'+(left<0?'over':'')+'">'+(left>=0?fmt(left)+' left':fmt(-left)+' over')+'</em></div></div>'
+    +'<div class="nu-macs">'+bar("Protein","p",s.p,g.p)+bar("Carbs","c",s.c,g.c)+bar("Fat","f",s.f,g.f)+'</div></div></div>';
+
+  var add='<div class="ck-card nu-card nu-add"><div class="ck-cardhd"><span class="ck-lbl">Add food</span><span class="ck-lbl ck-dim">'+esc(cur===today()?"to today":"to "+dayLabel(cur).split(" · ").pop())+'</span></div>'
+    +'<div class="nu-meals" role="group" aria-label="Meal">'+MEALS.map(function(m){ return '<button type="button" data-nmeal="'+m[0]+'" aria-pressed="'+(meal===m[0])+'">'+m[1]+'</button>'; }).join("")+'</div>'
+    +'<form id="nuAdd" autocomplete="off">'
+    +'<input class="fld" name="n" list="nuFoods" placeholder="Food, e.g. Skyr 200 g" aria-label="Food name" required>'
+    +'<datalist id="nuFoods">'+foods.map(function(f){ return '<option value="'+esc(f.n)+'">'; }).join("")+'</datalist>'
+    +'<div class="nu-num"><label>kcal<input class="fld sm" name="kcal" inputmode="decimal" placeholder="auto"></label>'
+    +'<label class="p">Protein<input class="fld sm" name="p" inputmode="decimal" placeholder="g"></label>'
+    +'<label class="c">Carbs<input class="fld sm" name="c" inputmode="decimal" placeholder="g"></label>'
+    +'<label class="f">Fat<input class="fld sm" name="f" inputmode="decimal" placeholder="g"></label></div>'
+    +'<div class="nu-addrow"><label class="fchk"><input type="checkbox" name="save" checked> Save to my foods</label>'
+    +'<button class="primary" type="submit">Add</button></div>'
+    +'<p class="nu-note">Leave kcal empty and it is calculated from the macros. Choose a saved food to fill everything in.</p></form>'
+    +(foods.length?'<div class="ck-lbl" style="margin:14px 0 8px">Quick add</div><div class="nu-quick">'+foods.slice(0,10).map(function(f,i){
+        return '<button type="button" data-nquick="'+i+'" title="'+esc(fmt(f.kcal)+" kcal · P "+f.p+" · C "+f.c+" · F "+f.f)+'"><span>'+esc(f.n)+'</span><em>'+fmt(f.kcal)+'</em></button>'; }).join("")+'</div>':'')
+    +'</div>';
+
+  var mealsHtml=MEALS.map(function(m){
+    var rows=list.filter(function(x){ return x.m===m[0]; }), ms=sum(rows);
+    return '<div class="nu-meal"><div class="nu-mealhd"><b>'+m[1]+'</b>'+(rows.length?'<span>'+fmt(ms.kcal)+' kcal · P '+fmt(ms.p)+' · C '+fmt(ms.c)+' · F '+fmt(ms.f)+'</span>':'<span>Nothing logged</span>')+'</div>'
+      +(rows.length?'<ul>'+rows.map(function(x){
+        return '<li><span class="nu-in">'+esc(x.n)+'</span><span class="nu-im">P '+fmt(x.p)+' · C '+fmt(x.c)+' · F '+fmt(x.f)+'</span><b>'+fmt(x.kcal)+'</b>'
+          +'<button type="button" class="nu-x" data-ndel="'+esc(x.id)+'" aria-label="Remove '+esc(x.n)+'">×</button></li>'; }).join("")+'</ul>':'')
+      +'</div>';
+  }).join("");
+  var hasPrev=items(addD(cur,-1)).length>0;
+  var log='<div class="ck-card nu-card nu-log"><div class="ck-cardhd"><span class="ck-lbl">Meals</span>'
+    +(hasPrev&&!list.length?'<button class="ck-link" data-nu="copy">Copy previous day</button>':'')+'</div>'+mealsHtml+'</div>';
+
+  ROOT.innerHTML=head+'<div class="nu-grid"><div class="nu-col">'+summary+log+'</div><div class="nu-col">'+add+weekCard()+goalsCard()+'</div></div>';
+  restoreForm(keepForm);
+}
+function captureForm(){ var f=$("#nuAdd",ROOT); if(!f) return null; var o={}; ["n","kcal","p","c","f"].forEach(function(k){ o[k]=f.elements[k].value; }); o.save=f.elements.save.checked; return o; }
+function restoreForm(o){ var f=$("#nuAdd",ROOT); if(!f||!o) return; ["n","kcal","p","c","f"].forEach(function(k){ f.elements[k].value=o[k]; }); f.elements.save.checked=o.save; }
+
+/* ── actions ── */
+function addEntry(e){
+  var nn=ensure(), k=cur, x={id:nid(), n:String(e.n||"").trim().slice(0,80), m:e.m||meal, p:num(e.p), c:num(e.c), f:num(e.f)};
+  x.kcal=num(e.kcal)||kcalOf(x.p,x.c,x.f);
+  if(!x.n || !(x.kcal>0)) return false;
+  (nn.log[k]=nn.log[k]||[]).push(x);
+  if(e.save){
+    var key=x.n.toLowerCase(), f=nn.foods.filter(function(y){ return y.n.toLowerCase()===key; })[0];
+    if(f){ f.kcal=x.kcal; f.p=x.p; f.c=x.c; f.f=x.f; f.u=(f.u||0)+1; }
+    else { nn.foods.push({n:x.n,kcal:x.kcal,p:x.p,c:x.c,f:x.f,u:1}); if(nn.foods.length>200) nn.foods.sort(function(a,b){return (b.u||0)-(a.u||0);}).length=200; }
+  }
+  B.touch(); return true;
+}
+ROOT.addEventListener("click",function(e){
+  var t;
+  if((t=e.target.closest("[data-nmeal]"))){ meal=t.dataset.nmeal; render(); return; }
+  if((t=e.target.closest("[data-ndel]"))){ var nn=ensure(), a=nn.log[cur]||[]; nn.log[cur]=a.filter(function(x){ return x.id!==t.dataset.ndel; }); if(!nn.log[cur].length) delete nn.log[cur]; B.touch(); render(); return; }
+  if((t=e.target.closest("[data-nquick]"))){
+    var fs=(N().foods||[]).slice().sort(function(a,b){ return (b.u||0)-(a.u||0); }), f=fs[+t.dataset.nquick];
+    if(f){ addEntry({n:f.n,kcal:f.kcal,p:f.p,c:f.c,f:f.f,save:true}); render(); } return; }
+  if((t=e.target.closest("[data-nu]"))){
+    var a2=t.dataset.nu;
+    if(a2==="prev") cur=addD(cur,-1);
+    else if(a2==="next" && cur<today()) cur=addD(cur,1);
+    else if(a2==="today") cur=today();
+    else if(a2==="copy"){ var n2=ensure(), src=n2.log[addD(cur,-1)]||[]; n2.log[cur]=src.map(function(x){ var y={}; for(var q in x) y[q]=x[q]; y.id=nid(); return y; }); B.touch(); }
+    render(); return; }
+});
+ROOT.addEventListener("toggle",function(e){ if(e.target.classList&&e.target.classList.contains("nu-goals")) editGoals=e.target.open; },true);
+ROOT.addEventListener("input",function(e){
+  if(e.target.name!=="n"||!e.target.closest("#nuAdd")) return;
+  var v=e.target.value.trim().toLowerCase(), f=((N()||{}).foods||[]).filter(function(y){ return y.n.toLowerCase()===v; })[0];
+  if(!f) return; var F=e.target.form; F.elements.kcal.value=f.kcal; F.elements.p.value=f.p; F.elements.c.value=f.c; F.elements.f.value=f.f;
+});
+ROOT.addEventListener("submit",function(e){
+  e.preventDefault();
+  var F=e.target;
+  if(F.id==="nuAdd"){
+    var ok=addEntry({n:F.elements.n.value,kcal:F.elements.kcal.value,p:F.elements.p.value,c:F.elements.c.value,f:F.elements.f.value,save:F.elements.save.checked});
+    if(!ok){ F.elements.n.focus(); F.classList.add("nu-bad"); setTimeout(function(){F.classList.remove("nu-bad");},700); return; }
+    ["n","kcal","p","c","f"].forEach(function(k){ F.elements[k].value=""; });
+    render(); var nf=$("#nuAdd input[name=n]",ROOT); if(nf) nf.focus(); return;
+  }
+  if(F.id==="nuGoals"){
+    var nn=ensure(), g={kcal:num(F.elements.kcal.value),p:num(F.elements.p.value),c:num(F.elements.c.value),f:num(F.elements.f.value)};
+    if(!(g.kcal>0)) g.kcal=kcalOf(g.p,g.c,g.f)||DEF.kcal;
+    nn.goals=g; editGoals=false; B.touch(); render();
+  }
+});
+
+var _r=B.render; B.render=function(){ var r=_r.apply(this,arguments); try{ if(ROOT.classList.contains("on") && !ROOT.contains(document.activeElement)) render(); }catch(e){} return r; };
+new MutationObserver(function(){ if(ROOT.classList.contains("on")) render(); }).observe(ROOT,{attributes:true,attributeFilter:["class"]});
+render();
+window.CompassNutrition={render:render, day:function(k){ return sum(items(k||today())); }};
 })();
 }, {once:true});
 </script>
