@@ -14385,7 +14385,7 @@ var toastT=null;
 function toast(msg,bad){var t=$("#pl-toast");t.textContent=msg;t.classList.toggle("bad",!!bad);t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},bad?5000:1800);}
 
 /* ── week grid ── */
-var G0=8*60,G1=22*60+15,PM=.9;
+var G0=8*60,G1=23*60+15,PM=.9;
 var curMon=mondayOf(ymd(now())); if(curMon<FIXED[0]) curMon=FIXED[0];
 var filter={};Object.keys(SUB).forEach(function(k){filter[k]=1;});
 function fcount(){return Object.keys(filter).length;}
@@ -14403,7 +14403,7 @@ function renderGrid(){
   if(note){bn.hidden=false;bn.innerHTML="<b>"+esc(note.title)+"</b> "+esc(note.text);}else bn.hidden=true;
   var html='<div class="pl-wh"></div>';
   days.forEach(function(d,i){var dd=new Date(d+"T12:00");html+='<div class="pl-wh'+(d===today?" pl-today":"")+(i>4?" pl-wknd":"")+'"><b>'+dd.toLocaleDateString("en-GB",{weekday:"short"})+'</b><span>'+dd.getDate()+'</span>'+((i===0||dd.getDate()===1)?'<em class="pl-mo">'+dd.toLocaleDateString("en-GB",{month:"short"})+'</em>':'')+'</div>';});
-  var ax='<div class="pl-axis" style="height:'+H+'px">';for(var h=9;h<=22;h++)ax+='<span style="top:'+((h*60-G0)*PM)+'px">'+pad(h)+'</span>';html+=ax+'</div>';
+  var ax='<div class="pl-axis" style="height:'+H+'px">';for(var h=9;h<=23;h++)ax+='<span style="top:'+((h*60-G0)*PM)+'px">'+pad(h)+'</span>';html+=ax+'</div>';
   days.forEach(function(d){
     var cls=["pl-col"];if(d<today)cls.push("pl-past");if(new Date(d+"T12:00").getDay()%6===0)cls.push("pl-wknd");if(d===today)cls.push("pl-tcol");if(note&&note.hol)cls.push("pl-hol");
     var c='<div class="'+cls.join(" ")+'" data-date="'+d+'" style="height:'+H+'px">';
