@@ -1321,6 +1321,24 @@ body.tg .line.td{padding-left:11px}
 .fwk.late .fwk-m{color:var(--warn,var(--muted))}
 .fweek-empty{font-size:12.5px;color:var(--muted);line-height:1.45}
 .flinked{font-size:12px;color:var(--muted);margin-top:3px}
+.fweek-hint{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)}
+.fwk-no{grid-row:1/3;width:18px;height:18px;border-radius:50%;background:var(--accent);color:var(--plane,#fff);
+  font-style:normal;font-size:10.5px;font-weight:700;display:grid;place-items:center}
+.frhythm{display:flex;justify-content:center;gap:10px 22px;flex-wrap:wrap;margin:12px 0 4px}
+.frh{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2)}
+.frh b{min-width:52px;text-align:center;font-variant-numeric:tabular-nums;color:var(--ink)}
+.frh button{width:28px;height:28px;padding:0;display:grid;place-items:center;border-radius:50%}
+.frh button svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+.ftasks{display:flex;flex-direction:column;gap:5px;margin:12px auto 4px;max-width:420px;width:100%}
+.ftask{display:flex;align-items:center;gap:9px;text-align:left;width:100%;padding:7px 11px;border-radius:10px;
+  border:1px solid var(--border);background:var(--surface-2);color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.ftask i{font-style:normal;width:18px;height:18px;border-radius:50%;border:1px solid var(--border);display:grid;place-items:center;font-size:10.5px;flex:none}
+.ftask span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ftask em{font-style:normal;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent)}
+.ftask.cur{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.ftask.done span{text-decoration:line-through;color:var(--muted)}
+.ftask.done i{background:var(--good,var(--accent));border-color:transparent;color:var(--plane,#fff)}
+.ftick{margin-top:4px;justify-content:center;text-align:center}
 .fopts .fchk{gap:7px;font-size:12.5px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
 .fopts .fchk input{width:16px;height:16px;accent-color:var(--d1);cursor:pointer;flex:none}
 .fopts .fchk:hover{color:var(--ink)}
@@ -3966,20 +3984,29 @@ function fCfg(){
   if(typeof S.focus.plan!=="number") S.focus.plan=120;
   if(typeof S.focus.sound!=="boolean") S.focus.sound=true;
   if(typeof S.focus.notify!=="boolean") S.focus.notify=true;
+  if(typeof S.focus.blk!=="number") S.focus.blk=F_BLOCK;
+  if(typeof S.focus.brk!=="number") S.focus.brk=F_BREAK;
   return S.focus;
 }
 
-/* Turn a total length into blocks of deep work separated by real breaks. */
+/* Turn a total length into blocks of deep work separated by real breaks.
+   The block and break lengths are his to set (S.focus.blk / .brk); the block
+   length is a target, the break length is exact. */
 function fBuild(total, skip){
   total=Math.max(5, Math.min(480, Math.round(total)));
   if(skip) return [{k:"f", s:total*60}];
-  var blocks=Math.max(1, Math.round(total/(F_BLOCK+F_BREAK)));
+  var F=fCfg(), blk=Math.max(10, F.blk||F_BLOCK), brk=Math.max(0, F.brk);
+  if(!(brk>=0)) brk=F_BREAK;
+  if(brk===0) return [{k:"f", s:total*60}];
+  var blocks=Math.max(1, Math.round(total/(blk+brk)));
+  /* Never let the breaks eat the session: each block keeps at least 5 min. */
+  while(blocks>1 && total-(blocks-1)*brk < blocks*5) blocks--;
   var breaks=blocks-1;
-  var focusTotal=Math.max(blocks, total-breaks*F_BREAK);   // honour the length he asked for
+  var focusTotal=Math.max(blocks, total-breaks*brk);   // honour the length he asked for
   var per=Math.floor(focusTotal/blocks), extra=focusTotal-per*blocks, seg=[];
   for(var i=0;i<blocks;i++){
     seg.push({k:"f", s:(per+(i<extra?1:0))*60});
-    if(i<blocks-1) seg.push({k:"b", s:F_BREAK*60});
+    if(i<blocks-1) seg.push({k:"b", s:brk*60});
   }
   return seg;
 }
@@ -4000,6 +4027,10 @@ function fWhere(pos){
   }
   return {i:t.seg.length, k:"end", left:0, len:0, before:t.seg.length};
 }
+/* Seconds of segment i already credited to an earlier task in this session —
+   switching task part-way through a block logs what was done so far, and the
+   rest of that block then belongs to the new task. */
+function fCut(i){ var c=S.timer && S.timer.cut; return (c && c.i===i) ? c.s : 0; }
 function fBlockNo(idx){
   var t=S.timer, n=0;
   for(var i=0;i<=idx && i<t.seg.length;i++) if(t.seg[i].k==="f") n++;
@@ -4073,31 +4104,58 @@ function fWeekItems(){
   });
   return out;
 }
-var fPickLink=null;
+var fPickLink=null, fPickLinks=[];
+function fPicked(k,id){
+  for(var i=0;i<fPickLinks.length;i++) if(fPickLinks[i].k===k && fPickLinks[i].id===id) return i;
+  return -1;
+}
 function fWeekHTML(){
   var items=fWeekItems();
   if(!items.length) return '<label class="lbl" style="margin-top:14px">From your week</label>'
     + '<div class="fweek-empty">Nothing left in your planner for today. Add blocks in Week, or name a task below.</div>';
-  return '<label class="lbl" style="margin-top:14px">From your week</label>'
+  return '<label class="lbl" style="margin-top:14px">From your week'
+    + '<span class="fweek-hint"> · pick one or several — the session runs through them in order</span></label>'
     + '<div class="fweek" role="list">' + items.map(function(x){
-        var on=fPickLink && fPickLink.k===x.k && fPickLink.id===x.id;
+        var pi=fPicked(x.k, x.id), on=pi>=0;
         return '<button type="button" class="fwk'+(x.late?' late':'')+'" role="listitem" data-flink="'+x.k+':'+esc(x.id)+'" aria-pressed="'+(on?'true':'false')+'">'
-          + '<i class="fwk-dot" style="background:var(--'+(x.sub||'gen')+',var(--accent))"></i>'
+          + (on && fPickLinks.length>1 ? '<i class="fwk-no">'+(pi+1)+'</i>' : '<i class="fwk-dot" style="background:var(--'+(x.sub||'gen')+',var(--accent))"></i>')
           + '<span class="fwk-t">'+esc(x.title)+'</span>'
           + '<span class="fwk-m">'+esc(x.when)+(x.mins?' \u00b7 '+fHrs(x.mins):'')+(x.done?' \u00b7 '+fHrs(x.done)+' done':'')+'</span>'
           + '</button>';
       }).join("") + '</div>';
 }
+/* Tapping a week item adds it to (or takes it off) the session's task list.
+   With one picked it behaves as before; with several, the session length
+   becomes their estimates added up plus the breaks between blocks. */
 function fPickWeek(key){
   var i=key.indexOf(":"), k=key.slice(0,i), id=key.slice(i+1);
-  if(fPickLink && fPickLink.k===k && fPickLink.id===id){ fPickLink=null; fPaint(true); return; }
-  var x=fWeekItems().filter(function(y){ return y.k===k && y.id===id; })[0]; if(!x) return;
-  fPickLink={k:k, id:id, x:x.x};
+  var at=fPicked(k,id);
+  if(at>=0) fPickLinks.splice(at,1);
+  else {
+    var x=fWeekItems().filter(function(y){ return y.k===k && y.id===id; })[0]; if(!x) return;
+    fPickLinks.push({k:k, id:id, x:x.x, title:x.title, mins:x.mins, sub:x.sub});
+  }
+  fPickLink=fPickLinks[0]||null;
   var F=fCfg();
-  T().q=x.title;
-  if(x.mins) F.plan=x.mins;
-  if(x.sub){ var sid=fSubFor(x.sub); if(sid) fPickSub=sid; }
+  if(!fPickLinks.length){ fPaint(true); return; }
+  T().q=fPickLinks.map(function(p){ return p.title; }).join(" · ");
+  var work=fPickLinks.reduce(function(a,p){ return a+(p.mins||0); },0);
+  if(work){
+    var tot=work;
+    if(!F.skip && F.brk>0){
+      /* Add the breaks the blocks will need, then settle on a length whose
+         focus time is close to the work. */
+      var n=Math.max(1, Math.round(work/Math.max(10,F.blk||F_BLOCK)));
+      tot=work+(n-1)*F.brk;
+    }
+    F.plan=Math.max(5, Math.min(480, Math.round(tot/5)*5));
+  }
+  var p0=fPickLinks[0];
+  if(p0.sub){ var sid=fSubFor(p0.sub); if(sid) fPickSub=sid; }
   touch(); fPaint(true);
+}
+function fPickToLink(p){
+  return p.k==="b" ? {b:p.id} : p.k==="t" ? {t:p.id} : {g:+p.id, k:iso(new Date()), x:p.x};
 }
 /* Called when a session that was tied to a week item ends. */
 function fOfferTick(link){
@@ -4127,7 +4185,7 @@ function fHarvest(){
     var n=0, mins=0;
     for(var j=0;j<t.seg.length;j++){
       if(t.seg[j].k==="f"){
-        if(n===(t.logged||0)){ mins=Math.round(t.seg[j].s/60); break; }
+        if(n===(t.logged||0)){ mins=Math.round((t.seg[j].s-fCut(j))/60); break; }
         n++;
       }
     }
@@ -4183,15 +4241,61 @@ function fMapHTML(seg, curIdx, curPct){
   }).join("") + '</div>';
 }
 
-function fStart(totalMin, label, sub, skip, link){
+function fStart(totalMin, label, sub, skip, link, tasks){
   var F=fCfg();
   F.plan=totalMin; F.skip=!!skip;
+  /* `tasks` is the list for a multi-task session: [{t:title, link, sub}]. The
+     one being worked on is tasks[cur]; label, link and sub always mirror it, so
+     everything that only knows about one task keeps working. */
+  tasks=(tasks && tasks.length>1) ? tasks : null;
+  if(tasks){ label=tasks[0].t; link=tasks[0].link; sub=tasks[0].sub||sub; }
   S.timer={ v:2, on:true, startAt:Date.now(), paused:0, pausedAt:null,
     seg:fBuild(totalMin, skip), logged:0, label:label||"", sub:sub||null, planMin:totalMin,
-    link:link||null };
-  fPickLink=null;
+    link:link||null, tasks:tasks, cur:0, cut:null };
+  fPickLink=null; fPickLinks=[];
   fSaid=null; touch(); fLoop(); fCue(); fPaint(true); renderToday();
   fBroadcast(true);
+}
+/* Move a multi-task session on to task `to`. Whatever has been done of the
+   current block so far is logged to the task being left, so each task gets
+   the minutes actually spent on it. `tick` also marks the task left as done. */
+function fSwitchTask(to, tick){
+  var t=S.timer; if(!fLive() || !t.tasks) return;
+  if(to<0 || to>=t.tasks.length || to===t.cur) { if(!tick) return; }
+  fHarvest();
+  var w=fWhere(fPos());
+  if(w.k==="f"){
+    var mins=Math.floor((w.len-w.left-fCut(w.i))/60);
+    if(mins>0) fRecord(mins, t.label, t.sub);
+    t.cut={i:w.i, s:fCut(w.i)+Math.max(0,mins)*60};
+  }
+  var was=t.tasks[t.cur];
+  if(tick){
+    was.done=true;
+    var o=fLinkObj(was.link);
+    if(o && !fLinkDone(o)){
+      if(was.link.b && window.CompassPlanner && CompassPlanner.setDone) CompassPlanner.setDone(was.link.b,true);
+      else if(was.link.g!=null){ o.d=true; o.doneAt=new Date().toISOString(); }
+      else { o.done=true; o.doneAt=new Date().toISOString(); }
+    }
+  }
+  if(to>=0 && to<t.tasks.length && to!==t.cur){
+    t.cur=to;
+    var nx=t.tasks[to];
+    t.label=nx.t; t.link=nx.link||null; if(nx.sub) t.sub=nx.sub;
+    T().q=nx.t;
+  }
+  touch(); fPaint(true); renderToday();
+  if(typeof renderTodo==="function") try{ renderTodo(); }catch(e){}
+}
+/* The next task in the list still to do, after the current one (wrapping). */
+function fNextOpen(){
+  var t=S.timer; if(!t || !t.tasks) return -1;
+  for(var k=1;k<t.tasks.length;k++){
+    var i=(t.cur+k)%t.tasks.length;
+    if(!t.tasks[i].done) return i;
+  }
+  return -1;
 }
 /* The lofi player lives in its own script and can't see this one, so session
    starts and stops are broadcast rather than called into. */
@@ -4201,8 +4305,8 @@ function fBroadcast(on){
 /* The phone gate used to sit on the Today button only, so starting from the
    Focus tab skipped the one check that matters. Both go through here now, and
    both remember the answer for the rest of the day. */
-function fStartGated(totalMin, label, sub, skip, link){
-  if(T().gate.phone){ fStart(totalMin, label, sub, skip, link); return; }
+function fStartGated(totalMin, label, sub, skip, link, tasks){
+  if(T().gate.phone){ fStart(totalMin, label, sub, skip, link, tasks); return; }
   openModal('<h2>Phone in another room?</h2>'
     +'<div class="md">Not face down. Not in your pocket. A phone in sight costs measurable working memory even switched off (Ward et al., 2017).</div>'
     +'<div class="row"><button class="primary" id="gYes">It\'s in another room now</button>'
@@ -4210,10 +4314,10 @@ function fStartGated(totalMin, label, sub, skip, link){
     function(root){
       on(root.querySelector("#gYes"),"click",function(){
         T().gate.phone=true; touch(); closeModal(); renderGate();
-        fStart(totalMin, label, sub, skip, link);
+        fStart(totalMin, label, sub, skip, link, tasks);
       });
       on(root.querySelector("#gNo"),"click",function(){
-        closeModal(); fStart(totalMin, label, sub, skip, link);
+        closeModal(); fStart(totalMin, label, sub, skip, link, tasks);
       });
     });
 }
@@ -4236,7 +4340,7 @@ function fStop(){
     // actually sat and worked counts, whether or not you saw the timer out.
     var t=S.timer, w=fWhere(fPos());
     if(w.k==="f"){
-      var done=Math.floor((w.len-w.left)/60);
+      var done=Math.floor((w.len-w.left-fCut(w.i))/60);
       if(done>0) fRecord(done, t.label, t.sub);
     }
   }
@@ -4292,7 +4396,7 @@ function fSkip(){
   var pos=fPos(), w=fWhere(pos);
   if(w.k==="end") return fStop();
   if(w.k==="f"){
-    var mins=Math.floor((w.len-w.left)/60);
+    var mins=Math.floor((w.len-w.left-fCut(w.i))/60);
     if(mins>0) fRecord(mins, t.label, t.sub);
     t.logged=(t.logged||0)+1;
   }
@@ -4686,6 +4790,16 @@ function fSetupHTML(compact){
     +   '<div class="fplan">'+plan+'</div>'
     +   '<div class="fends">Start now, finish at <b>'+fEta(fSpanSecs(seg))+'</b></div>'
     + '</div>'
+    + (F.skip ? '' : '<div class="frhythm">'
+    +   '<div class="frh"><span>Blocks of about</span>'
+    +     '<button class="ghost" data-fblk="-5" aria-label="Shorter blocks"'+(F.blk<=10?' disabled':'')+'>'+IMINUS+'</button>'
+    +     '<b>'+F.blk+' min</b>'
+    +     '<button class="ghost" data-fblk="5" aria-label="Longer blocks"'+(F.blk>=180?' disabled':'')+'>'+IPLUS+'</button></div>'
+    +   '<div class="frh"><span>Breaks of</span>'
+    +     '<button class="ghost" data-fbrk="-1" aria-label="Shorter breaks"'+(F.brk<=0?' disabled':'')+'>'+IMINUS+'</button>'
+    +     '<b>'+(F.brk?F.brk+' min':'none')+'</b>'
+    +     '<button class="ghost" data-fbrk="1" aria-label="Longer breaks"'+(F.brk>=60?' disabled':'')+'>'+IPLUS+'</button></div>'
+    + '</div>')
     + '<div class="fopts">'
     +   '<label class="fchk"><input type="checkbox" data-fbreaks="1"'+(F.skip?' checked':'')+'> Skip breaks</label>'
     +   '<label class="fchk"><input type="checkbox" data-fsound="1"'+(F.sound?' checked':'')+'> Chime</label>'
@@ -4809,11 +4923,13 @@ function fLiveHTML(compact){
     + '</div>'
     + '<div class="fmeta">'
     +   '<div class="fwhat">'+esc(t.label||"Deep work")+'</div>'
-    +   (fLinkObj(t.link) ? '<div class="flinked">From your week'+(fLinkObj(t.link).focused?' \u00b7 '+fHrs(fLinkObj(t.link).focused)+' focused on it so far':'')+'</div>' : '')
+    +   (t.tasks ? '<div class="flinked">Task '+(t.cur+1)+' of '+t.tasks.length+(fLinkObj(t.link)&&fLinkObj(t.link).focused?' \u00b7 '+fHrs(fLinkObj(t.link).focused)+' focused on it so far':'')+'</div>'
+        : fLinkObj(t.link) ? '<div class="flinked">From your week'+(fLinkObj(t.link).focused?' \u00b7 '+fHrs(fLinkObj(t.link).focused)+' focused on it so far':'')+'</div>' : '')
     +   '<div class="fsub">'+(onBreak
           ? "Off screens. Walk, stretch, look out of a window — scrolling isn’t a break."
           : "When you drift, come back without commentary.")+'</div>'
     + '</div>'
+    + fTasksHTML(t)
     + fMapHTML(t.seg, w.i, pct)
     + '<div class="fstats">'
     +   '<div><b data-fdone="1">'+fHrs(fSessionDone())+'</b><span>Focused</span></div>'
@@ -4826,11 +4942,28 @@ function fLiveHTML(compact){
     +   '<button class="ghost sm" data-fend="1">Stop</button>'
     + '</div></div>';
 }
+/* The session's task list, on the live card. Tap a task to switch to it; the
+   tick button finishes the current one and moves on to the next open one. */
+function fTasksHTML(t){
+  if(!t.tasks) return '';
+  var nx=fNextOpen(), cur=t.tasks[t.cur];
+  return '<div class="ftasks" role="list">' + t.tasks.map(function(x,i){
+      return '<button type="button" role="listitem" class="ftask'+(i===t.cur?' cur':'')+(x.done?' done':'')+'" data-ftask="'+i+'"'
+        + (i===t.cur?' aria-current="true"':'')+'>'
+        + '<i>'+(x.done?'\u2713':(i+1))+'</i><span>'+esc(x.t)+'</span>'
+        + (i===t.cur?'<em>Now</em>':'')+'</button>';
+    }).join('')
+    + (cur && !cur.done ? '<button type="button" class="primary sm ftick" data-ftick="1">'
+        + (nx>=0 ? 'Done \u2014 next task' : 'Done with the last task') + '</button>' : '')
+    + '</div>';
+}
 
 function fBindLive(root){
   on(root.querySelector("[data-fpause]"),"click",function(){ S.timer.on?fPause():fResume(); });
   on(root.querySelector("[data-fnext]"),"click",function(){ fSkip(); fPaint(true); });
   on(root.querySelector("[data-fend]"),"click",function(){ fStop(); });
+  each("[data-ftask]",root,function(b){ on(b,"click",function(){ fSwitchTask(+b.dataset.ftask, false); }); });
+  on(root.querySelector("[data-ftick]"),"click",function(){ fSwitchTask(fNextOpen(), true); });
 }
 function fBindSetup(root){
   var F=fCfg();
@@ -4841,6 +4974,13 @@ function fBindSetup(root){
     on(b,"click",function(){ F.plan=+b.dataset.fpre; touch(); fPaint(true); });
   });
   on(root.querySelector("[data-fbreaks]"),"change",function(e){ F.skip=e.target.checked; touch(); fPaint(true); });
+  /* Block length moves in 5s; breaks move by 1 under 10 min and by 5 above. */
+  each("[data-fblk]",root,function(b){ on(b,"click",function(){
+    F.blk=Math.max(10, Math.min(180, (F.blk||F_BLOCK)+(+b.dataset.fblk))); touch(); fPaint(true); }); });
+  each("[data-fbrk]",root,function(b){ on(b,"click",function(){
+    var d=+b.dataset.fbrk, v=F.brk;
+    v = d>0 ? (v<10 ? v+1 : v+5) : (v>10 ? v-5 : v-1);
+    F.brk=Math.max(0, Math.min(60, v)); touch(); fPaint(true); }); });
   /* Ticking the box is the gesture that lets audio start at all, so it doubles
      as the permission prompt and the preview of what you just turned on. */
   on(root.querySelector("[data-fsound]"),"change",function(e){
@@ -4882,9 +5022,12 @@ function fBindSetup(root){
     T().q=text; touch();
     fAudioPrime();                       /* while we still have the gesture */
     if(F.notify) fAskNotify();
-    var link=!fPickLink ? null : fPickLink.k==="b" ? {b:fPickLink.id}
-      : fPickLink.k==="t" ? {t:fPickLink.id} : {g:+fPickLink.id, k:iso(new Date()), x:fPickLink.x};
-    fStartGated(F.plan, text, fPickSub, F.skip, link);
+    var link=!fPickLink ? null : fPickToLink(fPickLink);
+    var tasks = fPickLinks.length>1 ? fPickLinks.map(function(p){
+        var sid=p.sub ? fSubFor(p.sub) : null;
+        return {t:p.title, link:fPickToLink(p), sub:sid||fPickSub||null, done:false};
+      }) : null;
+    fStartGated(F.plan, fPickLinks.length===1 ? fPickLinks[0].title : text, fPickSub, F.skip, link, tasks);
   });
 }
 
