@@ -1542,16 +1542,16 @@ body.workspace .modal{padding:24px;align-items:center}body.workspace .modal .mb{
 /* Planner page — same design as Navid's IB Plan. Every class is prefixed pl- so nothing collides with the app. */
 #pl-progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--accent);z-index:60;pointer-events:none}
 body[data-page=plan] #workspacePageHeading{display:none}
-#s-plan{font-family:var(--serif);color:var(--ink)}
-#s-plan .pl-sans{font-family:var(--sans)}
-#s-plan .pl-muted{color:var(--muted)}
-#s-plan h2.pl-h2{font-family:var(--serif);font-size:1.65rem;font-weight:600;margin:3.2rem 0 1rem;padding-top:1.15rem;border-top:1px solid var(--ink);letter-spacing:-.008em;line-height:1.2}
-#s-plan h2.pl-h2 .pl-no{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.14em;color:var(--accent);display:block;margin-bottom:.35rem;text-transform:uppercase}
-#s-plan h3{font-family:var(--serif);font-weight:600;margin:0}
-#s-plan p{margin:.6rem 0}
-#s-plan .pl-lede{color:var(--muted);max-width:46rem;margin-top:0}
-#s-plan .pl-lbl{font-family:var(--sans);font-size:.64rem;font-weight:600;text-transform:uppercase;letter-spacing:.13em;color:var(--muted)}
-#s-plan button{font-family:var(--sans)}
+:is(#s-plan,#s-prog){font-family:var(--serif);color:var(--ink)}
+:is(#s-plan,#s-prog) .pl-sans{font-family:var(--sans)}
+:is(#s-plan,#s-prog) .pl-muted{color:var(--muted)}
+:is(#s-plan,#s-prog) h2.pl-h2{font-family:var(--serif);font-size:1.65rem;font-weight:600;margin:3.2rem 0 1rem;padding-top:1.15rem;border-top:1px solid var(--ink);letter-spacing:-.008em;line-height:1.2}
+:is(#s-plan,#s-prog) h2.pl-h2 .pl-no{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.14em;color:var(--accent);display:block;margin-bottom:.35rem;text-transform:uppercase}
+:is(#s-plan,#s-prog) h3{font-family:var(--serif);font-weight:600;margin:0}
+:is(#s-plan,#s-prog) p{margin:.6rem 0}
+:is(#s-plan,#s-prog) .pl-lede{color:var(--muted);max-width:46rem;margin-top:0}
+:is(#s-plan,#s-prog) .pl-lbl{font-family:var(--sans);font-size:.64rem;font-weight:600;text-transform:uppercase;letter-spacing:.13em;color:var(--muted)}
+:is(#s-plan,#s-prog) button{font-family:var(--sans)}
 
 /* cover */
 .pl-cover{position:relative;border-radius:4px;background:var(--pl-cover-bg);color:var(--pl-cover-fg);padding:clamp(1.5rem,4vw,2.6rem) clamp(1.2rem,4vw,2.3rem);display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:2rem;align-items:center;overflow:hidden;margin-top:26px}
@@ -1654,8 +1654,8 @@ body.pl-dragging{user-select:none;cursor:grabbing}
 .pl-rows b{font-weight:600;font-variant-numeric:tabular-nums}
 .pl-kinds{display:flex;gap:1.3rem;flex-wrap:wrap;font-family:var(--sans);font-size:.76rem;color:var(--muted);margin-top:.6rem}
 .pl-kinds b{color:var(--ink);font-variant-numeric:tabular-nums}
-#s-plan svg{width:100%;height:auto;display:block}
-#s-plan svg text{font-family:var(--sans)}
+:is(#s-plan,#s-prog) svg{width:100%;height:auto;display:block}
+:is(#s-plan,#s-prog) svg text{font-family:var(--sans)}
 .pl-tm{fill:var(--muted)}.pl-ti{fill:var(--ink)}.pl-ta{fill:var(--accent)}
 .pl-gl{stroke:var(--surface-3)}.pl-ga{stroke:var(--border)}
 .pl-box{border-left:2px solid var(--border);padding:.1rem 0 .1rem 1.2rem;margin:1.4rem 0;font-size:.96rem}
@@ -1740,7 +1740,7 @@ body.pl-dragging{user-select:none;cursor:grabbing}
 .pl-focus.pl-fc-done button{border-color:color-mix(in srgb,currentColor 45%,transparent)}
 .pl-focus button{border:1px solid rgba(255,255,255,.35);background:transparent;color:inherit;border-radius:999px;padding:.3rem .7rem;cursor:pointer;font-size:.72rem;font-weight:600}
 .pl-imp textarea{width:100%;min-height:180px;font:400 .8rem/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--plane);color:var(--ink);border:1px solid var(--border);border-radius:3px;padding:.6rem}
-.pl-scrim[hidden],.pl-toast[hidden],.pl-focus[hidden],.pl-drawer [hidden],#s-plan [hidden]{display:none!important}
+.pl-scrim[hidden],.pl-toast[hidden],.pl-focus[hidden],.pl-drawer [hidden],:is(#s-plan,#s-prog) [hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){.pl-drawer,.pl-b,.pl-pbar i{transition:none}}
 </style>
 <style id="compass-cockpit-css">
@@ -2022,33 +2022,33 @@ table th{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-tran
 .ck-divider:after{content:"";flex:1;height:1px;background:var(--border)}
 
 /* ── Planner: flat cockpit cover instead of the burgundy editorial one ── */
-#s-plan .pl-cover{background:var(--surface)!important;border:1px solid var(--border);border-radius:var(--r)!important;color:var(--ink)!important}
-#s-plan .pl-cover h1{color:var(--ink)!important;font-weight:650!important;letter-spacing:-.035em!important}
-#s-plan .pl-cover h1 i{font-style:normal;color:var(--accent)}
-#s-plan .pl-cover .pl-eyebrow{font-family:var(--mono)!important;letter-spacing:.12em!important}
-#s-plan .pl-tags span{background:var(--surface-2)!important;border-color:var(--border)!important;color:var(--ink-2)}
-#s-plan .pl-cstats b{font-family:var(--mono)!important;letter-spacing:-.04em}
-#s-plan .pl-clip{color-scheme:inherit;background:var(--surface-2)!important;color:var(--ink)!important;transform:none!important;box-shadow:none!important;border:1px solid var(--border);border-radius:12px!important}
-#s-plan .pl-clip *{color:inherit}
-#s-plan .pl-clip .pl-sec{border-bottom-color:var(--line)!important;font-family:var(--mono)!important;color:var(--muted)!important}
-#s-plan .pl-clip .pl-hd{font-family:var(--sans)!important}
-#s-plan h2.pl-h2{border-top:1px solid var(--border)!important;font-weight:650!important;letter-spacing:-.025em!important}
-#s-plan h2.pl-h2 .pl-no{font-family:var(--mono)!important}
-#s-plan .pl-lbl{font-family:var(--mono)!important}
+:is(#s-plan,#s-prog) .pl-cover{background:var(--surface)!important;border:1px solid var(--border);border-radius:var(--r)!important;color:var(--ink)!important}
+:is(#s-plan,#s-prog) .pl-cover h1{color:var(--ink)!important;font-weight:650!important;letter-spacing:-.035em!important}
+:is(#s-plan,#s-prog) .pl-cover h1 i{font-style:normal;color:var(--accent)}
+:is(#s-plan,#s-prog) .pl-cover .pl-eyebrow{font-family:var(--mono)!important;letter-spacing:.12em!important}
+:is(#s-plan,#s-prog) .pl-tags span{background:var(--surface-2)!important;border-color:var(--border)!important;color:var(--ink-2)}
+:is(#s-plan,#s-prog) .pl-cstats b{font-family:var(--mono)!important;letter-spacing:-.04em}
+:is(#s-plan,#s-prog) .pl-clip{color-scheme:inherit;background:var(--surface-2)!important;color:var(--ink)!important;transform:none!important;box-shadow:none!important;border:1px solid var(--border);border-radius:12px!important}
+:is(#s-plan,#s-prog) .pl-clip *{color:inherit}
+:is(#s-plan,#s-prog) .pl-clip .pl-sec{border-bottom-color:var(--line)!important;font-family:var(--mono)!important;color:var(--muted)!important}
+:is(#s-plan,#s-prog) .pl-clip .pl-hd{font-family:var(--sans)!important}
+:is(#s-plan,#s-prog) h2.pl-h2{border-top:1px solid var(--border)!important;font-weight:650!important;letter-spacing:-.025em!important}
+:is(#s-plan,#s-prog) h2.pl-h2 .pl-no{font-family:var(--mono)!important}
+:is(#s-plan,#s-prog) .pl-lbl{font-family:var(--mono)!important}
 body.workspace .pl-drawer{background:var(--surface)!important;border-left:1px solid var(--line)!important}
 .pl-focus{font-family:var(--sans)!important}
 .pl-focus b{font-family:var(--mono)!important}
 
 /* the Today dashboard already carries today's slip, so the planner cover is just a header */
-#s-plan .pl-cover{grid-template-columns:1fr!important;padding:22px 24px!important;gap:0!important}
-#s-plan .pl-cover>div>p,#s-plan .pl-tags,#s-plan .pl-clip{display:none!important}
-#s-plan .pl-cover h1{font-size:clamp(26px,3vw,36px)!important;margin:.4rem 0 .2rem!important}
-#s-plan .pl-cstats{margin-top:.8rem!important}
-#s-plan .pl-cstats b{font-size:1.45rem!important}
+:is(#s-plan,#s-prog) .pl-cover{grid-template-columns:1fr!important;padding:22px 24px!important;gap:0!important}
+:is(#s-plan,#s-prog) .pl-cover>div>p,:is(#s-plan,#s-prog) .pl-tags,:is(#s-plan,#s-prog) .pl-clip{display:none!important}
+:is(#s-plan,#s-prog) .pl-cover h1{font-size:clamp(26px,3vw,36px)!important;margin:.4rem 0 .2rem!important}
+:is(#s-plan,#s-prog) .pl-cstats{margin-top:.8rem!important}
+:is(#s-plan,#s-prog) .pl-cstats b{font-size:1.45rem!important}
 
-#s-plan .pl-rmv{font:600 12px var(--sans);color:var(--accent);padding:0 0 0 10px;white-space:nowrap}
-#s-plan .pl-rmv:hover{text-decoration:underline}
-#s-plan .pl-rmv[hidden]{display:none}
+:is(#s-plan,#s-prog) .pl-rmv{font:600 12px var(--sans);color:var(--accent);padding:0 0 0 10px;white-space:nowrap}
+:is(#s-plan,#s-prog) .pl-rmv:hover{text-decoration:underline}
+:is(#s-plan,#s-prog) .pl-rmv[hidden]{display:none}
 #pl-dr-reset[hidden],#pl-f-rep-l[hidden]{display:none!important}
 .cl-edit{font-size:14px!important}
 #clCancel[hidden]{display:none!important}
@@ -2646,207 +2646,258 @@ body.lofi-noscroll{overflow:hidden}
 </style>
 <style id="compass-noir-css">
 /* ═══ Compass v4 · Noir ══════════════════════════════════════════════════
-   Pure black, solid magenta blocks, hairline gaps instead of borders.
-   Every subject is a shade of pink; neutral things are charcoal. No glow,
-   no dots, no blur, no monospace. Loaded last, so it wins.               */
-:root{
-  color-scheme:light;
-  --plane:#ffffff;--surface:#f4f4f5;--surface-2:#ececee;--surface-3:#e2e2e5;
-  --ink:#0a0a0a;--ink-2:#3d3d40;--muted:#7c7c82;--grid:#ececee;--axis:#c9c9ce;--border:#e6e6e9;--line:#d6d6db;
-  --accent:#e0005e;--accent-ink:#ffffff;--accent-soft:rgba(224,0,94,.10);--volt:#e0005e;
-  --d1:#e0005e;--d2:#ff4d94;--d3:#b3004b;--d4:#ff85b4;--d5:#7d1640;--d6:#c2185b;
-  --good:#1f9d6b;--warn:#c98a12;--serious:#e0005e;--crit:#d9234b;--ok-text:#17805a;
-  --track:#ececee;--pos:#1f9d6b;--neg:#d9234b;
-  --s0:#f4f4f5;--s1:#ffd6e6;--s2:#ff9cc2;--s3:#ff4d94;--s4:#e0005e;--s5:#9e0042;
-  --ma:#ff1f78;--ke:#c4004f;--fy:#f0559a;--da:#8a1745;--eo:#e83a6c;--fa:#a3105a;--th:#5c1b3b;--gen:#4a4a4f;
-  --pl-accent-soft:rgba(224,0,94,.22);--pl-sum-bg:#f4f4f5;--pl-sum-line:#e6e6e9;--pl-sum-lbl:#e0005e;
-  --pl-cover-bg:transparent;--pl-cover-fg:#0a0a0a;--pl-cover-eyebrow:#e0005e;
-  --pl-tip:#17805a;--pl-tip-line:#a7dcc4;--pl-bad-bg:#ffe5ee;--pl-good-bg:#e3f5ec;--pl-warn-bg:#fdf1d8;
-  --st-d:#e0005e;--st-i:#ff85b4;--st-r:#8a1745;--st-t:#ececee;--st-l:#f4f4f5;
+   Black page, grey hour tiles with black gaps, solid blocks in a handful of
+   magenta shades, charcoal for anything neutral. No green, no yellow, no
+   glow, no blur, no outlines, no monospace. Loaded last, so it wins.     */
+:root,:root[data-theme=dark]{
+  color-scheme:dark;
+  --p1:#e6006e;--p2:#c0004f;--p3:#7a1639;--p4:#ff3d8f;--p5:#9e0f55;--p6:#58142f;--char:#2b2b2b;
+  --plane:#000000;--surface:#101010;--surface-2:#1b1b1b;--surface-3:#2b2b2b;--border:#1b1b1b;--line:#2b2b2b;
+  --ink:#ffffff;--ink-2:#cfcfcf;--muted:#8c8c8c;--grid:#1b1b1b;--axis:#3a3a3a;
+  --accent:var(--p1);--accent-ink:#ffffff;--accent-soft:rgba(230,0,110,.16);--volt:var(--p1);
+  --d1:var(--p1);--d2:var(--p4);--d3:var(--p2);--d4:var(--p4);--d5:var(--p3);--d6:var(--p5);
+  --good:var(--p4);--warn:#ff7ab3;--serious:var(--p4);--crit:#ff2e5e;--ok-text:var(--p4);
+  --track:#1b1b1b;--pos:var(--p4);--neg:#ff2e5e;
+  --s0:#141414;--s1:#3a0d21;--s2:#58142f;--s3:#7a1639;--s4:#c0004f;--s5:#e6006e;
+  --ma:var(--p1);--ke:var(--p2);--fy:var(--p4);--da:var(--p3);--eo:#d6246e;--fa:var(--p5);--th:var(--p6);--gen:var(--char);
+  --pl-accent-soft:rgba(230,0,110,.25);--pl-sum-bg:#101010;--pl-sum-line:#1b1b1b;--pl-sum-lbl:var(--p1);
+  --pl-cover-bg:transparent;--pl-cover-fg:#ffffff;--pl-cover-eyebrow:var(--p1);
+  --pl-tip:var(--p4);--pl-tip-line:#3a0d21;--pl-bad-bg:#2a0915;--pl-good-bg:#1f0a14;--pl-warn-bg:#1f0a14;
+  --st-d:var(--p1);--st-i:var(--p4);--st-r:var(--p3);--st-t:#2b2b2b;--st-l:#161616;
   --sans:"Inter",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   --mono:var(--sans);--code:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-  --r:6px;--r-sm:4px;--dots:transparent;--shadow:none;--shadow-lg:0 24px 60px rgba(0,0,0,.18);
-  --tile:#f1f1f3;--tile-gap:#ffffff;
+  --r:6px;--r-sm:4px;--dots:transparent;--shadow:none;--shadow-lg:0 30px 90px rgba(0,0,0,.85);
+  --tile:#1b1b1b;--tile-gap:#000000;--sidebar:216px;
 }
-:root[data-theme=dark]{
-  color-scheme:dark;
-  --plane:#000000;--surface:#0e0e0f;--surface-2:#171718;--surface-3:#222224;--border:#1a1a1b;--line:#2a2a2c;
-  --ink:#f4f4f5;--ink-2:#c4c4c8;--muted:#7e7e85;--grid:#1a1a1b;--axis:#3a3a3d;
-  --accent:#ff1f78;--accent-ink:#ffffff;--accent-soft:rgba(255,31,120,.14);--volt:#ff1f78;
-  --d1:#ff1f78;--d2:#ff5c9d;--d3:#d6005a;--d4:#ff8ab8;--d5:#8f1747;--d6:#c2185b;
-  --good:#5fd3a0;--warn:#f2b84b;--serious:#ff5c9d;--crit:#ff4d6d;--ok-text:#5fd3a0;
-  --track:#1c1c1e;--pos:#5fd3a0;--neg:#ff4d6d;
-  --s0:#141415;--s1:#3a0f22;--s2:#6b1238;--s3:#a3104f;--s4:#e0005e;--s5:#ff4d94;
-  --ma:#ff1f78;--ke:#c4004f;--fy:#f0559a;--da:#8a1745;--eo:#e8346a;--fa:#a3105a;--th:#5c1b3b;--gen:#3a3a3d;
-  --pl-accent-soft:rgba(255,31,120,.25);--pl-sum-bg:#0e0e0f;--pl-sum-line:#1a1a1b;--pl-sum-lbl:#ff1f78;
-  --pl-cover-bg:transparent;--pl-cover-fg:#f4f4f5;--pl-cover-eyebrow:#ff1f78;
-  --pl-tip:#5fd3a0;--pl-tip-line:#1f4d3a;--pl-bad-bg:#2a0c17;--pl-good-bg:#0c2219;--pl-warn-bg:#2a2010;
-  --st-d:#ff1f78;--st-i:#ff8ab8;--st-r:#8a1745;--st-t:#1c1c1e;--st-l:#121213;
-  --shadow-lg:0 30px 90px rgba(0,0,0,.8);
-  --tile:#161617;--tile-gap:#000000;
+:root[data-theme=light]{
+  color-scheme:light;
+  --plane:#ffffff;--surface:#f3f3f3;--surface-2:#e9e9e9;--surface-3:#d9d9d9;--border:#e9e9e9;--line:#d9d9d9;--char:#d9d9d9;
+  --ink:#000000;--ink-2:#3a3a3a;--muted:#777777;--grid:#e9e9e9;--axis:#bdbdbd;
+  --s0:#f3f3f3;--pl-sum-bg:#f3f3f3;--pl-sum-line:#e9e9e9;--pl-cover-fg:#000;--st-t:#d9d9d9;--st-l:#ededed;--track:#e9e9e9;
+  --pl-bad-bg:#ffe3ee;--pl-good-bg:#ffe3ee;--pl-warn-bg:#ffe3ee;--pl-tip-line:#ffc2da;
+  --tile:#efefef;--tile-gap:#ffffff;--shadow-lg:0 24px 60px rgba(0,0,0,.18);
 }
 pre,code,kbd,samp{font-family:var(--code)!important}
 
-/* ── base: flat black, no dot grid ── */
+/* ── base ── */
 body.workspace,:root[data-theme=dark] body.workspace{background:var(--plane)!important;background-image:none!important;font-size:14px;letter-spacing:-.005em}
 h1,h2,h3,h4{font-weight:700!important;letter-spacing:-.025em!important}
-::selection{background:color-mix(in srgb,var(--accent) 45%,transparent)}
-
-/* small labels: tight caps, sans, quiet */
-.today-kicker,.eyebrow,.lbl,.metric-label,.ck-lbl,.ck-date,.workspace-location,.ci-badge,table th,
-#s-plan .pl-lbl,.pl-cover .pl-eyebrow,#s-plan h2.pl-h2 .pl-no,#s-today .today-journal label{
+::selection{background:color-mix(in srgb,var(--accent) 50%,transparent)}
+.today-kicker,.eyebrow,.lbl,.metric-label,.ck-lbl,.ck-date,.workspace-location,.ci-badge,table th,.ck-chip,
+:is(#s-plan,#s-prog) .pl-lbl,.pl-cover .pl-eyebrow,:is(#s-plan,#s-prog) h2.pl-h2 .pl-no,#s-today .today-journal label{
   font-family:var(--sans)!important;font-size:10.5px!important;font-weight:700!important;letter-spacing:.06em!important;text-transform:uppercase}
-.workspace-page-heading .today-kicker,.pl-cover .pl-eyebrow,#s-plan h2.pl-h2 .pl-no{color:var(--accent)!important}
-.ci-badge{border:0!important;background:var(--surface-2);border-radius:3px!important}
+.workspace-page-heading .today-kicker,.pl-cover .pl-eyebrow,:is(#s-plan,#s-prog) h2.pl-h2 .pl-no{color:var(--accent)!important}
+.ci-badge,.ck-chip{border:0!important;background:var(--surface-2);border-radius:3px!important;color:var(--muted)!important}
 
-/* ── sidebar: a black rail, pink when active ── */
-body.workspace .workspace-sidebar,:root[data-theme=dark] body.workspace .workspace-sidebar{background:var(--plane)!important;border-right:1px solid var(--border)!important}
-.workspace-brand{border-bottom:0!important}
-.brand-symbol{box-shadow:none!important;border-radius:8px!important}
-body.workspace .tab,:root[data-theme=dark] body.workspace .tab{border:0!important;border-radius:6px!important;font-weight:700!important;font-size:10.5px!important;letter-spacing:.02em;text-transform:lowercase}
-body.workspace .tab:hover{background:var(--surface-2)!important}
-body.workspace .tab[aria-selected=true]{background:var(--accent)!important;color:var(--accent-ink)!important;border:0!important}
-body.workspace .tab[aria-selected=true] .nav-icon{color:var(--accent-ink)!important}
+/* ══ sidebar: every page by name, grouped, quiet until active ══ */
+body.workspace .workspace-sidebar,:root[data-theme=dark] body.workspace .workspace-sidebar{
+  width:var(--sidebar)!important;background:var(--plane)!important;border-right:1px solid var(--border)!important;padding:18px 12px 14px!important;box-shadow:none!important}
+.workspace-brand{display:flex!important;align-items:center;justify-content:flex-start!important;gap:10px;padding:0 8px 14px!important;margin:0!important;border:0!important;color:var(--ink)!important;text-decoration:none}
+.workspace-brand>span:last-child{display:block!important;font-size:15px;font-weight:800;letter-spacing:-.03em}
+.workspace-brand>span:last-child *{display:none}
+.brand-symbol,.brand-symbol svg{width:28px!important;height:28px!important;border-radius:7px!important;box-shadow:none!important}
+body.workspace .workspace-search{display:flex!important;align-items:center;justify-content:space-between;width:100%;margin:0 0 14px;padding:7px 10px;border-radius:5px;
+  background:var(--surface-2);border:0;color:var(--muted);font-size:12.5px;font-weight:600}
+body.workspace .workspace-search kbd{font-size:10.5px;color:var(--muted);background:none;border:0;padding:0}
+body.workspace .workspace-search:hover{color:var(--ink)}
+body.workspace .workspace-sidebar nav{flex:1;display:flex!important;flex-direction:column;min-height:0}
+#tabs{flex:1;display:flex!important;flex-direction:column;gap:14px!important}
+.side-sec{display:flex;flex-direction:column;gap:1px}
+.side-sec.side-end{margin-top:auto;padding-top:12px;border-top:1px solid var(--border)}
+.side-h{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:0 10px 5px;opacity:.8}
+body.workspace .tab,:root[data-theme=dark] body.workspace .tab{
+  flex-direction:row!important;justify-content:flex-start!important;align-items:center;gap:10px!important;min-height:0!important;height:31px;padding:0 10px!important;
+  border:0!important;border-radius:5px!important;background:transparent!important;color:var(--muted)!important;
+  font-size:13px!important;font-weight:600!important;letter-spacing:-.005em!important;text-transform:none!important;text-align:left!important;width:100%}
+body.workspace .tab:hover{color:var(--ink)!important;background:var(--surface)!important}
+body.workspace .tab[aria-selected=true]{color:var(--ink)!important;background:var(--surface-2)!important}
 body.workspace .tab[aria-selected=true]:before{display:none!important}
-body.workspace .tab .badge{background:var(--ink)!important;color:var(--plane)!important;font-family:var(--sans)!important}
-body.workspace .tab[aria-selected=true] .badge{background:var(--plane)!important;color:var(--accent)!important}
+body.workspace .nav-icon,.nav-icon svg{width:16px!important;height:16px!important;flex:none;opacity:1}
+body.workspace .tab[aria-selected=true] .nav-icon{color:var(--accent)!important}
+.tab-n{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.workspace .tab .badge{position:static!important;margin:0!important;min-width:18px;height:18px;line-height:18px!important;padding:0 5px!important;border-radius:4px!important;
+  font:700 10.5px/18px var(--sans)!important;background:var(--accent)!important;color:#fff!important;text-align:center}
+.sidebar-bottom,.nav-group{display:none!important}
+body.workspace .wrap{margin-left:var(--sidebar)!important;max-width:none!important;padding:0 28px 60px!important}
 
-/* ── header: solid, no blur, no outline ── */
-body.workspace .workspace-header,:root[data-theme=dark] body.workspace .workspace-header{background:var(--plane)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-bottom:1px solid var(--border)!important}
+/* ── header: where you are + actions; sub-pages live in the sidebar ── */
+body.workspace .workspace-header,:root[data-theme=dark] body.workspace .workspace-header{
+  background:var(--plane)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-bottom:1px solid var(--border)!important;
+  margin:0 -28px!important;padding:10px 28px!important;min-height:54px}
+.workspace-location{color:var(--muted)!important;font-size:11px!important}
+.workspace-location strong{color:var(--ink)!important}
+@media(min-width:1001px){.subnav{display:none!important}}
 .subnav-track{background:transparent!important;border:0!important;padding:0!important;gap:4px!important;border-radius:0!important}
-.subnav button{border-radius:4px!important;font-weight:700!important;font-size:12px!important;text-transform:lowercase;padding:6px 12px!important;background:var(--surface-2)}
-.subnav button[aria-pressed=true],:root[data-theme=dark] .subnav button[aria-pressed=true]{background:var(--ink)!important;color:var(--plane)!important;box-shadow:none!important}
+.subnav button{border-radius:4px!important;font-weight:700!important;font-size:12px!important;padding:6px 11px!important;background:var(--surface-2);color:var(--muted)!important}
+.subnav button[aria-pressed=true],:root[data-theme=dark] .subnav button[aria-pressed=true]{background:var(--accent)!important;color:#fff!important;box-shadow:none!important}
 
 /* ── buttons ── */
 body.workspace .ghost,:root[data-theme=dark] body.workspace .ghost,.ck-btn,.pl-btn,.pl-chip,.pl-seg,.ck-step,.ck-seg{border:0!important;box-shadow:none!important}
-body.workspace .ghost,:root[data-theme=dark] body.workspace .ghost,.ck-btn,.pl-btn,.pl-chip{background:var(--surface-2)!important;border-radius:4px!important;font-weight:700!important;text-transform:lowercase}
-body.workspace .primary,body.workspace .today-primary,.ck-primary,.tgnav button,.tgnav a{text-transform:lowercase}
-body.workspace .ghost:hover,.ck-btn:hover,.pl-btn:hover,.pl-chip:hover{background:var(--surface-3)!important}
+body.workspace .ghost,:root[data-theme=dark] body.workspace .ghost,.ck-btn,.pl-btn,.pl-chip{background:var(--surface-2)!important;color:var(--ink-2)!important;border-radius:4px!important;font-weight:700!important}
+body.workspace .ghost:hover,.ck-btn:hover,.pl-btn:hover,.pl-chip:hover{background:var(--surface-3)!important;color:var(--ink)!important}
 body.workspace .ghost.on,body.workspace .primary,body.workspace #saveBtn,body.workspace .today-primary,.ck-primary,.pl-btn.pl-primary,.ck-seg button[aria-pressed=true]{
-  background:var(--accent)!important;color:var(--accent-ink)!important;border:0!important;border-radius:4px!important}
+  background:var(--accent)!important;color:#fff!important;border:0!important;border-radius:4px!important}
 .ck-ghost{background:transparent!important;box-shadow:inset 0 0 0 1px var(--line)!important}
 .pl-btn.pl-danger{color:var(--crit)!important}
 .ck-link,.workspace a{color:var(--accent)!important}
 
-/* ── cards: flat tiles, no outline, small radius ── */
+/* ── panels: flat, no outline ── */
 body.workspace .card,:root[data-theme=dark] body.workspace .card,.week-card,.today-metric,:root[data-theme=dark] .week-card,
-.ck-card,.ck-kpi,.pl-panel,.pl-banner,.askshell,:root[data-theme=dark] .askshell,.fdial,.tiles,:root[data-theme=dark] .tiles{
+.ck-card,.ck-kpi,.pl-panel,.pl-banner,.askshell,:root[data-theme=dark] .askshell,.fdial,.tiles,:root[data-theme=dark] .tiles,.pl-box{
   background:var(--surface)!important;border:0!important;border-radius:var(--r)!important;box-shadow:none!important;backdrop-filter:none!important}
 .tile,:root[data-theme=dark] .tile,:root[data-theme=dark] .dom{background:var(--surface)!important}
 .tiles{gap:3px;background:var(--plane)!important}
 .fdial:before{display:none!important}
-
-/* inputs */
 .fld,.composer,.tdadd,body.workspace .fld,:root[data-theme=dark] .fld,:root[data-theme=dark] .composer,:root[data-theme=dark] body.workspace .fld,:root[data-theme=dark] .tdadd,:root[data-theme=dark] .gatechk,:root[data-theme=dark] .anchor,:root[data-theme=dark] .nt,
-#s-today .today-journal textarea{background:var(--surface-2)!important;border:0!important;border-radius:4px!important}
+#s-today .today-journal textarea{background:var(--surface-2)!important;border:0!important;border-radius:4px!important;color:var(--ink)!important}
 .fld:focus,.composer:focus-within{box-shadow:inset 0 0 0 1.5px var(--accent)!important}
 .pills button,:root[data-theme=dark] .pills button{border:0!important;border-radius:4px!important;background:var(--surface-2)!important}
-.pills button[aria-pressed=true],:root[data-theme=dark] .pills button[aria-pressed=true]{background:var(--accent)!important;color:var(--accent-ink)!important}
+.pills button[aria-pressed=true],:root[data-theme=dark] .pills button[aria-pressed=true]{background:var(--accent)!important;color:#fff!important}
 .box[aria-pressed=true]{background:var(--accent)!important;border-color:var(--accent)!important}
-.tdprog i,.cap i,.barfill,.minibar i,.strength .sbar i,.pl-pbar i{background:var(--accent)!important}
+.tdprog i,.cap i,.barfill,.minibar i,.strength .sbar i,.pl-pbar i,.ck-meter>i{background:var(--accent)!important}
 .nt,.dom,.anchor,.callout{border-radius:4px!important}
 body.workspace .modal .mb,.workspace-dialog{border:0!important;border-radius:8px!important;background:var(--surface)!important}
-
-/* ── Today cockpit ── */
-.ck-kpi:after{width:auto;right:auto;top:0;bottom:0;width:3px;background:var(--tone)}
-.ck-kpi:hover{transform:none!important}
-.ck-kpi b,.ck-time,.ck-big,.ck-left b,.ck-ring b,.ck-step output,.ck-seg button b,.ck-next b,.tile .vl,.fnum b{font-family:var(--sans)!important;font-variant-numeric:tabular-nums;letter-spacing:-.04em!important;font-weight:700!important}
-.ck-time{font-weight:800!important;letter-spacing:-.06em!important}
-.ck-date span{color:var(--accent)!important}
-.ck-now{background:var(--accent)!important;color:var(--accent-ink)}
-.ck-now:before{display:none!important}
-.ck-now .ck-lbl,.ck-now .ck-info,.ck-now .ck-left,.ck-now .ck-next,.ck-now p{color:color-mix(in srgb,var(--accent-ink) 78%,transparent)!important}
-.ck-now h2,.ck-now h3,.ck-now .ck-left b,.ck-now .ck-next b,.ck-now .ck-big,.ck-now .ck-live{color:var(--accent-ink)!important}
-.ck-now .ck-live i{background:var(--accent-ink)!important;animation:none}
-.ck-now .ck-next{border-top-color:color-mix(in srgb,var(--accent-ink) 30%,transparent)!important}
-.ck-now .ck-btn{background:color-mix(in srgb,#000 22%,transparent)!important;color:var(--accent-ink)!important}
-.ck-now .ck-primary{background:var(--accent-ink)!important;color:var(--accent)!important}
-.ck-now .ck-ghost{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent-ink) 45%,transparent)!important}
-.ck-now .ck-link{color:var(--accent-ink)!important}
-.ck-now .ck-tag{background:color-mix(in srgb,#000 22%,transparent)!important;border:0!important;color:var(--accent-ink)!important}
-.ck-tag{border:0!important;border-radius:3px!important}
-.ck-step,.ck-seg{background:var(--surface-2)!important;border-radius:6px!important}
-.ck-seg button{border-radius:4px!important}
-.ck-it{border-radius:4px!important;border:0!important}
-.ck-it:hover{background:var(--surface-2)}
-.ck-next{border-top-style:solid!important}
-
-/* ══════════ PLANNER: the week as a wall of tiles ══════════ */
-.pl-cover{background:transparent!important;padding:22px 0 0!important;margin-top:8px!important;border-radius:0!important}
-.pl-cover h1{font-family:var(--sans)!important;font-weight:800!important;letter-spacing:-.04em!important}
-.pl-cstats b{font-family:var(--sans)!important;font-weight:700!important;letter-spacing:-.03em}
-#s-plan,#s-plan h2.pl-h2,#s-plan h3{font-family:var(--sans)!important}
-#s-plan h2.pl-h2{border-top:1px solid var(--border)!important;font-weight:800!important;letter-spacing:-.03em}
-.pl-seg{background:transparent!important;padding:0!important;gap:3px!important}
-.pl-seg button{border-radius:4px!important;background:var(--surface-2)!important;font-weight:700!important;text-transform:lowercase;color:var(--muted)!important}
-.pl-seg button[aria-pressed="true"]{background:var(--ink)!important;color:var(--plane)!important}
-.pl-chip{gap:.45rem!important}
-.pl-chip i{border-radius:2px!important}
-
-.pl-weekwrap{border:0!important;border-radius:0!important;background:var(--plane)!important;box-shadow:none!important}
-.pl-week{background:var(--plane);grid-template-columns:50px repeat(7,minmax(0,1fr))!important;column-gap:4px}
-.pl-wh,.pl-wh:first-child{background:var(--plane)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:0!important;
-  padding:6px 2px 8px!important;display:flex!important;flex-direction:column;align-items:flex-start!important;gap:1px!important}
-.pl-wh b{order:1!important;font-size:12px!important;font-weight:800!important;letter-spacing:.04em!important;color:var(--ink)!important}
-.pl-wh span{order:2!important;font-size:10px!important;font-weight:500!important;letter-spacing:0!important;color:var(--muted)!important;background:none!important;
-  min-width:0!important;height:auto!important;padding:0!important;margin:0!important;display:block!important;line-height:1.3!important}
-.pl-wh .pl-mo{order:3!important;margin:0!important;font-size:10px!important;color:var(--muted)!important}
-.pl-wh.pl-today b{color:var(--accent)!important}
-.pl-wh.pl-today span{color:var(--accent)!important}
-.pl-axis{border:0!important}
-.pl-axis span{font-family:var(--sans)!important;font-size:9.5px!important;font-weight:800!important;color:var(--ink-2)!important;right:6px!important}
-.pl-axis span::after{content:""!important}
-/* each hour is its own dark tile with a black gap around it */
-.pl-col,.pl-col.pl-wknd,.pl-col.pl-past,.pl-col.pl-tcol,.pl-col.pl-hol{border:0!important;background-color:transparent!important;
-  background-image:repeating-linear-gradient(to bottom,var(--tile-gap) 0 2px,var(--tile) 2px calc(var(--ph,46.8px) - 2px),var(--tile-gap) calc(var(--ph,46.8px) - 2px) var(--ph,46.8px))!important}
-.pl-col.pl-tcol{background-image:repeating-linear-gradient(to bottom,var(--tile-gap) 0 2px,color-mix(in srgb,var(--accent) 9%,var(--tile)) 2px calc(var(--ph,46.8px) - 2px),var(--tile-gap) calc(var(--ph,46.8px) - 2px) var(--ph,46.8px))!important}
-.pl-col.pl-hol{background-image:repeating-linear-gradient(to bottom,var(--tile-gap) 0 2px,color-mix(in srgb,var(--good) 8%,var(--tile)) 2px calc(var(--ph,46.8px) - 2px),var(--tile-gap) calc(var(--ph,46.8px) - 2px) var(--ph,46.8px))!important}
-.pl-now{border-top:2px solid var(--ink)!important;box-shadow:none!important}
-.pl-now::before{background:var(--ink)!important;box-shadow:none!important}
-
-/* blocks: solid colour, white text, a black hairline keeps neighbours apart */
-.pl-b,.pl-b.pl-study,.pl-b.pl-proj,.pl-b.pl-hw,.pl-b.pl-school{
-  background:var(--c)!important;color:#fff!important;border:2px solid var(--tile-gap)!important;background-clip:padding-box!important;
-  border-radius:5px!important;box-shadow:none!important;padding:4px 6px!important;gap:0!important;filter:none!important}
-.pl-b::before{display:none!important}
-.pl-b:hover{transform:none!important;box-shadow:none!important;filter:brightness(1.12)!important}
-.pl-b .pl-bt,.pl-b.pl-study .pl-bt,.pl-b.pl-school .pl-bt{color:#fff!important;font-weight:700!important;font-size:10.5px!important;letter-spacing:-.005em;line-height:1.2}
-.pl-b .pl-bm{color:rgba(255,255,255,.78)!important;font-size:9.5px!important;font-weight:500}
-.pl-b .pl-bm i{color:rgba(255,255,255,.95)!important;font-weight:600}
-/* lessons: charcoal, like a lunch break in a busy week */
-.pl-b.pl-school{background:var(--surface-3)!important;color:var(--ink)!important}
-.pl-b.pl-school .pl-bt{color:var(--ink)!important}
-.pl-b.pl-school .pl-bm{color:var(--muted)!important}
-.pl-b.pl-school .pl-bm::before{content:"";display:inline-block;width:6px;height:6px;border-radius:1px;background:var(--c);margin-right:5px;vertical-align:0}
-.pl-b.pl-ls-cancelled{background:repeating-linear-gradient(135deg,var(--surface-3) 0 5px,var(--surface-2) 5px 10px)!important;opacity:.7}
-/* hand-ins: the brightest thing on the grid */
-.pl-b.pl-proj{background:color-mix(in srgb,var(--c) 82%,#fff)!important}
-.pl-b.pl-proj .pl-bt::before{background:#fff!important;box-shadow:none!important;border-radius:1px!important}
-/* homework: the dark wine shade of its subject */
-.pl-b.pl-hw{background:color-mix(in srgb,var(--c) 48%,#000)!important}
-:root:not([data-theme=dark]) .pl-b.pl-hw{background:color-mix(in srgb,var(--c) 62%,#000)!important}
-.pl-b.pl-done{opacity:.32!important}
-.pl-b.pl-drag{box-shadow:0 12px 28px rgba(0,0,0,.5)!important}
-.pl-week.pl-filtered .pl-b:not(.pl-on){opacity:.1!important}
-/* legend */
-.pl-legend .pl-sw{border:0!important;box-shadow:none!important;border-radius:2px!important}
-.pl-legend .pl-sw.sw-class{background:var(--surface-3)!important}
-.pl-legend .pl-sw.sw-study{background:var(--ma)!important}
-.pl-legend .pl-sw.sw-proj{background:color-mix(in srgb,var(--ma) 82%,#fff)!important}
-.pl-legend .pl-sw.sw-hw{background:color-mix(in srgb,var(--ma) 48%,#000)!important}
-
-/* ── focus, check-in, health: drop glows ── */
-.fstep button{border:0!important}
-.ck-live i,.pl-now{animation:none}
+input[type=range]{accent-color:var(--accent)}
 #moodGrid{gap:3px!important}
 #moodGrid .quad{border:0!important;border-radius:5px!important;background:var(--surface-2)!important}
 #moodGrid .quad button{border:0!important;border-radius:4px!important;background:var(--surface-3)!important}
-#moodGrid .quad button[aria-pressed=true]{background:var(--accent)!important;color:var(--accent-ink)!important}
+#moodGrid .quad button[aria-pressed=true]{background:var(--accent)!important;color:#fff!important}
 
-/* ── phone tab bar ── */
+/* ══ TODAY: one day, drawn like the week ══ */
+.ck-top{grid-template-columns:minmax(240px,.8fr) minmax(0,2fr)!important}
+.ck-kpis{gap:3px!important}
+.ck-kpi{background:var(--surface)!important;border-radius:4px!important}
+.ck-kpi:after{display:none!important}
+.ck-kpi:hover{transform:none!important;background:var(--surface-2)!important}
+.ck-kpi b,.ck-time,.ck-big,.ck-left b,.ck-ring b,.ck-step output,.ck-seg button b,.ck-next b,.tile .vl,.fnum b,.ck-tm,.ck-dd,.ck-bar>b{font-family:var(--sans)!important;font-variant-numeric:tabular-nums;letter-spacing:-.03em!important;font-weight:700!important}
+.ck-time{font-weight:800!important;letter-spacing:-.06em!important}
+.ck-date span{color:var(--accent)!important}
+.ck-grid{gap:3px!important}
+.ck-card{border-radius:4px!important}
+/* now: a solid block */
+.ck-now{background:var(--accent)!important;color:#fff}
+.ck-now:before{display:none!important}
+.ck-now .ck-lbl,.ck-now .ck-info,.ck-now .ck-left,.ck-now .ck-next,.ck-now p{color:rgba(255,255,255,.8)!important}
+.ck-now h2,.ck-now h3,.ck-now .ck-left b,.ck-now .ck-next b,.ck-now .ck-big,.ck-now .ck-live{color:#fff!important}
+.ck-now .ck-live i{background:#fff!important;animation:none}
+.ck-now .ck-meter{background:rgba(0,0,0,.28)!important}.ck-now .ck-meter>i{background:#fff!important}
+.ck-now .ck-next{border-top:1px solid rgba(255,255,255,.3)!important}
+.ck-now .ck-btn{background:rgba(0,0,0,.22)!important;color:#fff!important}
+.ck-now .ck-primary{background:#fff!important;color:var(--accent)!important}
+.ck-now .ck-ghost{box-shadow:inset 0 0 0 1px rgba(255,255,255,.45)!important}
+.ck-now .ck-link{color:#fff!important}
+.ck-now .ck-tag,.ck-tag{border:0!important;border-radius:3px!important}
+.ck-now .ck-tag{background:rgba(0,0,0,.22)!important;color:#fff!important}
+.ck-now .ck-tag:before{background:#fff!important}
+.ck-step,.ck-seg{background:var(--surface-2)!important;border-radius:5px!important}
+.ck-seg button{border-radius:4px!important}
+/* the timeline: each item a solid tile */
+.ck-tl{gap:3px!important}
+.ck-it{grid-template-columns:46px minmax(0,1fr) auto!important;gap:0!important;padding:0!important;border:0!important;border-radius:4px!important;background:transparent!important;opacity:1!important}
+.ck-tm{color:var(--ink-2)!important;font-size:11.5px!important;padding:8px 8px 8px 0}
+.ck-tm small{font-size:10px!important}
+.ck-body{grid-column:2/4;grid-row:1;align-self:stretch;justify-content:center;background:var(--c)!important;border:0!important;border-radius:4px;padding:9px 46px 9px 11px!important;min-height:46px}
+.ck-body b{color:#fff!important;font-size:12.5px!important;font-weight:700!important}
+.ck-body span{color:rgba(255,255,255,.75)!important;font-size:11px!important}
+.ck-it>.ck-chk,.ck-it>.ck-chip{grid-column:3;grid-row:1;z-index:1;margin-right:9px}
+.ck-it.school .ck-body{background:var(--char)!important}
+.ck-it.school .ck-body b{color:var(--ink)!important;font-weight:600!important}
+.ck-it.school .ck-body span{color:var(--muted)!important}
+:root[data-theme=light] .ck-it:not(.school) .ck-chip{color:#fff!important}
+.ck-it.past .ck-body,.ck-it.done .ck-body{opacity:.38}
+.ck-it.now .ck-body{box-shadow:inset 0 0 0 2px #fff}
+.ck-it.now .ck-tm{color:var(--accent)!important}
+.ck-chk{width:24px!important;height:24px!important;border-radius:4px!important;border:0!important;background:rgba(0,0,0,.25)!important}
+.ck-chk[aria-pressed=true]{background:#fff!important}.ck-chk[aria-pressed=true] svg{stroke:var(--accent)!important}
+.ck-it.school .ck-chip{background:rgba(255,255,255,.07)!important}
+.ck-foot{border-top:0!important}
+/* deadlines: urgency by shade */
+.ck-dl li{border-top:1px solid var(--border)!important}
+.ck-dd{background:var(--tone)!important;color:#fff!important;border-radius:4px!important}
+.ck-dd small{color:rgba(255,255,255,.75)}
+.ck-dl li[style*="--surface-3"] .ck-dd{color:var(--ink)!important}
+.ck-dt span i{border-radius:2px!important}
+.ck-bar>i{background:var(--surface-2)!important;border-radius:2px!important}.ck-bar>i>i{border-radius:2px!important}
+.ck-ring{background:radial-gradient(closest-side,var(--surface) 80%,transparent 81%),conic-gradient(var(--accent) calc(var(--p)*1%),var(--surface-3) 0)!important}
+
+/* ══ WEEK: the calendar is the page ══ */
+#pl-week-sec{padding-top:14px}
+.pl-row{margin:0 0 10px!important;gap:8px 10px!important}
+.pl-seg{background:transparent!important;padding:0!important;gap:3px!important;border:0!important}
+.pl-seg button{border-radius:4px!important;background:var(--surface-2)!important;font-weight:700!important;color:var(--muted)!important;padding:.34rem .7rem!important}
+.pl-seg button[aria-pressed="true"]{background:var(--accent)!important;color:#fff!important}
+.pl-chips{gap:3px!important}
+.pl-chip{gap:.45rem!important;padding:.34rem .65rem!important}
+.pl-chip i{border-radius:2px!important}
+.pl-btn.pl-pill{border-radius:4px!important}
+.pl-legend{margin:0 0 8px!important;font-size:11px!important}
+.pl-legend .pl-sw{border:0!important;box-shadow:none!important;border-radius:2px!important;width:16px!important;height:10px!important}
+.pl-legend .pl-sw.sw-class{background:var(--char)!important}
+.pl-legend .pl-sw.sw-study{background:var(--p1)!important}
+.pl-legend .pl-sw.sw-proj{background:var(--p1)!important;box-shadow:inset 0 0 0 2px #fff!important}
+.pl-legend .pl-sw.sw-hw{background:color-mix(in srgb,var(--p1) 45%,#000)!important}
+.pl-weekwrap{border:0!important;border-radius:0!important;background:var(--plane)!important;box-shadow:none!important}
+.pl-week{background:var(--plane);grid-template-columns:44px repeat(7,minmax(0,1fr))!important;column-gap:3px}
+.pl-wh,.pl-wh:first-child{background:var(--plane)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:0!important;
+  padding:4px 2px 8px!important;display:flex!important;flex-direction:column;align-items:flex-start!important;gap:1px!important}
+.pl-wh b{order:1!important;font-size:11.5px!important;font-weight:800!important;letter-spacing:.03em!important;color:var(--ink)!important}
+.pl-wh span{order:2!important;font-size:10px!important;font-weight:500!important;letter-spacing:0!important;color:var(--muted)!important;background:none!important;
+  min-width:0!important;height:auto!important;padding:0!important;margin:0!important;display:block!important;line-height:1.3!important}
+.pl-wh .pl-mo{order:3!important;margin:0!important;font-size:10px!important;color:var(--muted)!important}
+.pl-wh.pl-today b,.pl-wh.pl-today span{color:var(--accent)!important}
+.pl-axis{border:0!important}
+.pl-axis span{font-family:var(--sans)!important;font-size:9.5px!important;font-weight:800!important;color:var(--ink)!important;right:6px!important}
+.pl-axis span::after{content:""!important}
+.pl-col,.pl-col.pl-wknd,.pl-col.pl-past,.pl-col.pl-tcol,.pl-col.pl-hol{border:0!important;background-color:transparent!important;
+  background-image:repeating-linear-gradient(to bottom,var(--tile-gap) 0 1.5px,var(--tile) 1.5px calc(var(--ph,46.8px) - 1.5px),var(--tile-gap) calc(var(--ph,46.8px) - 1.5px) var(--ph,46.8px))!important}
+.pl-now{border-top:2px solid var(--ink)!important;box-shadow:none!important}
+.pl-now::before{background:var(--ink)!important;box-shadow:none!important}
+.pl-b,.pl-b.pl-study,.pl-b.pl-proj,.pl-b.pl-hw,.pl-b.pl-school{
+  background:var(--c)!important;color:#fff!important;border:1.5px solid var(--tile-gap)!important;background-clip:padding-box!important;
+  border-radius:4px!important;box-shadow:none!important;padding:4px 6px!important;gap:0!important;filter:none!important}
+.pl-b::before{display:none!important}
+.pl-b:hover{transform:none!important;box-shadow:none!important;filter:brightness(1.15)!important}
+.pl-b .pl-bt,.pl-b.pl-study .pl-bt,.pl-b.pl-school .pl-bt{color:#fff!important;font-weight:700!important;font-size:10.5px!important;line-height:1.2}
+.pl-b .pl-bm{color:rgba(255,255,255,.72)!important;font-size:9.5px!important;font-weight:500}
+.pl-b .pl-bm i{color:#fff!important;font-weight:600}
+.pl-b.pl-school{background:var(--char)!important}
+.pl-b.pl-school .pl-bt{color:var(--ink)!important}
+.pl-b.pl-school .pl-bm{color:var(--muted)!important}
+.pl-b.pl-ls-cancelled{background:repeating-linear-gradient(135deg,var(--char) 0 5px,var(--surface-2) 5px 10px)!important;opacity:.7}
+.pl-b.pl-proj{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.9)!important}
+.pl-b.pl-proj .pl-bt::before{background:#fff!important;box-shadow:none!important;border-radius:1px!important}
+.pl-b.pl-hw{background:color-mix(in srgb,var(--c) 45%,#000)!important}
+.pl-b.pl-done{opacity:.3!important}
+.pl-b.pl-drag{box-shadow:0 12px 28px rgba(0,0,0,.6)!important}
+.pl-week.pl-filtered .pl-b:not(.pl-on){opacity:.1!important}
+.pl-foot{margin-top:8px!important}
+
+/* ══ PROGRESS: the old planner report, under School ══ */
+#s-prog{font-family:var(--sans)!important}
+#s-prog .pl-cover{display:block!important;background:transparent!important;padding:26px 0 0!important;margin:0!important;border-radius:0!important}
+#s-prog .pl-clip{display:none!important}
+#s-prog .pl-cover,#s-prog .pl-cover:before,#s-prog .pl-cover:after{border:0!important;box-shadow:none!important;outline:0!important}
+.workspace-brand,.workspace .workspace-brand{color:var(--ink)!important}
+.pl-cover h1{font-family:var(--sans)!important;font-weight:800!important;letter-spacing:-.04em!important}
+.pl-cover h1 i{font-style:normal;color:var(--accent)}
+.pl-tags span{background:var(--surface-2)!important;border:0!important;border-radius:3px!important;font-weight:700!important}
+.pl-cstats{gap:3px!important}
+.pl-cstats>div{background:var(--surface);border-radius:4px;padding:12px 16px;min-width:150px}
+.pl-cstats b{font-family:var(--sans)!important;font-weight:800!important;letter-spacing:-.03em}
+:is(#s-plan,#s-prog) h2.pl-h2,:is(#s-plan,#s-prog) h3{font-family:var(--sans)!important}
+:is(#s-plan,#s-prog) h2.pl-h2{border-top:0!important;margin-top:2.4rem!important;font-weight:800!important;letter-spacing:-.03em}
+.pl-stack{gap:2px;background:transparent!important}
+.pl-rows i{border-radius:2px!important}
+
+/* ── phones ── */
 @media(max-width:1000px){
+  body.workspace .wrap{margin-left:0!important;padding:0 16px 100px!important}
+  body.workspace .workspace-header{margin:0 -16px!important;padding:10px 16px!important}
   .tgnav{background:var(--plane)!important;border-top:1px solid var(--border)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .tgnav button[aria-selected="true"]{color:var(--accent)!important}
+  .ck-top{grid-template-columns:1fr!important}
 }
+@media(max-width:1200px) and (min-width:1001px){:root{--sidebar:196px}}
 </style>
 </head>
 <body class="workspace">
@@ -3329,7 +3380,7 @@ body.workspace .modal .mb,.workspace-dialog{border:0!important;border-radius:8px
 
 
 <!-- ═══════════════ PLANNER (Navid's IB Plan) ═══════════════ -->
-<section id="s-plan">
+<section id="s-prog">
   <div class="pl-cover">
     <div>
       <div class="pl-eyebrow" id="pl-eyebrow">Nørre Gymnasium 3i</div>
@@ -3351,26 +3402,9 @@ body.workspace .modal .mb,.workspace-dialog{border:0!important;border-radius:8px
     </aside>
   </div>
 
-  <div id="pl-week-sec">
-    <h2 class="pl-h2"><span class="pl-no">01 · The week</span>Your week, hour by hour</h2>
-    <p class="pl-lede">Grey blocks are your classes from Lectio. Coloured blocks are your plan, and <b>all of it is editable</b>: tap a class to change its time or topic or mark it attended, missed or cancelled; tap a block to change or delete it; tap an empty slot to add a block or an extra class. With a mouse, drag a block to move it, or drag its bottom edge to change its length.</p>
-    <div class="pl-row">
-      <div class="pl-seg" id="pl-tabs" role="group" aria-label="Choose week"></div>
-      <div class="pl-chips"><span id="pl-chips" class="pl-chips" role="group" aria-label="Filter by subject"></span><button class="pl-btn pl-pill" id="pl-add-class">+ Add class</button><button class="pl-btn pl-primary pl-pill" id="pl-add">+ Add block</button></div>
-    </div>
-    <div class="pl-legend">
-      <span><i class="pl-sw sw-class"></i>Class</span>
-      <span><i class="pl-sw sw-study"></i>Study (Notion section)</span>
-      <span><i class="pl-sw sw-proj"></i>Hand-in / IA</span>
-      <span><i class="pl-sw sw-hw"></i>Homework</span>
-    </div>
-    <div class="pl-banner" id="pl-banner" hidden></div>
-    <div class="pl-weekwrap"><div class="pl-week" id="pl-grid"></div></div>
-    <div class="pl-foot"><span id="pl-range"></span><div class="pl-pbar" aria-hidden="true"><i id="pl-bar"></i></div><span id="pl-count"></span><span id="pl-lcount"></span></div>
-  </div>
 
   <div>
-    <h2 class="pl-h2"><span class="pl-no">02 · Balance</span>Where the week's time goes</h2>
+    <h2 class="pl-h2"><span class="pl-no">01 · Balance</span>Where the week's time goes</h2>
     <div class="pl-two">
       <div class="pl-panel"><h3>By subject</h3><div class="pl-lbl" id="pl-bal-total">–</div><div class="pl-stack" id="pl-bal-stack"></div><div class="pl-rows" id="pl-bal-rows"></div><div class="pl-kinds" id="pl-bal-kinds"></div></div>
       <div class="pl-panel"><h3>By day</h3><div class="pl-lbl">Planned after-school minutes · ticked part is darker</div><svg id="pl-bal-days" viewBox="0 0 420 210" role="img" aria-label="Planned study minutes per day"></svg></div>
@@ -3380,7 +3414,7 @@ body.workspace .modal .mb,.workspace-dialog{border:0!important;border-radius:8px
   </div>
 
   <div>
-    <h2 class="pl-h2"><span class="pl-no">03 · Syllabus progress</span>Your notes vs. your classes</h2>
+    <h2 class="pl-h2"><span class="pl-no">02 · Syllabus progress</span>Your notes vs. your classes</h2>
     <p class="pl-lede">Each square is one section in your Notion database. Highlighted rows are what your class is doing right now according to Lectio.</p>
     <div class="pl-row">
       <div class="pl-seg" id="pl-syl-tabs" role="group" aria-label="Choose subject"></div>
@@ -3396,25 +3430,25 @@ body.workspace .modal .mb,.workspace-dialog{border:0!important;border-radius:8px
   </div>
 
   <div>
-    <h2 class="pl-h2"><span class="pl-no">04 · Deadlines</span>From now to May 2027</h2>
+    <h2 class="pl-h2"><span class="pl-no">03 · Deadlines</span>From now to May 2027</h2>
     <p class="pl-lede">Filled markers come from Lectio and are confirmed. Hollow markers are estimates from your Notion “Deadlines &amp; Milestones” table, so check them with your DP coordinator.</p>
     <div class="pl-panel" style="padding:.8rem"><svg id="pl-tl" viewBox="0 0 1000 250" role="img" aria-label="Deadline timeline September 2026 to July 2027"></svg></div>
     <div class="pl-tablewrap"><table class="pl-dl" id="pl-dl"><thead><tr><th></th><th>What</th><th>When</th><th>Countdown</th><th>Source</th></tr></thead><tbody></tbody></table></div>
   </div>
 
   <div>
-    <h2 class="pl-h2"><span class="pl-no">05 · Other subjects</span>The ones without a Notion database</h2>
+    <h2 class="pl-h2"><span class="pl-no">04 · Other subjects</span>The ones without a Notion database</h2>
     <div class="pl-cards" id="pl-cards"></div>
   </div>
 
   <div>
-    <h2 class="pl-h2"><span class="pl-no">06 · Already done</span>Handed in since August</h2>
+    <h2 class="pl-h2"><span class="pl-no">05 · Already done</span>Handed in since August</h2>
     <p class="pl-lede">Read this list when it feels like you're behind.</p>
     <ul class="pl-donelist" id="pl-done"></ul>
   </div>
 
   <div>
-    <h2 class="pl-h2"><span class="pl-no">07 · Notes</span>Assumptions and tools</h2>
+    <h2 class="pl-h2"><span class="pl-no">06 · Notes</span>Assumptions and tools</h2>
     <ul class="pl-notes">
       <li>Study blocks start after school. Move any block around your gym, volleyball or family time.</li>
       <li>Every day is a full working day, as you asked. Some things are not optional: 8 hours of sleep, real meal breaks, and the short gaps between blocks. If the tired, flat feeling comes back, cut a day short. That's part of the plan, not a failure of it.</li>
@@ -3426,6 +3460,25 @@ body.workspace .modal .mb,.workspace-dialog{border:0!important;border-radius:8px
       <button class="pl-btn" id="pl-import">Import a plan from Claude</button>
     </div>
     <div class="pl-footer">Planner · Lectio (Nørre Gymnasium 3i) + Notion (Maths HL, Physics SL, Chemistry HL, Compass) · lessons checked 24 Sep 2026</div>
+  </div>
+</section>
+
+<!-- ═══════════════ WEEK (planner grid) ═══════════════ -->
+<section id="s-plan">
+  <div id="pl-week-sec">
+    <div class="pl-row">
+      <div class="pl-seg" id="pl-tabs" role="group" aria-label="Choose week"></div>
+      <div class="pl-chips"><span id="pl-chips" class="pl-chips" role="group" aria-label="Filter by subject"></span><button class="pl-btn pl-pill" id="pl-add-class">+ Add class</button><button class="pl-btn pl-primary pl-pill" id="pl-add">+ Add block</button></div>
+    </div>
+    <div class="pl-legend">
+      <span><i class="pl-sw sw-class"></i>Class</span>
+      <span><i class="pl-sw sw-study"></i>Study (Notion section)</span>
+      <span><i class="pl-sw sw-proj"></i>Hand-in / IA</span>
+      <span><i class="pl-sw sw-hw"></i>Homework</span>
+    </div>
+    <div class="pl-banner" id="pl-banner" hidden></div>
+    <div class="pl-weekwrap"><div class="pl-week" id="pl-grid"></div></div>
+    <div class="pl-foot"><span id="pl-range"></span><div class="pl-pbar" aria-hidden="true"><i id="pl-bar"></i></div><span id="pl-count"></span><span id="pl-lcount"></span></div>
   </div>
 </section>
 
@@ -3819,13 +3872,13 @@ function execScore(){
    Every old page key still works (CompassSetTab('sync'), ('plan') ...), the
    sidebar and the phone tab bar just show the five groups. Tasks, Gym and
    "Why it works" stay retired; their sections are kept, unlinked. */
-var TABS=[["today","Dashboard"],["focus","Focus"],["plan","Planner"],["cal","Calendar"],["week","Review"],["school","Subjects"],["classes","Timetable"],["revise","Revision"],["notes","Notes"],["checkin","Check-in"],["health","Health"],["nutri","Nutrition"],["goals","Goals"],["rituals","Rituals"],["reset","Reset"],["ask","Assistant"],["sync","Data & sync"]];
+var TABS=[["today","Today"],["focus","Focus"],["checkin","Check-in"],["plan","Week"],["cal","Calendar"],["week","Weekly review"],["school","Subjects"],["prog","Progress"],["classes","Timetable"],["revise","Revision"],["notes","Notes"],["health","Health"],["nutri","Nutrition"],["goals","Goals"],["rituals","Rituals"],["reset","Reset"],["ask","Assistant"],["sync","Data & sync"]];
 var GONE_TABS={tasks:1, gym:1, why:1};
 var GROUPS=[
-  {k:"today",n:"Today",p:["today","focus"]},
-  {k:"week",n:"Week",p:["plan","cal","week"]},
-  {k:"school",n:"School",p:["school","classes","revise","notes"]},
-  {k:"me",n:"Me",p:["checkin","health","nutri","goals","rituals","reset"]},
+  {k:"today",n:"Today",p:["today","focus","checkin"]},
+  {k:"week",n:"Plan",p:["plan","cal","week"]},
+  {k:"school",n:"School",p:["school","prog","classes","revise","notes"]},
+  {k:"me",n:"Me",p:["health","nutri","goals","rituals","reset"]},
   {k:"tools",n:"Tools",p:["ask","sync"]}
 ];
 var SVGA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">';
@@ -3836,17 +3889,40 @@ var GICON={
   me:SVGA+'<path d="M3 12.5h4l2-5 3.2 10 2.4-6 1.4 3H21"/></svg>',
   tools:SVGA+'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>'
 };
+var PICON={
+  today:SVGA+'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  focus:SVGA+'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6"/></svg>',
+  checkin:SVGA+'<path d="M3 12.5h4l2-5 3.2 10 2.4-6 1.4 3H21"/></svg>',
+  plan:SVGA+'<rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M9.5 9.5v11M15 9.5v11"/></svg>',
+  cal:SVGA+'<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8.5 3v4M15.5 3v4"/></svg>',
+  week:SVGA+'<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4.5V8h3.5"/></svg>',
+  school:SVGA+'<path d="M3 8.5 12 4.5l9 4-9 4-9-4z"/><path d="M7 10.6V16c0 1.2 2.2 2.2 5 2.2s5-1 5-2.2v-5.4"/></svg>',
+  prog:SVGA+'<path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>',
+  classes:SVGA+'<rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M7 13h4M7 16.5h7"/></svg>',
+  revise:SVGA+'<path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4.5V8h-3.5"/><path d="M12 8v4l2.5 1.5"/></svg>',
+  notes:SVGA+'<path d="M6 3.5h9l3.5 3.5v13.5H6z"/><path d="M9 11h6M9 14.5h6M9 18h3"/></svg>',
+  health:SVGA+'<path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg>',
+  nutri:SVGA+'<path d="M7 3v8a2.5 2.5 0 0 0 5 0V3M9.5 3v18M17 3c-1.8 1-2.5 3.5-2.5 6s.8 3 2.5 3V21"/></svg>',
+  goals:SVGA+'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>',
+  rituals:SVGA+'<path d="M8 6h12M8 12h12M8 18h12"/><path d="m3.5 6 1 1 1.8-2M3.5 12l1 1 1.8-2M3.5 18l1 1 1.8-2"/></svg>',
+  reset:SVGA+'<path d="M12 21c4.5-2 7-5 7-9V6l-7-3-7 3v6c0 4 2.5 7 7 9z"/></svg>',
+  ask:SVGA+'<path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4 3.5v-3.5h0a2 2 0 0 1-1.5-2z"/></svg>',
+  sync:SVGA+'<path d="M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z"/><path d="M4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>'
+};
+/* Sidebar sections (desktop). Phones keep the five groups in the tab bar. */
+var SIDE=[{h:"",p:["today","focus","checkin"]},{h:"Plan",p:["plan","cal","week"]},{h:"School",p:["school","prog","classes","revise","notes"]},{h:"Me",p:["health","nutri","goals","rituals","reset"]},{h:"",p:["ask","sync"],end:1}];
 var PAGE_META={
   today:['Today','Dashboard','Where you are right now, and what is next.'],
   focus:['Today','Focus','One block, one question, phone in another room.'],
-  plan:['Week','Planner','Lessons, hand-ins and study blocks, hour by hour.'],
-  cal:['Week','Calendar','Every past day: what you did, slept and finished.'],
-  week:['Week','Weekly review','Look back at the week, then shape the next one.'],
+  plan:['Plan','Week','Lessons, hand-ins and study blocks, hour by hour.'],
+  cal:['Plan','Calendar','Every past day: what you did, slept and finished.'],
+  week:['Plan','Weekly review','Look back at the week, then shape the next one.'],
   school:['School','Subjects','Workload and deadlines per subject.'],
+  prog:['School','Progress','Balance, syllabus progress and every deadline to May 2027.'],
   classes:['School','Timetable','Your fixed lessons, so plans land in the gaps.'],
   revise:['School','Revision','Spaced revision: the topics that are due.'],
   notes:['School','Notes','Questions and ideas, saved per subject.'],
-  checkin:['Me','Check-in','Mood, sleep, energy and the habits that structure your day.'],
+  checkin:['Today','Check-in','Mood, sleep, energy and the habits that structure your day.'],
   health:['Me','Health','Sleep, heart rate and activity from your Apple Watch.'],
   nutri:['Me','Nutrition','Calories and macros, logged by meal.'],
   goals:['Me','Goals','The longer goals this week is working towards.'],
@@ -3862,10 +3938,12 @@ window.COMPASS_NAV={groups:GROUPS,tabs:TABS,meta:PAGE_META,icons:GICON,groupOf:g
   target:function(g){ var G=GROUPS.filter(function(x){return x.k===g;})[0]; return G?(LAST[g]||G.p[0]):"today"; }};
 function navGo(k){ if(window.CompassSetTab) window.CompassSetTab(k); else show(k); }
 function buildTabs(){
-  $('#tabs').innerHTML=GROUPS.map(function(g){
-    return '<button id="tab-'+g.k+'" class="tab" role="tab" data-g="'+g.k+'" data-t="'+g.p[0]+'" aria-selected="false" tabindex="-1"><span class="nav-icon" aria-hidden="true">'+GICON[g.k]+'</span><span>'+g.n+'</span><span class="badge" data-bg="'+g.k+'" style="display:none"></span></button>';
+  $('#tabs').innerHTML=SIDE.map(function(sec){
+    return '<div class="side-sec'+(sec.end?' side-end':'')+'" role="presentation">'+(sec.h?'<div class="side-h">'+sec.h+'</div>':'')+sec.p.map(function(k){
+      return '<button id="tab-'+k+'" class="tab" role="tab" data-p="'+k+'" aria-selected="false" tabindex="-1"><span class="nav-icon" aria-hidden="true">'+PICON[k]+'</span><span class="tab-n">'+esc(pageName(k))+'</span><span class="badge" data-bg="'+k+'" style="display:none"></span></button>';
+    }).join('')+'</div>';
   }).join('');
-  $('#tabs').addEventListener('click',function(e){var b=e.target.closest('[data-g]');if(b) navGo(window.COMPASS_NAV.target(b.dataset.g));});
+  $('#tabs').addEventListener('click',function(e){var b=e.target.closest('[data-p]');if(b) navGo(b.dataset.p);});
   $('#tabs').addEventListener('keydown',function(e){if(!['ArrowDown','ArrowUp','Home','End'].includes(e.key))return;var all=Array.from(this.querySelectorAll('[role=tab]')),i=all.indexOf(document.activeElement);if(i<0)return;e.preventDefault();i=e.key==='Home'?0:e.key==='End'?all.length-1:(i+(e.key==='ArrowDown'?1:-1)+all.length)%all.length;all[i].focus();all[i].click();});
   var sn=$('#subnav');
   if(sn) sn.addEventListener('click',function(e){var b=e.target.closest('[data-sub]');if(b) navGo(b.dataset.sub);});
@@ -3873,15 +3951,15 @@ function buildTabs(){
 function show(k){
   if(!PAGE_META[k]) k='today';
   S.tab=k; var m=PAGE_META[k], g=groupOf(k); LAST[g.k]=k;
-  each('.tab',null,function(b){var active=b.dataset.g===g.k;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;});
-  each('main>section',null,function(s){var active=s.id==='s-'+k;s.classList.toggle('on',active);s.setAttribute('role','tabpanel');s.setAttribute('aria-labelledby','tab-'+groupOf(s.id.slice(2)).k);});
+  each('.tab',null,function(b){var active=b.dataset.p===k;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;});
+  each('main>section',null,function(s){var active=s.id==='s-'+k;s.classList.toggle('on',active);s.setAttribute('role','tabpanel');if(PAGE_META[s.id.slice(2)])s.setAttribute('aria-labelledby','tab-'+s.id.slice(2));});
   var sn=$('#subnav');
   if(sn){ sn.hidden=g.p.length<2;
     sn.innerHTML='<div class="subnav-track">'+g.p.map(function(p){return '<button data-sub="'+p+'" aria-pressed="'+(p===k)+'">'+esc(pageName(p))+'</button>';}).join('')+'</div>'; }
-  var loc=$('.workspace-location span'); if(loc) loc.textContent=g.n;
+  var loc=$('.workspace-location span'); if(loc) loc.textContent=(g.n===pageName(k)?'':g.n); var sl=$('.breadcrumb-slash'); if(sl) sl.hidden=(g.n===pageName(k));
   $('#workspaceCrumb').textContent=pageName(k);
   $('#workspaceTitle').textContent=m[1];$('#workspaceGroup').textContent=m[0];$('#workspaceDescription').textContent=m[2];
-  $('#workspacePageHeading').hidden=(k==='today'||k==='plan');$('#subline').hidden=true;
+  $('#workspacePageHeading').hidden=(k==='today'||k==='plan'||k==='prog');$('#subline').hidden=true;
   document.title=pageName(k)+' · Compass';
   document.body.dataset.page=k; document.body.dataset.group=g.k;
   window.scrollTo({top:0,behavior:'instant'});
@@ -15153,7 +15231,7 @@ function deadCard(){
   var list=deadlines().slice(0,6);
   var rows=list.map(function(x){
     var dd=x.at!=null?daysLeft(x.at):null;
-    var tone=dd==null?"--muted":dd<=2?"--crit":dd<=7?"--warn":"--good";
+    var tone=dd==null?"--surface-3":dd<=7?"--p1":dd<=21?"--p3":"--surface-3";
     var when=x.at!=null?new Date(x.at).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}):esc(x.note||"no date");
     return '<li style="--tone:var('+tone+');--c:'+col(x.sub)+'"><span class="ck-dd">'+(dd==null?'?':dd<=0?'<b>Now</b>':'<b>'+dd+'</b><small>d</small>')+'</span>'
       + '<span class="ck-dt"><b>'+esc(x.t)+'</b><span><i></i>'+esc(short(x.sub))+' · '+when+(x.est?' · est.':'')+'</span></span></li>';
