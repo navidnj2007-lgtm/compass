@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Compass">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1670d3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#081a33" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"%3E%3Cdefs%3E%3ClinearGradient id="tile" x1="0" y1="0" x2="1" y2="1"%3E%3Cstop offset="0" stop-color="#1b1f26"/%3E%3Cstop offset="1" stop-color="#08090b"/%3E%3C/linearGradient%3E%3ClinearGradient id="north" x1="0" y1="1" x2="1" y2="0"%3E%3Cstop offset="0" stop-color="#e2303f"/%3E%3Cstop offset="1" stop-color="#ff5c69"/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width="512" height="512" rx="112" fill="url%28#tile%29"/%3E%3Crect x="3" y="3" width="506" height="506" rx="109" fill="none" stroke="#ffffff" stroke-opacity=".06" stroke-width="6"/%3E%3Cpath d="M396.95 204.70 A150 150 0 1 1 307.30 115.05" fill="none" stroke="#e9ecf0" stroke-width="34" stroke-linecap="round"/%3E%3Cpath d="M171.1 340.9 L232 232 L280 280 Z" fill="#e9ecf0" fill-opacity=".38"/%3E%3Cpath d="M390.3 121.7 L232 232 L256 256 Z" fill="#ff6b77"/%3E%3Cpath d="M390.3 121.7 L256 256 L280 280 Z" fill="url%28#north%29"/%3E%3Ccircle cx="256" cy="256" r="15" fill="#08090b" stroke="#e9ecf0" stroke-width="7"/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
@@ -2681,23 +2681,26 @@ body.lofi-noscroll{overflow:hidden}
 }
 :root[data-theme=dark]{
   color-scheme:dark;
-  /* Night: deep violet with a magenta glow, frosted purple cards, coral actions, pastel blocks */
-  --sky-a:#170830;--sky-b:#2a0f4a;--sky-c:#3e1560;--sky-d:#5a1a6a;
-  --plane:#2a0f4a;--surface:#36174f;--surface-2:#44215f;--surface-3:#552d72;--border:#4a2566;--line:#5e3580;
-  --ink:#ffffff;--ink-2:#e6d8f2;--muted:#b39ccb;--grid:#4a2566;--axis:#6e4790;
-  --on-sky:#ffffff;--on-sky-2:rgba(236,224,248,.72);
-  --orange:#ff5a6e;--coral:#ff5a6e;--yellow:#f8c43c;--green:#67d79a;--teal:#4fc7c0;--blue:#63b0f5;--navy:#2a0f4a;
-  --pastel-salmon:#f48a7c;--pastel-green:#67d79a;--pastel-blue:#63b0f5;--pastel-yellow:#f7c95e;--pastel-purple:#c18cf4;--pastel-pink:#f58fc0;--pastel-peri:#8f9cf7;
-  --accent:#ff5a6e;--accent-ink:#ffffff;--accent-soft:rgba(255,90,110,.16);--hi:#ff5a6e;
-  --good:#67d79a;--warn:#f8c43c;--serious:#ff8a5c;--crit:#ff5a6e;--ok-text:#67d79a;--track:#4a2566;--pos:#67d79a;--neg:#ff5a6e;
-  --s0:#3b1a55;--s1:#4d2a5a;--s2:#5d4a6a;--s3:#8fb07a;--s4:#67d79a;--s5:#9ae8bb;
-  --ma:var(--pastel-salmon);--ke:var(--pastel-green);--fy:var(--pastel-blue);--da:var(--pastel-yellow);--eo:var(--pastel-purple);--fa:var(--pastel-pink);--th:var(--pastel-peri);--gen:#8a76a3;
-  --pl-sum-bg:#44215f;--pl-sum-line:#5e3580;--pl-bad-bg:#5a1f3a;--pl-good-bg:#244a45;--pl-warn-bg:#5a4520;--pl-tip-line:#3f6b5a;--pl-sum-lbl:#ff5a6e;
-  --st-d:#67d79a;--st-i:#f8c43c;--st-r:#63b0f5;--st-t:#552d72;--st-l:#44215f;--char:#552d72;
-  --shadow:0 14px 40px rgba(10,0,25,.35);--shadow-lg:0 30px 90px rgba(5,0,15,.6);
-  --tile:#3d1b57;--tile-gap:#36174f;
-  --cloud:rgba(255,80,160,.0);
-  --block-ink:#1f0d33;
+  /* Night sky: the same sky, after dark. Near-black up top, a deep blue horizon,
+     faint clouds, charcoal cards, the same orange / yellow / green / blue voices. */
+  --sky-a:#000000;--sky-b:#03060b;--sky-c:#07111f;--sky-d:#0f2340;
+  --plane:#03060b;--surface:#0e1116;--surface-2:#171b22;--surface-3:#21262f;--border:#1a1f27;--line:#2a303a;
+  --ink:#f3f5f8;--ink-2:#c3cad4;--muted:#8690a0;--grid:#1a1f27;--axis:#3a4250;
+  --on-sky:#ffffff;--on-sky-2:rgba(220,230,245,.66);
+  --orange:#ff6a2b;--yellow:#f6c21c;--green:#2fa866;--teal:#1f9b8c;--blue:#3b82f6;--coral:#f0565b;--navy:#0b1a30;
+  --accent:var(--orange);--accent-ink:#ffffff;--accent-soft:rgba(255,106,43,.14);--hi:var(--orange);
+  --d1:var(--orange);--d2:var(--yellow);--d3:var(--green);--d4:var(--yellow);--d5:var(--teal);--d6:var(--blue);
+  --good:var(--green);--warn:var(--yellow);--serious:var(--orange);--crit:var(--coral);--ok-text:#4cc583;
+  --track:#1a1f27;--pos:var(--green);--neg:var(--coral);
+  --s0:#12161c;--s1:#123222;--s2:#17492f;--s3:#1f6a42;--s4:#2a8c56;--s5:#4cc583;
+  --ma:var(--orange);--ke:var(--green);--fy:var(--blue);--da:var(--yellow);--eo:var(--teal);--fa:var(--coral);--th:#5b7fb8;--gen:#5d6878;
+  --pl-sum-bg:#171b22;--pl-sum-line:#2a303a;--pl-sum-lbl:var(--orange);
+  --pl-bad-bg:#3a1517;--pl-good-bg:#10301f;--pl-warn-bg:#3a2f0c;--pl-tip:#4cc583;--pl-tip-line:#17492f;
+  --st-d:var(--green);--st-i:var(--yellow);--st-r:var(--blue);--st-t:#21262f;--st-l:#171b22;--char:#21262f;
+  --shadow:0 12px 34px rgba(0,0,0,.45);--shadow-lg:0 30px 90px rgba(0,0,0,.7);
+  --tile:#13171d;--tile-gap:#0e1116;
+  --cloud:rgba(140,170,215,.10);
+  --block-ink:#12302c;
 }
 pre,code,kbd,samp{font-family:var(--code)!important}
 
@@ -2976,60 +2979,21 @@ input[type=range]{accent-color:var(--orange)}
 }
 @media(max-width:1200px) and (min-width:1001px){:root{--sidebar:212px}}
 
-/* ══ dark = night board ══ */
-:root[data-theme=dark] body.workspace{
-  background:radial-gradient(60% 55% at 92% 100%,rgba(214,51,140,.55),transparent 70%),radial-gradient(50% 45% at 0% 0%,rgba(90,40,170,.45),transparent 70%),
-    linear-gradient(160deg,var(--sky-a) 0%,var(--sky-b) 40%,var(--sky-c) 75%,var(--sky-d) 100%)!important;background-attachment:fixed!important}
-:root[data-theme=dark] body.workspace:before,:root[data-theme=dark] body.workspace:after{display:none}
-:root[data-theme=dark] h1,:root[data-theme=dark] h2,:root[data-theme=dark] h3{font-variation-settings:"wdth" 100!important;font-weight:700!important;letter-spacing:-.02em!important}
-:root[data-theme=dark] .workspace-page-heading h1{text-decoration:none;font-size:clamp(32px,3.2vw,42px)!important}
-:root[data-theme=dark] .ck-time,:root[data-theme=dark] .ck-kpi b,:root[data-theme=dark] .pl-cstats b,:root[data-theme=dark] .pl-cover h1{font-variation-settings:"wdth" 100!important;font-weight:700!important}
-:root[data-theme=dark] .pl-cover h1 i{text-decoration:none;color:var(--coral)}
-/* frosted cards */
-:root[data-theme=dark] body.workspace .card,:root[data-theme=dark] .ck-card,:root[data-theme=dark] .pl-panel,:root[data-theme=dark] .pl-box,:root[data-theme=dark] .askshell,
-:root[data-theme=dark] .fdial,:root[data-theme=dark] .week-card,:root[data-theme=dark] .pl-weekwrap,:root[data-theme=dark] body.workspace .workspace-sidebar{
-  background:color-mix(in srgb,var(--surface) 88%,transparent)!important;box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.06)!important;border-radius:18px!important}
-:root[data-theme=dark] body.workspace .workspace-sidebar{background:rgba(26,9,46,.82)!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important}
-:root[data-theme=dark] body.workspace .tab{color:var(--ink-2)!important}
-:root[data-theme=dark] body.workspace .tab:hover{background:rgba(255,255,255,.07)!important}
-:root[data-theme=dark] body.workspace .tab[aria-selected=true]{background:var(--coral)!important;color:#fff!important}
-:root[data-theme=dark] .ck-now{background:linear-gradient(135deg,#ff5a6e 0%,#d6336c 100%)!important;box-shadow:0 18px 44px rgba(255,90,110,.32)!important}
-:root[data-theme=dark] .ck-now .ck-primary{color:#d6336c!important}
-/* yellow progress, like a board card */
-:root[data-theme=dark] .ck-meter>i,:root[data-theme=dark] .tdprog i,:root[data-theme=dark] .cap i,:root[data-theme=dark] .barfill,:root[data-theme=dark] .minibar i,:root[data-theme=dark] .pl-pbar i{background:var(--yellow)!important}
-:root[data-theme=dark] .ck-now .ck-meter>i{background:#fff!important}
-:root[data-theme=dark] .ck-ring{background:radial-gradient(closest-side,var(--surface) 80%,transparent 81%),conic-gradient(var(--yellow) calc(var(--p)*1%),var(--surface-3) 0)!important}
-:root[data-theme=dark] .ck-chip,:root[data-theme=dark] .ci-badge{background:#3d8bfd!important;color:#fff!important}
-:root[data-theme=dark] .ck-it.school .ck-chip{background:rgba(255,255,255,.1)!important;color:var(--ink-2)!important}
-/* pastel blocks with dark text, rounded like timeline bars */
-:root[data-theme=dark] .pl-b .pl-bt,:root[data-theme=dark] .pl-b .pl-bm,:root[data-theme=dark] .pl-b .pl-bm i,
-:root[data-theme=dark] .ck-it:not(.school) .ck-body b,:root[data-theme=dark] .ck-it:not(.school) .ck-body span{color:var(--block-ink)!important}
-:root[data-theme=dark] .pl-b .pl-bm,:root[data-theme=dark] .ck-it:not(.school) .ck-body span{opacity:.75}
-:root[data-theme=dark] .pl-b{border-radius:10px!important}
-:root[data-theme=dark] .pl-b.pl-school{background:rgba(255,255,255,.09)!important}
-:root[data-theme=dark] .pl-b.pl-school .pl-bt{color:#fff!important}
-:root[data-theme=dark] .pl-b.pl-school .pl-bm{color:var(--muted)!important;opacity:1}
-:root[data-theme=dark] .pl-b.pl-proj{box-shadow:inset 0 0 0 2px rgba(31,13,51,.55)!important}
-:root[data-theme=dark] .pl-b.pl-proj .pl-bt::before{background:var(--block-ink)!important}
-:root[data-theme=dark] .pl-b.pl-hw{background:color-mix(in srgb,var(--c) 22%,var(--surface))!important;box-shadow:inset 0 0 0 1.5px var(--c)!important}
-:root[data-theme=dark] .pl-b.pl-hw .pl-bt{color:#fff!important}:root[data-theme=dark] .pl-b.pl-hw .pl-bm{color:var(--ink-2)!important}
-:root[data-theme=dark] .ck-it.school .ck-body{background:rgba(255,255,255,.08)!important}
-:root[data-theme=dark] .ck-chk{background:rgba(31,13,51,.18)!important}
-:root[data-theme=dark] .ck-chk[aria-pressed=true]{background:var(--block-ink)!important}:root[data-theme=dark] .ck-chk[aria-pressed=true] svg{stroke:#fff!important}
-:root[data-theme=dark] .ck-dl li[style*="--yellow"] .ck-dd,:root[data-theme=dark] .ck-dl li[style*="--green"] .ck-dd{color:var(--block-ink)!important}
-:root[data-theme=dark] .pl-week{background:transparent}
-:root[data-theme=dark] .pl-wh,:root[data-theme=dark] .pl-wh:first-child{background:transparent!important}
-:root[data-theme=dark] .pl-wh.pl-today span{background:var(--coral)!important}
-:root[data-theme=dark] .pl-seg button[aria-pressed="true"],:root[data-theme=dark] .subnav button[aria-pressed=true]{background:#fff!important;color:#2a0f4a!important}
+/* ══ dark = the sky at night ══ */
+:root[data-theme=dark] body.workspace:before{opacity:.9}
 :root[data-theme=dark] .pl-chip{background:var(--surface-2)!important;color:var(--ink)!important}
-:root[data-theme=dark] .pl-legend .pl-sw.sw-class{background:rgba(255,255,255,.2)!important}
-:root[data-theme=dark] .pl-legend .pl-sw.sw-study{background:var(--pastel-salmon)!important}
-:root[data-theme=dark] .pl-legend .pl-sw.sw-proj{background:var(--pastel-salmon)!important;box-shadow:inset 0 0 0 2px rgba(31,13,51,.55)!important}
-:root[data-theme=dark] .pl-legend .pl-sw.sw-hw{background:color-mix(in srgb,var(--pastel-salmon) 22%,var(--surface))!important;box-shadow:inset 0 0 0 1.5px var(--pastel-salmon)!important}
-:root[data-theme=dark] .hbtns .ghost{background:rgba(255,255,255,.1)!important}
-:root[data-theme=dark] body.workspace .hbtns #saveBtn{background:var(--coral)!important;color:#fff!important}
-:root[data-theme=dark] .ck-kpi,:root[data-theme=dark] .pl-cstats>div{border-color:rgba(255,255,255,.14)!important}
-:root[data-theme=dark] #moodGrid .quad button{background:var(--surface-3)!important}
+:root[data-theme=dark] .pl-legend .pl-sw.sw-class{background:var(--surface-3)!important}
+:root[data-theme=dark] .pl-legend .pl-sw.sw-proj{box-shadow:0 0 0 2px var(--plane),0 0 0 3.5px var(--orange)!important}
+:root[data-theme=dark] .pl-legend .pl-sw.sw-hw{background:color-mix(in srgb,var(--orange) 22%,var(--surface))!important}
+:root[data-theme=dark] .ck-kpi,:root[data-theme=dark] .pl-cstats>div{border-color:rgba(255,255,255,.12)!important}
+:root[data-theme=dark] .hbtns .ghost{background:rgba(255,255,255,.08)!important}
+:root[data-theme=dark] .hbtns .ghost:hover{background:rgba(255,255,255,.16)!important}
+:root[data-theme=dark] .pl-seg{background:rgba(255,255,255,.07)!important}
+:root[data-theme=dark] .subnav button{background:rgba(255,255,255,.08)}
+:root[data-theme=dark] .ck-chk{background:rgba(0,0,0,.22)!important}
+:root[data-theme=dark] .ck-now{box-shadow:0 18px 44px rgba(255,106,43,.22)!important}
+:root[data-theme=dark] body.workspace .workspace-sidebar{box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.04)!important}
+:root[data-theme=dark] body.workspace .card,:root[data-theme=dark] .ck-card,:root[data-theme=dark] .pl-panel,:root[data-theme=dark] .pl-weekwrap,:root[data-theme=dark] .askshell,:root[data-theme=dark] .fdial{box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.04)!important}
 body.workspace a.workspace-brand{color:var(--ink)!important}
 </style>
 </head>
