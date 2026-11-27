@@ -16293,6 +16293,9 @@ var CITIES=[
           if(R()<0.6){ var hy=ri(R,top+60,186); neon(c,R,S,x+4,hy,w-8,7,pick(R,["#ff4fa3","#40e0ff","#7dffb0","#ffd23f"]),false); }
         }});
     });
+    // an elevated railway between the near towers
+    px(c,118,178,274,3,"#2a2840"); px(c,118,178,274,1,"#4a4664");
+    for(var vx=126;vx<392;vx+=24){ px(c,vx,181,3,25,"#1d1b2e"); px(c,vx,181,3,1,"#34304a"); }
     // shopfronts and a vending machine glow along the street
     for(var x=120;x<392;x+=ri(R,28,44)){
       c.fillStyle=rgba("#ffcf8a",0.1); c.fillRect(x-4,190,22,16);
@@ -16305,6 +16308,19 @@ var CITIES=[
     S.walkers=[0,1,2,3].map(function(i){ return {o:R()*W,v:(R()<0.5?-1:1)*(7+R()*6),u:pick(R,["#e84a5f","#2d9cdb","#f2c94c","#f5f5f5","#27ae60"])}; });
     S.lamps=[150,238,326];
     S.lamps.forEach(function(x){ S.glints.push(x); });
+  },
+  anim:function(c,t,S){
+    // a Yamanote-green commuter train every 20 s, its windows lit
+    var per=20, e=t%per; if(e>9) return;
+    var len=6*22, x=Math.round(118-len+e/9*(274+len));
+    c.save(); c.beginPath(); c.rect(118,150,274,40); c.clip();
+    c.fillStyle="rgba(255,240,200,.14)"; c.beginPath(); c.moveTo(x+len,172); c.lineTo(x+len+46,165); c.lineTo(x+len+46,181); c.closePath(); c.fill();
+    for(var i=0;i<6;i++){ var cx=x+i*22;
+      px(c,cx,169,21,9,"#d6dbe3"); px(c,cx,169,21,1,"#f2f4f8"); px(c,cx,175,21,1,"#3fa34d");
+      for(var w=cx+2;w<cx+19;w+=4) px(c,w,170,3,4,"#fff1c4");
+      px(c,cx+3,178,3,1,"#141220"); px(c,cx+15,178,3,1,"#141220"); }
+    px(c,x+len-1,171,1,2,"#fff8d8");
+    c.restore();
   },
   fg:function(c,t,S){
     px(c,0,206,W,7,"#262436"); px(c,0,206,W,1,"#3c3952"); px(c,0,213,W,1,"#56526e");
@@ -16349,6 +16365,16 @@ var CITIES=[
         });
         px(c,x-13,108,27,2,"#6d604f"); px(c,x-13,160,27,2,"#6d604f");
       }});
+    S.lanes.push({y:190,dir:1,v:24,far:true,cars:cars(6)},{y:192,dir:-1,v:20,far:true,cars:cars(5)});
+  },
+  anim:function(c,t,S){
+    var crown=[["#ff4a4a","#ffffff","#4a7dff"],["#ffd24a","#ffe8a0","#fff1c8"],["#7dd3ff","#ffffff","#7dd3ff"],["#ff7ad1","#b48cff","#7dd3ff"]][Math.floor(t/7)%4];
+    px(c,242,66,5,4,crown[0]); px(c,242,70,5,4,crown[1]); px(c,242,74,5,4,crown[2]);
+    var e=t%42; if(e>20) return;
+    var hx=Math.round(-20+e/20*(W+40)), hy=Math.round(46+Math.sin(e*0.6)*4), sw=Math.sin(e*0.8)*50;
+    c.fillStyle="rgba(230,240,255,.09)"; c.beginPath(); c.moveTo(hx,hy+2); c.lineTo(hx+sw-16,200); c.lineTo(hx+sw+16,200); c.closePath(); c.fill();
+    px(c,hx-3,hy,7,2,"#2e3654"); px(c,hx+4,hy+1,6,1,"#2e3654"); px(c,hx-5,hy-1,11,1,(t*8)%1<0.5?"#6a7290":"#3a4262");
+    if((t*2)%1<0.5) px(c,hx+9,hy,1,1,"#ff3b30");
   },
   fg:function(c,t,S){ [120,380].forEach(function(x){ px(c,x-15,200,31,7,"#4a4038"); px(c,x-15,200,31,1,"#6d604f"); }); }
 },
@@ -16377,6 +16403,14 @@ var CITIES=[
     S.lanes.push({y:181,dir:1,v:30,far:true,cars:cars(4)},{y:182,dir:-1,v:24,far:true,cars:cars(3)});
     S.boats=[{y:214,v:9,o:0,per:W+120,kind:"bateau"}];
   },
+  anim:function(c,t){
+    var e=t%75; if(e>45) return;
+    var bx=Math.round(-14+e/45*(W+28)), by=Math.round(66+Math.sin(e*0.35)*6);
+    halo(c,bx,by,14,"#ffcf6a");
+    disc(c,bx,by,6,"#c98a3a"); disc(c,bx-1,by-1,5,"#e9b25a"); px(c,bx-2,by-5,2,6,"#f6d38a");
+    line(c,bx-4,by+4,bx-2,by+9,"#6a4a2a"); line(c,bx+4,by+4,bx+2,by+9,"#6a4a2a");
+    px(c,bx-2,by+9,5,3,"#5a3a1c"); px(c,bx-1,by+9,3,1,"#ffd27a");
+  },
   fg:function(c,t,S){ drawBoats(c,t,S); }
 },
 { k:"hongkong", n:"Hong Kong", sub:"Harbour lights in the mist", hz:192, weather:"drizzle", amb:[["rain",0.45],["water",0.6],["traffic",0.4]],
@@ -16399,7 +16433,7 @@ var CITIES=[
     blocks(c,R,S,{base:192,h:[18,58],w:[10,20],col:"#0e1328",win:["#ffe7a6","#8fd3ff","#ff9fd2"],p:[0.25,0.6],sx:3,sy:3,ww:2,flicker:true,gap:3,
       after:function(c,R,S,x,top,w){ if(R()<0.45) S.leds.push([x,top,w,R()*360]); }});
     for(x=0;x<W;x+=12) S.glints.push(x+ri(R,0,6));
-    S.boats=[{y:222,v:14,o:0,per:W+160,kind:"ferry"},{y:206,v:-6,o:260,per:W+200,kind:"junk"}];
+    S.boats=[{y:222,v:14,o:0,per:W+160,kind:"ferry"},{y:206,v:-6,o:260,per:W+200,kind:"junk"},{y:240,v:4,o:90,per:W+120,kind:"sampan"}];
   },
   fg:function(c,t,S){ drawBoats(c,t,S); }
 },
@@ -16416,8 +16450,15 @@ var CITIES=[
         [62,80,104,132,160].forEach(function(y,i){ px(c,x-8,y,17,i===0?4:3,"#b8392d"); });
         S.lights.push([x,53,"#ff3b30",x/50]);
       }});
+    S.lanes.push({y:177,dir:1,v:28,far:true,cars:cars(7)},{y:179,dir:-1,v:24,far:true,cars:cars(6)});
+    S.boats=[{y:220,v:7,o:140,per:W+160,kind:"sail"}];
   },
-  fg:function(c,t,S){ [118,352].forEach(function(x){ px(c,x-12,198,25,5,"#3a2a2a"); }); }
+  anim:function(c,t){
+    var lx=26, ly=128; px(c,lx-1,ly,3,9,"#e8e4dc"); px(c,lx-1,ly+3,3,1,"#b8342a"); px(c,lx-2,ly-2,5,2,"#3a3030");
+    var a=Math.cos(t*0.9); px(c,lx,ly-1,1,1,a>0.6?"#fff6c8":"#c9a860");
+    if(a>0){ c.fillStyle="rgba(255,246,200,"+(0.17*a).toFixed(3)+")"; c.beginPath(); c.moveTo(lx,ly-1); c.lineTo(lx+280*a,ly-16); c.lineTo(lx+280*a,ly+12); c.closePath(); c.fill(); }
+  },
+  fg:function(c,t,S){ [118,352].forEach(function(x){ px(c,x-12,198,25,5,"#3a2a2a"); }); drawBoats(c,t,S); }
 },
 { k:"sydney", n:"Sydney", sub:"Warm night at the Opera House", hz:200, weather:"clear", amb:[["water",0.8],["crickets",0.5]],
   sky:[[0,"#060b1d"],[0.5,"#132046"],[0.85,"#2c3b67"],[1,"#5f5b7c"]], starsN:140, moon:[60,36,8,-5], water:["#081026",0.5,0.84],
@@ -16443,98 +16484,89 @@ var CITIES=[
     // the Opera House
     px(c,296,190,176,10,"#b8906a"); px(c,296,190,176,1,"#e2bf92"); px(c,300,186,168,4,"#ffc978");
     halo(c,382,190,80,"#ffd696");
+    S.sails=[];
     [[318,186,30,40,1],[346,186,24,32,1],[368,186,18,24,1],[392,186,26,34,1],[416,186,20,26,1],[436,186,14,18,1]].forEach(function(s){
       for(var i=0;i<s[2];i++){
         var hh=Math.round(s[3]*Math.sqrt(1-Math.pow(i/s[2],2)));
-        px(c,s[0]+i,s[1]-hh,1,hh,i%4===0?"#d9d2c4":"#f4f0e6");
+        px(c,s[0]+i,s[1]-hh,1,hh,i%4===0?"#d9d2c4":"#f4f0e6"); S.sails.push([s[0]+i,s[1]-hh,hh]);
         px(c,s[0]+i,s[1]-hh,1,1,"#fffaf0");
       }
       px(c,s[0]-1,s[1]-s[3],1,s[3],"#c9c1b0");
     });
     for(x=300;x<470;x+=10) S.glints.push(x);
+    S.boats=[{y:218,v:12,o:40,per:W+150,kind:"ferry"},{y:236,v:-8,o:300,per:W+180,kind:"sail"}];
   },
-  fg:function(c,t,S){}
+  anim:function(c,t,S,reduced){
+    var hue=(t*14)%360; c.globalAlpha=0.3;
+    S.sails.forEach(function(s){ c.fillStyle="hsl("+Math.round((hue+s[0]*2.2)%360)+",85%,62%)"; c.fillRect(s[0],s[1],1,s[2]); });
+    c.globalAlpha=1;
+    fireworks(c,t,S,reduced);
+  },
+  fg:function(c,t,S){ drawBoats(c,t,S); }
 },
-{ k:"shiraz", n:"Shiraz", sub:"Spring night at the Tomb of Hafez", hz:204, weather:"clear", amb:[["crickets",0.7],["water",0.35],["night",0.5]],
-  sky:[[0,"#070a20"],[0.5,"#17194a"],[0.82,"#3a2d62"],[1,"#7a4a6a"]], starsN:150, moon:[392,38,9,5], water:["#0a1030",0.45,0.8],
+{ k:"copenhagen", n:"Copenhagen", sub:"Winter lights in Nyhavn", hz:204, weather:"clear", amb:[["water",0.7],["night",0.55]],
+  sky:[[0,"#060c22"],[0.5,"#122247"],[0.82,"#28396a"],[1,"#5c5a80"]], starsN:110, moon:[408,34,9,3], water:["#08122a",0.5,0.84],
   build:function(c,R,S){
-    ridge(c,R,120,34,"#1a1a3c",0.9);
-    var near=ridge(c,R,150,26,"#141633",1.7);
-    // the Quran Gate on the pass, lit warm, standing on the near ridge
-    var gx=78, gy=near[gx]+1; halo(c,gx,gy-6,20,"#ffcf8a");
-    px(c,gx-14,gy,29,3,"#141633");
-    px(c,gx-9,gy-12,19,14,"#c9a36a"); px(c,gx-9,gy-12,19,2,"#e8c48a");
-    px(c,gx-3,gy-6,7,8,"#2a1d2a"); px(c,gx-2,gy-8,5,2,"#2a1d2a"); px(c,gx-1,gy-9,3,1,"#2a1d2a");
-    px(c,gx-6,gy-17,13,5,"#c9a36a"); px(c,gx-4,gy-16,9,2,"#3b78b8");
-    for(var i=0;i<260;i++){ var x=ri(R,0,W-1), y=ri(R,168,192); px(c,x,y,1,1,pick(R,["#ffd79a","#ffe9c4","#ffb866","#fff4dc"])); }
-    px(c,0,190,W,14,"#0d1a1a");
-    // cypress rows either side of the pavilion
-    [[18,40],[46,52],[78,44],[112,56],[146,46],[334,48],[366,56],[398,44],[430,52],[462,40]].forEach(function(t){ cypress(c,t[0],196,t[1],7,"#0f2a22","#1c4a3a"); });
-    for(i=0;i<W;i+=ri(R,6,12)) disc(c,i,196,ri(R,3,6),pick(R,["#10261f","#133026"]));
-    for(i=0;i<40;i++) px(c,ri(R,0,W),ri(R,188,200),1,1,pick(R,["#ffb347","#fff1d6"]));
-    // Hafezieh: stone platform, eight columns, the copper "dervish hat" dome
-    var cx=240; halo(c,cx,160,64,"#ffd9a0");
-    px(c,cx-58,196,117,8,"#b9a07a"); px(c,cx-52,190,105,6,"#cdb58c"); px(c,cx-46,186,93,4,"#dcc59c");
-    px(c,cx-58,196,117,1,"#e9d5ac"); px(c,cx-52,190,105,1,"#f1dfb8");
-    px(c,cx-8,178,17,8,"#f4ecd8"); px(c,cx-8,178,17,1,"#ffffff");
-    [-40,-28,-14,0,14,28,40].forEach(function(dx,j){ px(c,cx+dx-1,150,3,36,j===0||j===6?"#d8c7a4":"#efe2c4"); px(c,cx+dx-1,150,1,36,"#fff6e2"); });
-    px(c,cx-46,146,93,5,"#e7d6b2"); px(c,cx-46,151,93,2,"#2f6fb0"); px(c,cx-46,153,93,1,"#58a6c8");
-    for(var y=0;y<42;y++){
-      var f=y/41, hw=Math.round(1+Math.pow(f,1.9)*34+(f>0.9?(f-0.9)*50:0));
-      px(c,cx-hw,104+y,hw*2+1,1,"#b8733a");
-      for(var rx=-hw+3;rx<hw;rx+=6) px(c,cx+rx,104+y,1,1,"#8f5a2e");
-      px(c,cx-hw,104+y,Math.max(1,hw>>2),1,"#d89a5c");
+    // the city behind: low roofs, Our Saviour's corkscrew spire, Christiansborg's copper tower
+    blocks(c,R,S,{base:182,h:[10,28],w:[10,22],col:"#16203d",win:["#e9d39a","#ffe6b0"],p:[0.05,0.2],sx:3,sy:4,flicker:true});
+    var sx=96; halo(c,sx,96,26,"#ffd27a");
+    px(c,sx-5,124,11,58,"#1b2442"); px(c,sx-4,114,9,10,"#1b2442"); px(c,sx-3,118,7,3,"#ffe3a0");
+    for(var y=0;y<42;y++){ var hw=Math.max(0,Math.round(5*(1-y/42)));
+      px(c,sx-hw,72+(41-y),hw*2+1,1,"#1d2134");
+      var ph=y*0.6; if(Math.sin(ph)>-0.3) px(c,sx+Math.round(Math.cos(ph)*hw),72+(41-y),1,1,"#e8c060"); }
+    px(c,sx,60,1,12,"#e8c060"); px(c,sx-1,58,3,2,"#ffe08a");
+    var tx=382; halo(c,tx,104,18,"#9fe0c8");
+    px(c,tx-7,120,15,62,"#1b2442"); px(c,tx-5,108,11,12,"#2a6a5a"); px(c,tx-3,98,7,10,"#3a8a72"); px(c,tx-1,86,3,12,"#4aa088");
+    px(c,tx,74,1,12,"#d8d0b0"); disc(c,tx,106,2,"#ffe08a"); S.lights.push([tx,73,"#ff3b30",1]);
+    // Nyhavn: the gabled houses along the quay, each its own colour
+    var cols=[["#b8483c","#8e3328"],["#d69c3a","#a87422"],["#3f6f98","#2c5174"],["#d2bf98","#a8946e"],["#4f8466","#386248"],["#c4683a","#9a4c26"],["#e2cc7a","#b49e52"],["#86495a","#663442"]];
+    var x=-4, i=0;
+    while(x<W+4){
+      var w=ri(R,15,23), h=ri(R,40,62), top=198-h, cc=cols[(i*3+ri(R,0,2))%cols.length], face=cc[0], shade=cc[1];
+      if(R()<0.5){ var st=Math.max(1,Math.round(w/9));
+        for(var k=0;k<4;k++) px(c,x+1+k*st,top-3-k*3,w-2-k*st*2,3,face);
+        px(c,x+Math.floor(w/2),top-15,1,3,shade); }
+      else { var hw2=Math.floor(w/2); for(var g=0;g<hw2;g++) px(c,x+g,top-hw2+g,w-g*2,1,g<2?shade:face); }
+      px(c,x,top,w,h,face); px(c,x+w-1,top,1,h,shade); px(c,x,top,w,1,shade);
+      for(var yy=top+5; yy<188; yy+=8) for(var xx=x+3; xx+3<=x+w-2; xx+=5){
+        var lit=R()<0.64, wcol=lit?pick(R,["#ffd88a","#ffe6b0","#ffcf70"]):"#1a1626";
+        px(c,xx,yy,3,4,wcol); px(c,xx+1,yy,1,4,lit?"#e0b060":"#141020");
+        if(lit && R()<0.14) S.wins.push([xx,yy,3,4,wcol,"#1a1626",1]);
+      }
+      px(c,x+2,190,w-4,8,"#2a1e1a");
+      if(R()<0.72){ px(c,x+3,191,w-6,6,pick(R,["#ffcf80","#ffe3a8","#ffd090"])); c.fillStyle=rgba("#ffcf80",0.13); c.fillRect(x-1,186,w+2,14); S.glints.push(x+Math.floor(w/2)); }
+      x+=w; i++;
     }
-    px(c,cx,96,1,8,"#e0b070"); px(c,cx-1,95,3,1,"#f3cf8a");
-    for(i=cx-54;i<=cx+54;i+=12) S.glints.push(i);
-    S.lamps=[cx-66,cx+66,20,W-20];
-    S.lamps.forEach(function(x){ px(c,x,182,1,14,"#3a3030"); px(c,x-1,180,3,2,"#ffe3a8"); halo(c,x,181,7,"#ffe3a8"); S.glints.push(x); });
+    // the quay and the canal wall
+    px(c,0,198,W,4,"#3a3a46"); px(c,0,198,W,1,"#6a6a78"); px(c,0,202,W,2,"#24242e");
+    for(var bx=0;bx<W;bx+=ri(R,30,54)) px(c,bx,199,2,3,"#1e1e26");
+    // a string of bulbs along the quay
+    S.bulbs=[]; for(bx=2;bx<W;bx+=6) S.bulbs.push([bx,183+Math.round(3*Math.sin((bx%72)/72*Math.PI))]);
+    for(k=1;k<S.bulbs.length;k++) line(c,S.bulbs[k-1][0],S.bulbs[k-1][1],S.bulbs[k][0],S.bulbs[k][1],"#2a2430");
+    S.bikes=[0,1,2,3].map(function(j){ return {o:R()*W,v:(j%2?-1:1)*(15+R()*12),c:pick(R,["#e84a5f","#f2c94c","#2d9cdb","#f5f5f5","#7dd37d"])}; });
+    S.masts=[[30,1.0],[88,0.75],[146,1.2],[226,0.9],[296,1.1],[366,0.8],[438,1.05]];
+    S.boats=[{y:244,v:10,o:200,per:W+180,kind:"canal"}];
+  },
+  anim:function(c,t,S){
+    S.bulbs.forEach(function(b,i){ var on=Math.sin(t*1.4+i*0.9)>-0.85;
+      px(c,b[0],b[1]+1,1,1,on?(i%3?"#ffe2a0":"#ffb25a"):"#5a4630");
+      if(on && i%2===0){ c.fillStyle="rgba(255,214,140,.10)"; c.fillRect(b[0]-1,b[1],3,3); } });
+    S.bikes.forEach(function(b){ var x=Math.round(((b.o+b.v*t)%(W+20)+W+20)%(W+20)-10), d=b.v>0?1:-1, y=197, f=Math.floor(t*6)%2;
+      px(c,x-2,y,1,1,"#16121c"); px(c,x+2,y,1,1,"#16121c"); px(c,x-2+f,y-1,1,1,"#16121c"); px(c,x+2-f,y-1,1,1,"#16121c");
+      px(c,x-1,y-1,3,1,"#16121c"); px(c,x,y-4,1,3,b.c); px(c,x,y-5,1,1,"#e8c8a8"); px(c,x+2*d,y-2,1,1,"#fff4c4"); });
   },
   fg:function(c,t,S){
-    px(c,0,204,W,2,"#2f6fb0"); px(c,0,204,W,1,"#6fb4d8");
-    for(var k=0;k<3;k++){ var fx=150+k*90, h=4+Math.round(2*Math.sin(t*3+k));
-      c.fillStyle="rgba(210,235,255,.55)"; c.fillRect(fx,236-h,1,h); c.fillRect(fx-1,236-h+1,1,1); c.fillRect(fx+1,236-h+1,1,1);
-      c.fillStyle="rgba(210,235,255,.25)"; c.fillRect(fx-3,236,7,1); }
-  }
-},
-{ k:"tabriz", n:"Tabriz", sub:"Snowy night at El Goli", hz:200, weather:"snow", amb:[["wind",0.6],["water",0.3],["night",0.4]],
-  sky:[[0,"#0a0f22"],[0.5,"#1c2744"],[1,"#4e5a78"]], clouds:"#2c3654", water:["#0b1430",0.5,0.84],
-  build:function(c,R,S){
-    // Mount Sahand, snow on its shoulders
-    for(var x=0;x<W;x++){
-      var top=Math.round(118-40*Math.exp(-Math.pow((x-300)/130,2))+Math.sin(x/13)*3+Math.sin(x/4.7));
-      for(var y=top;y<180;y++){ var snow=y<top+18-Math.abs(Math.sin(x/9))*8;
-        px(c,x,y,1,1,snow?((x+y)%5===0?"#b9c3da":"#d3dbec"):(y<top+26&&(x*7+y)%3===0?"#8a95b2":"#2a3352")); }
-    }
-    ridge(c,R,160,16,"#1c2440",2.3);
-    blocks(c,R,S,{base:192,h:[8,22],w:[8,16],col:"#1a2138",win:["#ffd79a","#ffe9c4"],p:[0.2,0.5],sx:3,sy:3,flicker:true,
-      after:function(c,R,S,x,top,w){ px(c,x,top-1,w,1,"#e6ecf7"); }});
-    // the Blue Mosque on the right shore
-    var mx=410; px(c,mx-26,170,52,22,"#6b5a4a"); px(c,mx-26,170,52,1,"#e6ecf7");
-    px(c,mx-8,158,17,34,"#7a6652"); px(c,mx-5,164,11,28,"#2f63a8"); px(c,mx-3,168,7,24,"#1b2f5a");
-    px(c,mx+2,164,22,6,"#6b5a4a"); px(c,mx+2,164,22,1,"#8a7660");
-    for(var yy=0;yy<14;yy++){ var hw=Math.round(12*Math.sqrt(1-Math.pow((13-yy)/14,2))); px(c,mx+13-hw,150+yy,hw*2+1,1,yy<3?"#e6ecf7":"#2f63a8"); }
-    for(yy=155;yy<164;yy+=3) px(c,mx+5,yy,17,1,"#3f7cc4");
-    halo(c,mx,176,30,"#9ec4ff");
-    // bare trees along the far shore
-    for(x=6;x<W;x+=ri(R,14,26)) if(Math.abs(x-240)>60) tree(c,R,x,196);
-    px(c,0,194,W,6,"#dfe6f2"); px(c,0,194,W,1,"#ffffff");
-    // the causeway and the pavilion on its island
-    var cx=240; halo(c,cx,176,56,"#ffe0a0");
-    px(c,cx-50,192,101,8,"#9a8a74"); px(c,cx-50,192,101,1,"#e6ecf7");
-    px(c,cx-34,172,69,20,"#eadfc6"); px(c,cx-34,172,69,1,"#ffffff");
-    for(x=cx-30;x<cx+32;x+=6){ px(c,x,177,3,10,"#ffd27a"); px(c,x+1,176,1,1,"#ffd27a"); px(c,x,186,3,1,"#c9b48e"); }
-    px(c,cx-36,170,73,3,"#8a6a4a");
-    px(c,cx-26,154,53,16,"#e3d6ba"); for(x=cx-22;x<cx+24;x+=6){ px(c,x,158,3,9,"#ffe4a0"); px(c,x+1,157,1,1,"#ffe4a0"); }
-    px(c,cx-28,151,57,3,"#8a6a4a"); px(c,cx-28,150,57,1,"#f2f5fb");
-    for(x=cx-27;x<cx+29;x+=3) px(c,x,146,1,4,"#d9ccb0");
-    px(c,cx-28,145,57,1,"#e6ecf7");
-    for(x=cx-48;x<cx+50;x+=16){ S.glints.push(x); }
-    for(x=cx-40;x<=cx+40;x+=10) S.glints.push(x);
-  },
-  fg:function(c,t,S){
-    px(c,0,238,W,4,"#8f8070"); px(c,0,237,W,1,"#e6ecf7");
-    for(var x=12;x<W;x+=44){ px(c,x,228,1,9,"#4a4240"); px(c,x-1,226,3,2,"#ffe0a0"); c.fillStyle="rgba(255,224,160,.12)"; c.fillRect(x-3,224,7,6); }
+    S.masts.forEach(function(m,i){
+      var x=m[0], y=214+Math.round(Math.sin(t*1.1+i*1.7)), tilt=Math.sin(t*0.9+i)*1.6, L=Math.round(30*m[1]), mh=Math.round(60*m[1]), x0=Math.round(x-L/2);
+      line(c,x,y,Math.round(x+tilt),y-mh,"#a07a52"); line(c,x+1,y,Math.round(x+tilt)+1,y-mh,"#5a4030");
+      line(c,Math.round(x+tilt),y-mh,x0,y,"rgba(230,215,190,.45)"); line(c,Math.round(x+tilt),y-mh,x0+L,y,"rgba(230,215,190,.45)");
+      px(c,Math.round(x+tilt*0.6)-5,y-Math.round(mh*0.55),11,1,"#8a6a4a");
+      px(c,Math.round(x+tilt),y-mh-1,1,1,"#ffe9b0");
+      px(c,x0,y,L,4,i%2?"#5a2e22":"#2e3a4a"); px(c,x0,y,L,1,"#c9a070"); px(c,x0+1,y+4,L-2,1,"#14101a");
+      px(c,x-3,y-3,6,3,"#3a2e2a"); px(c,x-2,y-2,4,1,"#ffd27a");
+      c.fillStyle="rgba(255,210,122,.14)"; c.fillRect(x-3,y+5,6,4);
+    });
+    drawBoats(c,t,S);
   }
 }
 ];
@@ -16590,12 +16622,55 @@ function drawBoats(c,t,S){
       px(c,x,y-3,22,3,"#3a2418"); px(c,x+4,y-16,1,13,"#2a1a12");
       for(var r=0;r<11;r++) px(c,x+5,y-16+r,8-Math.floor(r/3),1,r%3===0?"#7a2418":"#b83a24");
       px(c,x+14,y-12,1,9,"#2a1a12"); for(r=0;r<8;r++) px(c,x+15,y-12+r,5-Math.floor(r/3),1,"#b83a24");
+    } else if(b.kind==="sampan"){
+      y+=Math.round(Math.sin(t*1.6+b.o));
+      px(c,x,y-2,16,2,"#2a1a12"); px(c,x+1,y-3,14,1,"#4a2e1c"); px(c,x+3,y-6,8,3,"#6a4428"); px(c,x+3,y-6,8,1,"#8a5a34");
+      px(c,x+13,y-10,1,8,"#2a1a12"); px(c,x+12,y-13,3,3,"#ff5a3a"); px(c,x+13,y-12,1,1,"#ffd0a0");
+      c.fillStyle="rgba(255,110,70,.16)"; c.fillRect(x+9,y-16,9,9); c.fillStyle="rgba(255,110,70,.22)"; c.fillRect(x+12,y+1,3,6);
+    } else if(b.kind==="sail"){
+      y+=Math.round(Math.sin(t*1.2+b.o));
+      px(c,x,y-3,22,3,"#e9e4d8"); px(c,x+1,y,20,1,"#1a1a24"); px(c,x+10,y-28,1,25,"#3a3030");
+      for(var r=0;r<22;r++) px(c,x+11,y-27+r,Math.round(r*0.5),1,"#f2efe6");
+      for(r=0;r<16;r++) px(c,x+10-Math.round(r*0.55),y-19+r,Math.round(r*0.55),1,"#d8d2c4");
+      px(c,x+10,y-29,1,1,"#ffffff"); px(c,x+21,y-2,1,1,"#40ff80"); px(c,x,y-2,1,1,"#ff4040");
+    } else if(b.kind==="canal"){
+      px(c,x,y-3,42,3,"#1d2a3a"); px(c,x,y-3,42,1,"#3d5470"); px(c,x+3,y-8,36,5,"#c9d4e0"); px(c,x+4,y-9,34,1,"#9ab8d4");
+      for(i=x+5;i<x+37;i+=3) px(c,i,y-7,2,3,"#ffe39a");
+      c.fillStyle="rgba(255,227,154,.22)"; for(i=0;i<4;i++) c.fillRect(x+6+i*8,y+1+i*2,7,1);
     } else {
       px(c,x,y-3,46,3,"#1c1d2a"); px(c,x+3,y-6,40,3,"#e0dccf");
       for(i=x+5;i<x+42;i+=3) px(c,i,y-5,2,1,"#ffd98a");
       c.fillStyle="rgba(255,217,138,.22)"; for(i=0;i<4;i++) c.fillRect(x+8+i*8,y+1+i*2,7,1);
     }
   });
+}
+
+/* A small flock crossing the sky now and then, wings flapping. */
+function birds(c,t,seed){
+  var per=47, e=(t+seed)%per; if(e>22) return;
+  var x0=-30+e/22*(W+60), y0=74+10*Math.sin(seed), up=Math.floor(t*5)%2;
+  [[0,0],[-6,-3],[-6,3],[-12,-6],[-12,6],[-18,-9]].forEach(function(o,i){
+    var x=Math.round(x0+o[0]), y=Math.round(y0+o[1]+Math.sin(t*2+i)*1.2), f=(up+i)%2;
+    c.fillStyle="#0c1124"; c.fillRect(x,y,1,1);
+    c.fillRect(x-1,y-f,1,1); c.fillRect(x+1,y-f,1,1); c.fillRect(x-2,y-(f?2:-1),1,1); c.fillRect(x+2,y-(f?2:-1),1,1);
+  });
+}
+/* Fireworks over the water: a rocket, a burst of two colours that droops
+   and fades, and a faint flash on the sky. One every nine seconds. */
+function fireworks(c,t,S,reduced){
+  var per=9, n=Math.floor(t/per), e=t-n*per; if(e>3.4) return;
+  var R=rng(n*7919+13), x=ri(R,250,460), y=ri(R,34,86);
+  var pal=["#ff5a7a","#ffd24a","#6ae0ff","#b48cff","#7dffb0","#ffffff","#ff9a4a"], c1=pick(R,pal), c2=pick(R,pal);
+  if(e<0.8){ var yy=Math.round(S.hz-8-(S.hz-8-y)*(e/0.8)); px(c,x,yy,1,2,"#fff0c0"); px(c,x,yy+3,1,1,"rgba(255,220,150,.5)"); return; }
+  var k=(e-0.8)/2.6, r=6+k*40, a=Math.max(0,1-k*k), sz=k<0.4?2:1;
+  if(!reduced && k<0.15){ c.fillStyle=rgba(c1,(0.09*(1-k/0.15)).toFixed(3)); c.fillRect(0,0,W,S.hz); }
+  if(k<0.25){ halo(c,x,y,Math.round(12+k*30),c1); }
+  c.globalAlpha=a;
+  for(var i=0;i<40;i++){ var ang=i/40*6.2832+n, dr=r*(0.8+0.2*((i*7)%5)/5), dy=k*k*14;
+    c.fillStyle=i%2?c1:c2; c.fillRect(Math.round(x+Math.cos(ang)*dr),Math.round(y+Math.sin(ang)*dr+dy),sz,sz);
+    if(!reduced && k<0.7){ c.globalAlpha=a*0.45; c.fillRect(Math.round(x+Math.cos(ang)*dr*0.75),Math.round(y+Math.sin(ang)*dr*0.75+dy*0.8),1,1); c.globalAlpha=a; }
+  }
+  c.globalAlpha=1;
 }
 
 /* Build a city into cached canvases: bg (everything above the horizon that
@@ -16676,9 +16751,11 @@ function drawFrame(ctx,S,t,dt,reduced){
     u.fillStyle="rgba(255,244,200,.16)"; u.beginPath(); u.moveTo(S.top[0],S.top[1]+2);
     u.lineTo(S.top[0]+len,S.top[1]-6); u.lineTo(S.top[0]+len,S.top[1]+8); u.closePath(); u.fill();
     u.beginPath(); u.moveTo(S.top[0],S.top[1]+2); u.lineTo(S.top[0]-len,S.top[1]-6); u.lineTo(S.top[0]-len,S.top[1]+8); u.closePath(); u.fill();
-    if((t%60)<10) for(var i=0;i<70;i++){ var p=S.spark[Math.floor(Math.random()*S.spark.length)]; if(p) px(u,p[0],p[1],1,1,Math.random()<0.5?"#ffffff":"#fff4c0"); }
+    if((t%30)<6) for(var i=0;i<70;i++){ var p=S.spark[Math.floor(Math.random()*S.spark.length)]; if(p) px(u,p[0],p[1],1,1,Math.random()<0.5?"#ffffff":"#fff4c0"); }
   }
   S.lanes.forEach(function(l){ if(l.far) drawCars(u,t,l); });
+  if(city.anim) city.anim(u,t,S,reduced);
+  if(!reduced && (city.weather==="clear"||city.weather==="drizzle"||city.weather==="fog")) birds(u,t,hz);
 
   ctx.drawImage(S.up,0,0);
   var wh=H-hz, road=city.road;
