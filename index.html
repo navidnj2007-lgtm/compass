@@ -3039,36 +3039,75 @@ body.workspace a.workspace-brand{color:var(--ink)!important}
 #s-focus .frow .gauge .num span{white-space:nowrap;font-size:10.5px!important;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--on-sky-2)!important}
 #s-focus .frow .gauge circle:first-of-type{stroke:rgba(255,255,255,.22)!important}
 #s-focus .frow .gauge circle:last-of-type{stroke:#fff!important}
-/* the session card: red, like Today's now card */
-#s-focus #fMain>.card{--tone:#fff;background:var(--orange)!important;color:#fff;box-shadow:0 18px 40px color-mix(in srgb,var(--orange) 32%,transparent)!important;padding:24px 26px!important}
-#s-focus #fMain>.card h2{color:#fff!important;font-size:clamp(30px,3vw,40px)!important;line-height:1.02!important}
-#s-focus #fMain>.card .hint,#s-focus #fMain>.card .fplan,#s-focus #fMain>.card .fends,#s-focus #fMain>.card .fwarn,#s-focus #fMain>.card .fmeta,
-#s-focus #fMain>.card .lbl,#s-focus #fMain>.card .fweek-hint,#s-focus #fMain>.card .fchk,#s-focus #fMain>.card .frh>span{color:rgba(255,255,255,.86)!important}
-#s-focus #fMain>.card .fends b,#s-focus #fMain>.card .frh b{color:#fff!important}
-#s-focus .fdial{background:rgba(0,0,0,.12)!important;box-shadow:none!important;border:0!important}
-#s-focus .fnum b{font-family:var(--display)!important;color:#fff!important;font-weight:500!important;font-size:64px!important;font-variation-settings:"wdth" 78;letter-spacing:-.02em!important}
-#s-focus .fnum b *,#s-focus .fnum span{color:rgba(255,255,255,.8)!important}
-#s-focus #fMain>.card .ghost,#s-focus .fstep button,#s-focus .fpre button,#s-focus #fMain>.card .pills button{background:rgba(0,0,0,.14)!important;color:#fff!important;border:0!important}
-#s-focus #fMain>.card .ghost:hover,#s-focus .fpre button:hover,#s-focus #fMain>.card .pills button:hover{background:rgba(0,0,0,.24)!important}
-#s-focus .fpre{background:rgba(0,0,0,.12)!important;border-radius:999px;padding:4px}
-#s-focus .fpre button{background:transparent!important;border-radius:999px!important}
-#s-focus .fpre button[aria-pressed="true"],#s-focus #fMain>.card .pills button[aria-pressed=true]{background:#fff!important;color:var(--orange)!important}
-#s-focus .fseg{background:rgba(0,0,0,.14)!important;border-color:transparent!important}
-#s-focus .fseg .fill{background:#fff!important}
-#s-focus .fseg.br{border:1.5px dashed rgba(255,255,255,.5)!important;background:transparent!important}
-#s-focus .fseg.br .fill{background:rgba(255,255,255,.4)!important}
-#s-focus .fseg em{color:#fff!important;font-family:var(--sans)!important}
-#s-focus .fseg em{color:#fff!important;mix-blend-mode:normal!important;opacity:1!important}
-#s-focus .fwk{background:rgba(0,0,0,.13)!important;border:0!important;border-radius:16px!important;color:#fff!important;box-shadow:none!important}
-#s-focus .fwk:hover{background:rgba(0,0,0,.22)!important}
-#s-focus .fwk[aria-pressed="true"]{background:#fff!important;color:var(--ink)!important}
-#s-focus .fwk[aria-pressed="true"] .fwk-t{color:var(--block-ink)!important}#s-focus .fwk[aria-pressed="true"] .fwk-m{color:#5d6878!important}
-#s-focus .fwk-t{color:#fff}#s-focus .fwk-m,#s-focus .fwk.late .fwk-m{color:rgba(255,255,255,.75)!important}
-#s-focus .fwk-dot{box-shadow:0 0 0 2px rgba(255,255,255,.75)}
-#s-focus #fMain>.card .fld{background:rgba(255,255,255,.18)!important;color:#fff!important}
-#s-focus #fMain>.card .fld::placeholder{color:rgba(255,255,255,.7)}
-#s-focus #fMain>.card input[type=checkbox]{accent-color:#fff}
-#s-focus #fMain>.card .primary{background:#fff!important;color:var(--orange)!important;font-size:15px!important;padding:12px 22px!important}
+/* the running session: red, like Today's now card */
+#s-focus #fMain>.fLiveCard,#s-focus #fMain>.card:not(.fset){--accent:#fff;--hi:#fff;--muted:rgba(255,255,255,.78);--ink-2:rgba(255,255,255,.9);--tone:#fff;background:var(--orange)!important;color:#fff;box-shadow:0 18px 40px color-mix(in srgb,var(--orange) 32%,transparent)!important}
+#s-focus #fMain>.card:not(.fset) h2,#s-focus #fMain>.card:not(.fset) .fmeta,#s-focus #fMain>.card:not(.fset) .hint{color:#fff!important}
+#s-focus #fMain>.card:not(.fset) .ghost{background:rgba(0,0,0,.14)!important;color:#fff!important}
+#s-focus #fMain>.card:not(.fset) .primary{background:#fff!important;color:var(--orange)!important}
+#s-focus #fMain>.card:not(.fset) .fseg{background:rgba(0,0,0,.14)!important;border-color:transparent!important}
+#s-focus #fMain>.card:not(.fset) .fseg .fill{background:#fff!important}
+#s-focus #fMain>.card:not(.fset) .fseg em{color:#fff!important}
+
+/* ══ the session card: time | what, then go ══ */
+#s-focus .fset{display:grid!important;grid-template-columns:minmax(250px,.95fr) minmax(0,1.25fr);grid-template-areas:"time what" "go go";
+  padding:0!important;overflow:hidden;align-items:stretch}
+#s-focus .fset-time{grid-area:time;background:var(--orange);color:#fff;padding:24px 22px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+#s-focus .fset-k{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.82);align-self:stretch;text-align:left}
+#s-focus .fset .fstep{display:flex;align-items:center;justify-content:center;gap:14px;margin:auto 0 0!important}
+#s-focus .fset .fstep button{width:40px!important;height:40px!important;border-radius:50%!important;background:rgba(0,0,0,.16)!important;color:#fff!important;border:0!important;padding:0!important;display:grid;place-items:center}
+#s-focus .fset .fstep button:hover:not(:disabled){background:rgba(0,0,0,.26)!important}
+#s-focus .fset .fnum{min-width:0!important}
+#s-focus .fset .fnum b{font-family:var(--display)!important;font-size:clamp(58px,5.6vw,80px)!important;font-weight:500!important;line-height:1!important;color:#fff!important;
+  font-variation-settings:"wdth" 78;letter-spacing:-.02em!important;background:none!important;-webkit-text-fill-color:#fff}
+#s-focus .fset .fnum b *{color:rgba(255,255,255,.75)!important;-webkit-text-fill-color:rgba(255,255,255,.75);font-size:.42em}
+#s-focus .fset .fpre{display:flex!important;flex-wrap:nowrap!important;gap:0!important;background:rgba(0,0,0,.14)!important;border:0!important;box-shadow:none!important;border-radius:999px!important;padding:4px!important;margin:0!important;width:auto!important;max-width:100%}
+#s-focus .fset .fpre button{flex:none;background:transparent!important;color:#fff!important;border:0!important;border-radius:999px!important;padding:6px 10px!important;font-weight:700;font-size:12.5px;white-space:nowrap}
+#s-focus .fset .fpre button:hover{background:rgba(0,0,0,.14)!important}
+#s-focus .fset .fpre button[aria-pressed="true"]{background:#fff!important;color:var(--orange)!important}
+#s-focus .fset .fmap{align-self:stretch;margin:2px 0 0!important}
+#s-focus .fset .fseg{background:rgba(0,0,0,.16)!important;border-color:transparent!important;border-radius:8px!important}
+#s-focus .fset .fseg .fill{background:#fff!important}
+#s-focus .fset .fseg.br{background:transparent!important;border:1.5px dashed rgba(255,255,255,.55)!important}
+#s-focus .fset .fseg em{color:#fff!important;font-family:var(--sans)!important;opacity:1!important;mix-blend-mode:normal!important}
+#s-focus .fset .fplan{color:rgba(255,255,255,.9)!important;font-size:13px!important;margin:0!important}
+#s-focus .fset .fplan{margin-bottom:auto!important}
+#s-focus .fmore{align-self:stretch;margin-top:18px;border-top:1px solid rgba(255,255,255,.25);padding-top:10px;text-align:left}
+#s-focus .fmore summary{cursor:pointer;list-style:none;font-size:12.5px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
+#s-focus .fmore summary::-webkit-details-marker{display:none}
+#s-focus .fmore summary:before{content:"›";display:inline-block;font-size:16px;line-height:1;transition:transform .15s}
+#s-focus .fmore[open] summary:before{transform:rotate(90deg)}
+#s-focus .fset .frhythm{display:flex!important;flex-direction:column;gap:8px!important;margin:10px 0 0!important;padding:0!important;border:0!important;background:none!important}
+#s-focus .fset .frh{display:flex!important;align-items:center;gap:8px;justify-content:flex-start!important}
+#s-focus .fset .frh span{flex:1;color:rgba(255,255,255,.85)!important;font-size:12.5px}
+#s-focus .fset .frh b{min-width:56px;text-align:center;color:#fff!important;font-size:13px}
+#s-focus .fset .frh button{width:28px!important;height:28px!important;border-radius:50%!important;background:rgba(0,0,0,.16)!important;color:#fff!important;padding:0!important;display:grid;place-items:center;border:0!important}
+#s-focus .fset .fopts{display:flex!important;flex-wrap:wrap;gap:6px 14px!important;justify-content:flex-start!important;margin:10px 0 0!important}
+#s-focus .fset .fchk{color:#fff!important;font-size:12.5px}
+#s-focus .fset .fchk input{accent-color:#fff}
+#s-focus .fset .fwarn{color:rgba(255,255,255,.85)!important;font-size:11.5px!important;margin-top:8px!important;text-align:left!important}
+#s-focus .fset-what{grid-area:what;padding:22px 24px 14px;min-width:0;display:flex;flex-direction:column}
+#s-focus .fset-what h2{font-size:26px!important;line-height:1.05!important;margin:0 0 4px!important}
+#s-focus .fset-what .lbl{display:block;margin:14px 0 7px!important}
+#s-focus .fset-what .fweek-hint{display:none}
+#s-focus .fset .fweek{display:flex!important;flex-direction:column;gap:6px!important;max-height:236px;overflow-y:auto;scrollbar-width:thin;padding-right:2px}
+#s-focus .fset .fwk{background:var(--surface-2)!important;border:0!important;border-radius:14px!important;box-shadow:none!important;padding:10px 12px!important;color:var(--ink)!important}
+#s-focus .fset .fwk:hover{background:var(--surface-3)!important}
+#s-focus .fset .fwk[aria-pressed="true"]{background:color-mix(in srgb,var(--orange) 14%,var(--surface))!important;box-shadow:inset 0 0 0 2px var(--orange)!important}
+#s-focus .fset .fwk-t{color:var(--ink)!important}
+#s-focus .fset .fwk-m,#s-focus .fset .fwk.late .fwk-m{color:var(--muted)!important}
+#s-focus .fset .fwk-no{background:var(--orange)!important;color:#fff!important}
+#s-focus .fset .fweek-empty{color:var(--muted);font-size:13px;background:var(--surface-2);border-radius:14px;padding:12px 14px}
+#s-focus .fset .pills{display:flex;flex-wrap:wrap;gap:6px}
+#s-focus .fset .pills button{padding:6px 12px!important;font-size:12px!important}
+#s-focus .fset-go{grid-area:go;display:flex;align-items:center;flex-wrap:wrap;gap:6px 16px;padding:16px 24px 20px;border-top:1px solid var(--border)}
+#s-focus .fset-go .primary{padding:13px 26px!important;font-size:15px!important;box-shadow:0 10px 24px color-mix(in srgb,var(--orange) 30%,transparent)}
+#s-focus .fset-end{font-size:14px;color:var(--ink-2)}#s-focus .fset-end b{color:var(--ink)}
+#s-focus .fset-tip{margin-left:auto;font-size:12px;color:var(--muted)}
+@media(max-width:760px){
+  #s-focus .fset{grid-template-columns:1fr;grid-template-areas:"time" "what" "go"}
+  #s-focus .fset-tip{margin-left:0;flex-basis:100%}
+  #s-focus .fset-go .primary{flex:1}
+}
 #s-focus #fMain>.card .gauge circle:first-of-type{stroke:rgba(255,255,255,.25)!important}
 #s-focus #fMain>.card .gauge circle:last-of-type{stroke:#fff!important}
 #s-focus #fMain>.card .gauge .num b,#s-focus #fMain>.card .gauge .num span,#s-focus #fMain>.card .fr-state,#s-focus #fMain>.card .fr-time{color:#fff!important}
@@ -5229,6 +5268,7 @@ function fSetupHTML(compact){
     ? 'One unbroken block of '+fHrs(F.plan)
     : n+' block'+(n===1?'':'s')+' of about '+Math.round(seg[0].s/60)+' min'
       +(br? ' · '+br+' break'+(br===1?'':'s') : ' · no break');
+  if(!compact) return fSetupFullHTML(F, seg, plan);
   return '<div class="'+(compact?'fSessionBox':'card')+'" data-fsetup="1">'
     + (compact ? '' :
         '<h2>Get ready to focus</h2>'
@@ -5280,6 +5320,62 @@ function fSetupHTML(compact){
     + '</div>';
 }
 var fPickSub=null;
+/* The Focus page's own session card: time on the left, what on the right,
+   one start button. Same data-attributes as the compact card, so every
+   handler keeps working; only the arrangement differs. */
+function fSetupFullHTML(F, seg, plan){
+  return '<div class="card fset" data-fsetup="1">'
+    + '<div class="fset-time">'
+    +   '<div class="fset-k">Session length</div>'
+    +   '<div class="fstep">'
+    +     '<button class="ghost" data-fminus="1" aria-label="Less time"'+(F.plan<=5?' disabled':'')+'>'+IMINUS+'</button>'
+    +     '<div class="fnum"><b>'+fDurHTML(F.plan)+'</b></div>'
+    +     '<button class="ghost" data-fplus="1" aria-label="More time"'+(F.plan>=480?' disabled':'')+'>'+IPLUS+'</button>'
+    +   '</div>'
+    +   '<div class="fpre">'+F_PRESETS.map(function(m){
+          return '<button data-fpre="'+m+'" aria-pressed="'+(F.plan===m)+'">'+(m<60 ? m+'m' : (m/60)+'h')+'</button>'; }).join("")+'</div>'
+    +   fMapHTML(seg, null, 0)
+    +   '<div class="fplan">'+plan+'</div>'
+    +   '<details class="fmore"'+(window.CompassFocusMore?' open':'')+' ontoggle="window.CompassFocusMore=this.open"><summary>Rhythm &amp; sound</summary>'
+    +     (F.skip ? '' : '<div class="frhythm">'
+    +       '<div class="frh"><span>Blocks</span>'
+    +         '<button class="ghost" data-fblk="-5" aria-label="Shorter blocks"'+(F.blk<=10?' disabled':'')+'>'+IMINUS+'</button>'
+    +         '<b>'+F.blk+' min</b>'
+    +         '<button class="ghost" data-fblk="5" aria-label="Longer blocks"'+(F.blk>=180?' disabled':'')+'>'+IPLUS+'</button></div>'
+    +       '<div class="frh"><span>Breaks</span>'
+    +         '<button class="ghost" data-fbrk="-1" aria-label="Shorter breaks"'+(F.brk<=0?' disabled':'')+'>'+IMINUS+'</button>'
+    +         '<b>'+(F.brk?F.brk+' min':'none')+'</b>'
+    +         '<button class="ghost" data-fbrk="1" aria-label="Longer breaks"'+(F.brk>=60?' disabled':'')+'>'+IPLUS+'</button></div>'
+    +     '</div>')
+    +     '<div class="fopts">'
+    +       '<label class="fchk"><input type="checkbox" data-fbreaks="1"'+(F.skip?' checked':'')+'> Skip breaks</label>'
+    +       '<label class="fchk"><input type="checkbox" data-fsound="1"'+(F.sound?' checked':'')+'> Chime</label>'
+    +       '<label class="fchk"><input type="checkbox" data-fnotify="1"'+(F.notify?' checked':'')+'> Notify</label>'
+    +     '</div>'
+    +     (F.notify && window.Notification && Notification.permission==="denied"
+            ? '<div class="fwarn">Notifications are blocked in your browser settings, so only the chime will play.</div>' : '')
+    +   '</details>'
+    + '</div>'
+    + '<div class="fset-what">'
+    +   '<h2>What are you focusing on?</h2>'
+    +   fWeekHTML()
+    +   '<label class="lbl">Or describe it</label>'
+    +   '<input class="fld sm" data-flabel="1" placeholder="e.g. the 8 equilibrium questions on p.212" value="'+esc(T().q||"")+'">'
+    +   '<label class="lbl">Count it towards</label>'
+    +   '<div class="pills" data-fsubs="1">'
+    +     '<button data-fsub="" aria-pressed="'+(!fPickSub?'true':'false')+'">Nothing</button>'
+    +     S.subjects.map(function(x){
+            return '<button data-fsub="'+x.id+'" aria-pressed="'+(fPickSub===x.id?'true':'false')+'">'+esc(x.name)+'</button>'; }).join("")
+    +     '<button data-fsub="__break" aria-pressed="'+(fPickSub==="__break"?'true':'false')+'" title="A timed break. It isn\u2019t counted as focus time.">Break</button>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="fset-go">'
+    +   '<button class="primary" data-fgo="1">Start '+fHrs(F.plan)+'</button>'
+    +   '<span class="fset-end">Finish at <b>'+fEta(fSpanSecs(seg))+'</b></span>'
+    +   '<span class="fset-tip">Phone in another room · breaks away from screens</span>'
+    + '</div>'
+    + '</div>';
+}
 
 /* ── the dial ──
    A watch-face ring: sixty minute ticks, a hairline track, the arc of time
