@@ -4866,6 +4866,12 @@ window.CompassFocus={
     fStartGated(mins, T().q||"Deep work", sub, F.skip, link);
   },
   stop:function(){ if(fLive()) fStop(); },
+  /* For the Lofi city: which segment is running and how far through it. */
+  state:function(){
+    if(!fLive()) return null;
+    var w=fWhere(fPos());
+    return {on:!!S.timer.on, k:w.k, i:w.i, frac:w.len?Math.max(0,Math.min(1,1-w.left/w.len)):1};
+  },
   current:function(){
     if(!fLive()) return null;
     var t=S.timer, l=t.link||{};
@@ -16095,7 +16101,7 @@ if(!MOUNT) return;
 function on(el,ev,fn){ if(el) el.addEventListener(ev,fn); }
 
 var PKEY="compass.lofi.v1";
-var P={city:"tokyo",vibe:"jazzhop",mood:"chill",band:"full",vol:0.7,amb:0.4,vinyl:0.35,withFocus:false,open:false,src:"lofi",sp:"",wx:"auto",wxI:1,sleep:"0",yt:""};
+var P={city:"tokyo",vibe:"jazzhop",mood:"chill",band:"full",vol:0.7,amb:0.4,vinyl:0.35,withFocus:false,open:false,src:"lofi",sp:"",wx:"auto",wxI:1,sleep:"0",yt:"",sky:"real",view:"window"};
 try{
   var saved=JSON.parse(localStorage.getItem(PKEY)||"null");
   if(saved && typeof saved==="object") Object.keys(P).forEach(function(k){ if(typeof saved[k]===typeof P[k]) P[k]=saved[k]; });
@@ -16186,6 +16192,7 @@ function blocks(c,R,S,o){
           if(rowOn && R()<p){
             var cc=R()<0.1?pick(R,o.win):wc;
             px(c,xx,yy,ww,wh,cc);
+            if(S.allWins) S.allWins.push([xx,yy,ww,wh,col,cc]);
             if(o.flicker && R()<0.06) S.wins.push([xx,yy,ww,wh,cc,col,1]);
           }
         }
@@ -16531,6 +16538,7 @@ var CITIES=[
       for(var yy=top+5; yy<188; yy+=8) for(var xx=x+3; xx+3<=x+w-2; xx+=5){
         var lit=R()<0.64, wcol=lit?pick(R,["#ffd88a","#ffe6b0","#ffcf70"]):"#1a1626";
         px(c,xx,yy,3,4,wcol); px(c,xx+1,yy,1,4,lit?"#e0b060":"#141020");
+        if(lit) S.allWins.push([xx,yy,3,4,"#1a1626",wcol]);
         if(lit && R()<0.14) S.wins.push([xx,yy,3,4,wcol,"#1a1626",1]);
       }
       px(c,x+2,190,w-4,8,"#2a1e1a");
@@ -16673,22 +16681,122 @@ function fireworks(c,t,S,reduced){
   c.globalAlpha=1;
 }
 
+/* ── the real sky ──
+   Sunrise and sunset for Denmark (55.7°N), worked out for today, decide
+   whether the city is at dawn, in daylight, at dusk or at night. */
+function skyPhase(){
+  if(P.sky==="night") return "night";
+  var d=new Date(), N=Math.floor((d-new Date(d.getFullYear(),0,0))/864e5);
+  var lat=55.7*Math.PI/180, decl=23.44*Math.PI/180*Math.sin(2*Math.PI*(284+N)/365);
+  var half=Math.acos(Math.max(-1,Math.min(1,-Math.tan(lat)*Math.tan(decl))))*12/Math.PI;
+  var noon=12-d.getTimezoneOffset()/60-12.57/15, rise=noon-half, set=noon+half, h=d.getHours()+d.getMinutes()/60;
+  if(h>=rise-1 && h<rise+0.75) return "dawn";
+  if(h>=rise+0.75 && h<set-0.75) return "day";
+  if(h>=set-0.75 && h<set+1.25) return "dusk";
+  return "night";
+}
+var PHASE_SKY={
+  dusk:{k:0.78,st:[[0,"#1b2350"],[0.5,"#4e4580"],[0.8,"#b4607a"],[1,"#f0a060"]],water:"#3a2c4a"},
+  dawn:{k:0.78,st:[[0,"#243262"],[0.5,"#6c75a8"],[0.8,"#d9a0a6"],[1,"#f4cf98"]],water:"#3a4468"},
+  day:{k:0.92,st:[[0,"#3f78c4"],[0.55,"#7fb0e0"],[1,"#cfe4f4"]],water:"#2f5a86"}
+};
+function hexOf(c){ return "#"+c.map(function(v){ return ("0"+Math.max(0,Math.min(255,Math.round(v))).toString(16)).slice(-2); }).join(""); }
+function phaseStops(stops,ph){
+  var X=PHASE_SKY[ph]; if(!X) return stops;
+  return [0,0.25,0.5,0.75,1].map(function(q){ return [q,hexOf(mixc(stopAt(stops,q),stopAt(X.st,q),X.k))]; });
+}
+
+/* ── focus, over the city ──
+   A finished block earns a shooting star and a burst over the skyline. */
+function celebrate(c,e,reduced){
+  if(e<1.4){ var x=40+e/1.4*380, y=18+e/1.4*58;
+    for(var k=0;k<28;k++){ c.fillStyle="rgba(255,250,220,"+((1-k/28)*(1-e/2.8)).toFixed(3)+")";
+      c.fillRect(Math.round(x-k*3),Math.round(y-k*0.46),k<3?2:1,k<3?2:1); } }
+  if(e>0.9 && !reduced){ var q=(e-0.9)/2.6; if(q>=1) return;
+    var cx=300, cy=58, r=6+q*48, a=1-q*q, sz=q<0.4?2:1;
+    if(q<0.25) halo(c,cx,cy,Math.round(14+q*30),"#ffe08a");
+    c.globalAlpha=a;
+    for(var i=0;i<48;i++){ var ang=i/48*6.2832; c.fillStyle=["#ffd24a","#ff7ab3","#7dd3ff","#ffffff"][i%4];
+      c.fillRect(Math.round(cx+Math.cos(ang)*r),Math.round(cy+Math.sin(ang)*r+q*q*14),sz,sz); }
+    c.globalAlpha=1; }
+}
+
+/* ── the view from a desk ──
+   A window frame and sill, rain on the glass when it rains, a desk lamp, a
+   mug that steams, a plant, and a cat asleep on the sill. */
+function room(c,t,S,dt,reduced){
+  var wet=/rain|drizzle|storm/.test(S.city.weather);
+  if(wet){
+    var D=S.drops||(S.drops=[]), cap=S.city.weather==="drizzle"?22:40;
+    if(D.length<cap && Math.random()<0.35) D.push({x:9+Math.random()*(W-18),y:9+Math.random()*190,v:0,r:Math.random()<0.25?2:1});
+    for(var i=D.length-1;i>=0;i--){ var d=D[i];
+      if(!d.v && Math.random()<0.008) d.v=10+Math.random()*30;
+      if(!reduced) d.y+=d.v*dt;
+      if(d.y>229){ D.splice(i,1); continue; }
+      var dx=Math.round(d.x), dy=Math.round(d.y);
+      if(d.v){ c.fillStyle="rgba(200,220,255,.12)"; c.fillRect(dx,dy-12,1,12); }
+      c.fillStyle="rgba(190,210,250,.45)"; c.fillRect(dx,dy,d.r,d.r+(d.v?1:0));
+      c.fillStyle="rgba(255,255,255,.6)"; c.fillRect(dx,dy,1,1);
+    }
+  }
+  c.fillStyle="rgba(255,255,255,.03)"; c.beginPath(); c.moveTo(60,7); c.lineTo(104,7); c.lineTo(30,232); c.lineTo(-14,232); c.closePath(); c.fill();
+  // the frame
+  px(c,0,0,W,7,"#1c1418"); px(c,0,6,W,1,"#33262c"); px(c,0,0,7,240,"#1c1418"); px(c,6,6,1,226,"#33262c");
+  px(c,W-7,0,7,240,"#1c1418"); px(c,W-7,6,1,226,"#33262c");
+  // the sill and the room
+  px(c,0,232,W,7,"#4a3428"); px(c,0,232,W,1,"#74543f"); px(c,0,239,W,2,"#2a1c18");
+  px(c,0,241,W,29,"#17111a"); px(c,0,252,W,18,"#2a1e22"); px(c,0,252,W,1,"#4a3830");
+  // the lamp, its light on the sill and the desk
+  halo(c,62,232,30,"#ffcf8a");
+  c.fillStyle="rgba(255,214,150,.12)"; c.beginPath(); c.moveTo(58,227); c.lineTo(18,252); c.lineTo(120,252); c.closePath(); c.fill();
+  px(c,34,249,18,3,"#2e2830"); px(c,34,249,18,1,"#4a4250");
+  line(c,43,249,49,233,"#5a5260"); line(c,49,233,60,226,"#5a5260");
+  px(c,55,221,13,5,"#b8463a"); px(c,56,220,11,1,"#d8624f"); px(c,57,226,9,1,"#fff2c8");
+  // books
+  px(c,88,246,26,6,"#3f5f8a"); px(c,90,241,22,5,"#a8463a"); px(c,92,237,18,4,"#d2b36a"); px(c,88,246,26,1,"#5f7faa"); px(c,90,241,22,1,"#c8665a");
+  // a mug, steaming
+  px(c,404,244,9,8,"#d9d2c4"); px(c,404,244,9,1,"#f2ece0"); px(c,405,245,7,1,"#4a2e20"); px(c,413,246,2,4,"#d9d2c4"); px(c,414,247,1,2,"#17111a");
+  if(!reduced) for(var k=0;k<3;k++) for(var j=0;j<9;j++){
+    var sy=242-j*2-Math.floor((t*6)%2), sx=405+k*2+Math.round(Math.sin(t*1.6+j*0.7+k*2)*1.6);
+    c.fillStyle="rgba(235,235,245,"+(0.2*(1-j/9)).toFixed(3)+")"; c.fillRect(sx,sy,1,1); }
+  // a plant in the corner, leaves over the frame
+  px(c,446,242,13,10,"#b8623a"); px(c,446,242,13,1,"#d8825a");
+  [[452,242,440,214],[452,242,462,210],[452,242,452,206],[452,242,470,226],[452,242,434,230]].forEach(function(l,i){
+    var sw=Math.round(Math.sin(t*0.6+i)*1); line(c,l[0],l[1],l[2]+sw,l[3],"#3f7a4a");
+    ellipse(c,l[2]+sw,l[3],3,2,i%2?"#4f9a5a":"#3f8a4a"); });
+  // the cat, asleep on the sill
+  var br=Math.sin(t*1.3)>0?1:0, tail=Math.round(Math.sin(t*0.7)*2);
+  ellipse(c,302,227-br,14,6+br,"#c9853f"); px(c,290,221-br,24,1,"#e8a860");
+  for(var st=294;st<314;st+=5) px(c,st,223-br,2,5,"#a8642a");
+  disc(c,288,226,5,"#c9853f"); px(c,284,220,2,3,"#c9853f"); px(c,290,220,2,3,"#c9853f"); px(c,284,219,1,1,"#c9853f"); px(c,291,219,1,1,"#c9853f");
+  px(c,285,221,1,1,"#e8a0a0"); px(c,290,221,1,1,"#e8a0a0");
+  px(c,285,226,2,1,"#5a3818"); px(c,289,226,2,1,"#5a3818"); px(c,287,228,1,1,"#e88080");
+  line(c,315,229,319,236,"#c9853f"); line(c,319,236,317+tail,241,"#c9853f"); px(c,317+tail,241,1,1,"#a8642a");
+}
+
 /* Build a city into cached canvases: bg (everything above the horizon that
    never moves), plus low-res cloud and fog strips that scroll. */
 function buildCity(city){
   var R=rng(city.k.split("").reduce(function(a,ch){ return a*31+ch.charCodeAt(0)|0; },7));
-  var S={city:city,hz:city.hz,stars:[],lights:[],wins:[],signs:[],spark:[],glints:[],lanes:[],leds:[],beams:null,boats:null};
-  var bg=canvas(W,city.hz), c=bg.getContext("2d");
-  sky(c,city.sky,city.hz);
-  if(city.starsN) stars(c,R,S,city.starsN,Math.round(city.hz*0.62));
-  if(city.moon) moon(c,city.moon[0],city.moon[1],city.moon[2],city.moon[3]);
+  var S={city:city,hz:city.hz,stars:[],lights:[],wins:[],allWins:[],signs:[],spark:[],glints:[],lanes:[],leds:[],beams:null,boats:null};
+  var bg=canvas(W,city.hz), c=bg.getContext("2d"), ph=skyPhase(); S.phase=ph;
+  sky(c,phaseStops(city.sky,ph),city.hz);
+  /* stars are drawn even by day (onto scrap) so the city's random layout never depends on the hour */
+  if(city.starsN){ stars(ph==="day"?canvas(W,city.hz).getContext("2d"):c,R,S,city.starsN,Math.round(city.hz*0.62)); if(ph==="day") S.stars=[]; }
+  if(city.moon && ph==="night") moon(c,city.moon[0],city.moon[1],city.moon[2],city.moon[3]);
   city.build(c,R,S);
+  /* keep only windows still visible in the finished picture, so dimming them never paints over a bridge or a tower in front */
+  var img=c.getImageData(0,0,W,city.hz).data;
+  S.allWins=S.allWins.filter(function(w){ if(w[1]<0||w[1]>=city.hz||w[0]<0||w[0]>=W) return false;
+    var o=(w[1]*W+w[0])*4, h=hx(w[5]); return Math.abs(img[o]-h[0])<4&&Math.abs(img[o+1]-h[1])<4&&Math.abs(img[o+2]-h[2])<4; });
+  var R2=rng(77); for(var si=S.allWins.length-1;si>0;si--){ var sj=Math.floor(R2()*(si+1)), sw=S.allWins[si]; S.allWins[si]=S.allWins[sj]; S.allWins[sj]=sw; }
   S.bg=bg;
   if(city.clouds) S.clouds=cloudStrip(R,city.clouds,Math.round(city.hz*0.55),city.weather==="snow"?0.9:0.7);
   if(city.fog||city.mist) S.fog=cloudStrip(R,city.weather==="fog"?"#9aa3b8":"#8b87a8",70,0.8);
   // what the water sees: a tint that darkens with depth
   var wh=H-city.hz, wt=canvas(W,wh), wc=wt.getContext("2d"), g=wc.createLinearGradient(0,0,0,wh);
-  g.addColorStop(0,rgba(city.water[0],city.water[1])); g.addColorStop(1,rgba(city.water[0],city.water[2]));
+  var wcol=PHASE_SKY[ph]?hexOf(mixc(hx(city.water[0]),hx(PHASE_SKY[ph].water),0.55)):city.water[0];
+  g.addColorStop(0,rgba(wcol,city.water[1])); g.addColorStop(1,rgba(wcol,city.water[2]));
   wc.fillStyle=g; wc.fillRect(0,0,W,wh);
   S.wtint=wt;
   S.up=canvas(W,city.hz);
@@ -16722,7 +16830,7 @@ function drawFrame(ctx,S,t,dt,reduced){
   var city=S.city, hz=S.hz, u=S.up.getContext("2d");
   u.drawImage(S.bg,0,0);
   S.stars.forEach(function(s){ var a=0.5+0.5*Math.sin(t*s[3]+s[2]); if(a>0.8) px(u,s[0],s[1],1,1,"#ffffff"); else if(a<0.25) px(u,s[0],s[1],1,1,"#2a3160"); });
-  if(city.starsN && !reduced){ var sp=t%19; if(sp<0.7){ var sx=90+(Math.floor(t/19)*137)%300, sy=18+(Math.floor(t/19)*53)%50;
+  if(city.starsN && !reduced && S.phase!=="day"){ var sp=t%19; if(sp<0.7){ var sx=90+(Math.floor(t/19)*137)%300, sy=18+(Math.floor(t/19)*53)%50;
     for(var k=0;k<10;k++){ u.fillStyle="rgba(255,255,255,"+(0.9-k*0.09)*(1-sp/0.7)+")"; u.fillRect(Math.round(sx+sp*120-k*2),Math.round(sy+sp*40-k*0.7),1,1); } } }
   if(S.clouds){ var cw=S.clouds.width*2, off=(t*3)%cw; u.imageSmoothingEnabled=false;
     u.drawImage(S.clouds,-off,0,cw,S.clouds.height*2); u.drawImage(S.clouds,cw-off,0,cw,S.clouds.height*2); }
@@ -16731,6 +16839,11 @@ function drawFrame(ctx,S,t,dt,reduced){
     if(Math.random()<0.004) w[6]=w[6]?0:1;
     if(!w[6]) px(u,w[0],w[1],w[2],w[3],w[5]);
   });
+  var fs=FSTATE;
+  if(fs && fs.k!=="b" && fs.k!=="end" && S.allWins.length){
+    var nW=S.allWins.length, litW=Math.floor(nW*(0.12+0.88*fs.frac));
+    for(var wi=litW;wi<nW;wi++){ var ww=S.allWins[wi]; px(u,ww[0],ww[1],ww[2],ww[3],ww[4]); }
+  }
   S.signs.forEach(function(s){
     if(!s.rate) return;
     var on=Math.sin(t*s.rate+s.ph)>-0.55 && !(Math.sin(t*23+s.ph*7)>0.93);
@@ -16755,6 +16868,7 @@ function drawFrame(ctx,S,t,dt,reduced){
   }
   S.lanes.forEach(function(l){ if(l.far) drawCars(u,t,l); });
   if(city.anim) city.anim(u,t,S,reduced);
+  if(CEL!=null && t-CEL>=0 && t-CEL<4) celebrate(u,t-CEL,reduced);
   if(!reduced && (city.weather==="clear"||city.weather==="drizzle"||city.weather==="fog")) birds(u,t,hz);
 
   ctx.drawImage(S.up,0,0);
@@ -16783,6 +16897,8 @@ function drawFrame(ctx,S,t,dt,reduced){
       ctx.drawImage(S.fog,-fo2,hz-20,fw,S.fog.height*2); ctx.drawImage(S.fog,fw-fo2,hz-20,fw,S.fog.height*2); }
     ctx.globalAlpha=1;
   }
+  if(S.phase==="day"){ ctx.fillStyle="rgba(255,244,228,.07)"; ctx.fillRect(0,0,W,H); }
+  if(P.view==="window") room(ctx,t,S,dt,reduced);
 }
 function plane(c,t,hz){
   var per=53, ph=(t%per)/per; if(ph>0.45) return;
@@ -16938,6 +17054,22 @@ function ramp(p,v,sec){ var now=AU.c.currentTime; p.cancelScheduledValues(now); 
 
 /* ── instruments: (time, midi note, duration, velocity) ── */
 var INST={
+  accordion:function(t,m,d,v){
+    var f=mtof(m), g=gn(0), end=adsr(g.gain,t,0.09,0.3,0.8,d,0.25,v*0.03), bp=bq("bandpass",Math.min(3200,f*3),0.6), trem=gn(0.8);
+    [-7,7].forEach(function(ct){ var o=osc("sawtooth",f,t,end); o.detune.value=ct; o.connect(bp); });
+    var lfo=osc("sine",5.6,t,end), lg=gn(0.22); lfo.connect(lg); lg.connect(trem.gain);
+    bp.connect(trem); trem.connect(g); out(g,0.35);
+  },
+  strings:function(t,m,d,v){
+    var f=mtof(m), g=gn(0), end=adsr(g.gain,t,0.7,1.2,0.85,d,1.4,v*0.028), lp=bq("lowpass",1700,0.3);
+    [-11,0,11].forEach(function(ct){ var o=osc("sawtooth",f,t,end); o.detune.value=ct; o.connect(lp); });
+    lp.connect(g); out(g,0.6);
+  },
+  marimba:function(t,m,d,v){
+    var f=mtof(m), g=gn(0), end=adsr(g.gain,t,0.002,0.45,0,Math.min(d,0.4),0.15,v*0.13);
+    var a=osc("sine",f,t,end), b=osc("sine",f*3.98,t,Math.min(end,t+0.09)), bg=gn(0.22);
+    a.connect(g); b.connect(bg); bg.connect(g); out(g,0.25);
+  },
   ep:function(t,m,d,v){
     var f=mtof(m), g=gn(0), end=adsr(g.gain,t,0.004,1.4,0.25,d,0.35,v*0.13);
     var car=osc("sine",f,t,end), mod=osc("sine",f,t,end), mg=gn(0);
@@ -17215,6 +17347,7 @@ function stepAt(pos,t,sd){
     }
   }
   if(sec.d && TR.D) drums(t,s,bar,sd,f);
+  if(P.band==="full" && sec.c) cityLayer(t,s,bar,cs,span,notes,sd,f);
   if(sec.m){
     var i=bar%4, order=sec.alt?[1,2,0,3]:[0,3,1,2], mo=TR.ms[order[i]];
     if(sec.m===0.5 && i%2===1) mo=null;
@@ -17225,6 +17358,22 @@ function stepAt(pos,t,sd){
       INST[V.mel](t+hum(),base+oct*12+sc[nt.deg%sc.length],nt.len*sd*1.05,nt.v*f);
     }
   }
+}
+/* Each city's own colour on top of the vibe: Tokyo's synth sparkle, Paris's
+   accordion, Copenhagen's strings and piano, New York's Rhodes, Hong Kong's
+   pentatonic flute, San Francisco's guitar, Sydney's marimba. */
+function cityLayer(t,s,bar,cs,span,notes,sd,f){
+  var k=P.city, h=(Math.random()-0.5)*0.01;
+  if(k==="tokyo"){ if((bar%4===1||bar%4===3) && s%2===0 && Math.random()<0.6){ var q=notes.concat([notes[0]+12,notes[1]+12]); INST.bell(t+h,q[(s/2)%q.length]+24,1.4*sd,0.3*f); } }
+  else if(k==="paris"){ if(cs===0) notes.forEach(function(m){ INST.accordion(t,m+12,span*sd*0.92,0.55*f); }); }
+  else if(k==="copenhagen"){
+    if(cs===0) notes.forEach(function(m){ INST.strings(t,m+12,span*sd+0.3,0.6*f); });
+    if((s===6||s===14) && Math.random()<0.3) INST.piano(t+h,notes[Math.floor(Math.random()*notes.length)]+24,3*sd,0.35*f); }
+  else if(k==="newyork"){ if((s===6||s===14) && Math.random()<0.55) notes.slice(-2).forEach(function(m){ INST.ep(t+h,m+12,1.2*sd,0.36*f); }); }
+  else if(k==="hongkong"){ if(bar%8>=6 && s%4===0 && Math.random()<0.6){ var pent=[0,2,4,7,9];
+    INST.flute(t+h,60+(TR.key%12)+pent[Math.floor(Math.random()*5)]+(Math.random()<0.3?12:0),3*sd,0.4*f); } }
+  else if(k==="sanfrancisco"){ if(s%2===0){ var q2=notes.concat([notes[0]+12]); INST.nylon(t+h,q2[(s/2)%q2.length]+12,2.5*sd,0.28*f); } }
+  else if(k==="sydney"){ var mv={0:0.7,3:0.5,6:0.6,10:0.5,12:0.45}[s]; if(mv && bar%2===0) INST.marimba(t+h,notes[((s/3)|0)%notes.length]+24,1.2*sd,mv*f); }
 }
 function drums(t,s,bar,sd,f){
   var D=TR.D, h=function(){ return (Math.random()-0.5)*0.008; };
@@ -17362,6 +17511,10 @@ MOUNT.innerHTML=
 +   '<div class="lofi-wxrow"><label>Intensity<input type="range" min="0.3" max="1.6" step="0.05" id="lofiWxI" value="'+P.wxI+'"></label>'
 +     '<span class="lofi-wxnote" id="lofiWxNote"></span></div>'
 +   '<label class="lbl">City</label>'+pills("city",CITIES.map(function(c){ return [c.k,c.n]; }))
++   '<div class="lofi-two">'
++     '<div><label class="lbl">Sky</label>'+pills("sky",[["real","Real time of day"],["night","Always night"]])+'</div>'
++     '<div><label class="lbl">View</label>'+pills("view",[["window","From a window"],["open","Open"]])+'</div>'
++   '</div>'
 +   '<div data-lofionly="1"><label class="lbl">Vibe</label>'+pills("vibe",VIBE_KEYS.map(function(k){ return [k,VIBES[k].n]; }))
 +   '<div class="lofi-two">'
 +     '<div><label class="lbl">Mood</label>'+pills("mood",[["chill","Chill"],["upbeat","Upbeat"]])+'</div>'
@@ -17398,6 +17551,7 @@ MINI.innerHTML='<button type="button" class="lofi-mini-go" aria-label="Open the 
 document.body.appendChild(MINI);
 
 var SC=null, T0=performance.now(), RAF=0, LAST=0, SEEN=false, FULL=false;
+var VT=0, VLAST=0, FSTATE=null, PREVF=null, CEL=null, PHCHK=0, BRKTONE=null;
 var REDUCED=window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 function setCity(k){
   P.city=cityOf(k).k; saveP();
@@ -17474,7 +17628,16 @@ function loop(now){
 }
 function draw(still,dt){
   if(!SC) return;
-  try{ drawFrame(CTX,SC,(performance.now()-T0)/1000,still?0:dt||0.066,REDUCED); }catch(e){ if(!draw.err){ draw.err=1; console.error("lofi scene",e); } }
+  var now=performance.now();
+  if(now-PHCHK>30000){ PHCHK=now; if(SC.phase!==skyPhase()) SC=buildCity(sceneCity(cityOf(P.city))); }
+  var fs=null; try{ fs=window.CompassFocus&&CompassFocus.state?CompassFocus.state():null; }catch(e){}
+  /* a block that ran to its end (not one that was stopped early) is celebrated */
+  if(PREVF && PREVF.k!=="b" && PREVF.k!=="end" && PREVF.frac>0.96 && (!fs || fs.i!==PREVF.i)) CEL=VT;
+  PREVF=fs; FSTATE=fs;
+  var brk=!!(fs && fs.k==="b"), speed=brk?0.4:1, real=VLAST?Math.min(1,(now-VLAST)/1000):0; VLAST=now;
+  if(!still) VT+=real*speed;
+  if(PLAY && AU && TR){ var want=brk?Math.min(1700,TR.V.tone):TR.V.tone; if(BRKTONE!==want){ BRKTONE=want; ramp(AU.tone.frequency,want,3); } }
+  try{ drawFrame(CTX,SC,VT,still?0:(dt||0.066)*speed,REDUCED); }catch(e){ if(!draw.err){ draw.err=1; console.error("lofi scene",e); } }
   clock();
 }
 function kick(){ if(!RAF && shouldRun()){ LAST=0; RAF=requestAnimationFrame(loop); } }
@@ -17651,6 +17814,8 @@ ROOT.querySelectorAll("[data-lset]").forEach(function(g){
     if(k==="wx"){ setWx(v); return; }
     if(k==="sleep"){ setSleep(+v); return; }
     if(k==="src"){ if(PLAY) pause(); P.src=v; saveP(); syncPills(); applySrc(); return; }
+    if(k==="sky"){ P.sky=v; saveP(); syncPills(); SC=buildCity(sceneCity(cityOf(P.city))); draw(true); return; }
+    if(k==="view"){ P.view=v; saveP(); syncPills(); draw(true); return; }
     P[k]=v; saveP(); syncPills();
     if(k==="vibe"||k==="mood"){ if(PLAY) skip(); else TR=null; }
     nowPlaying();
