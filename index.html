@@ -4093,13 +4093,13 @@ function execScore(){
    Every old page key still works (CompassSetTab('sync'), ('plan') ...), the
    sidebar and the phone tab bar just show the five groups. Tasks, Gym and
    "Why it works" stay retired; their sections are kept, unlinked. */
-var TABS=[["today","Today"],["focus","Focus"],["checkin","Check-in"],["plan","Week"],["cal","Calendar"],["week","Weekly review"],["school","Subjects"],["prog","Progress"],["classes","Timetable"],["revise","Revision"],["notes","Notes"],["health","Health"],["nutri","Nutrition"],["goals","Goals"],["rituals","Rituals"],["reset","Reset"],["ask","Assistant"],["sync","Data & sync"]];
+var TABS=[["today","Today"],["focus","Focus"],["plan","Week"],["cal","Calendar"],["week","Weekly review"],["school","Subjects"],["prog","Progress"],["revise","Revision"],["notes","Notes"],["nutri","Nutrition"],["goals","Goals"],["ask","Assistant"],["sync","Data & sync"]];
 var GONE_TABS={tasks:1, gym:1, why:1};
 var GROUPS=[
-  {k:"today",n:"Today",p:["today","focus","checkin"]},
+  {k:"today",n:"Today",p:["today","focus"]},
   {k:"week",n:"Plan",p:["plan","cal","week"]},
-  {k:"school",n:"School",p:["school","prog","classes","revise","notes"]},
-  {k:"me",n:"Me",p:["health","nutri","goals","rituals","reset"]},
+  {k:"school",n:"School",p:["school","prog","revise","notes"]},
+  {k:"me",n:"Me",p:["nutri","goals"]},
   {k:"tools",n:"Tools",p:["ask","sync"]}
 ];
 var SVGA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">';
@@ -4131,7 +4131,7 @@ var PICON={
   sync:SVGA+'<path d="M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z"/><path d="M4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>'
 };
 /* Sidebar sections (desktop). Phones keep the five groups in the tab bar. */
-var SIDE=[{h:"",p:["today","focus","checkin"]},{h:"Plan",p:["plan","cal","week"]},{h:"School",p:["school","prog","classes","revise","notes"]},{h:"Me",p:["health","nutri","goals","rituals","reset"]},{h:"",p:["ask","sync"],end:1}];
+var SIDE=[{h:"",p:["today","focus"]},{h:"Plan",p:["plan","cal","week"]},{h:"School",p:["school","prog","revise","notes"]},{h:"Me",p:["nutri","goals"]},{h:"",p:["ask","sync"],end:1}];
 var PAGE_META={
   today:['Today','Dashboard','Where you are right now, and what is next.'],
   focus:['Today','Focus','One block, one question, phone in another room.'],
@@ -4140,15 +4140,10 @@ var PAGE_META={
   week:['Plan','Weekly review','Look back at the week, then shape the next one.'],
   school:['School','Subjects','Workload and deadlines per subject.'],
   prog:['School','Progress','Balance, syllabus progress and every deadline to May 2027.'],
-  classes:['School','Timetable','Your fixed lessons, so plans land in the gaps.'],
   revise:['School','Revision','Spaced revision: the topics that are due.'],
   notes:['School','Notes','Questions and ideas, saved per subject.'],
-  checkin:['Today','Check-in','Mood, sleep, energy and the habits that structure your day.'],
-  health:['Me','Health','Sleep, heart rate and activity from your Apple Watch.'],
   nutri:['Me','Nutrition','Calories and macros, logged by meal.'],
   goals:['Me','Goals','The longer goals this week is working towards.'],
-  rituals:['Me','Rituals','Start-of-day, shutdown and weekly scripts.'],
-  reset:['Me','Reset','A smaller next step for a hard day.'],
   ask:['Tools','Assistant','Think something through with the Compass assistant.'],
   sync:['Tools','Data & sync','Saving, device sync and backups.']
 };
@@ -15422,7 +15417,7 @@ function kpis(){
   return '<div class="ck-kpis">'
     + k("Blocks today", tb.length?tDone.length+'<em>/'+tb.length+'</em>':'0', '', tb.length?fmtH(dm)+' of '+fmtH(pm)+' done':'nothing planned', tb.length?dm/Math.max(pm,1)*100:0, '--accent', 'plan')
     + k("Focus", fmtH(fm), '', 'goal '+fmtH(goal), fm/goal*100, '--d3', 'focus')
-    + k("Readiness", r?r.total:'–', '', bd?esc(bd.n):'log sleep + energy', r?r.total:0, bd?bd.c:'--muted', 'checkin')
+    + k("Readiness", r?r.total:'–', '', bd?esc(bd.n):'log sleep + energy', r?r.total:0, bd?bd.c:'--muted', 'readiness')
     + k("Next deadline", dl?(dd<=0?'Today':dd+'<small>d</small>'):'–', '', dl?esc(dl.t):'nothing dated', null, dl?(dd<=2?'--crit':dd<=7?'--warn':'--good'):'--muted', 'school')
     + '</div>';
 }
@@ -15482,7 +15477,7 @@ function checkCard(){
   var d=dayRec(ymd(new Date())), sl=+d.sleep||0, en=+d.energy||0;
   var r=null, bd=null; try{ r=B.readiness(); bd=B.band?B.band(r.total):null; }catch(e){}
   var segs=[1,2,3,4,5].map(function(v){ return '<button data-ck-en="'+v+'" aria-pressed="'+(en===v)+'"><b>'+v+'</b><span>'+ENERGY[v]+'</span></button>'; }).join("");
-  return '<div class="ck-card ck-check"><div class="ck-cardhd"><span class="ck-lbl">Check-in</span><button class="ck-link" data-ck="checkin">Full check-in →</button></div>'
+  return '<div class="ck-card ck-check"><div class="ck-cardhd"><span class="ck-lbl">Check-in</span></div>'
     + '<div class="ck-row"><div class="ck-field"><span class="ck-lbl">Sleep last night</span>'
     + '<div class="ck-step"><button data-ck-sl="-0.5" aria-label="Less sleep">−</button><output>'+(sl?sl+'<small>h</small>':'<em>not logged</em>')+'</output><button data-ck-sl="0.5" aria-label="More sleep">+</button></div>'+(sl&&d.sleepSrc==="watch"?'<span class="ck-watch">from your Watch</span>':'')+'</div>'
     + '<div class="ck-ring" style="--p:'+(r?r.total:0)+';--tone:var('+(bd?bd.c:'--muted')+')"><b>'+(r?r.total:'–')+'</b><span>'+(bd?esc(bd.n):'readiness')+'</span></div></div>'
