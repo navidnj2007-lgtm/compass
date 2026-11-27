@@ -3040,78 +3040,85 @@ body.workspace a.workspace-brand{color:var(--ink)!important}
 #s-focus .frow .gauge circle:first-of-type{stroke:rgba(255,255,255,.22)!important}
 #s-focus .frow .gauge circle:last-of-type{stroke:#fff!important}
 /* the running session: red, like Today's now card */
-#s-focus #fMain>.fLiveCard,#s-focus #fMain>.card:not(.fset){--accent:#fff;--hi:#fff;--muted:rgba(255,255,255,.78);--ink-2:rgba(255,255,255,.9);--tone:#fff;background:var(--orange)!important;color:#fff;box-shadow:0 18px 40px color-mix(in srgb,var(--orange) 32%,transparent)!important}
-#s-focus #fMain>.card:not(.fset) h2,#s-focus #fMain>.card:not(.fset) .fmeta,#s-focus #fMain>.card:not(.fset) .hint{color:#fff!important}
-#s-focus #fMain>.card:not(.fset) .ghost{background:rgba(0,0,0,.14)!important;color:#fff!important}
-#s-focus #fMain>.card:not(.fset) .primary{background:#fff!important;color:var(--orange)!important}
-#s-focus #fMain>.card:not(.fset) .fseg{background:rgba(0,0,0,.14)!important;border-color:transparent!important}
-#s-focus #fMain>.card:not(.fset) .fseg .fill{background:#fff!important}
-#s-focus #fMain>.card:not(.fset) .fseg em{color:#fff!important}
+:is(#fMain,#todayTimer)>.fLiveCard,:is(#fMain,#todayTimer)>.card:not(.fset){--accent:#fff;--hi:#fff;--muted:rgba(255,255,255,.78);--ink-2:rgba(255,255,255,.9);--tone:#fff;background:var(--orange)!important;color:#fff;box-shadow:0 18px 40px color-mix(in srgb,var(--orange) 32%,transparent)!important}
+:is(#fMain,#todayTimer)>.card:not(.fset) h2,:is(#fMain,#todayTimer)>.card:not(.fset) .fmeta,:is(#fMain,#todayTimer)>.card:not(.fset) .hint{color:#fff!important}
+:is(#fMain,#todayTimer)>.card:not(.fset) .ghost{background:rgba(0,0,0,.14)!important;color:#fff!important}
+:is(#fMain,#todayTimer)>.card:not(.fset) .primary{background:#fff!important;color:var(--orange)!important}
+:is(#fMain,#todayTimer)>.card:not(.fset) .fseg{background:rgba(0,0,0,.14)!important;border-color:transparent!important}
+:is(#fMain,#todayTimer)>.card:not(.fset) .fseg .fill{background:#fff!important}
+:is(#fMain,#todayTimer)>.card:not(.fset) .fseg em{color:#fff!important}
 
 /* ══ the session card: time | what, then go ══ */
-#s-focus .fset{display:grid!important;grid-template-columns:minmax(250px,.95fr) minmax(0,1.25fr);grid-template-areas:"time what" "go go";
+:is(#s-focus,#s-today) .fset{display:grid!important;grid-template-columns:minmax(250px,.95fr) minmax(0,1.25fr);grid-template-areas:"time what" "go go";
   padding:0!important;overflow:hidden;align-items:stretch}
-#s-focus .fset-time{grid-area:time;background:var(--orange);color:#fff;padding:24px 22px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
-#s-focus .fset-k{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.82);align-self:stretch;text-align:left}
-#s-focus .fset .fstep{display:flex;align-items:center;justify-content:center;gap:14px;margin:auto 0 0!important}
-#s-focus .fset .fstep button{width:40px!important;height:40px!important;border-radius:50%!important;background:rgba(0,0,0,.16)!important;color:#fff!important;border:0!important;padding:0!important;display:grid;place-items:center}
-#s-focus .fset .fstep button:hover:not(:disabled){background:rgba(0,0,0,.26)!important}
-#s-focus .fset .fnum{min-width:0!important}
-#s-focus .fset .fnum b{font-family:var(--display)!important;font-size:clamp(58px,5.6vw,80px)!important;font-weight:500!important;line-height:1!important;color:#fff!important;
+:is(#s-focus,#s-today) .fset-time{grid-area:time;background:var(--orange);color:#fff;padding:24px 22px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+:is(#s-focus,#s-today) .fset-k{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.82);align-self:stretch;text-align:left}
+:is(#s-focus,#s-today) .fset .fstep{display:flex;align-items:center;justify-content:center;gap:14px;margin:auto 0 0!important}
+:is(#s-focus,#s-today) .fset .fstep button{width:40px!important;height:40px!important;border-radius:50%!important;background:rgba(0,0,0,.16)!important;color:#fff!important;border:0!important;padding:0!important;display:grid;place-items:center}
+:is(#s-focus,#s-today) .fset .fstep button:hover:not(:disabled){background:rgba(0,0,0,.26)!important}
+:is(#s-focus,#s-today) .fset .fnum{min-width:0!important}
+:is(#s-focus,#s-today) .fset .fnum b{font-family:var(--display)!important;font-size:clamp(58px,5.6vw,80px)!important;font-weight:500!important;line-height:1!important;color:#fff!important;
   font-variation-settings:"wdth" 78;letter-spacing:-.02em!important;background:none!important;-webkit-text-fill-color:#fff}
-#s-focus .fset .fnum b *{color:rgba(255,255,255,.75)!important;-webkit-text-fill-color:rgba(255,255,255,.75);font-size:.42em}
-#s-focus .fset .fpre{display:flex!important;flex-wrap:nowrap!important;gap:0!important;background:rgba(0,0,0,.14)!important;border:0!important;box-shadow:none!important;border-radius:999px!important;padding:4px!important;margin:0!important;width:auto!important;max-width:100%}
-#s-focus .fset .fpre button{flex:none;background:transparent!important;color:#fff!important;border:0!important;border-radius:999px!important;padding:6px 10px!important;font-weight:700;font-size:12.5px;white-space:nowrap}
-#s-focus .fset .fpre button:hover{background:rgba(0,0,0,.14)!important}
-#s-focus .fset .fpre button[aria-pressed="true"]{background:#fff!important;color:var(--orange)!important}
-#s-focus .fset .fmap{align-self:stretch;margin:2px 0 0!important}
-#s-focus .fset .fseg{background:rgba(0,0,0,.16)!important;border-color:transparent!important;border-radius:8px!important}
-#s-focus .fset .fseg .fill{background:#fff!important}
-#s-focus .fset .fseg.br{background:transparent!important;border:1.5px dashed rgba(255,255,255,.55)!important}
-#s-focus .fset .fseg em{color:#fff!important;font-family:var(--sans)!important;opacity:1!important;mix-blend-mode:normal!important}
-#s-focus .fset .fplan{color:rgba(255,255,255,.9)!important;font-size:13px!important;margin:0!important}
-#s-focus .fset .fplan{margin-bottom:auto!important}
-#s-focus .fmore{align-self:stretch;margin-top:18px;border-top:1px solid rgba(255,255,255,.25);padding-top:10px;text-align:left}
-#s-focus .fmore summary{cursor:pointer;list-style:none;font-size:12.5px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
-#s-focus .fmore summary::-webkit-details-marker{display:none}
-#s-focus .fmore summary:before{content:"›";display:inline-block;font-size:16px;line-height:1;transition:transform .15s}
-#s-focus .fmore[open] summary:before{transform:rotate(90deg)}
-#s-focus .fset .frhythm{display:flex!important;flex-direction:column;gap:8px!important;margin:10px 0 0!important;padding:0!important;border:0!important;background:none!important}
-#s-focus .fset .frh{display:flex!important;align-items:center;gap:8px;justify-content:flex-start!important}
-#s-focus .fset .frh span{flex:1;color:rgba(255,255,255,.85)!important;font-size:12.5px}
-#s-focus .fset .frh b{min-width:56px;text-align:center;color:#fff!important;font-size:13px}
-#s-focus .fset .frh button{width:28px!important;height:28px!important;border-radius:50%!important;background:rgba(0,0,0,.16)!important;color:#fff!important;padding:0!important;display:grid;place-items:center;border:0!important}
-#s-focus .fset .fopts{display:flex!important;flex-wrap:wrap;gap:6px 14px!important;justify-content:flex-start!important;margin:10px 0 0!important}
-#s-focus .fset .fchk{color:#fff!important;font-size:12.5px}
-#s-focus .fset .fchk input{accent-color:#fff}
-#s-focus .fset .fwarn{color:rgba(255,255,255,.85)!important;font-size:11.5px!important;margin-top:8px!important;text-align:left!important}
-#s-focus .fset-what{grid-area:what;padding:22px 24px 14px;min-width:0;display:flex;flex-direction:column}
-#s-focus .fset-what h2{font-size:26px!important;line-height:1.05!important;margin:0 0 4px!important}
-#s-focus .fset-what .lbl{display:block;margin:14px 0 7px!important}
-#s-focus .fset-what .fweek-hint{display:none}
-#s-focus .fset .fweek{display:flex!important;flex-direction:column;gap:6px!important;max-height:236px;overflow-y:auto;scrollbar-width:thin;padding-right:2px}
-#s-focus .fset .fwk{background:var(--surface-2)!important;border:0!important;border-radius:14px!important;box-shadow:none!important;padding:10px 12px!important;color:var(--ink)!important}
-#s-focus .fset .fwk:hover{background:var(--surface-3)!important}
-#s-focus .fset .fwk[aria-pressed="true"]{background:color-mix(in srgb,var(--orange) 14%,var(--surface))!important;box-shadow:inset 0 0 0 2px var(--orange)!important}
-#s-focus .fset .fwk-t{color:var(--ink)!important}
-#s-focus .fset .fwk-m,#s-focus .fset .fwk.late .fwk-m{color:var(--muted)!important}
-#s-focus .fset .fwk-no{background:var(--orange)!important;color:#fff!important}
-#s-focus .fset .fweek-empty{color:var(--muted);font-size:13px;background:var(--surface-2);border-radius:14px;padding:12px 14px}
-#s-focus .fset .pills{display:flex;flex-wrap:wrap;gap:6px}
-#s-focus .fset .pills button{padding:6px 12px!important;font-size:12px!important}
-#s-focus .fset-go{grid-area:go;display:flex;align-items:center;flex-wrap:wrap;gap:6px 16px;padding:16px 24px 20px;border-top:1px solid var(--border)}
-#s-focus .fset-go .primary{padding:13px 26px!important;font-size:15px!important;box-shadow:0 10px 24px color-mix(in srgb,var(--orange) 30%,transparent)}
-#s-focus .fset-end{font-size:14px;color:var(--ink-2)}#s-focus .fset-end b{color:var(--ink)}
-#s-focus .fset-tip{margin-left:auto;font-size:12px;color:var(--muted)}
+:is(#s-focus,#s-today) .fset .fnum b *{color:rgba(255,255,255,.75)!important;-webkit-text-fill-color:rgba(255,255,255,.75);font-size:.42em}
+:is(#s-focus,#s-today) .fset .fpre{display:flex!important;flex-wrap:nowrap!important;gap:0!important;background:rgba(0,0,0,.14)!important;border:0!important;box-shadow:none!important;border-radius:999px!important;padding:4px!important;margin:0!important;width:auto!important;max-width:100%}
+:is(#s-focus,#s-today) .fset .fpre button{flex:none;background:transparent!important;color:#fff!important;border:0!important;border-radius:999px!important;padding:6px 10px!important;font-weight:700;font-size:12.5px;white-space:nowrap}
+:is(#s-focus,#s-today) .fset .fpre button:hover{background:rgba(0,0,0,.14)!important}
+:is(#s-focus,#s-today) .fset .fpre button[aria-pressed="true"]{background:#fff!important;color:var(--orange)!important}
+:is(#s-focus,#s-today) .fset .fmap{align-self:stretch;margin:2px 0 0!important}
+:is(#s-focus,#s-today) .fset .fseg{background:rgba(0,0,0,.16)!important;border-color:transparent!important;border-radius:8px!important}
+:is(#s-focus,#s-today) .fset .fseg .fill{background:#fff!important}
+:is(#s-focus,#s-today) .fset .fseg.br{background:transparent!important;border:1.5px dashed rgba(255,255,255,.55)!important}
+:is(#s-focus,#s-today) .fset .fseg em{color:#fff!important;font-family:var(--sans)!important;opacity:1!important;mix-blend-mode:normal!important}
+:is(#s-focus,#s-today) .fset .fplan{color:rgba(255,255,255,.9)!important;font-size:13px!important;margin:0!important}
+:is(#s-focus,#s-today) .fset .fplan{margin-bottom:auto!important}
+:is(#s-focus,#s-today) .fmore{align-self:stretch;margin-top:18px;border-top:1px solid rgba(255,255,255,.25);padding-top:10px;text-align:left}
+:is(#s-focus,#s-today) .fmore summary{cursor:pointer;list-style:none;font-size:12.5px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
+:is(#s-focus,#s-today) .fmore summary::-webkit-details-marker{display:none}
+:is(#s-focus,#s-today) .fmore summary:before{content:"›";display:inline-block;font-size:16px;line-height:1;transition:transform .15s}
+:is(#s-focus,#s-today) .fmore[open] summary:before{transform:rotate(90deg)}
+:is(#s-focus,#s-today) .fset .frhythm{display:flex!important;flex-direction:column;gap:8px!important;margin:10px 0 0!important;padding:0!important;border:0!important;background:none!important}
+:is(#s-focus,#s-today) .fset .frh{display:flex!important;align-items:center;gap:8px;justify-content:flex-start!important}
+:is(#s-focus,#s-today) .fset .frh span{flex:1;color:rgba(255,255,255,.85)!important;font-size:12.5px}
+:is(#s-focus,#s-today) .fset .frh b{min-width:56px;text-align:center;color:#fff!important;font-size:13px}
+:is(#s-focus,#s-today) .fset .frh button{width:28px!important;height:28px!important;border-radius:50%!important;background:rgba(0,0,0,.16)!important;color:#fff!important;padding:0!important;display:grid;place-items:center;border:0!important}
+:is(#s-focus,#s-today) .fset .fopts{display:flex!important;flex-wrap:wrap;gap:6px 14px!important;justify-content:flex-start!important;margin:10px 0 0!important}
+:is(#s-focus,#s-today) .fset .fchk{color:#fff!important;font-size:12.5px}
+:is(#s-focus,#s-today) .fset .fchk input{accent-color:#fff}
+:is(#s-focus,#s-today) .fset .fwarn{color:rgba(255,255,255,.85)!important;font-size:11.5px!important;margin-top:8px!important;text-align:left!important}
+:is(#s-focus,#s-today) .fset-what{grid-area:what;padding:22px 24px 14px;min-width:0;display:flex;flex-direction:column}
+:is(#s-focus,#s-today) .fset-what h2{font-size:26px!important;line-height:1.05!important;margin:0 0 4px!important}
+:is(#s-focus,#s-today) .fset-what .lbl{display:block;margin:14px 0 7px!important}
+:is(#s-focus,#s-today) .fset-what .fweek-hint{display:none}
+:is(#s-focus,#s-today) .fset .fweek{display:flex!important;flex-direction:column;gap:6px!important;max-height:236px;overflow-y:auto;scrollbar-width:thin;padding-right:2px}
+:is(#s-focus,#s-today) .fset .fwk{background:var(--surface-2)!important;border:0!important;border-radius:14px!important;box-shadow:none!important;padding:10px 12px!important;color:var(--ink)!important}
+:is(#s-focus,#s-today) .fset .fwk:hover{background:var(--surface-3)!important}
+:is(#s-focus,#s-today) .fset .fwk[aria-pressed="true"]{background:color-mix(in srgb,var(--orange) 14%,var(--surface))!important;box-shadow:inset 0 0 0 2px var(--orange)!important}
+:is(#s-focus,#s-today) .fset .fwk-t{color:var(--ink)!important}
+:is(#s-focus,#s-today) .fset .fwk-m,:is(#s-focus,#s-today) .fset .fwk.late .fwk-m{color:var(--muted)!important}
+:is(#s-focus,#s-today) .fset .fwk-no{background:var(--orange)!important;color:#fff!important}
+:is(#s-focus,#s-today) .fset .fweek-empty{color:var(--muted);font-size:13px;background:var(--surface-2);border-radius:14px;padding:12px 14px}
+:is(#s-focus,#s-today) .fset .pills{display:flex;flex-wrap:wrap;gap:6px}
+:is(#s-focus,#s-today) .fset .pills button{padding:6px 12px!important;font-size:12px!important}
+:is(#s-focus,#s-today) .fset-go{grid-area:go;display:flex;align-items:center;flex-wrap:wrap;gap:6px 16px;padding:16px 24px 20px;border-top:1px solid var(--border)}
+:is(#s-focus,#s-today) .fset-go .primary{padding:13px 26px!important;font-size:15px!important;box-shadow:0 10px 24px color-mix(in srgb,var(--orange) 30%,transparent)}
+:is(#s-focus,#s-today) .fset-end{font-size:14px;color:var(--ink-2)}:is(#s-focus,#s-today) .fset-end b{color:var(--ink)}
+:is(#s-focus,#s-today) .fset-tip{margin-left:auto;font-size:12px;color:var(--muted)}
 @media(max-width:760px){
-  #s-focus .fset{grid-template-columns:1fr;grid-template-areas:"time" "what" "go"}
-  #s-focus .fset-tip{margin-left:0;flex-basis:100%}
-  #s-focus .fset-go .primary{flex:1}
+  :is(#s-focus,#s-today) .fset{grid-template-columns:1fr;grid-template-areas:"time" "what" "go"}
+  :is(#s-focus,#s-today) .fset-tip{margin-left:0;flex-basis:100%}
+  :is(#s-focus,#s-today) .fset-go .primary{flex:1}
 }
-#s-focus #fMain>.card .gauge circle:first-of-type{stroke:rgba(255,255,255,.25)!important}
-#s-focus #fMain>.card .gauge circle:last-of-type{stroke:#fff!important}
-#s-focus #fMain>.card .gauge .num b,#s-focus #fMain>.card .gauge .num span,#s-focus #fMain>.card .fr-state,#s-focus #fMain>.card .fr-time{color:#fff!important}
+:is(#fMain,#todayTimer)>.card .gauge circle:first-of-type{stroke:rgba(255,255,255,.25)!important}
+:is(#fMain,#todayTimer)>.card .gauge circle:last-of-type{stroke:#fff!important}
+:is(#fMain,#todayTimer)>.card .gauge .num b,:is(#fMain,#todayTimer)>.card .gauge .num span,:is(#fMain,#todayTimer)>.card .fr-state,:is(#fMain,#todayTimer)>.card .fr-time{color:#fff!important}
 
+
+/* Today: the deep-block card is the Focus card, full width above the priorities */
+#s-today .tgrid{grid-template-columns:1fr!important}
+#s-today #trail{order:-1;grid-column:1/-1;min-width:0}
+#s-today #blockCard{background:transparent!important;box-shadow:none!important;padding:0!important;border:0!important}
+#s-today #blockCard>.spread,#s-today #blockCard>#gate,#s-today #blockCard>.lbl,#s-today #blockCard>#blockQ,#s-today #blockCard>details{display:none!important}
+#s-today #todayTimer>.card{margin:0!important}
 </style>
 </head>
 <body class="workspace">
@@ -5604,11 +5611,14 @@ function fPaintLive(){
 function fPaintToday(){
   paintTodayOverview();
   var box=$("#todayTimer"); if(!box) return;
+  /* Today shows exactly the Focus page's card, so the two never differ. */
   if(fLive()){
-    var html=fLiveHTML(true);
+    var html=fLiveHTML(false);
     if(html){ box.innerHTML=html; fBindLive(box); return; }
   }
-  box.innerHTML=fSetupHTML(true); fBindSetup(box);
+  var lab=box.querySelector("[data-flabel]");
+  if(lab && document.activeElement===lab) return;
+  box.innerHTML=fSetupHTML(false); fBindSetup(box);
 }
 
 function fPaintStats(){
@@ -8768,7 +8778,7 @@ function setTab(k){
   B.show(k);
   if(k==="sync"){ renderSync(); }
   if(k==="classes" && B.paintClasses) B.paintClasses();
-  if(k==="focus" && B.paintFocus) B.paintFocus();
+  if((k==="focus"||k==="today") && B.paintFocus) B.paintFocus();
   if(k==="gym" && B.paintGym) B.paintGym();
   if(k==="cal" && B.paintCal) B.paintCal();
   Array.prototype.forEach.call(nav.querySelectorAll("[data-nt]"),function(b){
@@ -15285,6 +15295,8 @@ function renderAll(){if(drag)return;renderTabs();renderChips();renderGrid();rend
 var _render=B.render;B.render=function(){var r=_render.apply(this,arguments);try{renderAll();}catch(e){}return r;};
 new MutationObserver(function(){if(ROOT.classList.contains("on")){renderAll();renderDeadlines();}}).observe(ROOT,{attributes:true,attributeFilter:["class"]});
 renderStatic();renderSyl();renderDeadlines();renderAll();
+/* the session cards list this week's blocks, which only exist once the planner has seeded them */
+try{ if(B.paintFocus) B.paintFocus(); }catch(e){}
 setInterval(function(){if(ROOT.classList.contains("on")){renderDeadlines();if(!drag&&!$("#pl-drawer").classList.contains("pl-open"))renderGrid();}},60000);
 window.CompassPlanner={render:renderAll,blocks:function(){return blocks();},focus:function(id,mins){startFocus(byId(id),mins);},
   lessons:function(d){return effLessons().filter(function(l){return !d||l.d===d;});},deadlines:function(){return DEADLINES.slice();},
