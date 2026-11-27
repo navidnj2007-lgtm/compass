@@ -2995,6 +2995,84 @@ input[type=range]{accent-color:var(--orange)}
 :root[data-theme=dark] body.workspace .workspace-sidebar{box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.04)!important}
 :root[data-theme=dark] body.workspace .card,:root[data-theme=dark] .ck-card,:root[data-theme=dark] .pl-panel,:root[data-theme=dark] .pl-weekwrap,:root[data-theme=dark] .askshell,:root[data-theme=dark] .fdial{box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.04)!important}
 body.workspace a.workspace-brand{color:var(--ink)!important}
+/* ══ FOCUS: laid out like Today ══
+   Today's numbers on the sky across the top, the session card as the red
+   "now" card on the left, music and the week in white cards on the right. */
+@media(min-width:1001px){
+  #s-focus .fgrid{display:grid!important;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)!important;
+    grid-template-areas:"hero hero" "setup music" "setup week" "setup .";grid-template-rows:auto auto auto 1fr;gap:16px!important;align-items:start}
+}
+@media(max-width:1000px){
+  #s-focus .fgrid{display:grid!important;grid-template-columns:1fr!important;grid-template-areas:"hero" "setup" "week" "music";gap:14px!important}
+}
+#s-focus #fMain,#s-focus #fStats{display:contents!important}
+@media(max-width:1000px){
+  #s-focus #fStats>.card:nth-child(1){grid-template-columns:1fr!important;grid-template-areas:"head" "done" "stats"!important;padding-top:14px!important;row-gap:10px}
+  #s-focus .frow>*{min-height:0;padding:8px 10px 6px}
+  #s-focus .frow>*:first-child{border-left:0;padding-left:0}
+  #s-focus .fcol b,#s-focus .frow .gauge .num b{font-size:28px!important}
+  #s-focus .frow .gauge svg{width:44px!important;height:44px!important}
+  #s-focus .frow .gauge{gap:8px}
+}
+#s-focus #fMain>:not(#fStats){grid-area:setup;min-width:0}
+#s-focus #fStats>.card:nth-child(1){grid-area:hero}
+#s-focus #fStats>.card:nth-child(2){grid-area:week}
+#s-focus #fStats>.card:nth-child(n+3){grid-column:-2}
+#s-focus #lofiMount{grid-area:music;min-width:0}
+/* hero: on the sky */
+#s-focus #fStats>.card:nth-child(1){background:transparent!important;box-shadow:none!important;padding:26px 0 6px!important;margin:0!important;border-radius:0!important;
+  display:grid;grid-template-columns:minmax(260px,.9fr) minmax(0,2fr);grid-template-areas:"head stats" "done stats";column-gap:16px;align-items:end}
+#s-focus #fStats>.card:nth-child(1)>.spread{grid-area:head;justify-content:flex-start!important;gap:12px;margin:0!important}
+#s-focus #fStats>.card:nth-child(1) h2{font-family:var(--sans)!important;font-size:10.5px!important;font-weight:700!important;letter-spacing:.08em!important;text-transform:uppercase;color:var(--on-sky)!important;font-variation-settings:normal}
+#s-focus #fGoalEdit{background:rgba(255,255,255,.18)!important;color:#fff!important;padding:4px 11px!important;font-size:11.5px!important}
+#s-focus .fdone{grid-area:done;color:var(--on-sky-2)!important;font-size:15px!important;margin:0!important;padding:0!important;border:0!important;background:none!important;text-align:left!important}
+#s-focus .fdone b{display:block;font-family:var(--display)!important;font-size:clamp(72px,8vw,108px)!important;font-weight:500!important;line-height:1!important;letter-spacing:-.03em;color:var(--on-sky)!important;font-variation-settings:"wdth" 78;margin:6px 0 0}
+#s-focus .frow{grid-area:stats;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:0!important;margin:0!important}
+#s-focus .frow>*{padding:10px 18px 12px;border-left:1px solid rgba(255,255,255,.22);min-height:96px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start!important;text-align:left!important}
+:root[data-theme=dark] #s-focus .frow>*{border-color:rgba(255,255,255,.12)}
+#s-focus .fcol b{font-family:var(--display)!important;font-size:36px!important;font-weight:500!important;color:var(--on-sky)!important;font-variation-settings:"wdth" 80;line-height:1.05}
+#s-focus .fcol span{order:-1;font-size:10.5px!important;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--on-sky-2)!important;margin-bottom:6px}
+#s-focus .frow .gauge{flex-direction:row!important;align-items:center!important;gap:12px}
+#s-focus .frow .gauge svg{width:64px!important;height:64px!important;flex:none}
+#s-focus .frow .gauge .num{position:static!important;transform:none!important;text-align:left!important}
+#s-focus .frow .gauge .num b{font-family:var(--display)!important;font-size:36px!important;font-weight:500!important;color:var(--on-sky)!important;font-variation-settings:"wdth" 80;display:block;line-height:1}
+#s-focus .frow .gauge .num span{white-space:nowrap;font-size:10.5px!important;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--on-sky-2)!important}
+#s-focus .frow .gauge circle:first-of-type{stroke:rgba(255,255,255,.22)!important}
+#s-focus .frow .gauge circle:last-of-type{stroke:#fff!important}
+/* the session card: red, like Today's now card */
+#s-focus #fMain>.card{--tone:#fff;background:var(--orange)!important;color:#fff;box-shadow:0 18px 40px color-mix(in srgb,var(--orange) 32%,transparent)!important;padding:24px 26px!important}
+#s-focus #fMain>.card h2{color:#fff!important;font-size:clamp(30px,3vw,40px)!important;line-height:1.02!important}
+#s-focus #fMain>.card .hint,#s-focus #fMain>.card .fplan,#s-focus #fMain>.card .fends,#s-focus #fMain>.card .fwarn,#s-focus #fMain>.card .fmeta,
+#s-focus #fMain>.card .lbl,#s-focus #fMain>.card .fweek-hint,#s-focus #fMain>.card .fchk,#s-focus #fMain>.card .frh>span{color:rgba(255,255,255,.86)!important}
+#s-focus #fMain>.card .fends b,#s-focus #fMain>.card .frh b{color:#fff!important}
+#s-focus .fdial{background:rgba(0,0,0,.12)!important;box-shadow:none!important;border:0!important}
+#s-focus .fnum b{font-family:var(--display)!important;color:#fff!important;font-weight:500!important;font-size:64px!important;font-variation-settings:"wdth" 78;letter-spacing:-.02em!important}
+#s-focus .fnum b *,#s-focus .fnum span{color:rgba(255,255,255,.8)!important}
+#s-focus #fMain>.card .ghost,#s-focus .fstep button,#s-focus .fpre button,#s-focus #fMain>.card .pills button{background:rgba(0,0,0,.14)!important;color:#fff!important;border:0!important}
+#s-focus #fMain>.card .ghost:hover,#s-focus .fpre button:hover,#s-focus #fMain>.card .pills button:hover{background:rgba(0,0,0,.24)!important}
+#s-focus .fpre{background:rgba(0,0,0,.12)!important;border-radius:999px;padding:4px}
+#s-focus .fpre button{background:transparent!important;border-radius:999px!important}
+#s-focus .fpre button[aria-pressed="true"],#s-focus #fMain>.card .pills button[aria-pressed=true]{background:#fff!important;color:var(--orange)!important}
+#s-focus .fseg{background:rgba(0,0,0,.14)!important;border-color:transparent!important}
+#s-focus .fseg .fill{background:#fff!important}
+#s-focus .fseg.br{border:1.5px dashed rgba(255,255,255,.5)!important;background:transparent!important}
+#s-focus .fseg.br .fill{background:rgba(255,255,255,.4)!important}
+#s-focus .fseg em{color:#fff!important;font-family:var(--sans)!important}
+#s-focus .fseg em{color:#fff!important;mix-blend-mode:normal!important;opacity:1!important}
+#s-focus .fwk{background:rgba(0,0,0,.13)!important;border:0!important;border-radius:16px!important;color:#fff!important;box-shadow:none!important}
+#s-focus .fwk:hover{background:rgba(0,0,0,.22)!important}
+#s-focus .fwk[aria-pressed="true"]{background:#fff!important;color:var(--ink)!important}
+#s-focus .fwk[aria-pressed="true"] .fwk-t{color:var(--block-ink)!important}#s-focus .fwk[aria-pressed="true"] .fwk-m{color:#5d6878!important}
+#s-focus .fwk-t{color:#fff}#s-focus .fwk-m,#s-focus .fwk.late .fwk-m{color:rgba(255,255,255,.75)!important}
+#s-focus .fwk-dot{box-shadow:0 0 0 2px rgba(255,255,255,.75)}
+#s-focus #fMain>.card .fld{background:rgba(255,255,255,.18)!important;color:#fff!important}
+#s-focus #fMain>.card .fld::placeholder{color:rgba(255,255,255,.7)}
+#s-focus #fMain>.card input[type=checkbox]{accent-color:#fff}
+#s-focus #fMain>.card .primary{background:#fff!important;color:var(--orange)!important;font-size:15px!important;padding:12px 22px!important}
+#s-focus #fMain>.card .gauge circle:first-of-type{stroke:rgba(255,255,255,.25)!important}
+#s-focus #fMain>.card .gauge circle:last-of-type{stroke:#fff!important}
+#s-focus #fMain>.card .gauge .num b,#s-focus #fMain>.card .gauge .num span,#s-focus #fMain>.card .fr-state,#s-focus #fMain>.card .fr-time{color:#fff!important}
+
 </style>
 </head>
 <body class="workspace">
@@ -4056,7 +4134,7 @@ function show(k){
   var loc=$('.workspace-location span'); if(loc) loc.textContent=(g.n===pageName(k)?'':g.n); var sl=$('.breadcrumb-slash'); if(sl) sl.hidden=(g.n===pageName(k));
   $('#workspaceCrumb').textContent=pageName(k);
   $('#workspaceTitle').textContent=m[1];$('#workspaceGroup').textContent=m[0];$('#workspaceDescription').textContent=m[2];
-  $('#workspacePageHeading').hidden=(k==='today'||k==='plan'||k==='prog');$('#subline').hidden=true;
+  $('#workspacePageHeading').hidden=(k==='today'||k==='plan'||k==='prog'||k==='focus');$('#subline').hidden=true;
   document.title=pageName(k)+' · Compass';
   document.body.dataset.page=k; document.body.dataset.group=g.k;
   window.scrollTo({top:0,behavior:'instant'});
