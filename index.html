@@ -2995,6 +2995,68 @@ input[type=range]{accent-color:var(--orange)}
 :root[data-theme=dark] body.workspace .workspace-sidebar{box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.04)!important}
 :root[data-theme=dark] body.workspace .card,:root[data-theme=dark] .ck-card,:root[data-theme=dark] .pl-panel,:root[data-theme=dark] .pl-weekwrap,:root[data-theme=dark] .askshell,:root[data-theme=dark] .fdial{box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.04)!important}
 body.workspace a.workspace-brand{color:var(--ink)!important}
+/* ══ Lectio strip on Week ══ */
+.pl-lectio{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:12px 0 0;padding:12px 16px;border-radius:18px;background:var(--surface);box-shadow:var(--shadow);font-family:var(--sans)}
+.pl-lx-main{display:flex;flex-direction:column;gap:2px;flex:1;min-width:220px}
+.pl-lx-main b{font-size:14px;color:var(--ink)}.pl-lx-main span{font-size:12.5px;color:var(--muted)}
+.pl-lx-act{display:flex;gap:6px;flex-wrap:wrap}
+.pl-lx-bm{text-decoration:none!important;color:#fff!important;cursor:grab}
+.pl-lx-how{flex-basis:100%;font-size:13px;color:var(--ink-2);border-top:1px solid var(--border);padding-top:10px}
+.pl-lx-how ol{margin:0 0 10px;padding-left:20px;display:flex;flex-direction:column;gap:5px}
+.pl-lx-row{display:flex;gap:6px;margin-top:6px}.pl-lx-row .fld{flex:1;padding:8px 12px}
+
+/* ══ PAST PAPERS ══ */
+#s-papers .pp-top{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px}
+#s-papers .pp-cards{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;min-width:0}
+#s-papers .pp-card{--c:var(--d1);position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:14px 16px 12px;border-radius:18px;
+  background:var(--surface);box-shadow:var(--shadow);border:0;color:var(--ink);transition:transform .15s}
+#s-papers .pp-card:hover{transform:translateY(-1px)}
+#s-papers .pp-card.on{box-shadow:var(--shadow),inset 0 0 0 2px var(--c)}
+#s-papers .pp-name{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--ink-2)}
+#s-papers .pp-name i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+#s-papers .pp-big{font-family:var(--display);font-size:34px;font-weight:600;line-height:1.05;font-variation-settings:"wdth" 80}
+#s-papers .pp-big small{font-size:16px;color:var(--muted);margin-left:1px}
+#s-papers .pp-meta{font-size:11.5px;color:var(--muted)}
+#s-papers .pp-grade{position:absolute;top:12px;right:12px;font-weight:700;font-size:12px;padding:3px 9px;border-radius:999px;background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--ink)}
+#s-papers .pp-spark{width:86px;height:24px;margin-top:4px}
+#s-papers .pp-spark polyline{fill:none;stroke:var(--c);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+#s-papers .pp-log{flex:none;padding:11px 18px!important}
+#s-papers .card{margin-bottom:16px}
+#s-papers .card h2{font-size:22px!important;margin:0 0 10px}
+#s-papers .pp-gridhd{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#s-papers .pp-legend{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted)}
+#s-papers .pp-legend i{width:10px;height:10px;border-radius:3px;margin-left:8px}
+#s-papers .hi{--t:var(--green)}#s-papers .mid{--t:var(--yellow)}#s-papers .lo{--t:var(--orange)}
+#s-papers .pp-legend i,#s-papers .pp-cell:not(.empty){background:var(--t)}
+#s-papers .pp-table{display:flex;flex-direction:column;gap:4px;max-height:460px;overflow:auto;padding-right:4px}
+#s-papers .pp-row{display:grid;grid-template-columns:110px repeat(3,minmax(0,1fr));gap:4px;align-items:center}
+#s-papers .pp-head{position:sticky;top:0;background:var(--surface);z-index:1;padding-bottom:4px;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+#s-papers .pp-ses{font-size:13px;font-weight:600;color:var(--ink-2)}
+#s-papers .pp-cell{height:34px;border-radius:10px;border:0;font-weight:700;font-size:13px;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:0!important}
+#s-papers .pp-cell.mid{color:var(--block-ink)}
+#s-papers .pp-cell sup{font-size:9px;margin-left:2px;opacity:.8}
+#s-papers .pp-cell.empty{background:var(--surface-2);color:var(--muted);font-size:16px;font-weight:500}
+#s-papers .pp-cell.empty:hover{background:var(--surface-3);color:var(--ink)}
+#s-papers .pp-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+#s-papers .pp-fields label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+#s-papers .pp-fields .fld{width:100%;padding:9px 12px;font-size:14px}
+#s-papers .pp-wide{grid-column:1/-1}
+#s-papers .pp-actions{display:flex;gap:8px;margin-top:14px}
+#s-papers .pp-del{margin-left:auto;color:var(--crit)!important}
+#s-papers .pp-err{margin-top:10px;color:var(--crit);font-size:13px;font-weight:600}
+#s-papers .pp-recent{display:flex;flex-direction:column;gap:6px}
+#s-papers .pp-item{--c:var(--d1);display:grid;grid-template-columns:10px minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:10px;align-items:center;text-align:left;
+  padding:10px 14px;border-radius:14px;border:0;background:var(--surface-2);color:var(--ink)}
+#s-papers .pp-item:hover{background:var(--surface-3)}
+#s-papers .pp-item>i{grid-row:1/3;width:10px;height:10px;border-radius:50%;background:var(--c)}
+#s-papers .pp-it-t{font-weight:700;font-size:13.5px}
+#s-papers .pp-it-m{grid-column:2;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#s-papers .pp-item>b{grid-row:1/3;grid-column:3;font-size:15px;padding:4px 10px;border-radius:999px;background:var(--t);color:#fff}
+#s-papers .pp-item>b.mid{color:var(--block-ink)}
+#s-papers .pp-empty,#s-papers .pp-note{color:var(--muted);font-size:13px}
+#s-papers .pp-note{color:var(--on-sky-2)}
+@media(max-width:760px){#s-papers .pp-top{flex-direction:column;align-items:stretch}#s-papers .pp-cards{width:100%;grid-template-columns:1fr 1fr}#s-papers .pp-card{padding:12px}#s-papers .pp-big{font-size:28px}#s-papers .pp-log{width:100%}#s-papers .pp-row{grid-template-columns:84px repeat(3,minmax(0,1fr))}}
+
 /* ══ FOCUS: laid out like Today ══
    Today's numbers on the sky across the top, the session card as the red
    "now" card on the left, music and the week in white cards on the right. */
@@ -3601,6 +3663,8 @@ body.workspace a.workspace-brand{color:var(--ink)!important}
 
 
 <!-- ═══════════════ PLANNER (Navid's IB Plan) ═══════════════ -->
+<section id="s-papers"></section>
+
 <section id="s-prog">
   <div class="pl-cover">
     <div>
@@ -3699,6 +3763,7 @@ body.workspace a.workspace-brand{color:var(--ink)!important}
     </div>
     <div class="pl-banner" id="pl-banner" hidden></div>
     <div class="pl-weekwrap"><div class="pl-week" id="pl-grid"></div></div>
+    <div class="pl-lectio" id="pl-lectio"></div>
     <div class="pl-foot"><span id="pl-range"></span><div class="pl-pbar" aria-hidden="true"><i id="pl-bar"></i></div><span id="pl-count"></span><span id="pl-lcount"></span></div>
   </div>
 </section>
@@ -4093,12 +4158,12 @@ function execScore(){
    Every old page key still works (CompassSetTab('sync'), ('plan') ...), the
    sidebar and the phone tab bar just show the five groups. Tasks, Gym and
    "Why it works" stay retired; their sections are kept, unlinked. */
-var TABS=[["today","Today"],["focus","Focus"],["plan","Week"],["cal","Calendar"],["week","Weekly review"],["school","Subjects"],["prog","Progress"],["revise","Revision"],["notes","Notes"],["nutri","Nutrition"],["goals","Goals"],["ask","Assistant"],["sync","Data & sync"]];
+var TABS=[["today","Today"],["focus","Focus"],["plan","Week"],["cal","Calendar"],["week","Weekly review"],["school","Subjects"],["prog","Progress"],["papers","Past papers"],["revise","Revision"],["notes","Notes"],["nutri","Nutrition"],["goals","Goals"],["ask","Assistant"],["sync","Data & sync"]];
 var GONE_TABS={tasks:1, gym:1, why:1};
 var GROUPS=[
   {k:"today",n:"Today",p:["today","focus"]},
   {k:"week",n:"Plan",p:["plan","cal","week"]},
-  {k:"school",n:"School",p:["school","prog","revise","notes"]},
+  {k:"school",n:"School",p:["school","prog","papers","revise","notes"]},
   {k:"me",n:"Me",p:["nutri","goals"]},
   {k:"tools",n:"Tools",p:["ask","sync"]}
 ];
@@ -4119,6 +4184,7 @@ var PICON={
   week:SVGA+'<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4.5V8h3.5"/></svg>',
   school:SVGA+'<path d="M3 8.5 12 4.5l9 4-9 4-9-4z"/><path d="M7 10.6V16c0 1.2 2.2 2.2 5 2.2s5-1 5-2.2v-5.4"/></svg>',
   prog:SVGA+'<path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>',
+  papers:SVGA+'<path d="M6 3.5h9l3.5 3.5v13.5H6z"/><path d="m9 13 2 2 4-4.5"/></svg>',
   classes:SVGA+'<rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M7 13h4M7 16.5h7"/></svg>',
   revise:SVGA+'<path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4.5V8h-3.5"/><path d="M12 8v4l2.5 1.5"/></svg>',
   notes:SVGA+'<path d="M6 3.5h9l3.5 3.5v13.5H6z"/><path d="M9 11h6M9 14.5h6M9 18h3"/></svg>',
@@ -4131,7 +4197,7 @@ var PICON={
   sync:SVGA+'<path d="M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z"/><path d="M4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>'
 };
 /* Sidebar sections (desktop). Phones keep the five groups in the tab bar. */
-var SIDE=[{h:"",p:["today","focus"]},{h:"Plan",p:["plan","cal","week"]},{h:"School",p:["school","prog","revise","notes"]},{h:"Me",p:["nutri","goals"]},{h:"",p:["ask","sync"],end:1}];
+var SIDE=[{h:"",p:["today","focus"]},{h:"Plan",p:["plan","cal","week"]},{h:"School",p:["school","prog","papers","revise","notes"]},{h:"Me",p:["nutri","goals"]},{h:"",p:["ask","sync"],end:1}];
 var PAGE_META={
   today:['Today','Dashboard','Where you are right now, and what is next.'],
   focus:['Today','Focus','One block, one question, phone in another room.'],
@@ -4139,6 +4205,7 @@ var PAGE_META={
   cal:['Plan','Calendar','Every past day: what you did, slept and finished.'],
   week:['Plan','Weekly review','Look back at the week, then shape the next one.'],
   school:['School','Subjects','Workload and deadlines per subject.'],
+  papers:['School','Past papers','Every past paper you have done: scores, time and how each subject is trending.'],
   prog:['School','Progress','Balance, syllabus progress and every deadline to May 2027.'],
   revise:['School','Revision','Spaced revision: the topics that are due.'],
   notes:['School','Notes','Questions and ideas, saved per subject.'],
@@ -14938,11 +15005,120 @@ function weekBlocks(mon){var e=addDays(mon,7);return blocks().filter(function(t)
 function weeks(){var tm=mondayOf(ymd(now())),a0=addDays(tm,-21),a1=addDays(tm,56),b0=addDays(curMon,-7),b1=addDays(curMon,14);
   var st=b0<a0?b0:a0,en=b1>a1?b1:a1;if(st<FIXED[0])st=FIXED[0];var a=[];for(var m=st;m<=en;m=addDays(m,7))a.push(m);return a;}
 /* ── classes (lessons): Lectio lessons are the defaults; his edits and extra classes live in S.plan ── */
+/* ── Lectio ──
+   Lectio is behind MitID, so no server can log in for him. A bookmark he taps
+   while logged in reads his timetable (this week and the next three) and his
+   hand-ins, and opens Compass with them in the address (#lectio=…). They are
+   kept in S.lectio and replace the built-in lessons for the weeks they cover;
+   his own edits to a lesson (status, topic, time) still apply on top. */
+function lectio(){var L=B.get().lectio;return(L&&Array.isArray(L.lessons)&&L.from&&L.to)?L:null;}
+function allDL(){var L=lectio(),out=DEADLINES.slice();
+  if(L&&Array.isArray(L.tasks))L.tasks.forEach(function(x){if(x.done||!x.d)return;
+    if(out.some(function(d){return d.d===x.d&&d.t===x.t;}))return;
+    out.push({d:x.d,t:x.t,s:x.s||"gen",src:"Lectio",big:/\b(IA|EE|TOK|SRP|essay|exam|eksamen)\b/i.test(x.t)?1:0});});
+  return out.sort(function(a,b){return(a.d||"9999")<(b.d||"9999")?-1:1;});}
+function lectioSub(team){var t=" "+String(team||"").toLowerCase()+" ";
+  if(/\btok\b|theory of/.test(t))return"th";
+  if(/\bma\b|\bmat|math/.test(t))return"ma";
+  if(/\bke\b|kemi|chem/.test(t))return"ke";
+  if(/\bfy\b|fysik|phys/.test(t))return"fy";
+  if(/\bda\b|dansk|danish/.test(t))return"da";
+  if(/øk|oek|econ|samf/.test(t))return"eo";
+  if(/\bfa\b|pers|farsi/.test(t))return"fa";
+  return"gen";}
+function lectioImport(raw){var j;
+  try{j=JSON.parse(decodeURIComponent(escape(atob(String(raw).trim()))));}catch(e){j=null;}
+  if(!j||j.v!==1||!Array.isArray(j.lessons)||!j.from||!j.to){toast("That Lectio data was incomplete. Tap the bookmark on Lectio again.",true);return false;}
+  var clip=function(x,n){return String(x||"").slice(0,n);},okD=function(d){return/^\d{4}-\d{2}-\d{2}$/.test(d);},okT=function(t){return/^\d{2}:\d{2}$/.test(t);};
+  var lessons=j.lessons.filter(function(x){return x&&okD(x.d)&&okT(x.s)&&okT(x.e);}).slice(0,600).map(function(x){
+    return{d:x.d,s:x.s,e:x.e,sub:lectioSub(x.team),team:clip(x.team,60),topic:clip(x.topic,120),room:clip(x.room,40),hw:clip(x.hw,600),
+      status:x.status==="cancelled"?"cancelled":x.status==="changed"?"changed":""};});
+  var tasks=(Array.isArray(j.tasks)?j.tasks:[]).filter(function(x){return x&&x.t;}).slice(0,200).map(function(x){
+    return{d:/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(x.d)?x.d:"",t:clip((x.team?x.team+": ":"")+x.t,160),s:lectioSub(x.team),done:!!x.done};});
+  B.get().lectio={at:new Date().toISOString(),from:j.from,to:j.to,lessons:lessons,tasks:tasks};
+  var open=tasks.filter(function(x){return!x.done;}).length;
+  commit("Lectio updated: "+lessons.length+" lessons, "+open+" open hand-in"+(open===1?"":"s"));return true;}
+var LECTIO_PENDING=/^#lectio=/.test(location.hash)?location.hash.slice(8):null;
+if(LECTIO_PENDING) try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
+function lectioPending(){if(!LECTIO_PENDING)return;var raw=decodeURIComponent(LECTIO_PENDING);LECTIO_PENDING=null;
+  if(lectioImport(raw))setTimeout(function(){if(window.CompassSetTab)window.CompassSetTab("plan");},400);}
+/* The bookmark itself. It runs on lectio.dk, in his own logged-in tab, and only reads. */
+function lectioBookmarklet(dest){
+  var fn=function(DEST){
+    var m=location.pathname.match(/\/lectio\/(\d+)\//);
+    if(!/(^|\.)lectio\.dk$/.test(location.hostname)||!m){alert("Open Lectio and log in first, then tap “Send to Compass” again.");return;}
+    var base="/lectio/"+m[1]+"/", html=document.documentElement.innerHTML, eid=(location.href.match(/elevid=(\d+)/)||html.match(/elevid=(\d+)/)||[])[1];
+    var box=document.createElement("div");box.textContent="Reading Lectio for Compass…";
+    box.style.cssText="position:fixed;z-index:99999;top:16px;right:16px;padding:12px 16px;border-radius:12px;background:#0e1116;color:#fff;font:600 14px system-ui;box-shadow:0 10px 30px rgba(0,0,0,.4)";
+    document.body.appendChild(box);
+    var pad=function(x){return("0"+x).slice(-2);}, ymd=function(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());};
+    var isoWk=function(d){var t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);
+      var y=t.getUTCFullYear(),w=Math.ceil(((t-Date.UTC(y,0,1))/864e5+1)/7);return pad(w)+y;};
+    var mon=new Date();mon.setHours(12,0,0,0);mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
+    var weeks=[0,1,2,3].map(function(i){var d=new Date(mon);d.setDate(d.getDate()+7*i);return d;});
+    var sk=function(d){var u=new URL(/SkemaNy\.aspx/i.test(location.pathname)?location.href:location.origin+base+"SkemaNy.aspx"+(eid?"?type=elev&elevid="+eid:""));
+      u.searchParams.set("week",isoWk(d));return u.toString();};
+    var parse=function(doc){var out=[];
+      doc.querySelectorAll(".s2skemabrik").forEach(function(a){
+        var t=a.getAttribute("data-additionalinfo")||a.getAttribute("data-tooltip")||a.getAttribute("title")||"";
+        var dm=t.match(/(\d{1,2})\/(\d{1,2})-(\d{4})\s+(\d{1,2}):(\d{2})\s+til\s+(\d{1,2}):(\d{2})/);if(!dm)return;
+        var L=t.split("\n").map(function(x){return x.trim();}), title="";
+        for(var i=0;i<L.length&&L[i].indexOf(dm[0])<0;i++) if(L[i]&&!/^(ændret|aflyst)!?$/i.test(L[i])) title=L[i];
+        var hw="",hi=t.search(/Lektier:/i);if(hi>-1)hw=t.slice(hi+8).split(/\n\s*\n|\nNote:|\nØvrigt indhold:/i)[0].trim();
+        var cls=a.className||"";
+        out.push({d:dm[3]+"-"+pad(dm[2])+"-"+pad(dm[1]),s:pad(dm[4])+":"+dm[5],e:pad(dm[6])+":"+dm[7],
+          team:((t.match(/Hold:\s*(.+)/)||[])[1]||"").trim(),room:((t.match(/Lokaler?:\s*(.+)/)||[])[1]||"").trim(),topic:title,hw:hw.slice(0,600),
+          status:/aflyst/i.test(t.slice(0,40))||/s2cancelled/.test(cls)?"cancelled":(/ændret/i.test(t.slice(0,40))||/s2changed/.test(cls)?"changed":"")});
+      });return out;};
+    var get=function(u){return fetch(u,{credentials:"include"}).then(function(r){return r.text();}).then(function(x){return new DOMParser().parseFromString(x,"text/html");});};
+    var tasksOf=function(doc){var out=[],tb=doc.querySelector("table[id*='ExerciseGV'],table.ls-table-layout1");if(!tb)return out;
+      var rows=[].slice.call(tb.querySelectorAll("tr")),hd=rows.length?[].slice.call(rows[0].children).map(function(c){return c.textContent.trim().toLowerCase();}):[];
+      var col=function(n){for(var i=0;i<hd.length;i++)if(hd[i].indexOf(n)===0)return i;return -1;};
+      var cH=col("hold"),cT=col("opgavetitel"),cF=col("frist"),cS=col("status");
+      rows.slice(1).forEach(function(r){var c=r.children;if(!c.length||cT<0)return;
+        var f=cF>-1?(c[cF].textContent.match(/(\d{1,2})-(\d{1,2})-(\d{4})\s+(\d{1,2}):(\d{2})/)||null):null;
+        out.push({team:cH>-1?c[cH].textContent.trim():"",t:c[cT].textContent.trim(),d:f?f[3]+"-"+pad(f[2])+"-"+pad(f[1])+"T"+pad(f[4])+":"+f[5]:"",
+          done:cS>-1&&/afleveret/i.test(c[cS].textContent)});});return out;};
+    Promise.all(weeks.map(function(d){return get(sk(d)).then(parse).catch(function(){return[];});})
+      .concat([get(location.origin+base+"OpgaverElev.aspx"+(eid?"?elevid="+eid:"")).then(tasksOf).catch(function(){return[];})])
+    ).then(function(r){
+      var lessons=[].concat.apply([],r.slice(0,4)), tasks=r[4], to=new Date(mon);to.setDate(to.getDate()+27);
+      if(!lessons.length){box.textContent="Couldn’t read your timetable. Open Skema in Lectio and tap the bookmark there.";setTimeout(function(){box.remove();},6000);return;}
+      var data=btoa(unescape(encodeURIComponent(JSON.stringify({v:1,from:ymd(mon),to:ymd(to),lessons:lessons,tasks:tasks}))));
+      try{var cp=navigator.clipboard&&navigator.clipboard.writeText(data);if(cp&&cp.catch)cp.catch(function(){});}catch(e){}
+      box.textContent="Sent "+lessons.length+" lessons to Compass ✓";setTimeout(function(){box.remove();},4000);
+      window.open(DEST+"#lectio="+encodeURIComponent(data),"_blank");
+    });
+  };
+  return "javascript:"+encodeURIComponent("("+fn.toString()+")("+JSON.stringify(dest)+")");
+}
+function compassURL(){return /^https?:$/.test(location.protocol)?location.origin+location.pathname:"https://navidnj2007-lgtm.github.io/compass/";}
+function renderLectio(){var el=$("#pl-lectio");if(!el)return;var L=B.get().lectio,ago="";
+  if(L&&L.at){var h=Math.round((Date.now()-new Date(L.at))/36e5);ago=h<1?"just now":h<24?h+" h ago":Math.round(h/24)+" days ago";}
+  el.innerHTML='<div class="pl-lx-main"><b>Lectio</b><span>'+(L?'Updated '+esc(ago)+' · '+L.lessons.length+' lessons from '+esc(L.from)+' to '+esc(L.to)+' · '+(L.tasks||[]).filter(function(x){return!x.done;}).length+' open hand-ins':'Not connected yet. Your lessons here are the built-in list.')+'</span></div>'
+    +'<div class="pl-lx-act"><a class="pl-btn pl-primary pl-pill pl-lx-bm" href="'+esc(lectioBookmarklet(compassURL()))+'" title="Drag me to your bookmarks bar" onclick="event.preventDefault();">Send to Compass</a>'
+    +'<button class="pl-btn pl-pill" id="pl-lx-help" type="button">How to set it up</button>'
+    +(L?'<button class="pl-btn pl-pill pl-danger" id="pl-lx-clear" type="button">Disconnect</button>':'')+'</div>'
+    +'<div class="pl-lx-how" id="pl-lx-how" hidden><ol>'
+    +'<li><b>On a computer:</b> drag the red <b>Send to Compass</b> button to your bookmarks bar. <b>On iPhone:</b> tap “Copy bookmark”, bookmark any page in Safari, then edit that bookmark and paste over its address.</li>'
+    +'<li>Open Lectio, log in with MitID, and open <b>Skema</b>.</li>'
+    +'<li>Tap the <b>Send to Compass</b> bookmark. It reads this week, the next three and your hand-ins, then opens Compass with them. Do it again whenever Lectio changes.</li>'
+    +'<li>If Compass doesn’t open by itself, the data is already copied: paste it below.</li></ol>'
+    +'<div class="pl-lx-row"><button class="pl-btn pl-pill" id="pl-lx-copy" type="button">Copy bookmark</button></div>'
+    +'<div class="pl-lx-row"><input class="fld sm" id="pl-lx-paste" placeholder="Paste the Lectio data here"><button class="pl-btn pl-pill" id="pl-lx-go" type="button">Import</button></div></div>';}
+document.addEventListener("click",function(e){var t=e.target;if(!t.closest)return;
+  if(t.closest("#pl-lx-help")){var h=$("#pl-lx-how");h.hidden=!h.hidden;return;}
+  if(t.closest("#pl-lx-copy")){var bad=function(){toast("Couldn’t copy. Long-press the red button instead.",true);};try{navigator.clipboard.writeText(lectioBookmarklet(compassURL())).then(function(){toast("Bookmark copied");},bad);}catch(x){bad();}return;}
+  if(t.closest("#pl-lx-go")){var v=$("#pl-lx-paste").value;if(v&&lectioImport(v.replace(/^.*#lectio=/,"").replace(/%3D/gi,"=")))renderLectio();return;}
+  if(t.closest("#pl-lx-clear")){if(confirm("Disconnect Lectio? Your lessons go back to the built-in list. Your own edits are kept.")){delete B.get().lectio;commit("Lectio disconnected");}return;}
+});
 var LSTAT={planned:"Planned",attended:"Attended",missed:"Missed",cancelled:"Cancelled",changed:"Changed / moved"};
 function lessonStore(){var p=P();if(!p.lessonEdits||typeof p.lessonEdits!=="object")p.lessonEdits={};if(!Array.isArray(p.extraLessons))p.extraLessons=[];return p;}
-function effLessons(){var p=lessonStore(),out=[];
-  LESSONS.forEach(function(l){var key=l[0]+"|"+l[1]+"|"+l[3],ed=p.lessonEdits[key]||{};if(ed.deleted)return;
+function effLessons(){var p=lessonStore(),out=[],L=lectio();
+  LESSONS.forEach(function(l){if(L&&l[0]>=L.from&&l[0]<=L.to)return;var key=l[0]+"|"+l[1]+"|"+l[3],ed=p.lessonEdits[key]||{};if(ed.deleted)return;
     out.push({key:key,d:ed.d||l[0],s:ed.s||l[1],e:ed.e||l[2],sub:ed.sub||l[3],topic:ed.topic!=null?ed.topic:l[4],status:ed.status||"planned",note:ed.note||"",orig:l});});
+  if(L) L.lessons.forEach(function(x){var key="L:"+x.d+"|"+x.s+"|"+x.sub,ed=p.lessonEdits[key]||{};if(ed.deleted)return;
+    out.push({key:key,d:ed.d||x.d,s:ed.s||x.s,e:ed.e||x.e,sub:ed.sub||x.sub,topic:ed.topic!=null?ed.topic:(x.topic||""),status:ed.status||x.status||"planned",note:ed.note||x.hw||"",orig:[x.d,x.s,x.e,x.sub,x.topic||""],room:x.room||""});});
   p.extraLessons.forEach(function(x){out.push({key:"x:"+x.id,d:x.d,s:x.s,e:x.e,sub:x.sub,topic:x.topic||"",status:x.status||"planned",note:x.note||"",orig:null});});
   return out;}
 function lessonByKey(k){return effLessons().filter(function(l){return l.key===k;})[0];}
@@ -15059,14 +15235,14 @@ function renderDeadlines(){
   ["Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul"].forEach(function(m,i){var xx=x(new Date(2026,8+i,1));s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(Y-4)+'" y2="'+(Y+4)+'" stroke="var(--ink)"/><text x="'+(xx+3)+'" y="'+(Y+48)+'" font-size="10.5" class="pl-tm">'+m+(i===4?" ’27":"")+'</text>';});
   var tx=x(now());s+='<line x1="'+tx+'" x2="'+tx+'" y1="'+(Y-60)+'" y2="'+(Y+20)+'" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 2"/><text x="'+(tx+4)+'" y="'+(Y-52)+'" font-size="10" class="pl-ta" font-weight="700">today</text>';
   var last=-999,lev=0;
-  DEADLINES.filter(function(d){return d.big&&d.d;}).forEach(function(d,i){var xx=x(d.d);lev=(xx-last<130)?(lev+1)%3:0;last=xx;var up=i%2===0,ly=up?Y-24-lev*26:Y+64+lev*20,anchor=xx>880?"end":xx<60?"start":"middle";
+  allDL().filter(function(d){return d.big&&d.d;}).forEach(function(d,i){var xx=x(d.d);lev=(xx-last<130)?(lev+1)%3:0;last=xx;var up=i%2===0,ly=up?Y-24-lev*26:Y+64+lev*20,anchor=xx>880?"end":xx<60?"start":"middle";
     s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+Y+'" y2="'+(up?ly+4:ly-11)+'" stroke="var(--border)"/><circle cx="'+xx+'" cy="'+Y+'" r="5.5" fill="'+(d.est?"var(--surface)":col(d.s))+'" stroke="'+col(d.s)+'" stroke-width="2"/>';
     s+='<text x="'+xx+'" y="'+ly+'" font-size="10.5" text-anchor="'+anchor+'" class="pl-ti" font-weight="600">'+esc(d.t.replace(" (group)"," · group").replace(" (individual)"," · indiv."))+'</text><text x="'+xx+'" y="'+(ly+12)+'" font-size="9.5" text-anchor="'+anchor+'" class="pl-tm">'+new Date(d.d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+(d.est?" · est.":"")+'</text>';});
   $("#pl-tl").innerHTML=s;
-  $("#pl-dl tbody").innerHTML=DEADLINES.filter(function(d){return !d.d||new Date(d.d)>now();}).map(function(d){var u=d.d?until(d.d):null;
+  $("#pl-dl tbody").innerHTML=allDL().filter(function(d){return !d.d||new Date(d.d)>now();}).map(function(d){var u=d.d?until(d.d):null;
     var when=d.d?new Date(d.d).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:d.d>"2027"?"numeric":undefined})+(d.est?"":" · "+new Date(d.d).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})):"—";
     return '<tr style="--c:'+col(d.s)+'"><td class="s"><i></i></td><td>'+esc(d.t)+'</td><td class="when">'+when+'</td><td>'+(u?'<span class="pl-pill '+(d.est?"":u.cls)+'">'+u.txt+'</span>':'<span class="pl-pill">'+esc(d.note)+'</span>')+'</td><td><span class="pl-src'+(d.est?" est":"")+'">'+(d.est?"Notion · estimated":d.src)+'</span></td></tr>';}).join("");
-  var nx=DEADLINES.filter(function(d){return d.big&&d.d&&new Date(d.d)>now();})[0];
+  var nx=allDL().filter(function(d){return d.big&&d.d&&new Date(d.d)>now();})[0];
   if(nx){var u=until(nx.d);$("#pl-cv-next").textContent=u.short;$("#pl-cv-next-l").textContent="until "+nx.t.split(":")[0];}
 }
 
@@ -15292,15 +15468,16 @@ document.addEventListener("keydown",function(e){if(!$("#pl-drawer").classList.co
 window.addEventListener("scroll",function(){var h=document.documentElement,p=$("#pl-progress");if(p)p.style.width=(document.body.dataset.page==="plan"?h.scrollTop/Math.max(1,h.scrollHeight-h.clientHeight)*100:0)+"%";},{passive:true});
 
 /* ── render wiring ── */
-function renderAll(){if(drag)return;renderTabs();renderChips();renderGrid();renderClip();if(openId&&!impMode){var t=byId(openId);if(t)$("#pl-dr-check").checked=!!t.done;else closeDrawer();}}
+function renderAll(){if(drag)return;lectioPending();renderTabs();renderChips();renderGrid();renderClip();renderLectio();if(openId&&!impMode){var t=byId(openId);if(t)$("#pl-dr-check").checked=!!t.done;else closeDrawer();}}
 var _render=B.render;B.render=function(){var r=_render.apply(this,arguments);try{renderAll();}catch(e){}return r;};
 new MutationObserver(function(){if(ROOT.classList.contains("on")){renderAll();renderDeadlines();}}).observe(ROOT,{attributes:true,attributeFilter:["class"]});
 renderStatic();renderSyl();renderDeadlines();renderAll();
+setTimeout(lectioPending,2500);   /* in case no saved state arrives to trigger a render */
 /* the session cards list this week's blocks, which only exist once the planner has seeded them */
 try{ if(B.paintFocus) B.paintFocus(); }catch(e){}
 setInterval(function(){if(ROOT.classList.contains("on")){renderDeadlines();if(!drag&&!$("#pl-drawer").classList.contains("pl-open"))renderGrid();}},60000);
 window.CompassPlanner={render:renderAll,blocks:function(){return blocks();},focus:function(id,mins){startFocus(byId(id),mins);},
-  lessons:function(d){return effLessons().filter(function(l){return !d||l.d===d;});},deadlines:function(){return DEADLINES.slice();},
+  lessons:function(d){return effLessons().filter(function(l){return !d||l.d===d;});},deadlines:function(){return allDL();},
   setDone:function(id,v){setDone(id,v);},edit:function(id){openEdit(id);},editLesson:function(k){openLesson(k);},add:function(d,s){openNew(d,s);},addClass:function(d,s){openNewClass(d,s);},
   focusing:function(){if(fc)return {t:fc.t,id:fc.id,mins:fc.mins,endAt:endAt};return window.CompassFocus?window.CompassFocus.current():null;},stopFocus:function(){stopFocus();}};
 })();
@@ -16083,6 +16260,135 @@ var _r=B.render; B.render=function(){ var r=_r.apply(this,arguments); try{ if(RO
 new MutationObserver(function(){ if(ROOT.classList.contains("on")) render(); }).observe(ROOT,{attributes:true,attributeFilter:["class"]});
 render();
 window.CompassNutrition={render:render, day:function(k){ return sum(items(k||today())); }};
+})();
+}, {once:true});
+</script>
+<script id="compass-papers">
+document.addEventListener("DOMContentLoaded", function(){
+/* ═══════════════ PAST PAPERS ═══════════════
+   Every past paper he has sat, per subject: year, session, paper, timezone,
+   score, time. Stored in S.papers so it saves, backs up and syncs with the
+   rest of Compass. The grade shown is a rough estimate from typical IB
+   boundaries, not a prediction — real boundaries move paper to paper. */
+(function(){
+"use strict";
+var B=window.CompassBridge; if(!B) return;
+var ROOT=document.getElementById("s-papers"); if(!ROOT) return;
+function S(){ var st=B.get(); if(!Array.isArray(st.papers)) st.papers=[]; return st; }
+function esc(x){ return String(x==null?"":x).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function subs(){ return (B.get().subjects||[]).filter(function(x){ return x && x.id; }); }
+function subOf(id){ return subs().filter(function(x){ return x.id===id; })[0]; }
+function papersFor(su){ return su && /math/i.test(su.name) && /HL/.test(su.name+" "+(su.level||"")) ? 3 : 2; }
+var YEARS=[]; for(var y=2026;y>=2014;y--) YEARS.push(y);
+var BOUND=[[7,72],[6,60],[5,48],[4,37],[3,26],[2,14]];
+function pct(p){ return p.max>0 ? Math.round(p.score/p.max*100) : null; }
+function gradeOf(pc){ if(pc==null) return null; for(var i=0;i<BOUND.length;i++) if(pc>=BOUND[i][1]) return BOUND[i][0]; return 1; }
+function tone(pc){ return pc==null?"":pc>=60?"hi":pc>=40?"mid":"lo"; }
+function today(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+var sel=null, form=null;     // the subject shown in the grid; the open form (or null)
+
+function stats(id){
+  var L=S().papers.filter(function(p){ return p.sub===id && pct(p)!=null; }).sort(function(a,b){ return (a.date||"")<(b.date||"")?-1:1; });
+  var last5=L.slice(-5), avg=last5.length?Math.round(last5.reduce(function(a,p){ return a+pct(p); },0)/last5.length):null;
+  return {n:L.length, avg:avg, last:L.length?pct(L[L.length-1]):null, trend:L.slice(-8).map(pct)};
+}
+function spark(vals){
+  if(vals.length<2) return '';
+  var w=86,h=24,pts=vals.map(function(v,i){ return (i/(vals.length-1)*w).toFixed(1)+","+(h-2-v/100*(h-4)).toFixed(1); }).join(" ");
+  return '<svg class="pp-spark" viewBox="0 0 '+w+' '+h+'" aria-hidden="true"><polyline points="'+pts+'"/></svg>';
+}
+function find(sub,year,ses,paper){ return S().papers.filter(function(p){ return p.sub===sub && +p.year===+year && p.ses===ses && String(p.paper)===String(paper); }); }
+
+function cardsHTML(){
+  return '<div class="pp-cards">'+subs().map(function(su){
+    var st=stats(su.id), g=gradeOf(st.avg);
+    return '<button class="pp-card'+(sel===su.id?' on':'')+'" data-pp-sub="'+esc(su.id)+'" style="--c:var('+esc(su.c||"--d1")+')">'
+      + '<span class="pp-name"><i></i>'+esc(su.name)+'</span>'
+      + '<span class="pp-big">'+(st.avg==null?'–':st.avg+'<small>%</small>')+'</span>'
+      + '<span class="pp-meta">'+st.n+' paper'+(st.n===1?'':'s')+(st.last!=null?' · last '+st.last+'%':'')+'</span>'
+      + (g?'<span class="pp-grade" title="Rough estimate from typical boundaries">≈ '+g+'</span>':'')
+      + spark(st.trend)
+      + '</button>';
+  }).join('')+'</div>';
+}
+function gridHTML(){
+  var su=subOf(sel); if(!su) return '';
+  var n=papersFor(su), head='<div class="pp-row pp-head"><span>Session</span>';
+  for(var k=1;k<=n;k++) head+='<span>Paper '+k+'</span>';
+  head+='</div>';
+  var rows=YEARS.map(function(y){
+    return ['May','Nov'].map(function(ses){
+      var r='<div class="pp-row"><span class="pp-ses">'+ses+' '+y+'</span>';
+      for(var k=1;k<=n;k++){
+        var f=find(su.id,y,ses,k), best=f.sort(function(a,b){ return pct(b)-pct(a); })[0], pc=best?pct(best):null;
+        r+= best ? '<button class="pp-cell '+tone(pc)+'" data-pp-edit="'+esc(best.id)+'" title="'+esc((best.tz||'')+' · '+best.score+'/'+best.max+(best.mins?' · '+best.mins+' min':''))+'">'+pc+'%'+(f.length>1?'<sup>×'+f.length+'</sup>':'')+'</button>'
+                 : '<button class="pp-cell empty" data-pp-new="'+esc(su.id)+'|'+y+'|'+ses+'|'+k+'" aria-label="Log '+esc(su.name)+' '+ses+' '+y+' paper '+k+'">+</button>';
+      }
+      return r+'</div>';
+    }).join('');
+  }).join('');
+  return '<div class="card pp-grid"><div class="pp-gridhd"><h2>'+esc(su.name)+'</h2><span class="pp-legend"><i class="hi"></i>60%+<i class="mid"></i>40–59%<i class="lo"></i>under 40%</span></div>'
+    + '<div class="pp-table">'+head+rows+'</div></div>';
+}
+function formHTML(){
+  if(!form) return '';
+  var f=form, opt=function(arr,v){ return arr.map(function(a){ var val=Array.isArray(a)?a[0]:a, lab=Array.isArray(a)?a[1]:a;
+    return '<option value="'+esc(val)+'"'+(String(val)===String(v)?' selected':'')+'>'+esc(lab)+'</option>'; }).join(''); };
+  return '<div class="card pp-form" id="ppForm"><h2>'+(f.id?'Edit paper':'Log a paper')+'</h2>'
+    + '<div class="pp-fields">'
+    +   '<label>Subject<select class="fld" data-f="sub">'+opt(subs().map(function(x){ return [x.id,x.name]; }),f.sub)+'</select></label>'
+    +   '<label>Session<select class="fld" data-f="ses">'+opt(["May","Nov"],f.ses)+'</select></label>'
+    +   '<label>Year<select class="fld" data-f="year">'+opt(YEARS,f.year)+'</select></label>'
+    +   '<label>Paper<select class="fld" data-f="paper">'+opt(["1","2","3"],f.paper)+'</select></label>'
+    +   '<label>Timezone<select class="fld" data-f="tz">'+opt([["","—"],"TZ0","TZ1","TZ2"],f.tz)+'</select></label>'
+    +   '<label>Score<input class="fld" data-f="score" type="number" min="0" step="0.5" value="'+esc(f.score)+'" placeholder="e.g. 74"></label>'
+    +   '<label>Out of<input class="fld" data-f="max" type="number" min="1" step="1" value="'+esc(f.max)+'" placeholder="e.g. 110"></label>'
+    +   '<label>Minutes<input class="fld" data-f="mins" type="number" min="0" step="1" value="'+esc(f.mins)+'" placeholder="e.g. 120"></label>'
+    +   '<label>Date<input class="fld" data-f="date" type="date" value="'+esc(f.date)+'"></label>'
+    +   '<label class="pp-wide">What went wrong, what to revisit<input class="fld" data-f="note" value="'+esc(f.note)+'" placeholder="e.g. lost marks on Q7 (integration by parts), ran out of time"></label>'
+    + '</div><div class="pp-err" id="ppErr" hidden></div>'
+    + '<div class="pp-actions"><button class="primary" data-pp-save="1">Save</button><button class="ghost" data-pp-cancel="1">Cancel</button>'
+    +   (f.id?'<button class="ghost pp-del" data-pp-del="'+esc(f.id)+'">Delete</button>':'')+'</div></div>';
+}
+function recentHTML(){
+  var L=S().papers.slice().sort(function(a,b){ return (b.date||"")<(a.date||"")?-1:1; }).slice(0,12);
+  if(!L.length) return '<div class="card pp-recent"><h2>Recent papers</h2><p class="pp-empty">Nothing logged yet. Pick a subject above and tap a square in the grid, or use “Log a paper”.</p></div>';
+  return '<div class="card pp-recent"><h2>Recent papers</h2>'+L.map(function(p){ var su=subOf(p.sub), pc=pct(p);
+    return '<button class="pp-item" data-pp-edit="'+esc(p.id)+'" style="--c:var('+esc(su?su.c:"--d1")+')"><i></i><span class="pp-it-t">'+esc(su?su.name:"Subject")+' · '+esc(p.ses)+' '+esc(p.year)+' · P'+esc(p.paper)+(p.tz?' '+esc(p.tz):'')+'</span>'
+      + '<span class="pp-it-m">'+esc(p.date||"")+(p.mins?' · '+p.mins+' min':'')+(p.note?' · '+esc(p.note):'')+'</span>'
+      + '<b class="'+tone(pc)+'">'+(pc==null?'–':pc+'%')+'</b></button>'; }).join('')+'</div>';
+}
+function render(){
+  if(!ROOT.classList.contains("on")) return;
+  if(form && ROOT.contains(document.activeElement) && document.activeElement.closest("#ppForm")) return;
+  if(!sel || !subOf(sel)){ var f=subs()[0]; sel=f?f.id:null; }
+  ROOT.innerHTML='<div class="pp-top">'+cardsHTML()+'<button class="primary pp-log" data-pp-log="1">+ Log a paper</button></div>'
+    + formHTML() + gridHTML() + recentHTML()
+    + '<p class="pp-note">The ≈ grade is a rough guide from typical IB boundaries (7 ≈ 72%, 6 ≈ 60%, 5 ≈ 48%, 4 ≈ 37%), using your last five papers. Real boundaries change from paper to paper.</p>';
+}
+function openForm(o){ form=o; render(); var el=document.getElementById("ppForm"); if(el){ el.scrollIntoView({block:"nearest",behavior:"smooth"}); var sc=el.querySelector('[data-f="score"]'); if(sc) sc.focus(); } }
+function readForm(){ var o={}; ROOT.querySelectorAll("#ppForm [data-f]").forEach(function(e){ o[e.dataset.f]=e.value; }); return o; }
+
+ROOT.addEventListener("click",function(e){
+  var b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.ppSub){ sel=b.dataset.ppSub; render(); return; }
+  if(b.dataset.ppLog){ openForm({sub:sel,ses:"May",year:2025,paper:"1",tz:"",score:"",max:"",mins:"",date:today(),note:""}); return; }
+  if(b.dataset.ppNew){ var a=b.dataset.ppNew.split("|"); openForm({sub:a[0],year:+a[1],ses:a[2],paper:a[3],tz:"",score:"",max:"",mins:"",date:today(),note:""}); return; }
+  if(b.dataset.ppEdit){ var p=S().papers.filter(function(x){ return x.id===b.dataset.ppEdit; })[0]; if(p){ sel=p.sub; openForm(Object.assign({},p)); } return; }
+  if(b.dataset.ppCancel){ form=null; render(); return; }
+  if(b.dataset.ppDel){ var st=S(); st.papers=st.papers.filter(function(x){ return x.id!==b.dataset.ppDel; }); form=null; B.touch(); render(); return; }
+  if(b.dataset.ppSave){
+    var v=readForm(), sc=parseFloat(v.score), mx=parseFloat(v.max), err=document.getElementById("ppErr");
+    if(!(mx>0) || !(sc>=0) || sc>mx){ err.hidden=false; err.textContent=!(mx>0)?"Add the maximum mark (Out of).":sc>mx?"The score is higher than the maximum.":"Add your score."; return; }
+    var st2=S(), rec={id:form.id||("pp"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)), sub:v.sub, ses:v.ses, year:+v.year, paper:String(v.paper),
+      tz:v.tz, score:sc, max:mx, mins:v.mins?Math.max(0,Math.round(+v.mins)):null, date:v.date||today(), note:String(v.note||"").slice(0,300)};
+    st2.papers=st2.papers.filter(function(x){ return x.id!==rec.id; }); st2.papers.push(rec);
+    sel=rec.sub; form=null; B.touch(); render(); return;
+  }
+});
+new MutationObserver(function(){ render(); }).observe(ROOT,{attributes:true,attributeFilter:["class"]});
+var _r=B.render; B.render=function(){ var r=_r.apply(this,arguments); try{ render(); }catch(e){} return r; };
+render();
 })();
 }, {once:true});
 </script>
