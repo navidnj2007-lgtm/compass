@@ -8178,7 +8178,7 @@ document.addEventListener("keydown",function(e){
 });
 window.addEventListener("beforeunload",function(e){ if(dirty){ e.preventDefault(); e.returnValue=""; } });
 
-buildTabs(); applyTheme(); renderAll(); show(S.tab||"today"); fRestore();
+buildTabs(); applyTheme(); renderAll(); show("today"); fRestore();
 
 /* Fresh-start nudge on Mondays and month starts */
 (function(){
@@ -8892,7 +8892,7 @@ function boot(){
     try{ TG.onEvent("contentSafeAreaChanged", applyInsets); }catch(e){}
     try{ TG.onEvent("viewportChanged", applyInsets); }catch(e){}
   }
-  setTab(B.tab()||"today");
+  setTab("today");   /* Compass always opens on Today, whatever page was open last time */
 
   var canSave = CAN_CLOUD || CAN_LS;
   if(canSave){
@@ -8901,7 +8901,7 @@ function boot(){
       if(state && !B.isDirty()){
         B.set(state);
         if(B.applyTheme) B.applyTheme();
-        B.render(); setTab(B.tab()||"today");
+        B.render(); setTab("today");
         if(B.restoreTimer) B.restoreTimer();
         applyChrome();
         say(where==="telegram" ? "Loaded from Telegram" : "Loaded", "ok");
